@@ -1,0 +1,53 @@
+# Refreshing the dashboard data
+
+The page is static: it shows whatever is in `data/` at deploy time. Updating it means changing those files and pushing to `master`.
+Vercel redeploys automatically (about a minute). Shared features (ticks, topics, flags) live in the database and are not affected.
+Mike pushes straight to `master`: there is no pull request or approval step.
+
+## What each file holds
+
+| File | Datasets | Comes from | Notes |
+|---|---|---|---|
+| `data/roadmap-coming-soon.js` | `COMING` (teams and their items), `COMING_PREV`, `ROADMAP_REVIEW`, `TEAM_MEETINGS`, `PEOPLE`, `SHOUTS`, `TESTTALK`, `SELLCALL`, `VIBE`, `CS`, `VEL`, `DATES`, `HOURLY`, `RELN` | Roadmap sheet (Active Work tabs), Jira DEAP, Slack, calendar, meeting notes | Main file Mike touches. Header comments say how each dataset is refreshed |
+| `data/sources.js` | `SRCS`: for each roadmap item, where each field came from (Jira key, Slack thread, sheet row) | Same as above | One entry per roadmap item title. Keys must match `COMING` item titles exactly |
+| `data/cvr-pacer-snapshot.js`, `data/cvr-ledger.js`, `data/max-bot-filter-and-products.js` | `D`, `L`, `MAX`, `UXL`, `PROD`... | Amplitude dashboards | Header comment names the dashboard and date pulled |
+| `data/orders-slack-standups.js` | `ORD`, revenue, standup notes | Amplitude order_completed, Slack | |
+| `data/experiments.js` | `EXPS` | Amplitude Experiment | |
+
+Always edit the existing file and keep its shape: open the current dataset, change values, keep every field name. Do not rename fields or change the file structure.
+
+## Dates to update on every refresh
+- `COMING.asOf`, `D.asOf`, `PROD.asOf` and the pull date in each file's header comment.
+- After each Executive Roadmap Review (every other Tuesday): set `ROADMAP_REVIEW.last`, copy the current board into `COMING_PREV`, and update `TEAM_MEETINGS.<team>.last`.
+
+## Rules for the content
+- Shareable only: no people-performance, compensation, HR or budget items.
+- Every roadmap item in `COMING` should have a matching entry in `SRCS` with at least one origin link. `npm run check` lists the ones that do not.
+- Keep the source of every claim (Jira key, Slack thread link, sheet row) so it can be traced.
+
+## One-time setup (Mike)
+1. Install GitHub Desktop and sign in with your GitHub account (it must have Write access to this repo).
+2. In GitHub Desktop: File, Clone repository, pick this repo. Remember where the folder is.
+3. Open that folder in Claude (Claude Code in the desktop app, or whichever Claude app Jay has set up for you), with your usual connectors on (Slack, Granola, Jira, the Google sheet, Amplitude), so your own access does the gathering.
+
+## Each refresh
+1. In GitHub Desktop, click Fetch origin, then Pull if it offers one, so you start from the latest version.
+2. Paste the prompt below into Claude with the folder open.
+3. When Claude is done, read its summary. It should say which files changed and the check result.
+4. In GitHub Desktop you will see the changed files. Type a short message (for example "Refresh Nov 4"), click Commit to master, then Push origin. The site updates in about a minute.
+5. Open the site and look at it. If you pushed a bad update, see "If something looks wrong".
+
+## Prompt for Claude (paste with the repo folder open)
+> Read REFRESH.md. Update the data files in `data/` from the sources I give you, keeping every field name and structure exactly as it is now. Only change files inside `data/`: do not touch any other file. Update the as-of dates and header comments. Keep to the shareable-only rule. Then run `npm run check`, fix any FAIL, and tell me in plain language what changed, which items still have no source link, and whether the check passed. Do not commit or push; I will do that in GitHub Desktop.
+
+If Node is not installed on your computer, `npm run check` will not run. Tell Claude to skip it: GitHub runs the same check after you push and emails you if it fails.
+
+## Rules for the content
+- Shareable only: no people-performance, compensation, HR or budget items.
+- Every roadmap item in `COMING` should have a matching entry in `SRCS` with at least one origin link. `npm run check` lists the ones that do not.
+- Keep the source of every claim (Jira key, Slack thread link, sheet row) so it can be traced.
+
+## If something looks wrong
+- **GitHub emailed you "Check dashboard data failed":** the last update has a problem. Ask Claude to read the failed check and fix it, then commit and push again. The site may be showing the broken version until you do.
+- **The site looks wrong or empty:** in GitHub Desktop, open History, right-click your last commit, choose Revert Changes in Commit, then Push origin. That puts the previous data back.
+- **Fastest rollback:** someone with Vercel access (Jay or Tom) can open the project's Deployments tab and promote the previous deployment. That restores the last good version immediately.

@@ -3,6 +3,9 @@
 Static dashboard (no build step) moved out of Mike's Claude artifact "Product Org Dashboard".
 Source of truth for roadmap/active work is still the Product Org Dashboard Google Sheet.
 
+## Updating the data
+See `REFRESH.md` for what each data file holds and the steps. Updates are pushed straight to `master`; `npm run check` runs locally and on every push (GitHub Action).
+
 ## Layout
 - `index.html`: shell, loads everything below in order (classic scripts share globals, so order matters)
 - `styles.css`: all styling

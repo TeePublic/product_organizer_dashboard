@@ -1,0 +1,16 @@
+# Runs the data check on every push to master. If it fails, GitHub emails the person who pushed.
+# This does not stop the deploy; it tells you quickly that the last update has a problem.
+name: Check dashboard data
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm run check
