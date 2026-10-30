@@ -14,7 +14,8 @@ Mike pushes straight to `master`: there is no pull request or approval step.
 | `data/orders-slack-standups.js` | `ORD`, revenue, standup notes | Amplitude order_completed, Slack | |
 | `data/experiments.js` | `EXPS` | Amplitude Experiment | |
 
-Always edit the existing file and keep its shape: open the current dataset, change values, keep every field name. Do not rename fields or change the file structure.
+For data, edit the existing file and keep its shape: change values, keep every field name, do not rename fields or change the file structure.
+`app.js` reads these datasets by name, so renaming or restructuring a dataset can break the page, even when `npm run check` passes.
 
 ## Dates to update on every refresh
 - `COMING.asOf`, `D.asOf`, `PROD.asOf` and the pull date in each file's header comment.
@@ -26,6 +27,11 @@ Always edit the existing file and keep its shape: open the current dataset, chan
 - Keep the source of every claim (Jira key, Slack thread link, sheet row) so it can be traced.
 
 
+## Tips to keep token use low
+- Start a fresh Claude session for each refresh, and only give it what changed since last time.
+- The data files are large (`sources.js` alone is about 160 KB). Ask for targeted edits, never whole-file rewrites.
+- For a UI change, name the part of the page (for example "the scorecard header") so Claude can grep for it.
+
 ## Each refresh
 1. In GitHub Desktop, click Fetch origin, then Pull if it offers one, so you start from the latest version.
 2. Paste the prompt below into Claude with the folder open.
@@ -34,7 +40,12 @@ Always edit the existing file and keep its shape: open the current dataset, chan
 5. Open the site and look at it. You will be asked to sign in with Okta first. If you pushed a bad update, see "If something looks wrong".
 
 ## Prompt for Claude (paste with the repo folder open)
-> Read REFRESH.md. Update the data files in `data/` from the sources I give you, keeping every field name and structure exactly as it is now. Only change files inside `data/`: do not touch any other file. Update the as-of dates and header comments. Keep to the shareable-only rule. Then run `npm run check`, fix any FAIL, and tell me in plain language what changed, which items still have no source link, and whether the check passed. Do not commit or push if anything fails, fix everything before push command.
+> Read REFRESH.md. I may ask for data updates, UI changes, or both.
+> - Data: edit the files in `data/`, keeping every field name and structure exactly as it is now. Update the as-of dates and header comments. Keep to the shareable-only rule.
+> - UI: you may edit `app.js`, `styles.css` and `index.html`. Make small targeted edits, keep the existing code style, and tell me which files you touched.
+> - Never touch the files listed under "Do not edit" in REFRESH.md.
+> - Save tokens: do not read or print whole files. Use grep, or a short node snippet, to look at only the part you need, and change things with targeted edits rather than rewriting a file.
+> Then run `npm run check`, fix any FAIL, and tell me in plain language what changed, which items still have no source link, and whether the check passed. Do not commit or push if anything fails.
 
 If Node is not installed on your computer, `npm run check` will not run. Tell Claude to skip it: GitHub runs the same check after you push and emails you if it fails.
 
@@ -43,7 +54,10 @@ If Node is not installed on your computer, `npm run check` will not run. Tell Cl
 - Run `git pull origin master` before making changes, so you start from the latest version.
 - Never check out, commit to, merge, or push to the `okta-auth` branch.
 - Never force-push, and never rewrite history.
-- Do not edit `middleware.js`, `lib/auth.js`, or anything under `api/auth/`. Those files are managed separately.
+## Do not edit
+- `middleware.js`, `lib/auth.js`, anything under `api/auth/` (Okta sign-in, managed separately).
+- `runtime-shim.js`, `api/docs.js`, `schema.sql`, `migrations/` and `vercel.json` (shared features and database).
+- Everything else, including `app.js`, `styles.css` and `data/`, is fine to change.
 
 ## If something looks wrong
 - **GitHub emailed you "Check dashboard data failed":** the last update has a problem. Ask Claude to read the failed check and fix it, then commit and push again. The site may be showing the broken version until you do.
