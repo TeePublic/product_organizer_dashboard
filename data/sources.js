@@ -109,12 +109,13 @@ const SRCS = {
    "what": "Brand: RBO (Redbubble)"
   },
   "s": {
-   "kind": "jira",
-   "where": "Jira DEAP-6266",
-   "who": "James Jeges",
-   "date": "2026-10-28",
-   "url": "https://articore.atlassian.net/browse/DEAP-6266",
-   "what": "Cart cross-sell A/B ticket moved from Code Review to Approved"
+   "kind": "slack",
+   "where": "#released, Oct 29",
+   "who": "Jonathan Tan",
+   "date": "2026-10-29",
+   "url": "https://grid-articore.enterprise.slack.com/archives/C0V4PM9DW",
+   "what": "Cart cross-sell and trust badges A/B test is live on Redbubble",
+   "say": "Jonathan Tan posted in #released on Oct 29 that the Redbubble cart cross-sell and trust badges A/B test went live at 2:38 PM ET."
   },
   "s_sheet": {
    "kind": "sheet",
@@ -124,11 +125,12 @@ const SRCS = {
   },
   "eta": {
    "kind": "slack",
-   "where": "#temp-performance-digging-tiger-team",
-   "who": "Mike Carafa",
-   "date": "2026-10-27",
-   "url": "https://grid-articore.enterprise.slack.com/archives/C0C80KTBQSY/p1793109243505609?thread_ts=1793108659.706889&cid=C0C80KTBQSY",
-   "what": "Two cross-sell improvements launching on Redbubble this week"
+   "where": "#released, Oct 29",
+   "who": "Jonathan Tan",
+   "date": "2026-10-29",
+   "url": "https://grid-articore.enterprise.slack.com/archives/C0V4PM9DW",
+   "what": "Test live Oct 29, 2:38 PM ET",
+   "say": "Jonathan Tan posted in #released on Oct 29 that the test started at 2:38 PM ET, replacing the Oct 27 to 28 target."
   },
   "eta_sheet": {
    "kind": "sheet",
@@ -424,12 +426,12 @@ const SRCS = {
   },
   "s": {
    "kind": "slack",
-   "where": "#temp-google-sign-up",
+   "where": "#released, Oct 29",
    "who": "Allison Cassara",
-   "date": "2026-10-28",
-   "url": "https://grid-articore.enterprise.slack.com/archives/C0BPU9P07UK/p1793199445224809",
-   "what": "Really close to release; final QA after the sign-up method event fix (DEAP-6834)",
-   "say": "Allison Cassara posted in #temp-google-sign-up on Oct 28 that release is close and final QA follows a fix so sign-ups record email or Google."
+   "date": "2026-10-29",
+   "url": "https://grid-articore.enterprise.slack.com/archives/C0V4PM9DW",
+   "what": "Account sign-up with Google is live on TeePublic",
+   "say": "Allison Cassara posted in #released on Oct 29 that sign-up with Google is live on TeePublic (switched on about 1 PM ET)."
   },
   "s_sheet": {
    "kind": "sheet",
@@ -455,10 +457,10 @@ const SRCS = {
    "kind": "slack",
    "where": "#temp-google-sign-up",
    "who": "Allison Cassara",
-   "date": "2026-10-28",
-   "url": "https://grid-articore.enterprise.slack.com/archives/C0BPU9P07UK/p1793199445224809",
-   "what": "Launch waits on DEAP-6834, then a final round of QA",
-   "say": "Allison Cassara posted in #temp-google-sign-up on Oct 28 that launch waits on the sign-up event fix (DEAP-6834) and a final QA round, so it did not launch Oct 28."
+   "date": "2026-10-29",
+   "url": "https://grid-articore.enterprise.slack.com/archives/C0BPU9P07UK",
+   "what": "Turned on around 1 PM ET Oct 29; needed time to propagate",
+   "say": "Allison Cassara posted in #temp-google-sign-up on Oct 29 that it was switched on around 1 PM ET and needed a little time to take effect."
   }
  },
  "Simon event matching": {
@@ -1209,19 +1211,21 @@ const SRCS = {
   },
   "s": {
    "kind": "slack",
-   "where": "#ask-deap-dashery",
-   "who": "Tony Lum",
-   "date": "2026-10-27",
-   "url": "https://grid-articore.enterprise.slack.com/archives/C08CYHX6PL2/p1793115408294899",
-   "what": "Dashboard v2 releases very soon; asked account managers for accounts to double-check the new numbers"
+   "where": "#released, Oct 29",
+   "who": "Grace Russell",
+   "date": "2026-10-29",
+   "url": "https://grid-articore.enterprise.slack.com/archives/C0V4PM9DW",
+   "what": "Dashery Creator Dashboard v2 is live",
+   "say": "Grace Russell posted in #released on Oct 29 that Creator Dashboard v2 is live for everyone."
   },
   "eta": {
    "kind": "slack",
-   "where": "#ask-deap-dashery",
-   "who": "Tony Lum",
-   "date": "2026-10-27",
-   "url": "https://grid-articore.enterprise.slack.com/archives/C08CYHX6PL2/p1793115408294899",
-   "what": "Release planned very soon, no date given"
+   "where": "#released, Oct 29",
+   "who": "Grace Russell",
+   "date": "2026-10-29",
+   "url": "https://grid-articore.enterprise.slack.com/archives/C0V4PM9DW",
+   "what": "Live Oct 29",
+   "say": "Grace Russell posted in #released on Oct 29 that it launched that day."
   },
   "start": {
    "kind": "jira",
@@ -2381,10 +2385,10 @@ const SRCS = {
    "kind": "jira",
    "where": "Jira DEAP-6615, status change",
    "url": "https://articore.atlassian.net/browse/DEAP-6615",
-   "what": "Moved from Backlog to In Development on Oct 29",
+   "what": "Moved to Code Review on Oct 30",
    "who": "Mohit Bansal",
-   "date": "2026-10-29",
-   "say": "Mohit Bansal moved DEAP-6615 from Backlog to In Development on Oct 29."
+   "date": "2026-10-30",
+   "say": "Mohit Bansal moved DEAP-6615 to Code Review on Oct 30, and design supplied the new search icon the same morning."
   },
   "s_sheet": {
    "kind": "sheet",
@@ -2675,12 +2679,13 @@ const SRCS = {
    "what": "Brand: TPO (TeePublic)"
   },
   "s": {
-   "kind": "jira",
-   "where": "Jira DEAP-6797, status change",
-   "url": "https://articore.atlassian.net/browse/DEAP-6797",
-   "what": "Moved from Backlog to In Development on Oct 26; in the current sprint (CA 26-44, Oct 27 to Nov 8)",
-   "who": "Jeff Cooper",
-   "date": "2026-10-26"
+   "kind": "slack",
+   "where": "#temp-tpo-peak-2026-cvr-upsells",
+   "who": "Karl Fleener",
+   "date": "2026-10-29",
+   "url": "https://grid-articore.enterprise.slack.com/archives/C0BU9AUHX2N/p1793308013785129",
+   "what": "Mocks with two quantity options shared; effort check pending; Jira DEAP-6797 back in Backlog",
+   "say": "Karl Fleener posted two quantity design options in #temp-tpo-peak-2026-cvr-upsells on Oct 29, and DEAP-6797 went back to Backlog while engineering sizes them."
   },
   "s_sheet": {
    "kind": "sheet",
@@ -2769,6 +2774,12 @@ const SRCS = {
   }
  },
  "Feed images at 1260px": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Project Name column, row 135",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A135",
+   "what": "The roadmap sheet lists \"Feed image fix (1260px)\" on the Active Work tab"
+  },
   "team": {
    "kind": "sheet",
    "where": "Roadmap sheet, Active Work tab, Team column, row 135",
@@ -3107,6 +3118,12 @@ const SRCS = {
   }
  },
  "SEO: 20 results per search page": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Project Name column, row 20",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A20",
+   "what": "The roadmap sheet lists \"SEO: Increase Pagination from 10 to 20\" on the Active Work tab"
+  },
   "s": {
    "kind": "jira",
    "where": "Jira DEAP-6285, status change",
@@ -3737,6 +3754,182 @@ const SRCS = {
    "who": "",
    "date": "2026-10-29",
    "say": "The roadmap sheet's Active Work tab added \"Agentic readiness\" under MarTech, listed as Not Started, no dates (read Oct 29)."
+  }
+ },
+ "SEO: trending links in the footer": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Project Name column, row 21",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A21",
+   "what": "The roadmap sheet lists \"SEO: Trending links in footer\" on the Active Work tab"
+  }
+ },
+ "More branded search result pages": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Project Name column, row 24",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A24",
+   "what": "The roadmap sheet lists \"PATHWAYS: Enable more branded IP SRPs\" on the Active Work tab"
+  }
+ },
+ "Product filtering in search": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Project Name column, row 29",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A29",
+   "what": "The roadmap sheet lists \"PATHWAYS:  Product Filtering (Scoping)\" on the Active Work tab"
+  }
+ },
+ "AI content for tag pages": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Project Name column, row 26",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A26",
+   "what": "The roadmap sheet lists \"AI: Content Enrichment for Tag Pages\" on the Active Work tab"
+  }
+ },
+ "AI content for product pages": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Project Name column, row 27",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A27",
+   "what": "The roadmap sheet lists \"AI:  Content Enrichment for pdp Pages\" on the Active Work tab"
+  }
+ },
+ "Product recommendations in Simon emails": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Project Name column, row 22",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A22",
+   "what": "The roadmap sheet lists \"RETENTION: Simon email recommendations\" on the Active Work tab"
+  }
+ },
+ "Related tag improvements": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Project Name column, row 28",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A28",
+   "what": "The roadmap sheet lists \"PATHWAYS: Related Tag improvements\" on the Active Work tab"
+  }
+ },
+ "Dormant designs test": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Project Name column, row 14",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A14",
+   "what": "The roadmap sheet lists \"QUALITY: Dormancy\" on the Active Work tab"
+  }
+ },
+ "Vector and lexical search consolidation": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Project Name column, row 31",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A31",
+   "what": "The roadmap sheet lists \"Cost Savings: Vector and Lexical Consolidation\" on the Active Work tab"
+  }
+ },
+ "iOS native checkout test": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Project Name column, row 88",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A88",
+   "what": "The roadmap sheet lists \"iOS: Native checkout\" on the Active Work tab"
+  }
+ },
+ "Meta Shopping": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Project Name column, row 80",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A80",
+   "what": "The roadmap sheet lists \"Meta Shopping Feed (for product tagging)\" on the Active Work tab"
+  }
+ },
+ "Amazon Ads tracking on TeePublic": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Project Name column, row 150",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A150",
+   "what": "The roadmap sheet lists \"Amazon Ads\" on the Active Work tab"
+  }
+ },
+ "Seller verification compliance": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Project Name column, row 85",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A85",
+   "what": "The roadmap sheet lists \"Seller Verification Compliance\" on the Active Work tab"
+  }
+ },
+ "OMAFS phases 2 to 5": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Project Name column, row 42",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A42",
+   "what": "The roadmap sheet lists \"OMAFS | TP can send RB orders to Foundry\" on the Active Work tab"
+  }
+ },
+ "PayPlus offer at checkout": {
+  "origin": {
+   "kind": "jira",
+   "where": "Jira DEAP-4816",
+   "url": "https://articore.atlassian.net/browse/DEAP-4816",
+   "what": "Jira epic DEAP-4816 tracks this roadmap item"
+  }
+ },
+ "Beam conversion test": {
+  "origin": {
+   "kind": "jira",
+   "where": "Jira DEAP-6282",
+   "url": "https://articore.atlassian.net/browse/DEAP-6282",
+   "what": "Jira epic DEAP-6282 tracks this roadmap item"
+  }
+ },
+ "Products on order events in Amplitude": {
+  "origin": {
+   "kind": "jira",
+   "where": "Jira DEAP-1603",
+   "url": "https://articore.atlassian.net/browse/DEAP-1603",
+   "what": "Jira ticket DEAP-1603 tracks this roadmap item"
+  }
+ },
+ "Simon AI profile attributes": {
+  "origin": {
+   "kind": "jira",
+   "where": "Jira DEAP-2807",
+   "url": "https://articore.atlassian.net/browse/DEAP-2807",
+   "what": "Jira epic DEAP-2807 tracks this roadmap item"
+  }
+ },
+ "Ranking test for 3+ word queries": {
+  "origin": {
+   "kind": "jira",
+   "where": "Jira DEAP-6326",
+   "url": "https://articore.atlassian.net/browse/DEAP-6326",
+   "what": "Jira ticket DEAP-6326 tracks this roadmap item"
+  }
+ },
+ "Self-serve artist tax reports": {
+  "origin": {
+   "kind": "jira",
+   "where": "Jira DEAP-5348",
+   "url": "https://articore.atlassian.net/browse/DEAP-5348",
+   "what": "Jira epic DEAP-5348 tracks this roadmap item"
+  }
+ },
+ "Precise USA sales tax by address": {
+  "origin": {
+   "kind": "jira",
+   "where": "Jira DEAP-5972",
+   "url": "https://articore.atlassian.net/browse/DEAP-5972",
+   "what": "Jira ticket DEAP-5972 tracks this roadmap item"
+  }
+ },
+ "Cart upsell results": {
+  "origin": {
+   "kind": "jira",
+   "where": "Jira DEAP-5747",
+   "url": "https://articore.atlassian.net/browse/DEAP-5747",
+   "what": "Jira ticket DEAP-5747 tracks this roadmap item"
   }
  }
 };

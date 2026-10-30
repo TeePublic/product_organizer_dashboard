@@ -3545,3 +3545,30 @@ a.pvwhere { color: var(--ctl); text-decoration: underline; text-underline-offset
 .ghead .gacts { display: flex; align-items: flex-start; gap: 18px; flex-wrap: wrap; justify-content: flex-end; }
 .ghead .gsrc { text-align: right; } .ghead .gsrc .tipsrcbox { text-align: left; max-width: 520px; margin-top: 6px; font-size: 12.5px; }
 .ghead .gsrc .srcbtn { padding: 0; border: 0; background: none; color: var(--ctl); font: 600 12.5px var(--body); cursor: pointer; }
+/* A/B tests: one column per exec question (Sam, standup Oct 30) */
+:root:not(#z):not(#y) .abcols, :root:not(#z):not(#y) .abrow { grid-template-columns: minmax(200px, 1.5fr) 76px repeat(5, minmax(86px, 104px)) minmax(170px, 1.2fr) 18px; gap: 0 12px; }
+.abm { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; border-bottom: 0 !important; }
+.abm.na { color: var(--faint); }
+.abv { font: 700 15.5px var(--body); color: var(--ink); white-space: nowrap; }
+.abv.b { color: var(--good); } .abv.w { color: var(--bad); } .abv.ns { color: var(--muted); font-weight: 600; }
+.abgoal { font-style: normal; font-size: 12px; margin-right: 3px; }
+.abs { font: 600 11px var(--body); color: var(--faint); white-space: nowrap; }
+.abs.sig { color: var(--good); }
+.abday { display: flex; flex-direction: column; gap: 1px; } .abday b { font-size: 14px; } .abday small { font-size: 11.5px; color: var(--muted); }
+.abcall { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; min-width: 0; }
+.abcall small { font-size: 12px; color: var(--muted); line-height: 1.35; }
+.abv2 { font: 600 12px var(--body); padding: 2px 9px; border-radius: 99px; background: var(--sunk); color: var(--muted); white-space: nowrap; }
+.abv2.v-lean, .abv2.v-ship { background: var(--good-bg); color: var(--good); }
+.abv2.v-mixed { background: color-mix(in srgb, var(--ctl) 12%, var(--surface)); color: var(--ctl); }
+.abkey { margin: 2px 0 8px; font-size: 13px; color: var(--muted); }
+.abkey .abv { font-size: 13px; }
+.abans { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px 20px; padding: 14px 16px; margin-bottom: 14px; border-radius: 10px; background: var(--sunk); }
+.abans > div { display: flex; flex-direction: column; gap: 2px; } .abans .lbl { font-size: 12px; color: var(--muted); } .abans b { font-size: 14px; }
+.abvr { margin-bottom: 14px; overflow-x: auto; } .abvr table { border-collapse: collapse; font-size: 13.5px; } .abvr th, .abvr td { padding: 5px 14px 5px 0; text-align: left; white-space: nowrap; }
+.abvr th { font-size: 12px; color: var(--muted); font-weight: 600; } .abvr td.b { color: var(--good); font-weight: 700; } .abvr td.w { color: var(--bad); font-weight: 700; } .abvr td.ns, .abvr td.na { color: var(--muted); }
+@media (min-width: 761px) and (max-width: 1240px) { :root:not(#z):not(#y) .abcols, :root:not(#z):not(#y) .abrow { grid-template-columns: minmax(160px, 1.3fr) 62px repeat(5, minmax(70px, 86px)) minmax(130px, 1fr) 16px; gap: 0 9px; } .abv { font-size: 14px; } }
+@media (max-width: 760px) { :root:not(#z):not(#y) .abrow { grid-template-columns: repeat(3, 1fr); gap: 10px 12px; } .abrow .tname, .abrow .abcall { grid-column: 1 / -1; } .abrow .chev { display: none; } }
+:root:not(#z):not(#y) .hint.abm { display: inline-flex !important; flex-direction: column; align-items: flex-start; gap: 2px; border-bottom: 0 !important; text-decoration: none !important; justify-self: start; }
+:root:not(#z):not(#y) .hint.abm .abs { display: block; }
+
+.abvd { margin: 8px 0 0; padding: 0; list-style: none; display: grid; gap: 3px; font-size: 13px; color: var(--muted); } .abvd b { color: var(--ink); }

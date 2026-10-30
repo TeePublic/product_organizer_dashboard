@@ -1,3 +1,4 @@
+/* CVR Pacer v6. Everything is computed in the page from the snapshots in D (overall, payments), L (slices), R (revenue), AP (Apple Pay entry), SLACK and TOPS. */
 const DAY = 86400000;
 const WD = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 const WDL = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
@@ -62,7 +63,7 @@ const infoNow = (b, d) => saleInfo(SALES[b], d);
 const edgeOf = (b, x) => { const i = infoNow(b, x); if (i.sale) return null; if (i.after) return 'after'; return SALES[b].some(r => addDays(r[0], -1) === x) ? 'before' : 'plain'; };
 const sameKind = (b, d, x) => { const e = edgeOf(b, d), f = edgeOf(b, x); return e === 'plain' ? f === 'plain' && dow(x) === dow(d) : f === e; };
 const EDGEN = { after: 'day after a sale', before: 'day before a sale' };
-const noSaleKind = (b, d, n) => { const e = edgeOf(b, d); return EDGEN[e] ? (n === 1 ? EDGEN[e] : EDGEN[e].replace('day', 'days')) : WDL[dow(d)] + (n === 1 ? '' : 's') + ' with no sale'; };
+const noSaleKind = (b, d, n) => { const e = edgeOf(b, d); if (EDGEN[e]) return n === 1 ? EDGEN[e] : EDGEN[e].replace('day', 'days'); return baseDays(b, d).topped ? 'no-sale days' : WDL[dow(d)] + (n === 1 ? '' : 's') + ' with no sale'; };
 const infoLY = d => saleInfo(LYR, d);
 
 const BR = {
@@ -978,7 +979,24 @@ function cmpControls(b, d) {
   if (state.cmpEdit) h += '<div class="cmpedit"><label>Average of <input type="date" class="pick" id="cfrom" min="' + SER[b].dates[0] + '" max="' + D.asOf + '" value="' + (cu ? cu.from : def ? def.from : addDays(d, -28)) + '"></label><label>to <input type="date" class="pick" id="cto" min="' + SER[b].dates[0] + '" max="' + D.asOf + '" value="' + (cu ? cu.to : def ? def.to : addDays(d, -1)) + '"></label><button class="btn pri" id="cmpapply">Compare</button><p class="cap">' + why + ' Pick one day or a range to compare ' + short(d) + ' against instead. Custom ranges use every day in the range and are not graded red or green.</p></div>';
   return h;
 }
+// Always at least 2 comparison days (Mike, Oct 30). When too few same-kind days exist, top up with the most recent day of the same kind
+// from the same part of the week (Mon to Thu, Friday, or the weekend), then older ones, so one odd day never sets the baseline alone.
+const wkGrp = x => { const w = dow(x); return w >= 1 && w <= 4 ? 'wk' : w === 5 ? 'fri' : 'we'; }, WKGN = { wk: 'midweek day', fri: 'Friday', we: 'weekend day' };
+const BDC = {};
+// When the rule had to stretch to reach 2 days, say so plainly (Mike, Oct 30: "just note that").
+const stretchNote = (b, d, bd) => { if (!bd || !bd.topped) return ''; const st = infoNow(b, d), e = st.sale ? null : edgeOf(b, d);
+  return ' ⚠️ Rule stretched: ' + (st.sale ? 'too few recent sales at this point, so an older one was added.' : e !== 'plain' ? 'too few recent ' + EDGEN[e].replace('day', 'days') + ', so an older one was added.' : 'too few recent ' + WDL[dow(d)] + 's with no sale, so the nearest ' + WKGN[wkGrp(d)] + ' was added (' + bd.filter(x => dow(x) !== dow(d)).map(x => short(x) + ', a ' + WDL[dow(x)]).join('; ') + ').'); };
 function baseDays(b, d) {
+  const key = b + '|' + d + '|' + BASE_START; if (key in BDC) return BDC[key];
+  const out = baseDays0(b, d); if (out.length >= 2) return (BDC[key] = out);
+  const st = infoNow(b, d), pk = posKey(st), e = st.sale ? null : edgeOf(b, d), S = SER[b];
+  const loose = x => { if (x === d || isContam(b, x) || out.indexOf(x) >= 0) return false; const i = infoNow(b, x); if (st.sale) return i.sale && posKey(i) === pk; if (i.sale) return false; return e === 'plain' ? edgeOf(b, x) === 'plain' && wkGrp(x) === wkGrp(d) : edgeOf(b, x) === e; };
+  const add = []; for (let x = addDays(d, -1); x >= S.dates[0] && out.length + add.length < 2; x = addDays(x, -1)) if (loose(x)) add.push(x);
+  if (!add.length) return (BDC[key] = out);
+  const res = out.concat(add).sort(); res.tierMix = out.tierMix; res.near = out.near; res.topped = true;
+  return (BDC[key] = res);
+}
+function baseDays0(b, d) {
   const st = infoNow(b, d), pk = posKey(st), wd = new Date(d + 'T12:00:00Z').getUTCDay();
   // Same discount tier first; if no such day exists, the same position at any tier, flagged.
   for (const strict of [true, false]) {
@@ -1099,7 +1117,7 @@ function topHtml(b) {
   keys = keys.replace('@@SR@@', plain('Sessions', int(cs.val)) + line('Revenue', cr2.mom, cr2.val, cr2.momV, usd)); // sessions plain here (Mike, Oct 28)
   keys = kadd(keys, kon ? orow(obc.mom, obc.val, obc.momV, nrOf(om, obc.mom), 'comparable days').replace('<span class="kow">was</span>', '<span class="kow">CVR was</span> <b>' + pct(oc.val) + '</b>,') : '');
   const kop = keys.indexOf('>') + 1, kch = cmpBars(m, bd, c2.momV, htc === 'lo' ? 'bad' : htc === 'hi' ? 'good' : null, hr ? hr.w : 0) || tipChart(m, bd, c2.momV, htc === 'lo' ? 'bad' : htc === 'hi' ? 'good' : null, { band: hr ? hr.w : 0, h: 200, w: 560, dots: true });
-  keys = keys.slice(0, kop).replace('class="key hero', 'class="key hero kwide') + '<div class="kleft">' + keys.slice(kop, -6) + '</div>' + (kch ? '<div class="kright"><span class="lbl">Against its comparison days</span><span class="kexp">' + (bd.length ? 'Compared with ' + esc(cmpKind(b, d, bd.length)) + ' (' + bd.map(z => short(z)).join(', ') + '). The band is the normal range around their average.' : 'No comparable days yet.') + '</span>' + kch + '</div>' : '') + '</div>' +
+  keys = keys.slice(0, kop).replace('class="key hero', 'class="key hero kwide') + '<div class="kleft">' + keys.slice(kop, -6) + '</div>' + (kch ? '<div class="kright"><span class="lbl">Against its comparison days</span><span class="kexp">' + (bd.length ? 'Compared with ' + esc(cmpKind(b, d, bd.length)) + ' (' + bd.map(z => short(z)).join(', ') + '). The band is the normal range around their average.' + stretchNote(b, d, bd) : 'No comparable days yet.') + '</span>' + kch + '</div>' : '') + '</div>' +
     (c.custom ? kadd(comp('mom'), orow(op.mom, op.val, op.momV, null, 'range')) : '') + ''; // no last-year tile on either site: the RB layout reads better, and YoY lives in the H1 and the scorecard (Mike, Oct 28)
   // The day controls live in a small chip at the top right; click it for the full panel (pick a day, edit comparisons, sale calendar).
   const saleTxt = st.sale && tierOf(b, d) ? 'Up to ' + tierOf(b, d) + '% off sale · day ' + st.pos + ' of ' + st.len : st.label;
@@ -1138,8 +1156,8 @@ const OFFERS = {
     ['2026-09-03', '2026-09-07', 'Up to 40% off', 'Sep 5 and 6 may have been 35%'], ['2026-09-15', '2026-09-17', 'Up to 40% off', '$6 off Extra Soft Tees'], ['2026-09-18', '2026-09-19', 'Up to 35% off', '$10 off Hoodies'], ['2026-09-20', '2026-09-20', 'Up to 40% off', '$8 off Vintage Tees'],
     ['2026-09-25', '2026-09-27', 'Up to 40% off', '$16 Tees, $8 off Crewnecks'], ['2026-09-30', '2026-10-01', 'Up to 40% off', '$8 off Vintage Tees'], ['2026-10-02', '2026-10-03', 'Up to 35% off', '$8 off Streetwear Tees'], ['2026-10-04', '2026-10-04', 'Up to 40% off', '$5 off Mugs'],
     ['2026-10-13', '2026-10-14', 'Up to 40% off', '$8 off Baseball Tees'], ['2026-10-15', '2026-10-16', 'Up to 35% off', '$10 off Kids Hoodies'], ['2026-10-17', '2026-10-18', 'Up to 40% off', '$6 off Extra Soft Tees'],
-    ['2026-10-21', '2026-10-21', 'Up to 40% off', '$10 off Hoodies'], ['2026-10-22', '2026-10-23', 'Up to 35% off', '$8 off Hats'], ['2026-10-24', '2026-10-25', 'Up to 40% off', '$10 off Hoodies'], ['2026-11-01', '2026-12-19', 'Holiday sale', 'Planned: starts Sun Nov 1; Dec 19 end is likely, tiers not posted yet']],
-  rb: [['2026-09-23', '2026-09-28', 'Up to 40% off', ''], ['2026-10-04', '2026-10-11', 'Up to 40% off', 'Plus 25% off 1 to 3 stickers (test)'], ['2026-10-21', '2026-10-26', 'Up to 40% off', ''], ['2026-11-02', '2026-11-21', 'Up to 50% off', 'Planned; dates being confirmed in #promotions'], ['2026-11-22', '2026-12-01', 'Up to 60% off', 'Planned: Black Friday and Cyber Monday'], ['2026-12-02', '2026-12-02', 'Up to 50% off', 'Planned; Dec 2 tier still being confirmed'], ['2026-12-03', '2026-12-20', 'Up to 55% off', 'Planned']]
+    ['2026-10-21', '2026-10-21', 'Up to 40% off', '$10 off Hoodies'], ['2026-10-22', '2026-10-23', 'Up to 35% off', '$8 off Hats'], ['2026-10-24', '2026-10-25', 'Up to 40% off', '$10 off Hoodies'], ['2026-11-01', '2026-11-03', 'Up to 40% off', '$16 Tees, $8 off Crewnecks'], ['2026-11-04', '2026-11-05', 'Up to 35% off', '$16 Tees, $8 off Hats'], ['2026-11-06', '2026-11-07', 'Up to 40% off', '$16 Tees, $8 off Vintage Tees'], ['2026-11-08', '2026-11-09', 'Up to 35% off', '$16 Tees, $6 off Mugs'], ['2026-11-10', '2026-11-12', 'Up to 40% off', '$16 Tees, $6 off Extra Soft Tees'], ['2026-11-13', '2026-11-14', 'Up to 35% off', '$16 Tees, $6 off Crossbody Bags'], ['2026-11-15', '2026-11-16', 'Up to 40% off', '$16 Tees, $10 off Hoodies'], ['2026-11-17', '2026-11-19', 'Up to 35% off', '$16 Tees, $7 off Kids Tees'], ['2026-11-20', '2026-11-21', 'Up to 40% off', '$16 Tees, $7 off Socks'], ['2026-11-22', '2026-11-23', 'Up to 35% off', '$16 Tees, $7 off Phone Cases'], ['2026-11-24', '2026-11-26', 'Up to 40% off', 'Cyber: $15 Tees, $6 off Mugs'], ['2026-11-27', '2026-11-30', 'Up to 40% off', 'Cyber: $15 Tees'], ['2026-12-01', '2026-12-19', 'Holiday sale', 'Planned: December offers to be posted next week']],
+  rb: [['2026-09-23', '2026-09-28', 'Up to 40% off', ''], ['2026-10-04', '2026-10-11', 'Up to 40% off', 'Plus 25% off 1 to 3 stickers (test)'], ['2026-10-21', '2026-10-26', 'Up to 40% off', ''], ['2026-11-02', '2026-11-08', 'Up to 50% off', '30% off Tees'], ['2026-11-09', '2026-11-15', 'Up to 50% off', '30% off Posters'], ['2026-11-16', '2026-11-21', 'Up to 50% off', '30% off select Phone Cases'], ['2026-11-22', '2026-12-01', 'Up to 60% off', 'Cyber: 35% off Tees, plus flash deals'], ['2026-12-02', '2026-12-02', 'Up to 50% off', 'Planned; Dec 2 tier still being confirmed'], ['2026-12-03', '2026-12-20', 'Up to 55% off', 'Planned']]
 };
 const offerOn = (b, d) => (OFFERS[b] || []).find(o => d >= o[0] && d <= o[1]);
 function saleCalModal() {
@@ -1874,7 +1892,7 @@ function scoreHtml(b) {
 }
 
 /* ---------- A/B tests: its own page, because it is a weekly decision review, not the daily pulse ---------- */
-const EXPS_AS_OF = '2026-10-29';
+const EXPS_AS_OF = '2026-10-30';
 const testDays = t => Math.round((parse(EXPS_AS_OF) - parse(t.start)) / DAY) + 1;
 const siteImp = (rel, reach) => rel * reach;
 // Where a test's whole-site number comes from, for every hover that shows one.
@@ -1906,28 +1924,46 @@ function ttc(t) {
   const more = Math.round(days * Math.pow(1.96 / z, 2) - days);
   return more > 90 ? 'Months from 95% at this effect size' : '~' + Math.max(1, more) + ' more day' + (more === 1 ? '' : 's') + ' to 95%, if it holds';
 }
+// A/B table built around the exec questions (Sam, standup Oct 30): revenue per visitor, CVR, add to cart, AOV and engagement side by side,
+// each marked proven or not, plus how long it has run, the call, what's next and who decides. Color only when a result is proven (Mike, Oct 30).
+const ABK = [['rpv', 'Revenue per visitor', 'What each visitor in the test spends on average. The number paid media and Finance watch most.'], ['cvr', 'CVR', 'Share of visitors in the test who order. Some tests measure a narrower step (product page, cart or checkout); the hover names it.'], ['atc', 'Add to cart', 'Share of visitors in the test who add something to their cart.'], ['aov', 'AOV', 'Average order value: revenue ÷ orders. Not Amplitude\'s per-visitor "AOV".'], ['eng', 'Engagement', 'Only for tests built to change how people browse, like the nav.']];
+const abRd = t => (EXPS.reads || {})[t.id] || { goal: t.kind === 'aov' ? 'rpv' : 'cvr', verdict: t.status === 'shipped' ? ['ship', 'Shipped'] : t.status === 'running' ? ['early', 'Running'] : ['none', 'Kept control'], next: t.call || '', m: { cvr: { v: t.cvr.rel, s: t.p != null && t.p < 0.05 ? 'sig' : 'ns', a: t.cvr.a, b: t.cvr.b, name: 'Sitewide CVR' }, rpv: rpuOf(t) ? { v: rpuOf(t).rel, s: 'nb', a: rpuOf(t).a, b: rpuOf(t).b, f: 'usd' } : null } };
+const abVal = (x, v) => x.f === 'usd' ? '$' + (v >= 10 ? v.toFixed(2) : v.toFixed(v < 1 ? 3 : 2)) : pct(v, v < 0.01 ? 3 : v < 0.1 ? 2 : 1);
+const abSure = x => x.s === 'sig' ? '✓ Proven' : x.s === 'nb' ? 'No error bar' : x.s === 'early' ? 'Too early' : x.c ? x.c + '% sure' : 'Could be noise';
+const abSureL = x => x.s === 'sig' ? '<b class="b">Proven:</b> 95%+ sure this is a true difference.' : x.s === 'nb' ? '<b>No error bar:</b> Amplitude can\'t say how sure it is about this number, so treat it as a direction only.' : x.s === 'early' ? '<b>Too early:</b> too little data to trust yet.' : x.c ? '<b>' + x.c + '% sure</b> it\'s a true difference; we call it at 95%.' : '<b>Could be noise:</b> not enough evidence yet that this is a true difference.';
+function abCell(t, k) {
+  const r = abRd(t), x = (r.m || {})[k], goal = r.goal === k;
+  if (!x) return '<span class="abm na" title="Not measured on this test">–</span>';
+  const cls = x.s === 'sig' ? (x.v >= 0 ? 'b' : 'w') : 'ns', nm = x.name || ABK.find(z => z[0] === k)[1];
+  const tip = '<b class="tiph nosrc">' + esc(nm) + (goal ? ' · 🎯 what the test is built to move' : '') + '</b><span class="tipv"><b>' + sgn(x.v, 1) + '</b> for the test group</span><ul class="hul nrul"><li>📊 <b>Control → test:</b> ' + abVal(x, x.a) + ' → ' + abVal(x, x.b) + '</li><li>🧪 ' + abSureL(x) + '</li>' + (x.note ? '<li>📝 ' + esc(x.note) + '</li>' : '') + '</ul>';
+  return hint('<span class="abv ' + cls + '">' + (goal ? '<i class="abgoal" aria-label="Goal metric">🎯</i>' : '') + sgn(x.v, 1) + '</span><small class="abs ' + x.s + '">' + abSure(x) + '</small>', 'abm', tip);
+}
+const abDay = t => t.status === 'running' ? '<span class="abday"><b>Day ' + testDays(t) + '</b><small>since ' + short(t.start) + '</small></span>' : '<span class="abday"><b>' + (Math.round((parse(t.end) - parse(t.start)) / DAY) + 1) + ' days</b><small>ended ' + short(t.end) + '</small></span>';
+const abCall = t => { const r = abRd(t); return '<span class="abcall"><span class="abv2 v-' + r.verdict[0] + '">' + esc(r.verdict[1]) + '</span>' + (r.next && t.status === 'running' ? '<small>' + esc(r.next.split('. ')[0].replace(/\.$/, '')) + '</small>' : '') + '</span>'; };
+const ABHEAD = '<div class="tcols abcols"><span>Test</span><span>Running</span>' + ABK.map(k => hint(k[1] + ' ⓘ', 'soft', '<b>' + k[1] + '</b><br>' + k[2] + '<br><span class="cap">🎯 marks what each test is built to move. Color means proven (95%+ sure); grey could still be noise.</span>')).join('') + '<span>The call</span><span></span></div>';
 function testRow(t) {
   const site = siteImp(t.cvr.rel, t.reach), open = state.open.has('x' + t.id), r = Math.round(t.reach * 100);
   const st = t.status === 'running' ? 'Running' : t.status === 'shipped' ? 'Shipped' : 'Kept control';
   const more = (ttc(t).match(/~(\d+) more day/) || [])[1], dates = t.status === 'running' ? short(t.start) + ' → ' + (more ? '~' + short(addDays(EXPS_AS_OF, +more)) : 'open') + '<small>Day ' + testDays(t) + (more ? ' · result in ~' + more + ' days' : '') + '</small>' : short(t.start) + ' → ' + short(t.end) + '<small>' + (Math.round((parse(t.end) - parse(t.start)) / DAY) + 1) + ' days</small>';
   const fv = t.primary.name.indexOf('per') > -1 ? v => v.toFixed(3) : v => pct(v, v < 0.01 ? 3 : v < 0.05 ? 2 : 1);
-  let h = '<div class="rowwrap"><div class="trow" role="button" tabindex="0" aria-expanded="' + open + '" data-xrow="' + t.id + '"><span class="tname tnico"><span class="ge gico g-' + esc(testObj(t)) + '" aria-hidden="true">' + projIco({ t: t.name, obj: testObj(t) }) + '</span><b>' + esc(t.name) + srcBtn('test:' + t.id) + '</b><span class="cap tmeta">' + teamTag(testTeam(t)) + pmChip(t.name, testTeam(t)) + siteDot(testSite(t)) + ' · ' + esc(t.where) + '</span></span>' +
-    '<span class="tdates">' + dates + '</span><span class="tstw"><span class="tst ' + t.status + '">' + st + '</span>' + sigChip(t) + (ttc(t) ? '<span class="cap ttc">' + ttc(t) + '</span>' : '') + '</span><span class="tlift"><span class="tpm">' + esc(t.primary.name) + '</span><b>' + sp(t.primary.rel, 1) + '</b></span>' +
-    hint('<span class="mlabel">Whole site </span>' + sp(site) + (rpuOf(t) ? '<small>revenue ' + sp(siteImp(rpuOf(t).rel, t.reach)) + '</small>' : '') + '<small class="treach2">' + r + '% reach</small>', 'timp ' + (site < 0 ? 'w' : 'b') /* always bold green or red (Mike, Oct 27) */, impTip(t)) + '<span class="chev" aria-hidden="true">▾</span></div>';
+  let h = '<div class="rowwrap"><div class="trow abrow" role="button" tabindex="0" aria-expanded="' + open + '" data-xrow="' + t.id + '"><span class="tname tnico"><span class="ge gico g-' + esc(testObj(t)) + '" aria-hidden="true">' + projIco({ t: t.name, obj: testObj(t) }) + '</span><b>' + esc(t.name) + srcBtn('test:' + t.id) + '</b><span class="cap tmeta">' + teamTag(testTeam(t)) + pmChip(t.name, testTeam(t)) + siteDot(testSite(t)) + ' · ' + esc(t.where) + '</span></span>' +
+    abDay(t) + ABK.map(k => abCell(t, k[0])).join('') + abCall(t) + '<span class="chev" aria-hidden="true">▾</span></div>';
   if (open) {
     const pv = t.p == null ? null : t.p, sigTxt = pv == null ? '' : pv < 0.05 ? '<b class="b">Significant.</b> Less than a 5% chance this difference is noise.' : '<b>Not significant yet.</b> The gap is small enough that it could be noise (p ' + pv.toFixed(2) + '; we want below 0.05).';
     const mx = Math.max(t.cvr.a, t.cvr.b) * 1.15, bar = (lab, v, cls) => '<div class="vb"><span>' + lab + '</span><span class="vbt"><i class="' + cls + '" style="width:' + (v / mx * 100).toFixed(1) + '%"></i></span><b>' + pct(v, v < 0.01 ? 3 : 2) + '</b></div>';
     const days = t.status === 'running' ? testDays(t) : Math.round((parse(t.end) - parse(t.start)) / DAY) + 1;
     const ws = siteImp(t.cvr.rel, t.reach), rp = rpuOf(t), sigLine = pv == null ? '' : conf(t) >= 95 ? '✅ <b>' + conf(t) + '% confidence.</b> Clears the 95% bar, so we can call it.' : conf(t) >= 80 ? '⏳ <b>' + conf(t) + '% confidence.</b> Leaning real, but short of the 95% bar we use to call a winner.' : '⏳ <b>' + conf(t) + '% confidence.</b> No reliable sign of a difference yet; we call a winner at 95%.';
-    h += '<div class="detail tdet2">' +
-      '<div class="tmet">' +
-        '<div class="tm site"><span class="tml">Whole-site ' + (t.kind === 'aov' ? 'AOV' : 'CVR') + ' impact</span><b class="' + (ws < 0 ? 'w' : 'b') + '">' + sp(ws) + ' ' + (t.kind === 'aov' ? 'AOV' : 'CVR') + '</b><span class="tms">' + (rp ? 'Revenue per user ' + sp(siteImp(rp.rel, t.reach)) + ' · ' : '') + 'test lift × ' + Math.round(t.reach * 100) + '% of orders it touches</span></div>' +
-        '<div class="tm pri"><span class="tml">' + esc(t.primary.name) + '</span><b>' + sp(t.primary.rel) + '</b><span class="tms">' + fv(t.primary.a) + ' control → ' + fv(t.primary.b) + ' test</span></div>' +
-        (t.sec || []).map(x => '<div class="tm sec"><span class="tml">' + esc(x.name) + '</span><b>' + sp(x.rel) + '</b><span class="tms">' + fmtM(x, x.a) + ' → ' + fmtM(x, x.b) + (x.note ? ' · no error bar' : '') + '</span></div>').join('') +
-      '</div>' +
-      '<p class="tsig">' + sigLine + '</p>' +
+    const R = abRd(t), vr = R.vrows ? '<div class="abvr"><h4 class="ph">🔀 Each version vs no change</h4><table><thead><tr><th>Version</th>' + ABK.filter(k => R.vrows.some(v => v[1][k[0]] != null)).map(k => '<th>' + k[1] + '</th>').join('') + '</tr></thead><tbody>' + R.vrows.map(v => '<tr><td>' + esc(v[0]) + '</td>' + ABK.filter(k => R.vrows.some(w => w[1][k[0]] != null)).map(k => '<td class="' + (v[1][k[0]] == null ? 'na' : (R.m[k[0]] && R.m[k[0]].s === 'sig' ? (v[1][k[0]] >= 0 ? 'b' : 'w') : 'ns')) + '">' + (v[1][k[0]] == null ? '–' : sgn(v[1][k[0]], 1)) + '</td>').join('') + '</tr>').join('') + '</tbody></table>' + (R.vdef ? '<ul class="abvd">' + R.vrows.filter(v => R.vdef[v[0]]).map(v => '<li><b>' + esc(v[0]) + ':</b> ' + esc(R.vdef[v[0]]) + '</li>').join('') + '</ul>' : '') + '</div>' : '';
+    h += '<div class="detail tdet2"><div class="abans">' +
+      '<div><span class="lbl">🎯 Built to move</span><b>' + esc((R.m[R.goal] && R.m[R.goal].name) || ABK.find(z => z[0] === R.goal)[1]) + '</b></div>' +
+      '<div><span class="lbl">📣 The call</span><b>' + esc(R.verdict[1]) + '</b>' + (R.next ? '<span class="cap">' + esc(R.next) + '</span>' : '') + '</div>' +
+      (R.decides ? '<div><span class="lbl">🧑‍⚖️ Who decides</span><b>' + esc(R.decides) + '</b></div>' : '') +
+      '<div><span class="lbl">💵 Gross profit per visitor</span><b>Not measured yet</b><span class="cap">Amplitude has no gross profit for Redbubble orders; it needs an order-level join from Analytics.</span></div>' +
+      '<div><span class="lbl">📱 Mobile vs desktop</span><b>Not available yet</b><span class="cap">Redbubble\'s device tagging in Amplitude is being fixed (due next week).</span></div>' +
+      (R.flag ? '<div><span class="lbl">⚠️ Read with care</span><b>' + esc(R.flag) + '</b></div>' : '') +
+      '</div>' + vr +
       '<div class="tdg2"><div><h4 class="ph">🧪 What we are testing</h4><p>' + esc(t.hyp) + '</p><p class="cap">' + esc(t.where) + ' · ' + days + ' days so far · owners ' + esc(t.owners) + '</p></div>' +
-      '<div><h4 class="ph">📣 The call</h4><p>' + esc(t.call) + '</p>' + (t.variants ? '<ul class="tvl">' + t.variants.map(v => '<li><span>' + esc(v[0]) + '</span><b class="' + (v[1] < 0 ? 'w' : 'b') + '">' + sp(v[1]) + '</b></li>').join('') + '</ul>' : '') + '<a class="srclink" href="' + t.url + '" target="_blank" rel="noopener">Open in Amplitude ↗</a></div></div></div>';
+      '<div><h4 class="ph">🔗 The data</h4><p>Every number above comes from Amplitude Experiment, read ' + esc(EXPS.asOf) + '.</p><a class="srclink" href="' + t.url + '" target="_blank" rel="noopener">Open in Amplitude ↗</a></div></div></div>'; // old metric boxes and call text removed: the answers box and table above replace them (Mike, Oct 30)
     h += testProv(t);
   }
   return h + '</div>';
@@ -1974,10 +2010,10 @@ function testModal(kind, i) {
 }
 function testsHtml() {
   const all = [].concat(EXPS.live, EXPS.done), best = all.reduce((a, t) => Math.max(a, siteImp(t.cvr.rel, t.reach)), 0);
-  const head = '<div class="tcols"><span>Test</span><span>Dates</span><span>Status and confidence</span><span>Primary metric</span><span>' + hint('Whole-site impact ⓘ', 'soft', METHOD + '<br><b>Reach</b> (under each number): the share of orders from people who see the change.') + '</span><span></span></div>';
+  const head = ABHEAD;
   return '<section class="sview"><div class="vhead vhl">' + abHeadline() + '</div>' +
-    '<div class="group trun"><div class="ghead"><h3>Running</h3>' + abFacts(EXPS.live, true) + '</div>' + head + '<div class="rows">' + EXPS.live.map(testRow).join('') + '</div></div>' +
-    '<div class="group"><div class="ghead"><h3>Decided in the last three weeks</h3>' + abFacts(EXPS.done, false) + '</div>' + head + '<div class="rows">' + EXPS.done.map(testRow).join('') + '</div></div>' +
+    '<div class="group trun"><div class="ghead"><h3>Running</h3>' + abFacts(EXPS.live, true) + '</div><p class="abkey"><span class="abv b">Green</span> or <span class="abv w">red</span> means proven (95%+ sure). <span class="abv ns">Grey</span> could still be noise. 🎯 marks what each test is built to move. Not on this page yet: gross profit per visitor and the mobile vs desktop split (open a test to see why).</p>' + head + '<div class="rows">' + EXPS.live.slice().sort((p, q) => parse(q.start) - parse(p.start)).map(testRow).join('') + '</div></div>' +
+    '<div class="group"><div class="ghead"><h3>Decided in the last three weeks</h3>' + abFacts(EXPS.done, false) + '</div>' + head + '<div class="rows">' + EXPS.done.slice().sort((p, q) => parse(q.end) - parse(p.end)).map(testRow).join('') + '</div></div>' +
     (EXPS.soon ? '<div class="group"><div class="ghead"><h3>Coming soon</h3><span class="sfacts">' + EXPS.soon.length + ' queued</span></div><div class="tsoon">' + EXPS.soon.map((x, i) => '<div class="tsc" role="button" tabindex="0" data-tsoon="' + i + '"><span class="tse" aria-hidden="true">' + x.e + '</span><div><b>' + esc(x.name) + '</b><p>' + esc(x.what) + '</p><span class="cap">' + esc(x.where) + ' · ' + esc(x.site) + ' · ' + esc(x.when) + '</span>' + refsHtml(x.refs) + '</div></div>').join('') + '</div></div>' : '') +
     earlierHtml() + '</section>';
 }
@@ -2297,7 +2333,7 @@ const SHEET_URL = 'https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJT
 const provLnk = (txt, url) => url ? '<a href="' + esc(url) + '" target="_blank" rel="noopener">' + esc(txt) + ' ↗</a>' : esc(txt);
 const provBox = rows => '<div class="pbox prov"><h4 class="ph">🔎 Where this comes from</h4><dl class="provl">' + rows.filter(Boolean).map(r => '<dt>' + r[0] + '</dt><dd>' + (r[1] ? '<b>' + r[1] + '</b> · ' : '') + '<span class="cap">' + r[2] + '</span></dd>').join('') + '</dl></div>';
 function testProv(t) {
-  const R = (typeof SRCS !== 'undefined' && SRCS[t.name]) || {}, pick = (k, d) => R[k] ? provLnk(R[k].from, R[k].url) : d, amp = provLnk('Amplitude Experiment', t.url), tm = testTeam(t), tk = COMING.teams.find(x => x.key === tm) || {}, pm = pmOf(t.name, tm), site = testSite(t);
+  const R = (typeof SRCS !== 'undefined' && SRCS[t.name]) || {}, pick = (k, d) => R[k] ? provLnk(R[k].from || R[k].where || 'Source', R[k].url) : d, amp = provLnk('Amplitude Experiment', t.url), tm = testTeam(t), tk = COMING.teams.find(x => x.key === tm) || {}, pm = pmOf(t.name, tm), site = testSite(t);
   return provBox([
     ['🧪 The test', esc(t.name), pick('origin', 'Running or decided in ' + amp + (t.id ? ' (experiment ' + esc(t.id) + ')' : '') + ', read ' + esc(short(EXPS_AS_OF)))],
     ['👥 Team', esc(tk.name || TEAMS(tm) || '–'), pick('team', 'Worked out from the test\'s owners in ' + amp + ', matched to the team they work on')],
@@ -2311,7 +2347,7 @@ function testProv(t) {
   ]);
 }
 function impProv(it) {
-  const R = (typeof SRCS !== 'undefined' && SRCS[it.t]) || {}, pick = (k, d) => R[k] ? provLnk(R[k].from, R[k].url) : d, tk = COMING.teams.find(x => x.key === it.team) || {}, pm = pmOf(it.t, it.team), rv = revEst(it);
+  const R = (typeof SRCS !== 'undefined' && SRCS[it.t]) || {}, pick = (k, d) => R[k] ? provLnk(R[k].from || R[k].where || 'Source', R[k].url) : d, tk = COMING.teams.find(x => x.key === it.team) || {}, pm = pmOf(it.t, it.team), rv = revEst(it);
   return provBox([
     ['📋 Why it\'s here', '', pick('origin', 'Shipped or decided in the last 30 days, from release announcements in #released, Jira releases and the roadmap\'s wins list')],
     ['👥 Team', esc(tk.name || TEAMS(it.team) || '–'), pick('team', 'The team that owns it on the roadmap sheet or in Jira')],
@@ -2588,6 +2624,8 @@ const GICO = { CVR: '<circle cx="8" cy="8" r="5.5"/><circle cx="8" cy="8" r="2.5
 // A specific icon for what each project is about (Mike, Oct 27: a trucker hat should be a hat, wall art a framed picture,
 // retiring products a sunset). First keyword match on the title wins; the goal icon is only the fallback.
 const PICO = [
+  // Cart icon for the cart sticker cross-sell test, ahead of the generic sticker icon (Oct 30).
+  [/sticker cross-sell/i, '<path d="M1.5 2.5h2l1.6 7.5h7l1.4-5.5H4.3"/><circle cx="6" cy="13" r="1"/><circle cx="11.5" cy="13" r="1"/>'],
   // Clock with a back arrow for "Recently viewed" (Oct 29).
   [/recently viewed/i, '<path d="M3 8a5 5 0 1 0 1.5-3.6"/><path d="M3 3v2.5h2.5"/><path d="M8 5.5V8l1.8 1.2"/>'],
   // Star for reviews (Oct 29, Trustpilot product reviews win).
@@ -3222,7 +3260,7 @@ function salePill() {
 }
 function saleHdr() {
   let el = document.getElementById('hsale'); if (!el) { el = document.createElement('span'); el.id = 'hsale'; const br = document.getElementById('brand'); if (br) br.insertAdjacentElement('afterend', el); }
-  el.innerHTML = state.view === 'daily' ? '' : salePill(); el.hidden = state.view === 'daily';
+  el.innerHTML = ''; el.hidden = true; // no header sale pill on any page: the CVR tabs show it above the H1 (Mike, Oct 30)
 }
 function render() {
   const b = state.tab;
@@ -3650,4 +3688,3 @@ if (state.openTok) { const [k, v] = state.openTok, M = metricsFor(state.tab); le
 })();
 // A clicked ticker item drops focus once its jump runs, so the ticker keeps moving (Mike, Oct 26).
 document.addEventListener('click', ev => { const tb = ev.target.closest && ev.target.closest('#ticker button'); if (tb) setTimeout(() => tb.blur(), 0); });
-
