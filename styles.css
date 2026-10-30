@@ -3610,8 +3610,8 @@ a.pvwhere { color: var(--ctl); text-decoration: underline; text-underline-offset
 .abt td small { display: block; margin-top: 2px; font-size: 12px; font-weight: 400; color: var(--muted); max-width: 46ch; }
 .abt td b.b { color: var(--good); } .abt td b.w { color: var(--bad); } .abt td.na { color: var(--faint); }
 .abcall { display: inline-flex; }
-.dtop { display: flex; gap: 24px; align-items: flex-start; } .dtop .dtl { flex: 1; min-width: 0; } .dtop .sibs { flex: 0 0 340px; margin: 0; }
-@media (max-width: 900px) { .dtop { flex-direction: column; } .dtop .sibs { flex-basis: auto; width: 100%; } }
+.devtop { display: flex; gap: 24px; align-items: flex-start; } .devtop .devl { flex: 1; min-width: 0; } .devtop .sibs { flex: 0 0 340px; margin: 0; }
+@media (max-width: 900px) { .devtop { flex-direction: column; } .devtop .sibs { flex-basis: auto; width: 100%; } }
 .botlinks { display: flex; gap: 16px; flex-wrap: wrap; }
 .bothead { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
 .say4 .botcard2 { display: block; min-width: 0; text-align: left; } .botsay .botcard2 .scard { height: 100%; cursor: default; }
@@ -3654,3 +3654,17 @@ a.trow.erow { color: inherit; text-decoration: none; }
 a.trow.abrow { color: inherit; text-decoration: none; }
 
 .abfilter { display: flex; align-items: center; gap: 10px; margin: 18px 0 6px; } .abfilter .lbl { font: 600 12px var(--body); color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+
+/* Sortable headers, pills, overlay alignment, no row chevrons, the switch on the heading row (design agency, Oct 31) */
+.abh { cursor: pointer; user-select: none; display: inline-flex; align-items: center; gap: 5px; } .abh:hover { color: var(--ink); } .abh .sa { font-style: normal; font-size: 12px; }
+.tmeta .rtag { margin: 0; } .tmeta .rtag.sitepill { padding: 2px 9px; }
+.mtags .abv2 { display: inline-flex; align-items: center; margin: 4px 5px 0 0; padding: 1px 10px; line-height: 1.55; }
+div.abrow .chev, div.strow .chev, div.erow .chev { visibility: hidden; }
+.abst.tbd { background: transparent; box-shadow: inset 0 0 0 1px var(--line); }
+.mbox .abt { table-layout: fixed; width: 100%; } .mbox .abt th:first-child { width: 36%; }
+.group.trun .ghead { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 14px; } .group.trun .abfilter { margin: 0 0 0 auto; }
+.mbox .abt th { white-space: normal; line-height: 1.25; overflow-wrap: break-word; vertical-align: bottom; }
+/* Date picker sits beside the Bot filter in the top row, level with the sale tag, so nothing is pushed down (design agency, Oct 31) */
+:root :has(> .dtop) > .dtop { flex-direction: row-reverse !important; align-items: center !important; gap: 10px !important; }
+:root :has(> .dtop) > .dtop .bfwrap { margin: 0; }
+@media (max-width: 1100px) { :root :has(> .dtop) > .dtop { flex-direction: column !important; align-items: flex-end !important; gap: 6px !important; } }
