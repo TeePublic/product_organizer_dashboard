@@ -1511,10 +1511,10 @@ function abHeadline() {
   const next24 = (EXPS.soon || []).find(x => x.start && (parse(x.start) - asOfD) / DAY >= 0 && (parse(x.start) - asOfD) / DAY <= 1);
   const pool = live.filter(t => abRd(t).verdict[0] !== 'paused' && rpvOf(t) != null && t !== recent).sort((p, q) => rpvOf(q) - rpvOf(p));
   const promising = pool[0], latest = live.slice().sort((p, q) => parse(q.start) - parse(p.start))[0];
-  const launchedS = t => esc(t.name) + ' launched ' + short(t.start) + '.', promisingS = t => esc(t.name) + ' is the most promising, at ' + sgn(rpvOf(t), 1) + ' revenue per user.';
-  const title = recent ? launchedS(recent) : promising ? promisingS(promising) : live.length ? esc(latest.name) + ' started ' + short(latest.start) + '.' : 'No tests are running right now.';
-  const subtitle = next24 ? esc(next24.name) + ' launches ' + short(next24.start) + '.' : recent ? (promising ? promisingS(promising) : '') : (promising && latest && latest !== promising ? esc(latest.name) + ' started ' + short(latest.start) + '.' : '');
-  return '<p class="verdict vtests">' + title + '</p>' + (subtitle ? '<p class="sulead">' + subtitle + '</p>' : '');
+  const L = t => t.id ? '<span class="verd n2 hlink" role="link" tabindex="0" data-jt="' + esc(t.id) + '">' + esc(t.name) + '</span>' : esc(t.name);
+  const first = recent ? L(recent) + ' launched ' + short(recent.start) : promising ? L(promising) + ' is the most promising, at ' + sgn(rpvOf(promising), 1) + ' revenue per user' : live.length ? L(latest) + ' started ' + short(latest.start) : '';
+  const second = next24 ? esc(next24.name) + ' launches ' + short(next24.start) : recent ? (promising ? L(promising) + ' leads at ' + sgn(rpvOf(promising), 1) + ' revenue per user' : '') : (promising && latest && latest !== promising ? L(latest) + ' started ' + short(latest.start) : '');
+  return '<p class="verdict vtests">' + (first ? first + (second ? ', and ' + second : '') + '.' : 'No tests are running right now.') + '</p><p class="sulead">This page shows Redbubble tests only. TeePublic tests are coming soon.</p>';
 }
 function trHeadline() {
   const L = (typeof SLACK !== 'undefined' ? SLACK : []).slice(0, 2), tn = (s, k) => hint(esc(/^(TeePublic|Redbubble|Dashery|Google|Amazon|Apple|USA|Black|Meta)\b/.test(s.title) || !k ? s.title : s.title.charAt(0).toLowerCase() + s.title.slice(1)), 'verd n2 hlink" data-say="' + SLACK.indexOf(s), '<b>' + esc(s.title) + '</b><br>' + esc(s.tldr || sents(s.body)[0] || '') + '<span class="segmore">Click for the full read →</span>');
@@ -1532,13 +1532,14 @@ function trHeadline() {
 // Recently shipped and Coming soon share the main table's look (Mike, Oct 30): same header, rows and name cell.
 const erSite = s => /tee/i.test(s || '') ? 'TP' : /both/i.test(s || '') ? 'Both' : 'RB';
 const erName = (name, team, site) => '<span class="tname tnico"><span class="ge gico g-CVR" aria-hidden="true">' + projIco({ t: name, obj: 'CVR' }) + '</span><b>' + esc(name) + '</b><span class="cap tmeta">' + teamTag(team) + '<span class="tloc">' + siteDot(erSite(site)) + '</span></span></span>';
-function earlierHtml() {
-  const cut = addDays(EXPS_AS_OF, -21), sx = (typeof SEXP !== 'undefined' ? SEXP.items : []).filter(x => x.end < cut);
-  const day = d => '<span class="abday"><b>' + short(d) + '</b><small>ended</small></span>';
-  const A = EXPS.older.map((o, i) => ({ end: o.end, html: '<div class="rowwrap"><div class="trow erow" role="button" tabindex="0" data-told="' + i + '">' + erName(o.name, 'customer', 'Redbubble') + day(o.end) + '<span class="abcall"><span class="abv2 ' + (o.status === 'shipped' ? 'v-ship' : '') + '">' + (o.status === 'shipped' ? 'Shipped' : 'Kept control') + '</span></span><span class="erlt">' + esc(o.note) + '</span><span class="chev" aria-hidden="true">›</span></div></div>' }));
-  const B = sx.map(x => ({ end: x.end, html: '<div class="rowwrap"><a class="trow erow" href="' + esc(SEXP.url) + '" target="_blank" rel="noopener">' + erName(x.name, 'search', x.site) + day(x.end) + '<span class="abcall"><span class="abv2 ' + (x.verdict === 'win' ? 'v-ship' : '') + '">' + (x.verdict === 'win' ? 'Clear winner' : x.verdict === 'loss' ? 'Clear loser' : 'Inconclusive') + '</span></span><span class="erlt">' + esc(x.metric) + ': ' + x.vars.map(v => esc(v[0].replace('Variant ', '')) + ' ' + sgn(v[1], 1)).join(', ') + ', none stat sig.</span><span class="chev" aria-hidden="true">↗</span></a></div>' }));
-  const all = A.concat(B).sort((p, q) => p.end < q.end ? 1 : -1);
-  return all.length ? '<div class="group"><div class="ghead"><h3>Recently shipped</h3><span class="sfacts">' + all.length + ' tests</span></div><div class="tcols ertc"><span>Test</span><span>Ended</span><span>Decision</span><span>What happened</span><span></span></div><div class="rows">' + all.map(x => x.html).join('') + '</div></div>' : '';
+function shippedHtml() {
+  const cut = addDays(EXPS_AS_OF, -60), sx = (typeof SEXP !== 'undefined' ? SEXP.items : []);
+  const dash = '<span class="abm na">–</span>', dayC = d => '<span class="abday"><b>' + short(d) + '</b><small>ended</small></span>';
+  const D1 = (EXPS.done || []).map(t => ({ end: t.end, html: testRow(t) }));
+  const A = EXPS.older.map((o, i) => ({ end: o.end, html: '<div class="rowwrap"><div class="trow abrow" role="button" tabindex="0" data-told="' + i + '">' + erName(o.name, 'customer', 'Redbubble') + dayC(o.end) + dash + dash + dash + '<span class="abcall"><span class="abv2 ' + (o.status === 'shipped' ? 'v-ship' : '') + '">' + (o.status === 'shipped' ? 'Shipped' : 'Kept control') + '</span></span><span class="chev" aria-hidden="true">›</span></div></div>' }));
+  const B = sx.map(x => ({ end: x.end, html: '<div class="rowwrap"><a class="trow abrow erow2" href="' + esc(SEXP.url) + '" target="_blank" rel="noopener">' + erName(x.name, 'search', x.site) + dayC(x.end) + dash + dash + dash + '<span class="abcall"><span class="abv2 ' + (x.verdict === 'win' ? 'v-ship' : '') + '">' + (x.verdict === 'win' ? 'Clear winner' : x.verdict === 'loss' ? 'Clear loser' : 'Inconclusive') + '</span></span><span class="chev" aria-hidden="true">↗</span></a></div>' }));
+  const all = D1.concat(A, B).filter(x => x.end >= cut).sort((p, q) => p.end < q.end ? 1 : -1);
+  return all.length ? '<div class="group"><div class="ghead"><h3>Recently shipped</h3><span class="sfacts">' + all.length + ' tests</span></div>' + ABHEAD + '<div class="rows">' + all.map(x => x.html).join('') + '</div></div>' : '';
 }
 function soonHtml() {
   return '<div class="group"><div class="ghead"><h3>Coming soon</h3><span class="sfacts">' + EXPS.soon.length + ' queued</span></div><div class="tcols stc"><span>Test</span><span>Where</span><span>When</span><span>What it tests</span><span></span></div><div class="rows">' + EXPS.soon.map((x, i) => '<div class="rowwrap"><div class="trow strow" role="button" tabindex="0" data-tsoon="' + i + '">' + erName(x.name, x.team || 'customer', x.site) + '<span class="erlt">' + esc(x.where) + '</span><span class="erlt">' + esc(x.when) + '</span><span class="erlt">' + esc(x.what) + '</span><span class="chev" aria-hidden="true">›</span></div></div>').join('') + '</div></div>';
@@ -1949,13 +1950,26 @@ function abCell(t, k) {
 }
 const abSig = t => { const r = abRd(t), g = (r.m || {})[r.goal], nm = (g && g.name) || ABK.find(z => z[0] === r.goal)[1];
   const o = !g ? ['na', '–', '', ''] : g.s === 'sig' ? ['yes', 'Yes', '95%+ sure', 'At least 95% sure this is a true difference.'] : g.s === 'early' ? ['early', 'Too early', 'few days of data', 'Not enough days to say anything yet.'] : g.s === 'nb' ? ['nb', 'Can\'t tell', 'no error bar', 'Amplitude gives no error bar for this metric.'] : g.c ? ['not', 'Not yet', g.c + '% sure', 'Needs 95% before we call it.'] : ['not', 'Not yet', 'could be noise', 'Under 95% sure, so it could still be noise.'];
-  return hint('<span class="abst ' + o[0] + '">' + o[1] + '</span><small class="abs">' + (o[2] ? o[2] + ' · ' : '') + 'on ' + esc(nm.toLowerCase()) + '</small>', 'abm', '<span class="nosrc">' + o[3] + '</span>');
+  return hint('<span class="abst ' + o[0] + '">' + o[1] + '</span>', 'abm', '<span class="nosrc">' + o[3] + '</span>');
 };
 const abImp = t => { const v = siteImp(t.cvr.rel, t.reach); return hint('<span class="abv big lite ' + (v >= 0 ? 'b' : 'w') + '">' + sp(v, 1) + '</span><small class="abs">' + Math.round(t.reach * 100) + '% reach</small>', 'abm', '<span class="nosrc">In the test group: ' + pct(t.cvr.a, t.cvr.a < 0.1 ? 2 : 1) + ' → ' + pct(t.cvr.b, t.cvr.b < 0.1 ? 2 : 1) + ' CVR (' + sgn(t.cvr.rel, 1) + ').</span>'); };
 const abRpu = t => { const x = (abRd(t).m || {}).rpv; if (!x) return '<span class="abm na" title="Not measured on this test">–</span>'; return hint('<span class="abv big ' + (x.v >= 0 ? 'b' : 'w') + '">' + sgn(x.v, 1) + '</span><small class="abs">in test group</small>', 'abm', '<span class="nosrc">' + abVal(x, x.a) + ' → ' + abVal(x, x.b) + ' per user.</span>'); };
 const abDay = t => t.status === 'running' ? '<span class="abday"><b>Day ' + testDays(t) + '</b><small>since ' + short(t.start) + '</small></span>' : '<span class="abday"><b>' + (Math.round((parse(t.end) - parse(t.start)) / DAY) + 1) + ' days</b><small>ended ' + short(t.end) + '</small></span>';
 const abCall = t => { const r = abRd(t), pill = '<span class="abv2 v-' + r.verdict[0] + '">' + esc(r.verdict[1]) + '</span>'; return r.next && t.status === 'running' ? hint(pill, 'abcall', '<span class="nosrc">' + esc(r.next) + '</span>') : '<span class="abcall">' + pill + '</span>'; };
-const ABHEAD = '<div class="tcols abcols"><span>Test</span><span>Running</span>' + hint('Stat sig ⓘ', 'soft', '<span class="nosrc"><b>Stat sig</b><br>Are we 95% sure the main metric moved, not noise?</span>') + hint('Sitewide CVR impact ⓘ', 'soft', '<span class="nosrc"><b>Sitewide CVR impact</b><br>The test group\'s CVR change, scaled by the share of orders it reaches: what it would do to the whole site.</span>') + hint('Revenue per user ⓘ', 'soft', '<span class="nosrc"><b>Revenue per user</b><br>Revenue per user in the test group vs control.</span>') + '<span>The call</span><span></span></div>';
+const ABHEAD = '<div class="tcols abcols"><span>Test</span><span>Running</span>' + hint('Stat sig', 'soft', '<span class="nosrc"><b>Stat sig</b><br>Are we 95% sure the main metric moved, not noise?</span>') + hint('Sitewide CVR impact', 'soft', '<span class="nosrc"><b>Sitewide CVR impact</b><br>The test group\'s CVR change, scaled by the share of orders it reaches: what it would do to the whole site.</span>') + hint('Revenue per user', 'soft', '<span class="nosrc"><b>Revenue per user</b><br>Revenue per user in the test group vs control.</span>') + '<span>The call</span><span></span></div>';
+function testDetailModal(id) {
+  const t = [].concat(EXPS.live, EXPS.done).find(x => String(x.id) === String(id)); if (!t) return;
+  const R = abRd(t), days = t.status === 'running' ? testDays(t) : Math.round((parse(t.end) - parse(t.start)) / DAY) + 1;
+  const cols = ABK.filter(k => (R.m || {})[k[0]] && k[0] !== 'rpv').concat(ABK.filter(k => (R.m || {})[k[0]] && k[0] === 'rpv')), lab = k => R.m[k[0]].name || k[1];
+  const ch = (v, main) => '<span class="chn ' + (v >= 0 ? 'b' : 'w') + (main ? ' main' : '') + '">' + sgn(v, 1) + '</span>';
+  const sureOf = x => x.s === 'sig' ? '<span class="abst yes">Yes</span>' : x.s === 'early' ? '<span class="abst early">Too early</span>' : x.s === 'nb' ? '<span class="abst nb">Can\'t tell</span>' : '<span class="abst">' + (x.c ? 'Not yet · ' + x.c + '%' : 'Not yet') + '</span>';
+  const tbl = R.vrows
+    ? '<table class="abt"><thead><tr><th>Version</th>' + cols.map(k => '<th>' + esc(lab(k)) + '</th>').join('') + '</tr></thead><tbody>' + [['All versions together', Object.fromEntries(cols.map(k => [k[0], R.m[k[0]].v])), '']].concat(R.vrows.map(v => [v[0], v[1], (R.vdef || {})[v[0]] || ''])).map(v => '<tr><td><b>' + esc(v[0]) + '</b>' + (v[2] ? '<small>' + esc(v[2]) + '</small>' : '') + '</td>' + cols.map(k => { const x = v[1][k[0]]; return x == null ? '<td class="na">–</td>' : '<td>' + ch(x, k[0] === 'rpv') + '</td>'; }).join('') + '</tr>').join('') + '</tbody></table>'
+    : '<table class="abt"><thead><tr><th>Metric</th><th>Control</th><th>Test</th><th>Change</th><th>Stat sig</th></tr></thead><tbody>' + cols.map(k => { const x = R.m[k[0]]; return '<tr><td>' + esc(lab(k)) + '</td><td>' + abVal(x, x.a) + '</td><td>' + abVal(x, x.b) + '</td><td>' + ch(x.v, k[0] === 'rpv') + '</td><td>' + sureOf(x) + '</td></tr>'; }).join('') + '</tbody></table>';
+  const pill = '<span class="abv2 v-' + R.verdict[0] + '">' + esc(R.verdict[1]) + '</span>';
+  openModal('<div class="mhead"><h3 id="mtitle">' + esc(t.name) + '</h3></div><div class="mtags">' + teamTag(testTeam(t)) + '<span class="rtag">' + siteDot(testSite(t)) + ' · ' + esc(t.where) + '</span><span class="rtag">' + (t.status === 'running' ? 'Day ' + days + ', since ' + short(t.start) : days + ' days, ended ' + short(t.end)) + '</span>' + pill + '</div>' +
+    '<div class="abwhat2"><h4 class="ph">🧪 What we are testing</h4><p>' + esc(t.hyp) + '</p>' + (R.flag ? '<p class="abflag">⚠️ ' + esc(R.flag) + '</p>' : '') + '</div>' + tbl + '<div class="abfoot2">' + srcBtn('test:' + t.id) + '</div>');
+}
 function testRow(t) {
   const site = siteImp(t.cvr.rel, t.reach), open = state.open.has('x' + t.id), r = Math.round(t.reach * 100);
   const st = t.status === 'running' ? 'Running' : t.status === 'shipped' ? 'Shipped' : 'Kept control';
@@ -1963,20 +1977,6 @@ function testRow(t) {
   const fv = t.primary.name.indexOf('per') > -1 ? v => v.toFixed(3) : v => pct(v, v < 0.01 ? 3 : v < 0.05 ? 2 : 1);
   let h = '<div class="rowwrap"><div class="trow abrow" role="button" tabindex="0" aria-expanded="' + open + '" data-xrow="' + t.id + '"><span class="tname tnico"><span class="ge gico g-' + esc(testObj(t)) + '" aria-hidden="true">' + projIco({ t: t.name, obj: testObj(t) }) + '</span><b>' + esc(t.name) + '</b><span class="cap tmeta">' + teamTag(testTeam(t)) + '<span class="tloc">' + siteDot(testSite(t)) + ' · ' + esc(t.where) + '</span></span></span>' +
     abDay(t) + abSig(t) + abImp(t) + abRpu(t) + abCall(t) + '<span class="chev" aria-hidden="true">▾</span></div>';
-  if (open) {
-    const pv = t.p == null ? null : t.p, sigTxt = pv == null ? '' : pv < 0.05 ? '<b class="b">Significant.</b> Less than a 5% chance this difference is noise.' : '<b>Not significant yet.</b> The gap is small enough that it could be noise (p ' + pv.toFixed(2) + '; we want below 0.05).';
-    const mx = Math.max(t.cvr.a, t.cvr.b) * 1.15, bar = (lab, v, cls) => '<div class="vb"><span>' + lab + '</span><span class="vbt"><i class="' + cls + '" style="width:' + (v / mx * 100).toFixed(1) + '%"></i></span><b>' + pct(v, v < 0.01 ? 3 : 2) + '</b></div>';
-    const days = t.status === 'running' ? testDays(t) : Math.round((parse(t.end) - parse(t.start)) / DAY) + 1;
-    const ws = siteImp(t.cvr.rel, t.reach), rp = rpuOf(t), sigLine = pv == null ? '' : conf(t) >= 95 ? '✅ <b>' + conf(t) + '% confidence.</b> Clears the 95% bar, so we can call it.' : conf(t) >= 80 ? '⏳ <b>' + conf(t) + '% confidence.</b> Leaning real, but short of the 95% bar we use to call a winner.' : '⏳ <b>' + conf(t) + '% confidence.</b> No reliable sign of a difference yet; we call a winner at 95%.';
-    const R = abRd(t), cols = ABK.filter(k => (R.m || {})[k[0]]), lab = k => R.m[k[0]].name || k[1];
-    const ch = v => '<b class="' + (v >= 0 ? 'b' : 'w') + '">' + sgn(v, 1) + '</b>';
-    const sureOf = x => x.s === 'sig' ? '<span class="abst yes">Yes</span>' : x.s === 'early' ? '<span class="abst early">Too early</span>' : x.s === 'nb' ? '<span class="abst nb">Can\'t tell</span>' : '<span class="abst">' + (x.c ? 'Not yet · ' + x.c + '%' : 'Not yet') + '</span>';
-    const tbl = R.vrows
-      ? '<table class="abt"><thead><tr><th>Version</th>' + cols.map(k => '<th>' + esc(lab(k)) + '</th>').join('') + '</tr></thead><tbody>' + [['All versions together', Object.fromEntries(cols.map(k => [k[0], R.m[k[0]].v])), '']].concat(R.vrows.map(v => [v[0], v[1], (R.vdef || {})[v[0]] || ''])).map(v => '<tr><td><b>' + esc(v[0]) + '</b>' + (v[2] ? '<small>' + esc(v[2]) + '</small>' : '') + '</td>' + cols.map(k => { const x = v[1][k[0]]; return x == null ? '<td class="na">–</td>' : '<td>' + ch(x) + '</td>'; }).join('') + '</tr>').join('') + '</tbody></table>'
-      : '<table class="abt"><thead><tr><th>Metric</th><th>Control</th><th>Test</th><th>Change</th><th>Stat sig</th></tr></thead><tbody>' + cols.map(k => { const x = R.m[k[0]]; return '<tr><td><b>' + esc(lab(k)) + '</b></td><td>' + abVal(x, x.a) + '</td><td>' + abVal(x, x.b) + '</td><td>' + ch(x.v) + '</td><td>' + sureOf(x) + '</td></tr>'; }).join('') + '</tbody></table>';
-    h += '<div class="detail tdet2 abd"><div class="abgrid"><div class="abwhat"><span class="abwl">🧪 What we are testing</span><p>' + esc(t.hyp) + '</p>' + (R.flag ? '<p class="abflag">⚠️ ' + esc(R.flag) + '</p>' : '') + srcBtn('test:' + t.id) + '</div><div class="abcard">' + tbl + '</div></div></div>'; // two tiles; the Amplitude and Jira links live behind Sources (Mike, Oct 30)
-    // sources now sit behind the Sources link in the opened view, not in a box under it (Mike, Oct 30)
-  }
   return h + '</div>';
 }
 // One takeaway sentence for the tab: the running test that matters most, what is close to a call, and what was decided lately.
@@ -2024,9 +2024,8 @@ function testsHtml() {
   const head = ABHEAD;
   return '<section class="sview"><div class="vhead vhl">' + abHeadline() + '</div>' +
     '<div class="group trun"><div class="ghead"><h3>Running</h3>' + abFacts(EXPS.live, true) + '</div>' + head + '<div class="rows">' + EXPS.live.slice().sort((p, q) => parse(q.start) - parse(p.start)).map(testRow).join('') + '</div></div>' +
-    '<div class="group"><div class="ghead"><h3>Decided in the last three weeks</h3>' + abFacts(EXPS.done, false) + '</div>' + head + '<div class="rows">' + EXPS.done.slice().sort((p, q) => parse(q.end) - parse(p.end)).map(testRow).join('') + '</div></div>' +
-    (EXPS.soon && EXPS.soon.length ? soonHtml() : '') +
-    earlierHtml() + '</section>';
+    shippedHtml() +
+    (EXPS.soon && EXPS.soon.length ? soonHtml() : '') + '</section>';
 }
 
 /* ---------- Coming soon: what each product team is working on, what's next, and what moved ---------- */
@@ -3404,7 +3403,7 @@ document.addEventListener('click', ev => {
   const tk = t.closest('[data-tick]'); if (tk && TKSH && RT.db) { const [dt, k] = tk.dataset.tick.split(':'), cur = Object.assign({}, SHT[dt] || {}); cur['k' + k] = !cur['k' + k]; SHT[dt] = cur; renderKeep(); RT.db.collection('ticks').doc(dt).set(cur).catch(() => { TKSH = false; renderKeep(); }); return; }
   if (tk) { const k = tk.dataset.tick; TICKS.has(k) ? TICKS.delete(k) : TICKS.add(k); try { localStorage.setItem('pod.ticks', JSON.stringify([...TICKS])); } catch (e) { /* ignore */ } return renderKeep(); }
   const gt = t.closest('[data-goto]'); if (gt) { let [v, sel] = gt.dataset.goto.split('|'); if (v === 'standuplast') { v = 'standup'; state.su = 'last'; state.view = ''; } if (state.view !== v) { state.view = v; render(); } const el = document.querySelector(sel); if (el) { window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 110 }); el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 2600); } return; }
-  const jt = t.closest('[data-jt]'); if (jt) { const id = jt.dataset.jt; state.view = 'tests'; state.open.add('x' + id); render(); const el = document.querySelector('[data-xrow="' + CSS.escape(id) + '"]'); if (el) { window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 110 }); el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 2600); } return; }
+  const jt = t.closest('[data-jt]'); if (jt) { if (state.view !== 'tests') { state.view = 'tests'; render(); } return testDetailModal(jt.dataset.jt); }
   const bw = t.closest('[data-basewhy]'); if (bw) return baseModal(bw.dataset.basewhy);
   const js = t.closest('[data-js]'); if (js) { closeModal(); state.view = 'soon'; state.fteam = js.dataset.js; render(); window.scrollTo({ top: 0 }); const el = document.querySelector('.tmpick [aria-selected="true"]'); if (el) { el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 2600); } return; }
   const rd = t.closest('[data-rtdel]'); if (rd) { rtSave(myItems().filter(x => String(x.at) !== rd.dataset.rtdel)); return; }
@@ -3432,7 +3431,7 @@ document.addEventListener('click', ev => {
   if (t.closest('#aboutbtn')) { const m = $('#amenu'); m.hidden = !m.hidden; $('#aboutbtn').setAttribute('aria-expanded', String(!m.hidden)); return; }
   if (!t.closest('#amenu') && $('#amenu')) $('#amenu').hidden = true;
   const wt = t.closest('[data-watch]'); if (wt) { const [wb, wk] = wt.dataset.watch.split('|'); state.view = 'daily'; state.tab = wb; if (wk !== 'pay') state.open.add(wk); render(); const el = wk === 'pay' ? document.getElementById('g-pay') : document.querySelector('[data-row="' + CSS.escape(wk) + '"]'); if (el) { window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 110 }); el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 2600); } return; }
-  const xr = t.closest('[data-xrow]'); if (xr) { const k = 'x' + xr.dataset.xrow; state.open.has(k) ? state.open.delete(k) : state.open.add(k); return renderKeep(); }
+  const xr = t.closest('[data-xrow]'); if (xr) return testDetailModal(xr.dataset.xrow);
   const why = t.closest('[data-why]'); if (why) { ev.stopPropagation(); return whyModal(why.dataset.why); }
   const mode = t.closest('[data-cmpmode]'); if (mode) { state.cmpMode = mode.dataset.cmpmode; const [cb, ck] = state.cmp.split('|'); const m = findMetric(cb, state.cmp.slice(cb.length + 1)); if (m) compareModal(m); return; }
   const pgb = t.closest('[data-pgeo]'); if (pgb) { const [k, g] = pgb.dataset.pgeo.split('|'); state.pgeo = state.pgeo || {}; state.pgeo[k] = g; return renderKeep(); }

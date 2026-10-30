@@ -3642,3 +3642,13 @@ a.trow.erow { color: inherit; text-decoration: none; }
 .erow .chev, .strow .chev { transform: none !important; }
 @media (min-width: 761px) and (max-width: 1240px) { :root:not(#z):not(#y) .ertc, :root:not(#z):not(#y) .erow { grid-template-columns: minmax(160px, 1fr) 80px 120px minmax(150px, 1.4fr) 14px; gap: 0 10px; } :root:not(#z):not(#y) .stc, :root:not(#z):not(#y) .strow { grid-template-columns: minmax(160px, 1fr) 100px 140px minmax(150px, 1.4fr) 14px; gap: 0 10px; } }
 @media (max-width: 760px) { :root:not(#z):not(#y) .erow, :root:not(#z):not(#y) .strow { grid-template-columns: 1fr; gap: 6px; } .erow .chev, .strow .chev { display: none; } }
+
+/* Opened test as an overlay (design agency, Oct 30) */
+.abwhat2 { background: var(--sunk); border-radius: 12px; padding: 18px 20px; margin: 14px 0 8px; }
+.abwhat2 .ph { margin: 0 0 6px; font-size: 13px; } .abwhat2 p { margin: 0; font-size: 14.5px; line-height: 1.5; } .abwhat2 .abflag { margin-top: 10px; font-size: 13px; color: var(--muted); }
+.mbox .abt { margin-top: 8px; } .mbox .abt th:first-child, .mbox .abt td:first-child { padding-left: 4px; } .mbox .abt td:last-child, .mbox .abt th:last-child { padding-right: 4px; }
+.abt .chn { font-weight: 500; } .abt .chn.main { font-weight: 800; } .abt .chn.b { color: var(--good); } .abt .chn.w { color: var(--bad); }
+.abfoot2 { margin-top: 14px; } .mbox .srcbtn { border-left: 0 !important; padding-left: 0 !important; margin-left: 0 !important; }
+.hlink[data-jt] { cursor: pointer; }
+
+a.trow.abrow { color: inherit; text-decoration: none; }
