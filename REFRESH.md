@@ -25,37 +25,25 @@ Always edit the existing file and keep its shape: open the current dataset, chan
 - Every roadmap item in `COMING` should have a matching entry in `SRCS` with at least one origin link. `npm run check` lists the ones that do not.
 - Keep the source of every claim (Jira key, Slack thread link, sheet row) so it can be traced.
 
-## One-time setup (Mike)
-1. Install GitHub Desktop and sign in with your GitHub account (it must have Write access to this repo).
-2. In GitHub Desktop: File, Clone repository, pick this repo. Remember where the folder is.
-3. Open that folder in Claude (Claude Code in the desktop app, or whichever Claude app Jay has set up for you), with your usual connectors on (Slack, Granola, Jira, the Google sheet, Amplitude), so your own access does the gathering.
 
 ## Each refresh
 1. In GitHub Desktop, click Fetch origin, then Pull if it offers one, so you start from the latest version.
 2. Paste the prompt below into Claude with the folder open.
 3. When Claude is done, read its summary. It should say which files changed and the check result.
 4. In GitHub Desktop you will see the changed files. Type a short message (for example "Refresh Nov 4"), click Commit to master, then Push origin. The site updates in about a minute.
-5. Open the site and look at it. If you pushed a bad update, see "If something looks wrong".
+5. Open the site and look at it. You will be asked to sign in with Okta first. If you pushed a bad update, see "If something looks wrong".
 
 ## Prompt for Claude (paste with the repo folder open)
 > Read REFRESH.md. Update the data files in `data/` from the sources I give you, keeping every field name and structure exactly as it is now. Only change files inside `data/`: do not touch any other file. Update the as-of dates and header comments. Keep to the shareable-only rule. Then run `npm run check`, fix any FAIL, and tell me in plain language what changed, which items still have no source link, and whether the check passed. Do not commit or push if anything fails, fix everything before push command.
 
-## Branch rules (read before committing)
+If Node is not installed on your computer, `npm run check` will not run. Tell Claude to skip it: GitHub runs the same check after you push and emails you if it fails.
 
-- Always work on `master`. Before any commit, run `git branch --show-current`
-  and confirm it prints `master`. If it doesn't, stop and tell the user.
+## Branch rules (read before committing)
+- Always work on `master`. Before any commit, run `git branch --show-current` and confirm it prints `master`. If it doesn't, stop and tell the user.
 - Run `git pull origin master` before making changes, so you start from the latest version.
 - Never check out, commit to, merge, or push to the `okta-auth` branch.
 - Never force-push, and never rewrite history.
-- Do not edit `middleware.js`, `lib/auth.js`, or anything under `api/auth/`.
-  Those files are managed separately.
-
-If Node is not installed on your computer, `npm run check` will not run. Tell Claude to skip it: GitHub runs the same check after you push and emails you if it fails.
-
-## Rules for the content
-- Shareable only: no people-performance, compensation, HR or budget items.
-- Every roadmap item in `COMING` should have a matching entry in `SRCS` with at least one origin link. `npm run check` lists the ones that do not.
-- Keep the source of every claim (Jira key, Slack thread link, sheet row) so it can be traced.
+- Do not edit `middleware.js`, `lib/auth.js`, or anything under `api/auth/`. Those files are managed separately.
 
 ## If something looks wrong
 - **GitHub emailed you "Check dashboard data failed":** the last update has a problem. Ask Claude to read the failed check and fix it, then commit and push again. The site may be showing the broken version until you do.
