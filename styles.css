@@ -3094,7 +3094,7 @@ b.nrin { color: var(--ctl); } b.nrhi { color: var(--good); } b.nrlo { color: var
 .ngrp { padding: 0 !important; gap: 0 !important; overflow: hidden; }
 #tabs button { padding-block: 9px !important; border-radius: 9px; }
 #tabs button[aria-selected="true"] { color: var(--ink); font-weight: 700; }
-#navpill { border-radius: 9px !important; background: color-mix(in srgb, var(--c, var(--accent)) 17%, transparent) !important; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--c, var(--accent)) 34%, transparent), inset 0 -2px 0 color-mix(in srgb, var(--c, var(--accent)) 70%, transparent) !important; transition: transform .4s cubic-bezier(.4, 1.15, .5, 1), width .4s cubic-bezier(.4, 1.15, .5, 1), height .2s, opacity .2s, background-color .3s !important; }
+#navpill { border-radius: 9px !important; background: color-mix(in srgb, var(--c, var(--accent)) 17%, transparent) !important; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--c, var(--accent)) 34%, transparent), inset 0 -2px 0 color-mix(in srgb, var(--c, var(--accent)) 70%, transparent) !important; transition: transform .38s cubic-bezier(.4, 1.1, .5, 1), opacity .2s, background-color .3s !important; will-change: transform; }
 /* ===== end NAV fill ===== */
 /* No orphan words on a headline's last line (Mike, Oct 27). */
 :root .wrap .sulead, :root .wrap .rmlead { text-wrap: pretty !important; }
@@ -3546,7 +3546,7 @@ a.pvwhere { color: var(--ctl); text-decoration: underline; text-underline-offset
 .ghead .gsrc { text-align: right; } .ghead .gsrc .tipsrcbox { text-align: left; max-width: 520px; margin-top: 6px; font-size: 12.5px; }
 .ghead .gsrc .srcbtn { padding: 0; border: 0; background: none; color: var(--ctl); font: 600 12.5px var(--body); cursor: pointer; }
 /* A/B tests: one column per exec question (Sam, standup Oct 30) */
-:root:not(#z):not(#y) .abcols, :root:not(#z):not(#y) .abrow { grid-template-columns: minmax(190px, 1fr) 76px 128px 128px 116px minmax(190px, 1.4fr) 18px; gap: 0 16px; }
+:root:not(#z):not(#y) .abcols, :root:not(#z):not(#y) .abrow { grid-template-columns: minmax(260px, 1.9fr) 76px 124px 124px 112px minmax(130px, .6fr) 18px; gap: 0 14px; }
 .abm { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; border-bottom: 0 !important; }
 .abm.na { color: var(--faint); }
 .abv { font: 700 15.5px var(--body); color: var(--ink); white-space: nowrap; }
@@ -3566,7 +3566,7 @@ a.pvwhere { color: var(--ctl); text-decoration: underline; text-underline-offset
 .abans > div { display: flex; flex-direction: column; gap: 2px; } .abans .lbl { font-size: 12px; color: var(--muted); } .abans b { font-size: 14px; }
 .abvr { margin-bottom: 14px; overflow-x: auto; } .abvr table { border-collapse: collapse; font-size: 13.5px; } .abvr th, .abvr td { padding: 5px 14px 5px 0; text-align: left; white-space: nowrap; }
 .abvr th { font-size: 12px; color: var(--muted); font-weight: 600; } .abvr td.b { color: var(--good); font-weight: 700; } .abvr td.w { color: var(--bad); font-weight: 700; } .abvr td.ns, .abvr td.na { color: var(--muted); }
-@media (min-width: 761px) and (max-width: 1240px) { :root:not(#z):not(#y) .abcols, :root:not(#z):not(#y) .abrow { grid-template-columns: minmax(150px, 1fr) 60px 108px 100px 96px minmax(120px, 1.2fr) 14px; gap: 0 10px; } .abv { font-size: 14px; } }
+@media (min-width: 761px) and (max-width: 1240px) { :root:not(#z):not(#y) .abcols, :root:not(#z):not(#y) .abrow { grid-template-columns: minmax(170px, 1.5fr) 60px 100px 92px 88px minmax(110px, .7fr) 14px; gap: 0 10px; } .abv { font-size: 14px; } }
 @media (max-width: 760px) { :root:not(#z):not(#y) .abrow { grid-template-columns: repeat(2, 1fr); gap: 10px 12px; } .abrow .tname, .abrow .abcall { grid-column: 1 / -1; } .abrow .chev { display: none; } }
 :root:not(#z):not(#y) .hint.abm { display: inline-flex !important; flex-direction: column; align-items: flex-start; gap: 2px; border-bottom: 0 !important; text-decoration: none !important; justify-self: start; }
 :root:not(#z):not(#y) .hint.abm .abs { display: block; }
@@ -3596,3 +3596,25 @@ a.pvwhere { color: var(--ctl); text-decoration: underline; text-underline-offset
 .abd .abvr th { background: var(--sunk); font-size: 12px; color: var(--muted); font-weight: 600; } .abd .abvr td:first-child { font-weight: 600; }
 .abd .abvd { padding: 8px 14px 10px; margin: 0; border-top: 1px solid var(--line); }
 .abd .abfoot { margin: 0; }
+
+/* One opened card, device header with the comparison on the right, Bot Squad cards (design agency, Oct 30) */
+.rowwrap .detail.abd { padding: 4px 14px 14px !important; background: transparent !important; border-top: 0 !important; display: block !important; }
+.abcard { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px 8px; }
+.abtop { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 10px; }
+.abhy { flex: 1; margin: 0; padding: 9px 14px; border-radius: 9px; background: var(--sunk); font-size: 14px; line-height: 1.45; }
+.ablinks { display: flex; align-items: center; gap: 12px; white-space: nowrap; padding-top: 8px; }
+.abflag { margin: 0 0 8px; font-size: 13px; color: var(--muted); }
+.abt { width: 100%; border-collapse: collapse; font-size: 14px; }
+.abt th { text-align: left; font-size: 11.5px; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); font-weight: 700; padding: 6px 12px 6px 0; }
+.abt td { padding: 9px 12px 9px 0; border-top: 1px solid var(--line); vertical-align: top; }
+.abt td small { display: block; margin-top: 2px; font-size: 12px; font-weight: 400; color: var(--muted); max-width: 46ch; }
+.abt td b.b { color: var(--good); } .abt td b.w { color: var(--bad); } .abt td.na { color: var(--faint); }
+.abcall { display: inline-flex; }
+.dtop { display: flex; gap: 24px; align-items: flex-start; } .dtop .dtl { flex: 1; min-width: 0; } .dtop .sibs { flex: 0 0 340px; margin: 0; }
+@media (max-width: 900px) { .dtop { flex-direction: column; } .dtop .sibs { flex-basis: auto; width: 100%; } }
+.botlinks { display: flex; gap: 16px; flex-wrap: wrap; }
+.bothead { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.say4 .botcard2 { display: block; min-width: 0; text-align: left; } .botsay .botcard2 .scard { height: 100%; cursor: default; }
+.botsay .botpts { margin: 8px 14px 14px; padding-left: 18px; font-size: 13.5px; color: var(--ink-2); display: grid; gap: 4px; }
+.abt th, .abt td { text-align: left !important; }
+.abt td:first-child { min-width: 140px; }

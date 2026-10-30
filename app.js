@@ -1517,7 +1517,7 @@ function trHeadline() {
   const L = (typeof SLACK !== 'undefined' ? SLACK : []).slice(0, 2), tn = (s, k) => hint(esc(/^(TeePublic|Redbubble|Dashery|Google|Amazon|Apple|USA|Black|Meta)\b/.test(s.title) || !k ? s.title : s.title.charAt(0).toLowerCase() + s.title.slice(1)), 'verd n2 hlink" data-say="' + SLACK.indexOf(s), '<b>' + esc(s.title) + '</b><br>' + esc(s.tldr || sents(s.body)[0] || '') + '<span class="segmore">Click for the full read →</span>');
   const csAll = typeof CS !== 'undefined' && CS.tp && CS.rb ? ['rb', 'tp'].flatMap(b => (CS[b].topics || []).map(t => Object.assign({ b }, t))) : [];
   const csTop = csAll.sort((a, z) => (a.level === 'high' ? 0 : 1) - (z.level === 'high' ? 0 : 1))[0];
-  const h1 = L.length ? tn(L[0], false) + '.' : 'Nothing unusual in Slack lately.';
+  const botFirst = L.length && /bot-squad/.test(L[0].channel || ''), h1 = L.length ? (botFirst ? 'Bot Squad update: ' : '') + tn(L[0], botFirst) + '.' : 'Nothing unusual in Slack lately.';
   const hot = ((typeof TRENDS !== 'undefined' && TRENDS.tags) || []).filter(t => t[2] >= 2).sort((a, z) => z[2] - a[2]).slice(0, 1), lbl = t => t[0].split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ').replace(/^Wutang/, 'Wu-Tang');
   const sub = hot.length ? andJoin(hot.map(t => hint(esc(lbl(t)), 'verd b', '<b>' + esc(lbl(t)) + '</b><div class="gkv"><span class="gk">Orders, 24 hours</span><span class="gv">' + t[1] + '</span><span class="gk">vs its usual share</span><span class="gv">' + t[2].toFixed(1) + '×</span></div>') + ' designs are selling ' + t[2].toFixed(1) + '× usual')) + '.' : '';
   // Tags, design agency Oct 27: what the selling data covers (as a kind of day, not a date), where the talk comes from, and the customer service read. Nothing the sentence already says.
@@ -1695,10 +1695,10 @@ function detailHtml(m) {
   const GN = { all: 'All', US: 'USA', GB: 'UK', AU: 'Australia', CA: 'Canada', DE: 'Germany', FR: 'France', NZ: 'New Zealand' }, pg = (state.pgeo || {})[m.key] || 'all';
   const geoTog = m.pgeo && Object.keys(m.pgeo).length ? '<div class="segs pgeo" role="group" aria-label="Country">' + ['all'].concat(Object.keys(m.pgeo)).map(g => '<button type="button" data-pgeo="' + esc(m.key + '|' + g) + '" aria-pressed="' + (pg === g) + '">' + (GN[g] || g) + '</button>').join('') + '</div>' : '';
   const gs = pg !== 'all' && m.pgeo && m.pgeo[pg] ? (m.pgeo[pg].s || []).filter(x => x != null).slice(-14).sort((x, y) => x - y) : [], thin = gs.length && gs[Math.floor(gs.length / 2)] < 100;
-  return '<div class="dhead"><div class="dtitle"><h4>' + em(m.label) + ' ' + esc(m.label) + ' <span>' + BR[m.b].name + (pg !== 'all' ? ', ' + (GN[pg] || pg) : '') + ', last 90 days</span></h4><p class="dsub">' + esc(defOf(m)) + (thin ? ' <b>Under 100 product-page viewers a day here, so daily swings are mostly noise.</b>' : '') + '</p></div><div class="dbtns">' + geoTog +
+  return '<div class="dtop"><div class="dtl"><div class="dhead"><div class="dtitle"><h4>' + em(m.label) + ' ' + esc(m.label) + ' <span>' + BR[m.b].name + (pg !== 'all' ? ', ' + (GN[pg] || pg) : '') + ', last 90 days</span></h4><p class="dsub">' + esc(defOf(m)) + (thin ? ' <b>Under 100 product-page viewers a day here, so daily swings are mostly noise.</b>' : '') + '</p></div><div class="dbtns">' + geoTog +
     (m.sess && !m.isSess ? '<button type="button" class="swtog" role="switch" data-sesstog="' + esc(m.key) + '" aria-checked="' + sessOn + '"><span class="trk"><span class="knb"></span></span>Sessions</button>' : '') +
-    '<button type="button" class="actbtn" data-cmp="' + esc(m.key) + '" data-from="' + m.b + '">👀 Compare with ' + ob + '</button>' + detailPrior(m) + '</div></div>' + leg +
-    '<div class="chart" data-chart="' + esc(m.key) + '"></div>' + botHtml(m) + sibHtml(m) + baselineLine(m) + '<div class="tbox">' + metricTable(m) + '</div>';
+    '<button type="button" class="actbtn" data-cmp="' + esc(m.key) + '" data-from="' + m.b + '">👀 Compare with ' + ob + '</button>' + detailPrior(m) + '</div></div></div>' + sibHtml(m) + '</div>' + leg +
+    '<div class="chart" data-chart="' + esc(m.key) + '"></div>' + '<div class="tbox">' + metricTable(m) + '</div>';
 }
 /* table cells are only red or green: better or worse than usual */
 const cellCls = j => j ? j.cls : '';
@@ -1871,7 +1871,7 @@ function trendingHtml() {
     // Topics go straight under the title (Mike, Oct 22): four cards, then a one-time "Show N more".
     (() => { const L = SLACK, more = L.length - 4; return '<section class="bare tsay"><div class="ghead"><div class="gt"><h3>💬 What people are saying</h3><p class="gsub">The last 48 hours.</p></div></div>' + (L.length ? '' : '<p class="cap">Quiet: nothing new in the last 48 hours.</p>') + sayList(state.sayAll ? L : L.slice(0, 4), state.sayAll ? L.length : 4) + (more > 0 && !state.sayAll ? '<button type="button" class="linkbtn saymore" data-saymore="1">Show ' + more + ' more</button>' : '') + '</section>'; })() +
     // Bot Squad updates moved here from the CVR pages, under What people are saying, both sites (Mike, Oct 27).
-    '<section class="botsec" id="g-bots"><div class="bothead"><h2>🤖 Bot Squad updates</h2></div>' + ['rb', 'tp'].map(b => '<div class="botsite"><div class="botsh"><span class="botsn">' + siteDot(b === 'rb' ? 'RB' : 'TP') + '</span>' + (botNotesFor(b).length ? '<button type="button" class="linkbtn bmore" data-botwatch="' + b + '">All ' + BR[b].name + ' bot notes →</button>' : '') + '</div>' + botRow(b) + '</div>').join('') + '</section>' +
+    '<section class="botsec" id="g-bots"><div class="bothead"><h2>🤖 Bot Squad updates</h2><span class="botlinks">' + ['rb', 'tp'].map(b => botNotesFor(b).length ? '<button type="button" class="linkbtn bmore" data-botwatch="' + b + '">All ' + BR[b].name + ' bot notes →</button>' : '').join('') + '</span></div><div class="say4 botsay">' + ['rb', 'tp'].map(b => botRow(b, true)).join('') + '</div></section>' +
     // Customer service lives here once, for both sites (Mike, Oct 24), instead of on each CVR page.
     (typeof CS !== 'undefined' && CS.tp && CS.rb ? '<section class="bare tcs"><div class="ghead"><div class="gt"><h3>🎧 What customer service is seeing</h3><p class="gsub">Repeat customer complaints from the customer service channels, ' + esc(String(CS.window || '').replace(/^Customer service channels,\s*/i, '')) + '.</p></div></div>' + csHtml() + '</section>' : '') +
     '<div class="sellrow">' + panel('🏷️', 'What is selling', 'Share of TeePublic orders by category in the last 24 hours, and the topics moving fastest.', sellingHtml(), 'p-sell') +
@@ -1944,7 +1944,7 @@ const abSig = t => { const r = abRd(t), g = (r.m || {})[r.goal], nm = (g && g.na
 const abImp = t => { const v = siteImp(t.cvr.rel, t.reach); return hint('<span class="abv big ' + (v >= 0 ? 'b' : 'w') + '">' + sp(v, 1) + '</span><small class="abs">' + Math.round(t.reach * 100) + '% reach</small>', 'abm', 'In the test group: ' + pct(t.cvr.a, t.cvr.a < 0.1 ? 2 : 1) + ' → ' + pct(t.cvr.b, t.cvr.b < 0.1 ? 2 : 1) + ' CVR (' + sgn(t.cvr.rel, 1) + ').'); };
 const abRpu = t => { const x = (abRd(t).m || {}).rpv; if (!x) return '<span class="abm na" title="Not measured on this test">–</span>'; return hint('<span class="abv big ' + (x.v >= 0 ? 'b' : 'w') + '">' + sgn(x.v, 1) + '</span><small class="abs">in test group</small>', 'abm', abVal(x, x.a) + ' → ' + abVal(x, x.b) + ' per user.'); };
 const abDay = t => t.status === 'running' ? '<span class="abday"><b>Day ' + testDays(t) + '</b><small>since ' + short(t.start) + '</small></span>' : '<span class="abday"><b>' + (Math.round((parse(t.end) - parse(t.start)) / DAY) + 1) + ' days</b><small>ended ' + short(t.end) + '</small></span>';
-const abCall = t => { const r = abRd(t); return '<span class="abcall"><span class="abv2 v-' + r.verdict[0] + '">' + esc(r.verdict[1]) + '</span>' + (r.next && t.status === 'running' ? '<small>' + esc(r.next.split('. ')[0].replace(/\.$/, '')) + '</small>' : '') + '</span>'; };
+const abCall = t => { const r = abRd(t), pill = '<span class="abv2 v-' + r.verdict[0] + '">' + esc(r.verdict[1]) + '</span>'; return r.next && t.status === 'running' ? hint(pill, 'abcall', esc(r.next)) : '<span class="abcall">' + pill + '</span>'; };
 const ABHEAD = '<div class="tcols abcols"><span>Test</span><span>Running</span>' + hint('Stat sig ⓘ', 'soft', '<b>Stat sig</b><br>Are we 95% sure the main metric moved, not noise?') + hint('Sitewide CVR impact ⓘ', 'soft', '<b>Sitewide CVR impact</b><br>The test group\'s CVR change, scaled by the share of orders it reaches: what it would do to the whole site.') + hint('Revenue per user ⓘ', 'soft', '<b>Revenue per user</b><br>Revenue per user in the test group vs control.') + '<span>The call</span><span></span></div>';
 function testRow(t) {
   const site = siteImp(t.cvr.rel, t.reach), open = state.open.has('x' + t.id), r = Math.round(t.reach * 100);
@@ -1959,11 +1959,12 @@ function testRow(t) {
     const days = t.status === 'running' ? testDays(t) : Math.round((parse(t.end) - parse(t.start)) / DAY) + 1;
     const ws = siteImp(t.cvr.rel, t.reach), rp = rpuOf(t), sigLine = pv == null ? '' : conf(t) >= 95 ? '✅ <b>' + conf(t) + '% confidence.</b> Clears the 95% bar, so we can call it.' : conf(t) >= 80 ? '⏳ <b>' + conf(t) + '% confidence.</b> Leaning real, but short of the 95% bar we use to call a winner.' : '⏳ <b>' + conf(t) + '% confidence.</b> No reliable sign of a difference yet; we call a winner at 95%.';
     const R = abRd(t), cols = ABK.filter(k => (R.m || {})[k[0]]), lab = k => R.m[k[0]].name || k[1];
-    const all = Object.assign({}, ...cols.map(k => ({ [k[0]]: R.m[k[0]].v }))), rows = R.vrows ? [['All versions together', all]].concat(R.vrows) : [['Test vs no change', all]];
-    const tcls = (k, v) => R.m[k] && R.m[k].s === 'sig' ? (v >= 0 ? 'b' : 'w') : 'ns';
-    const vr = '<div class="abvr"><h4 class="ph">🔀 ' + (R.vrows ? 'Each version vs no change' : 'Test vs no change') + '</h4><table><thead><tr><th>' + (R.vrows ? 'Version' : '') + '</th>' + cols.map(k => '<th>' + esc(lab(k)) + '</th>').join('') + '</tr></thead><tbody>' + rows.map(v => '<tr><td>' + esc(v[0]) + '</td>' + cols.map(k => { const x = v[1][k[0]]; return x == null ? '<td class="na">–</td>' : '<td class="' + tcls(k[0], x) + '">' + sgn(x, 1) + (R.vrows && v[0] !== 'All versions together' ? '' : '<small>' + abVal(R.m[k[0]], R.m[k[0]].a) + ' → ' + abVal(R.m[k[0]], R.m[k[0]].b) + '</small>') + '</td>'; }).join('') + '</tr>').join('') + '</tbody></table>' + (R.vdef && R.vrows ? '<ul class="abvd">' + R.vrows.filter(v => R.vdef[v[0]]).map(v => '<li><b>' + esc(v[0]) + ':</b> ' + esc(R.vdef[v[0]]) + '</li>').join('') + '</ul>' : '') + '</div>';
-    h += '<div class="detail tdet2 abd"><div class="abhyp"><h4 class="ph">🧪 What we are testing</h4><p>' + esc(t.hyp) + '</p><p class="cap">' + days + ' days so far · owners ' + esc(t.owners) + '</p>' + (R.flag ? '<p class="abflag">⚠️ <b>Read with care:</b> ' + esc(R.flag) + '</p>' : '') + '</div>' + vr +
-      '<div class="abfoot"><a class="srclink" href="' + t.url + '" target="_blank" rel="noopener">Open in Amplitude ↗</a> ' + srcBtn('test:' + t.id) + '</div></div>'; // hypothesis first, every metric vs control, sources behind a link (Mike, Oct 30)
+    const ch = v => '<b class="' + (v >= 0 ? 'b' : 'w') + '">' + sgn(v, 1) + '</b>';
+    const sureOf = x => x.s === 'sig' ? '<span class="abst yes">Yes</span>' : x.s === 'early' ? '<span class="abst early">Too early</span>' : x.s === 'nb' ? '<span class="abst nb">Can\'t tell</span>' : '<span class="abst">' + (x.c ? 'Not yet · ' + x.c + '%' : 'Not yet') + '</span>';
+    const tbl = R.vrows
+      ? '<table class="abt"><thead><tr><th>Version</th>' + cols.map(k => '<th>' + esc(lab(k)) + '</th>').join('') + '</tr></thead><tbody>' + [['All versions together', Object.fromEntries(cols.map(k => [k[0], R.m[k[0]].v])), '']].concat(R.vrows.map(v => [v[0], v[1], (R.vdef || {})[v[0]] || ''])).map(v => '<tr><td><b>' + esc(v[0]) + '</b>' + (v[2] ? '<small>' + esc(v[2]) + '</small>' : '') + '</td>' + cols.map(k => { const x = v[1][k[0]]; return x == null ? '<td class="na">–</td>' : '<td>' + ch(x) + '</td>'; }).join('') + '</tr>').join('') + '</tbody></table>'
+      : '<table class="abt"><thead><tr><th>Metric</th><th>Control</th><th>Test</th><th>Change</th><th>Stat sig</th></tr></thead><tbody>' + cols.map(k => { const x = R.m[k[0]]; return '<tr><td><b>' + esc(lab(k)) + '</b></td><td>' + abVal(x, x.a) + '</td><td>' + abVal(x, x.b) + '</td><td>' + ch(x.v) + '</td><td>' + sureOf(x) + '</td></tr>'; }).join('') + '</tbody></table>';
+    h += '<div class="detail tdet2 abd"><div class="abcard"><div class="abtop"><p class="abhy"><b>🧪 What we are testing:</b> ' + esc(t.hyp) + '</p><span class="ablinks"><a class="srclink" href="' + t.url + '" target="_blank" rel="noopener">Open in Amplitude ↗</a>' + srcBtn('test:' + t.id) + '</span></div>' + (R.flag ? '<p class="abflag">⚠️ <b>Read with care:</b> ' + esc(R.flag) + '</p>' : '') + tbl + '</div></div>'; 
     // sources now sit behind the Sources link in the opened view, not in a box under it (Mike, Oct 30)
   }
   return h + '</div>';
@@ -3141,8 +3142,9 @@ function movePill() {
   let p = document.getElementById('navpill'), fresh = false; if (!p) { p = document.createElement('span'); p.id = 'navpill'; p.setAttribute('aria-hidden', 'true'); p.style.transition = 'none'; wrap.appendChild(p); fresh = true; }
   if (!sel) { p.style.opacity = '0'; return; }
   const w = wrap.getBoundingClientRect(), r = sel.getBoundingClientRect();
-  p.style.opacity = '1'; p.style.width = r.width + 'px'; p.style.height = r.height + 'px';
-  p.style.transform = 'translate(' + (r.left - w.left) + 'px,' + (r.top - w.top) + 'px)';
+  if (!p._bw) { p._bw = r.width; p._bh = r.height; p.style.width = r.width + 'px'; p.style.height = r.height + 'px'; p.style.transformOrigin = '0 0'; p.style.willChange = 'transform'; }
+  p.style.opacity = '1';
+  p.style.transform = 'translate(' + (r.left - w.left) + 'px,' + (r.top - w.top) + 'px) scale(' + (r.width / p._bw) + ',' + (r.height / p._bh) + ')';
   p.style.setProperty('--c', getComputedStyle(sel).getPropertyValue('--c') || 'var(--accent)');
   if (fresh) { void p.offsetWidth; p.style.transition = ''; }
 }
@@ -3205,7 +3207,7 @@ const botTipOf = (e, x) => { if (!e) return x ? '<b>' + esc(x.m.label) + '</b><b
   const aff = [...new Set((e.metrics || []).map(k => k === 'overall' ? 'Overall CVR' : k.split('/').pop()))].slice(0, 5).join(', ');
   const kv = [['When', short(e.date) + (e.end ? ' to ' + short(e.end) : ' onward')], ['Site', e.site === 'both' ? 'Both sites' : SITEN(String(e.site || '').toUpperCase())], aff ? ['Affects', aff] : null].filter(Boolean);
   return '<div class="gtipc"><b class="gtt">' + (e.emoji || '🤖') + ' ' + esc(e.short || e.title) + '</b><div class="gkv">' + kv.map(r => '<span class="gk">' + r[0] + '</span><span class="gv">' + esc(r[1]) + '</span>').join('') + '</div>' + (e.link ? '<a class="segmore" href="' + esc(e.link) + '" target="_blank" rel="noopener">Open the Bot Squad thread ↗</a>' : '') + '</div>'; };
-function botRow(b) {
+function botRow(b, flat) {
   // A short bot report in plain words (Mike, Oct 26): what looks skewed today, then what the Bot Squad found or changed this week.
   // Only the key words hover (each with a small tip); the full notes sit behind "More info".
   const d = state.day, set = BOTSET[b] || [], upto = d === D.asOf ? addDays(d, 2) : d, comps = compsFor(b, d);
@@ -3233,6 +3235,9 @@ function botRow(b) {
   if (!lines.length) lines.push({ e: '✅', t: 'All clear', pts: ['Nothing bot-related flagged this week.'], k: 'ok', tip: '<b>All clear</b><br>No Bot Squad findings for this site in the last week, and no segment looks skewed today.' });
   const more = botNotesFor(b).length ? ' <button type="button" class="linkbtn bmore" data-botwatch="' + b + '">More info →</button>' : '';
   // One or two sentences, not bullets (Mike, Oct 26).
+  const tn = l => l.k === 'now' ? 'bad' : l.k === 'ok' ? 'good' : 'warn';
+  const card = l => hint('<article class="scard ' + tn(l) + '"><div class="schd"><h4><span class="scic" aria-hidden="true">' + l.e + '</span><span>' + l.t + '</span></h4><span class="sctags"><span class="stat-chip ' + tn(l) + '">' + (l.k === 'now' ? 'Handling' : l.k === 'ok' ? 'All clear' : 'Update') + '</span><span class="scmeta">' + BR[b].name + '</span></span></div><ul class="botpts">' + l.pts.slice(0, 2).map(p => '<li>' + p + '</li>').join('') + '</ul></article>', 'botcard2' + (l.k ? ' ' + l.k : ''), l.tip || '');
+  if (flat) return lines.slice(0, 3).map(card).join('');
   return '<div class="botgrid">' + lines.slice(0, 3).map(l => hint((l.k === 'now' ? '<b class="botalert" aria-label="Needs attention">!</b>' : '') + '<span class="bote" aria-hidden="true">' + l.e + '</span><span class="botbody"><b class="bott">' + l.t + '</b><ul class="botpts">' + l.pts.map(p => '<li>' + p + '</li>').join('') + '</ul></span>', 'botcard' + (l.k ? ' ' + l.k : ''), l.tip || '')).join('') + '</div>';
 }
 function botWatchModal(b) {
