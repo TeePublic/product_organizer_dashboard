@@ -25,6 +25,11 @@ For data, edit the existing file and keep its shape: change values, keep every f
 - Shareable only: no people-performance, compensation, HR or budget items.
 - Every roadmap item in `COMING` should have a matching entry in `SRCS` with at least one origin link. `npm run check` lists the ones that do not.
 - Keep the source of every claim (Jira key, Slack thread link, sheet row) so it can be traced.
+- **The Active Work tab decides what is on the roadmap** (Product Managers, Oct 30). Slack and Jira add the latest update to a project that is already on the sheet; they never create a project, and a project that is only in a Slack thread does not go on the roadmap.
+- **Titles are verbatim from the sheet** (tidied for spaces only), and the **Team column on the sheet decides the team**. Do not rephrase a title or infer a team.
+- **Goals come from the sheet only.** Dashery has not broken its goal into OKRs, so Dashery projects show no goal.
+- **A result appears only after the Product Manager has posted it.** A test going live is not a result; do not put it on Recent impact.
+- **TeePublic tests come from the Split dashboard** (teepublic.com/manage/split, sign in through the browser pane): only tests launched in the last 30 days that have completed conversions. The date beside the experiment name is the launch date.
 
 
 ## Tips to keep token use low

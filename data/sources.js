@@ -1384,40 +1384,6 @@ const SRCS = {
    "what": "Brand: Dashery"
   }
  },
- "TikTok Shop": {
-  "origin": {
-   "kind": "slack",
-   "where": "#ask-deap-dashery",
-   "who": "Grace Russell",
-   "date": "2025-09-24",
-   "url": "https://grid-articore.enterprise.slack.com/archives/C08CYHX6PL2/p1758724057479519?thread_ts=1758689752.610379&cid=C08CYHX6PL2",
-   "what": "TikTok Shop came up in backlog review as a creator ask, not prioritized; asked the team to log each creator request"
-  },
-  "pm": {
-   "kind": "slack",
-   "where": "#cfx-dashery-marketing",
-   "who": "Grace Russell",
-   "date": "2026-09-15",
-   "url": "https://grid-articore.enterprise.slack.com/archives/C0AH1V5SWHK/p1789487137948169?thread_ts=1789480955.197209&cid=C0AH1V5SWHK",
-   "what": "Grace is scoping the TikTok integration against the Meta catalog work"
-  },
-  "team": {
-   "kind": "slack",
-   "where": "#cfx-dashery-marketing",
-   "who": "Grace Russell",
-   "date": "2026-09-15",
-   "url": "https://grid-articore.enterprise.slack.com/archives/C0AH1V5SWHK/p1789487137948169?thread_ts=1789480955.197209&cid=C0AH1V5SWHK",
-   "what": "Discussed as Dashery work"
-  },
-  "s": {
-   "kind": "slack",
-   "where": "#cfx-dashery-marketing",
-   "who": "Grace Russell",
-   "date": "2026-09-15",
-   "url": "https://grid-articore.enterprise.slack.com/archives/C0AH1V5SWHK/p1789487137948169?thread_ts=1789480955.197209&cid=C0AH1V5SWHK",
-   "what": "A TikTok integration is likely a multi-month project; Meta catalog first as the easier win, TikTok may still follow"
-  }
- },
  "Shirt Monkey integration": {
   "origin": {
    "kind": "jira",

@@ -59,14 +59,14 @@ const EXPS = { metricNote: 'Each test has a primary metric (what it was built to
 };
 
 // Every metric the exec team asks about, per running test (Sam, standup Oct 30: revenue per visitor, CVR, add to cart, AOV, engagement,
-// is it proven, when did it start, who decides). s: 'sig' = 95%+ sure, 'ns' = could be noise (c = % sure when known), 'nb' = Amplitude
+// is it proven, when did it start, who decides). s: 'sig' = 95%+ confidence, 'ns' = could be noise (c = % sure when known), 'nb' = Amplitude
 // can't put an error bar on it, 'early' = too little data to trust. a = control, b = test. AOV is revenue ÷ orders, not Amplitude's per-visitor
 // "AOV". Pulled from Amplitude Experiment, Oct 30.
 EXPS.reads = {
   '1569370': { goal: 'rpv', verdict: ['lean', 'Promising, not proven'], next: 'Read again Tue Nov 3, after 4 to 5 more days. Finance to check the extra order value isn\'t lower-margin tees.', decides: 'Customer team, with Finance on margin', flag: 'Uneven group sizes and a targeting change on Oct 27, so read it loosely.',
     m: { rpv: { v: 0.0168, s: 'ns', a: 0.7415, b: 0.7539, f: 'usd', note: 'Amplitude\'s headline +2.2% "roll out" comes from a revenue metric with a broken error bar. This is the version with a working one: +1.7%, could still be noise.' },
          cvr: { v: -0.0149, s: 'ns', a: 0.014167, b: 0.013956, name: 'Product page to order rate' },
-         atc: { v: -0.0679, s: 'ns', c: 93, a: 0.0386, b: 0.0360, name: 'Add to cart rate (product page)', note: '93% sure it\'s lower; we call it at 95%. Steering people to pricier styles can lower add to cart while raising order value, which is what TeePublic saw.' },
+         atc: { v: -0.0679, s: 'ns', c: 93, a: 0.0386, b: 0.0360, name: 'Add to cart rate (product page)', note: '93% confidence it\'s lower; we call it at 95%. Steering people to pricier styles can lower add to cart while raising order value, which is what TeePublic saw.' },
          aov: { v: 0.0244, s: 'nb', a: 50.90, b: 52.14, f: 'usd', note: 'Revenue ÷ orders. Amplitude\'s own "AOV" divides by everyone in the test, which is why it showed about $0.74.' } } },
   '1409398': {vdef: { 'Topics nav': 'The nav is organized by topic instead of product type.', 'T-shirt default': 'Clicking a topic opens the regular T-shirt results for it, whatever the mix would be.', 'Topic runs a search': 'Clicking a topic runs a normal search for it, so results mix product types (more stickers show up) and the system picks the style.' },  goal: 'cvr', verdict: ['mixed', 'Engagement up, CVR flat'], next: 'Decide whether +13% engagement is worth flat CVR (more engaged visitors feed retargeting). Check revenue per buyer on the T-shirt default.', decides: 'Exec team (the board asked for this test)', flag: 'Uneven group sizes, so read it loosely.',
     m: { rpv: { v: -0.0027, s: 'nb', a: 0.5004, b: 0.4991, f: 'usd', note: 'Topics nav −0.3%, T-shirt default −0.3%, topic runs a search −1.8%.' },
@@ -113,3 +113,12 @@ const SEXP = { url: 'https://app.sigmacomputing.com/teepublic/workbook/GA4-Searc
       verdict: 'inconclusive' }
   ] };
 
+
+// TeePublic A/B tests, read from the Split dashboard (https://www.teepublic.com/manage/split) on Oct 30 2026. Only tests launched in the last 30 days
+// that have numbers (Mike and Jon, Oct 30): the date beside each experiment name is its launch date. Older tests and tests with no completed
+// conversions are left out. Split reports each test's own conversion goal, so these rates are not sitewide CVR. conf is Split's confidence, null for "Insufficient".
+const TPEXPS = { asOf: '2026-10-30', url: 'https://www.teepublic.com/manage/split', items: [
+  { id: 'pdp_bestseller_badge', name: 'Bestseller badge on product pages', start: '2026-10-27', where: 'Product page', control: { p: 4753, conv: 0.0797 }, variants: [{ n: 'Title badge', p: 4991, conv: 0.0827, rel: 0.0377, conf: null }, { n: 'Gallery badge', p: 4932, conv: 0.0896, rel: 0.1239, conf: 90 }], call: ['lean', 'Leaning up'] },
+  { id: 'pdp_trending_badge', name: 'Trending badge on product pages', start: '2026-10-23', where: 'Product page', control: { p: 452020, conv: 0.0119 }, variants: [{ n: 'Title badge', p: 451481, conv: 0.0121, rel: 0.0182, conf: null }, { n: 'Gallery badge', p: 450610, conv: 0.0121, rel: 0.017, conf: null }], call: ['early', 'Too early'] },
+  { id: 'thankyou_mobile_layout', name: 'Thank-you page layout on mobile', start: '2026-10-23', where: 'Thank-you page', control: { p: 9492, conv: 0.0177 }, variants: [{ n: 'Layout A', p: 9475, conv: 0.0182, rel: 0.0256, conf: null }, { n: 'Layout B', p: 9610, conv: 0.0186, rel: 0.0524, conf: null }, { n: 'Layout C', p: 9504, conv: 0.0198, rel: 0.1176, conf: null }], call: ['early', 'Too early'] }
+] };

@@ -1442,6 +1442,22 @@ function sayModal(i) {
 // Plain-English names for projects inside a sentence (Mike, Oct 27: "feed fixes, incl. new iPhone case" was confusing). The refresh adds `say` to new projects.
 const SAYN = {"New iPhone cases in the feed": "adding new iPhone cases to the feed", "Cart and cart-tray cross-sell": "adding cross-sell to the cart and cart tray", "Cart tray vs cart page test": "testing the cart tray against the cart page", "T-shirt style pills on product pages": "showing T-shirt styles as pills on product pages", "Thank-you page upsell, 6 slots": "a six-slot upsell on the thank-you page", "Checkout email opt-in and hashing": "email opt-in at checkout", "Retire 8 low-value Redbubble products": "retiring 8 low-value Redbubble products", "Takedown (DMCA) tool": "a takedown tool for artists", "Fix sale prices in Google Shopping": "fixing sale prices in Google Shopping", "Creator behavior data in Amplitude": "creator behavior data in Amplitude", "Delivery-issue resolution queue": "a queue for delivery issues", "Trucker hat fulfillment": "trucker hat fulfillment", "Trucker hats on Redbubble": "trucker hats on Redbubble", "Standardized wall art sizes": "standard wall art sizes", "Simon AI profile attributes": "Simon AI profile attributes", "Search cluster migration": "moving search to its new cluster", "Sticker quick-add with quantity on search": "sticker quick-add on search", "Sticker cross-sell on add to cart": "a sticker cross-sell on add to cart", "Feed images at 1260px": "sharper feed images", "Apple Pay buy-now on product pages": "Apple Pay buy-now on product pages", "Premium tee upsell in cart": "a premium tee upsell in the cart", "Greeting cards and postcards in the feeds": "greeting cards and postcards on TeePublic", "Learn to Rank rerun": "rerunning Learn to Rank", "Show the lowest-priced T-shirt style first in Redbubble search": "showing the cheapest T-shirt style first in Redbubble search", "Selling blanks on TeePublic": "selling blank apparel on TeePublic", "Recently viewed on Redbubble search and product pages": "a recently viewed row on Redbubble search and product pages", "More prominent Redbubble search bar": "a more prominent Redbubble search bar", "TeePublic GRIN webhook tracking": "tracking creator affiliate sales from GRIN on TeePublic", "Redbubble search tracking": "tracking searches on Redbubble", "One data layer across Redbubble and TeePublic": "one shared tracking data layer for Redbubble and TeePublic", "Redbubble GA4 purchase tracking fix": "fixing Redbubble purchase tracking in GA4", "Tracking on search and remaining pages": "tracking on search and the remaining pages", "Automated tracking QA": "automated checks on site tracking", "Redbubble app analytics": "analytics for the Redbubble app", "One consent platform across all brands": "one consent platform across all brands", "Communication preference management": "letting shoppers manage their email and message preferences", "Artist tracking and audiences": "tracking artist activity and building artist audiences"};
 const sayOf = it => it.say || SAYN[it.t] || midCase(it.t);
+// Titles stay verbatim from the Active Work tab (Product Managers, Oct 30): an item with a sheet title shows it, and every record keyed by the old title is aliased.
+// The Team column on the sheet is the authority for the team. Dashery has not broken its goal into OKRs, so its projects show no goal.
+(function verbatimTitles() {
+  if (typeof COMING === 'undefined') return;
+  const clean = x => { const v = String(x).replace(/\s+/g, ' ').trim().replace(/\.$/, '').replace(/ — /g, ': '); return v.charAt(0).toUpperCase() + v.slice(1); };
+  const has = (o, k) => Object.prototype.hasOwnProperty.call(o, k);
+  const maps = [typeof SRCS !== 'undefined' && SRCS, typeof LATEST !== 'undefined' && LATEST, typeof DATES !== 'undefined' && DATES, typeof PEOPLE !== 'undefined' && PEOPLE, typeof BURN !== 'undefined' && BURN, SAYN, typeof COMING_PREV !== 'undefined' && COMING_PREV.items].filter(Boolean);
+  const moves = [];
+  COMING.teams.forEach(T => T.items.forEach(it => {
+    if (it.sheet) { const v = clean(it.sheet), old = it.t; if (v !== old) { it.t0 = old; it.t = v; maps.forEach(o => { if (has(o, old) && !has(o, v)) o[v] = o[old]; }); } }
+    if (it.sheetTeam && it.sheetTeam !== T.key) moves.push([T, it]);
+  }));
+  moves.forEach(([T, it]) => { let D = COMING.teams.find(x => x.key === it.sheetTeam); if (!D) { D = { key: it.sheetTeam, name: 'Infrastructure', icon: '🏗️', tagline: 'Platform and tooling consolidation across the sites.', items: [] }; COMING.teams.push(D); } T.items.splice(T.items.indexOf(it), 1); D.items.push(it); });
+  const dz = COMING.teams.find(x => x.key === 'dashery');
+  if (dz) dz.items.forEach(it => { it.obj = ''; const R = typeof SRCS !== 'undefined' && SRCS[it.t]; if (R && R.obj) delete R.obj; });
+})();
 // Numbered lists show the top 3, then "Show more" (Mike, Oct 27: the full list of 13 was too big).
 const hlist = (title, items, ol) => '<b>' + title + '</b><' + (ol ? 'ol class="hol"' : 'ul class="hul nrul"') + '>' + items.map((x, i) => ol && i >= 3 ? x.replace('<li>', '<li class="hx">') : x).join('') + '</' + (ol ? 'ol' : 'ul') + '>' + (ol && items.length > 3 ? '<button type="button" class="linkbtn hmore" data-hmore="1">Show ' + (items.length - 3) + ' more</button>' : '');
 // Names inside a sentence keep the sentence's case: "feed fixes", "cart and cart-tray cross-sell"; proper nouns stay capitalized.
@@ -1474,7 +1490,7 @@ function rmHeadline() {
   const DT = it => (typeof DATES !== 'undefined' && DATES[it.t]) || {}, dueOf = it => etaDate(it.eta) || (DT(it).due ? parse(DT(it).due) : null);
   const all = preList().map(it => Object.assign({}, it)), open = all.filter(it => !(stepIx(it.s) === 6 && !stuck(it.s)));
   const wk = open.filter(it => { const e = dueOf(it); return e && e >= today && e <= wkEnd + DAY - 1; }).sort((a, b) => impVal(b) - impVal(a));
-  const late = open.filter(it => { const e = dueOf(it); return e && e < today; }).sort((a, b) => impVal(b) - impVal(a));
+  const late = open.filter(it => { const e = dueOf(it); return e && e < today && (today - e) / DAY <= 60; }).sort((a, b) => impVal(b) - impVal(a));
   const disc = open.filter(it => (STAGE(it) === 'next' || DT(it).notStarted) && late.indexOf(it) < 0 && wk.indexOf(it) < 0).sort((a, b) => impVal(b) - impVal(a));
   const later = open.filter(it => { const e = dueOf(it); return e && e > wkEnd && e <= FREEZE; });
   const nm = (it, cls) => hint(esc(sayOf(it)), 'verd ' + (cls || 'b') + ' hlink" data-lbm2="' + it.ref, gTip(it, dueOf(it), false, null, DT(it).start ? parse(DT(it).start) : null));
@@ -1494,7 +1510,7 @@ function rmHeadline() {
   return '<p class="verdict">' + h1 + '</p>' + (sub.length ? '<p class="sulead">' + sub.map(ucf).join(' ') + '</p>' : '');
 }
 function abHeadline() {
-  const live = EXPS.live || [], done = EXPS.done || [], soon = EXPS.soon || [], imp = t => siteImp(t.cvr.rel, t.reach);
+  const live = (EXPS.live || []).filter(t => abSiteOk(testSite(t))), done = EXPS.done || [], soon = EXPS.soon || [], imp = t => siteImp(t.cvr.rel, t.reach);
   // Each running test hovers to a card: where it runs, day N, whole-site and in-test effect, a confidence bar to 95%, the primary metric.
   const card = t => { const c = t.p != null ? conf(t) : null, w = c == null ? 0 : Math.min(100, c);
     return '<div class="gtipc"><b class="gtt">' + testE(t.name) + ' ' + esc(t.name) + '</b><span class="cap">' + esc(t.where || '') + '</span><div class="gkv">' +
@@ -1507,14 +1523,15 @@ function abHeadline() {
   const li = (t, x) => '<li>' + testE(t.name) + ' <b>' + esc(t.name) + '</b>' + (x ? ': ' + x : '') + '</li>';
   const words = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'];
   const rpvOf = t => ((abRd(t).m || {}).rpv || {}).v, asOfD = parse(EXPS_AS_OF);
-  const recent = live.filter(t => (asOfD - parse(t.start)) / DAY <= 2).sort((p, q) => parse(q.start) - parse(p.start))[0];
+  const tps = (typeof TPEXPS !== 'undefined' && abSiteOk('TP') ? TPEXPS.items : []).map((x, i) => Object.assign({ tp: true, ix: i }, x)), all2 = live.concat(tps);
+  const recent = all2.filter(t => (asOfD - parse(t.start)) / DAY <= 2).sort((p, q) => parse(q.start) - parse(p.start))[0];
   const next24 = (EXPS.soon || []).find(x => x.start && (parse(x.start) - asOfD) / DAY >= 0 && (parse(x.start) - asOfD) / DAY <= 1);
   const pool = live.filter(t => abRd(t).verdict[0] !== 'paused' && rpvOf(t) != null && t !== recent).sort((p, q) => rpvOf(q) - rpvOf(p));
-  const promising = pool[0], latest = live.slice().sort((p, q) => parse(q.start) - parse(p.start))[0];
-  const L = t => t.id ? '<span class="verd n2 hlink" role="link" tabindex="0" data-jt="' + esc(t.id) + '">' + esc(t.name) + '</span>' : esc(t.name);
-  const first = recent ? L(recent) + ' launched ' + short(recent.start) : promising ? L(promising) + ' is the most promising, at ' + sgn(rpvOf(promising), 1) + ' revenue per user' : live.length ? L(latest) + ' started ' + short(latest.start) : '';
+  const promising = pool[0], latest = all2.slice().sort((p, q) => parse(q.start) - parse(p.start))[0];
+  const L = t => t.tp ? '<span class="verd n2 hlink" role="link" tabindex="0" data-tpx="' + t.ix + '">' + esc(t.name) + '</span>' : t.id ? '<span class="verd n2 hlink" role="link" tabindex="0" data-jt="' + esc(t.id) + '">' + esc(t.name) + '</span>' : esc(t.name);
+  const first = recent ? L(recent) + ' launched ' + short(recent.start) : promising ? L(promising) + ' is the most promising, at ' + sgn(rpvOf(promising), 1) + ' revenue per user' : all2.length ? L(latest) + ' started ' + short(latest.start) : '';
   const second = next24 ? esc(next24.name) + ' launches ' + short(next24.start) : recent ? (promising ? L(promising) + ' leads at ' + sgn(rpvOf(promising), 1) + ' revenue per user' : '') : (promising && latest && latest !== promising ? L(latest) + ' started ' + short(latest.start) : '');
-  return '<p class="verdict vtests">' + (first ? first + (second ? ', and ' + second : '') + '.' : 'No tests are running right now.') + '</p><p class="sulead">This page shows Redbubble tests only. TeePublic tests are coming soon.</p>';
+  return '<p class="verdict vtests">' + (first ? first + (second ? ', and ' + second : '') + '.' : 'No tests are running right now.') + '</p><p class="sulead">Redbubble tests come from Amplitude. TeePublic tests come from Split and cover the last 30 days.</p>';
 }
 function trHeadline() {
   const L = (typeof SLACK !== 'undefined' ? SLACK : []).slice(0, 2), tn = (s, k) => hint(esc(/^(TeePublic|Redbubble|Dashery|Google|Amazon|Apple|USA|Black|Meta)\b/.test(s.title) || !k ? s.title : s.title.charAt(0).toLowerCase() + s.title.slice(1)), 'verd n2 hlink" data-say="' + SLACK.indexOf(s), '<b>' + esc(s.title) + '</b><br>' + esc(s.tldr || sents(s.body)[0] || '') + '<span class="segmore">Click for the full read →</span>');
@@ -1535,14 +1552,14 @@ const erName = (name, team, site) => '<span class="tname tnico"><span class="ge 
 function shippedHtml() {
   const cut = addDays(EXPS_AS_OF, -60), sx = (typeof SEXP !== 'undefined' ? SEXP.items : []);
   const dash = '<span class="abm na">–</span>', dayC = d => '<span class="abday"><b>' + short(d) + '</b><small>ended</small></span>';
-  const D1 = (EXPS.done || []).map(t => ({ end: t.end, html: testRow(t) }));
-  const A = EXPS.older.map((o, i) => ({ end: o.end, html: '<div class="rowwrap"><div class="trow abrow" role="button" tabindex="0" data-told="' + i + '">' + erName(o.name, 'customer', 'Redbubble') + dayC(o.end) + dash + dash + dash + '<span class="abcall"><span class="abv2 ' + (o.status === 'shipped' ? 'v-ship' : '') + '">' + (o.status === 'shipped' ? 'Shipped' : 'Kept control') + '</span></span><span class="chev" aria-hidden="true">›</span></div></div>' }));
-  const B = sx.map(x => ({ end: x.end, html: '<div class="rowwrap"><a class="trow abrow erow2" href="' + esc(SEXP.url) + '" target="_blank" rel="noopener">' + erName(x.name, 'search', x.site) + dayC(x.end) + dash + dash + dash + '<span class="abcall"><span class="abv2 ' + (x.verdict === 'win' ? 'v-ship' : '') + '">' + (x.verdict === 'win' ? 'Clear winner' : x.verdict === 'loss' ? 'Clear loser' : 'Inconclusive') + '</span></span><span class="chev" aria-hidden="true">↗</span></a></div>' }));
+  const D1 = (abSiteOk('RB') ? EXPS.done || [] : []).map(t => ({ end: t.end, html: testRow(t) }));
+  const A = (abSiteOk('RB') ? EXPS.older : []).map((o, i) => ({ end: o.end, html: '<div class="rowwrap"><div class="trow abrow" role="button" tabindex="0" data-told="' + i + '">' + erName(o.name, 'customer', 'Redbubble') + dayC(o.end) + dash + dash + dash + '<span class="abcall"><span class="abv2 ' + (o.status === 'shipped' ? 'v-ship' : '') + '">' + (o.status === 'shipped' ? 'Shipped' : 'Kept control') + '</span></span><span class="chev" aria-hidden="true">›</span></div></div>' }));
+  const B = sx.filter(x => abSiteOk(x.site)).map(x => ({ end: x.end, html: '<div class="rowwrap"><a class="trow abrow erow2" href="' + esc(SEXP.url) + '" target="_blank" rel="noopener">' + erName(x.name, 'search', x.site) + dayC(x.end) + dash + dash + dash + '<span class="abcall"><span class="abv2 ' + (x.verdict === 'win' ? 'v-ship' : '') + '">' + (x.verdict === 'win' ? 'Clear winner' : x.verdict === 'loss' ? 'Clear loser' : 'Inconclusive') + '</span></span><span class="chev" aria-hidden="true">↗</span></a></div>' }));
   const all = D1.concat(A, B).filter(x => x.end >= cut).sort((p, q) => p.end < q.end ? 1 : -1);
   return all.length ? '<div class="group"><div class="ghead"><h3>Recently shipped</h3><span class="sfacts">' + all.length + ' tests</span></div>' + ABHEAD + '<div class="rows">' + all.map(x => x.html).join('') + '</div></div>' : '';
 }
 function soonHtml() {
-  return '<div class="group"><div class="ghead"><h3>Coming soon</h3><span class="sfacts">' + EXPS.soon.length + ' queued</span></div><div class="tcols stc"><span>Test</span><span>Where</span><span>When</span><span>What it tests</span><span></span></div><div class="rows">' + EXPS.soon.map((x, i) => '<div class="rowwrap"><div class="trow strow" role="button" tabindex="0" data-tsoon="' + i + '">' + erName(x.name, x.team || 'customer', x.site) + '<span class="erlt">' + esc(x.where) + '</span><span class="erlt">' + esc(x.when) + '</span><span class="erlt">' + esc(x.what) + '</span><span class="chev" aria-hidden="true">›</span></div></div>').join('') + '</div></div>';
+  return '<div class="group"><div class="ghead"><h3>Coming soon</h3><span class="sfacts">' + EXPS.soon.filter(x => abSiteOk(x.site)).length + ' queued</span></div><div class="tcols stc"><span>Test</span><span>Where</span><span>When</span><span>What it tests</span><span></span></div><div class="rows">' + EXPS.soon.map((x, i) => !abSiteOk(x.site) ? '' : '<div class="rowwrap"><div class="trow strow" role="button" tabindex="0" data-tsoon="' + i + '">' + erName(x.name, x.team || 'customer', x.site) + '<span class="erlt">' + esc(x.where) + '</span><span class="erlt">' + esc(x.when) + '</span><span class="erlt">' + esc(x.what) + '</span><span class="chev" aria-hidden="true">›</span></div></div>').join('') + '</div></div>';
 }
 function searchTestsHtml() {
   if (typeof SEXP === 'undefined' || !SEXP.items.length) return '';
@@ -1914,7 +1931,7 @@ const fmtM = (x, v) => x.f === 'usd' ? '$' + v.toFixed(2) : pct(v, v < 0.01 ? 3 
 const conf = t => Math.max(0, Math.min(99, Math.floor((1 - t.p) * 100)));
 // Confidence in plain words: how sure we are the difference is real. Direction comes from the primary metric.
 const sigWord = t => { const c = conf(t), up = (t.primary ? t.primary.rel : t.cvr.rel) >= 0; if (c >= 95) return up ? 'Clear winner' : 'Clear loser'; if (c >= 80) return 'Likely ' + (up ? 'up' : 'down'); if (c >= 50) return 'Leaning ' + (up ? 'up' : 'down'); return t.status === 'running' ? 'Too early to tell' : 'No clear difference'; };
-const sigChip = t => t.p == null ? '' : '<span class="sig ' + (conf(t) >= 95 ? 'yes' : conf(t) >= 80 ? 'mid' : 'no') + '" title="How sure we are the difference is real, not noise: ' + conf(t) + '%. We call a winner at 95%. Under 50% the results so far look like noise.">' + '<span class="cbar"><i style="width:' + Math.max(3, Math.round(conf(t) / 95 * 100)) + '%"></i></span>' + sigWord(t) + (conf(t) >= 50 ? ' · ' + conf(t) + '% sure' : '') + '</span>';
+const sigChip = t => t.p == null ? '' : '<span class="sig ' + (conf(t) >= 95 ? 'yes' : conf(t) >= 80 ? 'mid' : 'no') + '" title="How sure we are the difference is real, not noise: ' + conf(t) + '%. We call a winner at 95%. Under 50% the results so far look like noise.">' + '<span class="cbar"><i style="width:' + Math.max(3, Math.round(conf(t) / 95 * 100)) + '%"></i></span>' + sigWord(t) + (conf(t) >= 50 ? ' · ' + conf(t) + '% confidence' : '') + '</span>';
 const TESTE = [[/return to cart/i, '🔙'], [/topics/i, '🧭'], [/countdown/i, '⏳'], [/swatch/i, '🎨'], [/trust badge/i, '🛡️'], [/flat-lay/i, '👕'], [/image first/i, '📸'], [/express/i, '⚡'], [/price/i, '🏷️'], [/shipping/i, '📦']];
 // Tests get the same line icons as Roadmap projects (Mike, Oct 27); the goal is read from the primary metric.
 const testObj = t => /revenue|order value|aov|items per/i.test((t.primary && t.primary.name) || '') ? 'AOV' : 'CVR';
@@ -1939,8 +1956,8 @@ const ABK = [['rpv', 'Revenue per user', 'What each user in the test group spend
 const ABO = ['rpv', 'cvr'];
 const abRd = t => (EXPS.reads || {})[t.id] || { goal: t.kind === 'aov' ? 'rpv' : 'cvr', verdict: t.status === 'shipped' ? ['ship', 'Shipped'] : t.status === 'running' ? ['early', 'Running'] : ['none', 'Kept control'], next: t.call || '', m: { cvr: { v: t.cvr.rel, s: t.p != null && t.p < 0.05 ? 'sig' : 'ns', a: t.cvr.a, b: t.cvr.b, name: 'Sitewide CVR' }, rpv: rpuOf(t) ? { v: rpuOf(t).rel, s: 'nb', a: rpuOf(t).a, b: rpuOf(t).b, f: 'usd' } : null } };
 const abVal = (x, v) => x.f === 'usd' ? '$' + (v >= 10 ? v.toFixed(2) : v.toFixed(v < 1 ? 3 : 2)) : pct(v, v < 0.01 ? 3 : v < 0.1 ? 2 : 1);
-const abSure = x => x.s === 'sig' ? '✓ Significant' : x.s === 'nb' ? 'No error bar' : x.s === 'early' ? 'Too early' : x.c ? x.c + '% sure' : 'Could be noise';
-const abSureL = x => x.s === 'sig' ? '<b class="b">Statistically significant:</b> at least 95% sure this is a true difference, not noise.' : x.s === 'nb' ? '<b>No error bar:</b> Amplitude can\'t calculate how sure it is for this metric, so read it as a direction only.' : x.s === 'early' ? '<b>Too early:</b> too few days of data to trust yet.' : x.c ? '<b>' + x.c + '% sure</b> this is a true difference. We call it at 95%.' : '<b>Not significant yet:</b> this could still be random noise.';
+const abSure = x => x.s === 'sig' ? '✓ Significant' : x.s === 'nb' ? 'No error bar' : x.s === 'early' ? 'Too early' : x.c ? x.c + '% confidence' : 'Could be noise';
+const abSureL = x => x.s === 'sig' ? '<b class="b">Statistically significant:</b> at least 95% confidence of a true difference, not noise.' : x.s === 'nb' ? '<b>No error bar:</b> Amplitude can\'t calculate how sure it is for this metric, so read it as a direction only.' : x.s === 'early' ? '<b>Too early:</b> too few days of data to trust yet.' : x.c ? '<b>' + x.c + '% confidence</b> this is a true difference. We call it at 95%.' : '<b>Not significant yet:</b> this could still be random noise.';
 function abCell(t, k) {
   const r = abRd(t), x = (r.m || {})[k], goal = r.goal === k;
   if (!x) return '<span class="abm na" title="Not measured on this test">–</span>';
@@ -1949,14 +1966,14 @@ function abCell(t, k) {
   return hint('<span class="abv ' + cls + '">' + (goal ? '<i class="abgoal" aria-label="Goal metric">🎯</i>' : '') + sgn(x.v, 1) + '</span>' + (k === 'cvr' ? '<small class="abs ' + x.s + '">' + (x.s === 'sig' ? '✓ ' : '') + esc(scope) + '</small>' : x.s === 'sig' || (x.c && x.c >= 80) ? '<small class="abs ' + x.s + '">' + abSure(x) + '</small>' : ''), 'abm', tip);
 }
 const abSig = t => { const r = abRd(t), g = (r.m || {})[r.goal], nm = (g && g.name) || ABK.find(z => z[0] === r.goal)[1];
-  const o = !g ? ['na', '–', '', ''] : g.s === 'sig' ? ['yes', 'Yes', '95%+ sure', 'At least 95% sure this is a true difference.'] : g.s === 'early' ? ['early', 'Too early', 'few days of data', 'Not enough days to say anything yet.'] : g.s === 'nb' ? ['nb', 'Can\'t tell', 'no error bar', 'Amplitude gives no error bar for this metric.'] : g.c ? ['not', 'Not yet', g.c + '% sure', 'Needs 95% before we call it.'] : ['not', 'Not yet', 'could be noise', 'Under 95% sure, so it could still be noise.'];
+  const o = !g ? ['na', '–', '', ''] : g.s === 'sig' ? ['yes', 'Yes', '95%+ confidence', 'At least 95% confidence of a true difference.'] : g.s === 'early' ? ['early', 'Too early', 'few days of data', 'Not enough days to say anything yet.'] : g.s === 'nb' ? ['nb', 'Can\'t tell', 'no error bar', 'Amplitude gives no error bar for this metric.'] : g.c ? ['not', 'Not yet', g.c + '% confidence', 'Needs 95% before we call it.'] : ['not', 'Not yet', 'could be noise', 'Under 95% confidence, so it could still be noise.'];
   return hint('<span class="abst ' + o[0] + '">' + o[1] + '</span>', 'abm', '<span class="nosrc">' + o[3] + '</span>');
 };
 const abImp = t => { const v = siteImp(t.cvr.rel, t.reach); return hint('<span class="abv big lite ' + (v >= 0 ? 'b' : 'w') + '">' + sp(v, 1) + '</span><small class="abs">' + Math.round(t.reach * 100) + '% reach</small>', 'abm', '<span class="nosrc">In the test group: ' + pct(t.cvr.a, t.cvr.a < 0.1 ? 2 : 1) + ' → ' + pct(t.cvr.b, t.cvr.b < 0.1 ? 2 : 1) + ' CVR (' + sgn(t.cvr.rel, 1) + ').</span>'); };
 const abRpu = t => { const x = (abRd(t).m || {}).rpv; if (!x) return '<span class="abm na" title="Not measured on this test">–</span>'; return hint('<span class="abv big ' + (x.v >= 0 ? 'b' : 'w') + '">' + sgn(x.v, 1) + '</span><small class="abs">in test group</small>', 'abm', '<span class="nosrc">' + abVal(x, x.a) + ' → ' + abVal(x, x.b) + ' per user.</span>'); };
 const abDay = t => t.status === 'running' ? '<span class="abday"><b>Day ' + testDays(t) + '</b><small>since ' + short(t.start) + '</small></span>' : '<span class="abday"><b>' + (Math.round((parse(t.end) - parse(t.start)) / DAY) + 1) + ' days</b><small>ended ' + short(t.end) + '</small></span>';
 const abCall = t => { const r = abRd(t), pill = '<span class="abv2 v-' + r.verdict[0] + '">' + esc(r.verdict[1]) + '</span>'; return r.next && t.status === 'running' ? hint(pill, 'abcall', '<span class="nosrc">' + esc(r.next) + '</span>') : '<span class="abcall">' + pill + '</span>'; };
-const ABHEAD = '<div class="tcols abcols"><span>Test</span><span>Running</span>' + hint('Stat sig', 'soft', '<span class="nosrc"><b>Stat sig</b><br>Are we 95% sure the main metric moved, not noise?</span>') + hint('Sitewide CVR impact', 'soft', '<span class="nosrc"><b>Sitewide CVR impact</b><br>The test group\'s CVR change, scaled by the share of orders it reaches: what it would do to the whole site.</span>') + hint('Revenue per user', 'soft', '<span class="nosrc"><b>Revenue per user</b><br>Revenue per user in the test group vs control.</span>') + '<span>The call</span><span></span></div>';
+const ABHEAD = '<div class="tcols abcols"><span>Test</span><span>Running</span>' + hint('Stat sig', 'soft', '<span class="nosrc"><b>Stat sig</b><br>Is there 95% confidence the main metric moved, not noise?</span>') + hint('Sitewide CVR impact', 'soft', '<span class="nosrc"><b>Sitewide CVR impact</b><br>The test group\'s CVR change, scaled by the share of orders it reaches: what it would do to the whole site.</span>') + hint('Revenue per user', 'soft', '<span class="nosrc"><b>Revenue per user</b><br>Revenue per user in the test group vs control.</span>') + '<span>The call</span><span></span></div>';
 function testDetailModal(id) {
   const t = [].concat(EXPS.live, EXPS.done).find(x => String(x.id) === String(id)); if (!t) return;
   const R = abRd(t), days = t.status === 'running' ? testDays(t) : Math.round((parse(t.end) - parse(t.start)) / DAY) + 1;
@@ -1982,11 +1999,11 @@ function testRow(t) {
 // One takeaway sentence for the tab: the running test that matters most, what is close to a call, and what was decided lately.
 function testsLead() {
   const imp = t => siteImp(t.cvr.rel, t.reach);
-  const nm = t => hint(esc(t.name), 'verd ' + (t.status === 'running' ? 'n2' : imp(t) < 0 ? 'w' : 'b'), '<b>' + esc(t.name) + '</b><br>' + esc(t.primary.name) + ' ' + sp(t.primary.rel, 1) + ' · whole-site ' + sp(imp(t)) + '<br>' + (t.p == null ? 'No read yet' : esc(sigWord(t)) + ' · ' + conf(t) + '% sure') + '<br><span class="cap">' + esc(t.where || '') + '</span>');
+  const nm = t => hint(esc(t.name), 'verd ' + (t.status === 'running' ? 'n2' : imp(t) < 0 ? 'w' : 'b'), '<b>' + esc(t.name) + '</b><br>' + esc(t.primary.name) + ' ' + sp(t.primary.rel, 1) + ' · whole-site ' + sp(imp(t)) + '<br>' + (t.p == null ? 'No read yet' : esc(sigWord(t)) + ' · ' + conf(t) + '% confidence') + '<br><span class="cap">' + esc(t.where || '') + '</span>');
   const lc = w => w.charAt(0).toLowerCase() + w.slice(1);
   const live = EXPS.live.slice().sort((a, z) => Math.abs(imp(z)) * (conf(z) || 1) - Math.abs(imp(a)) * (conf(a) || 1)), out = [];
   const headT = live[0] ? '<p class="verdict rmverd">A/B tests: ' + nm(live[0]) + ' is the one to watch.</p>' : '';
-  if (live[0]) { const t = live[0]; out.push('It is at ' + '<span class="' + (imp(t) < 0 ? 'bad' : 'good') + '">' + sp(imp(t)) + ' whole-site CVR</span>, ' + (t.p == null ? 'no read yet' : lc(sigWord(t)) + (conf(t) >= 50 ? ' (' + conf(t) + '% sure)' : '')) + (ttc(t) ? ', ' + lc(ttc(t)) : '')); }
+  if (live[0]) { const t = live[0]; out.push('It is at ' + '<span class="' + (imp(t) < 0 ? 'bad' : 'good') + '">' + sp(imp(t)) + ' whole-site CVR</span>, ' + (t.p == null ? 'no read yet' : lc(sigWord(t)) + (conf(t) >= 50 ? ' (' + conf(t) + '% confidence)' : '')) + (ttc(t) ? ', ' + lc(ttc(t)) : '')); }
   const close = live.slice(1).filter(t => conf(t) >= 80)[0];
   if (close) out.push(nm(close) + ' is close to a call at ' + conf(close) + '%');
   const sh = EXPS.done.filter(t => t.status === 'shipped'), kc = EXPS.done.length - sh.length;
@@ -2019,13 +2036,31 @@ function testModal(kind, i) {
     '<div class="pbox"><h4 class="ph">📝 What happened</h4>' + (wu && wu[1] ? '<p>' + esc(wu[1]) + '</p>' : '') + '<p>' + esc(o.note) + '</p></div>' +
     '<div class="pbox"><h4 class="ph">🔗 Links</h4><p><a href="' + esc(o.url) + '" target="_blank" rel="noopener">Open the test in Amplitude Experiment ↗</a></p>' + (wu && /^https?:/.test(wu[0]) ? '<p><a href="' + esc(wu[0]) + '" target="_blank" rel="noopener">Read the write-up in Confluence ↗</a></p>' : '') + '</div>');
 }
+const abSiteOk = s => { const f = state.abSite || 'both'; if (f === 'both') return true; const c = /tee|^tp$/i.test(s || '') ? 'TP' : /both/i.test(s || '') ? 'B' : 'RB'; return c === 'B' || c === f; };
+const tpDays = x => Math.round((parse(EXPS_AS_OF) - parse(x.start)) / DAY) + 1;
+function tpRow(x, i) {
+  const best = x.variants.reduce((m, v) => Math.max(m, v.conf || 0), 0), dash = '<span class="abm na">–</span>';
+  const chip = best >= 95 ? '<span class="abst yes">Yes</span>' : '<span class="abst">' + (best >= 80 ? 'Not yet · ' + best + '%' : 'Not yet') + '</span>';
+  const tip = best >= 95 ? 'At least 95% confidence of a true difference.' : best >= 80 ? 'The best version has ' + best + '% confidence. It needs 95%.' : 'No version is close to 95% yet.';
+  return '<div class="rowwrap"><div class="trow abrow" role="button" tabindex="0" data-tpx="' + i + '"><span class="tname tnico"><span class="ge gico g-CVR" aria-hidden="true">' + projIco({ t: x.name, obj: 'CVR' }) + '</span><b>' + esc(x.name) + '</b><span class="cap tmeta"><span class="tloc">' + siteDot('TP') + ' · ' + esc(x.where) + '</span></span></span><span class="abday"><b>Day ' + tpDays(x) + '</b><small>since ' + short(x.start) + '</small></span>' + hint(chip, 'abm', '<span class="nosrc">' + tip + '</span>') + dash + dash + '<span class="abcall"><span class="abv2 v-' + x.call[0] + '">' + esc(x.call[1]) + '</span></span><span class="chev" aria-hidden="true">▾</span></div></div>';
+}
+function tpDetailModal(i) {
+  const x = typeof TPEXPS !== 'undefined' ? TPEXPS.items[i] : null; if (!x) return;
+  const rows = [{ n: 'Control', p: x.control.p, c: x.control.conv, rel: null }].concat(x.variants.map(v => ({ n: v.n, p: v.p, c: v.conv, rel: v.rel, conf: v.conf })));
+  const tbl = '<table class="abt"><thead><tr><th>Version</th><th>Participants</th><th>Conversion</th><th>Change</th><th>Confidence</th></tr></thead><tbody>' + rows.map(r => '<tr><td>' + esc(r.n) + '</td><td>' + int(r.p) + '</td><td>' + pct(r.c, r.c < 0.1 ? 2 : 1) + '</td><td>' + (r.rel == null ? '–' : '<span class="chn ' + (r.rel >= 0 ? 'b' : 'w') + '">' + sgn(r.rel, 1) + '</span>') + '</td><td>' + (r.rel == null ? '–' : r.conf ? r.conf + '% confidence' : 'Not enough yet') + '</td></tr>').join('') + '</tbody></table>';
+  openModal('<span class="tipsrc" hidden></span><div class="mhead"><h3 id="mtitle">' + esc(x.name) + '</h3></div><div class="mtags"><span class="rtag">' + siteDot('TP') + ' · ' + esc(x.where) + '</span><span class="rtag">Day ' + tpDays(x) + ', since ' + short(x.start) + '</span><span class="abv2 v-' + x.call[0] + '">' + esc(x.call[1]) + '</span></div><div class="abwhat2"><h4 class="ph">🧪 About this test</h4><p>Read from the Split dashboard on ' + short(TPEXPS.asOf) + '. Split reports each test\'s own conversion goal, so these rates are not comparable across tests and none of them is sitewide CVR.</p></div>' + tbl + '<div class="abfoot2"><a class="srclink" href="' + esc(TPEXPS.url) + '" target="_blank" rel="noopener">Open in Split\u00a0↗</a></div>');
+}
 function testsHtml() {
-  const all = [].concat(EXPS.live, EXPS.done), best = all.reduce((a, t) => Math.max(a, siteImp(t.cvr.rel, t.reach)), 0);
-  const head = ABHEAD;
-  return '<section class="sview"><div class="vhead vhl">' + abHeadline() + '</div>' +
-    '<div class="group trun"><div class="ghead"><h3>Running</h3>' + abFacts(EXPS.live, true) + '</div>' + head + '<div class="rows">' + EXPS.live.slice().sort((p, q) => parse(q.start) - parse(p.start)).map(testRow).join('') + '</div></div>' +
+  const f = state.abSite || 'both';
+  const rb = (EXPS.live || []).filter(t => abSiteOk(testSite(t))).map(t => ({ start: t.start, html: testRow(t), n: testDays(t) }));
+  const tp = typeof TPEXPS !== 'undefined' && abSiteOk('TP') ? TPEXPS.items.map((x, i) => ({ start: x.start, html: tpRow(x, i), n: tpDays(x) })) : [];
+  const rows = rb.concat(tp).sort((p, q) => parse(q.start) - parse(p.start));
+  const facts = rows.length ? '<span class="sfacts"><span>' + rows.length + ' running</span><span aria-hidden="true">·</span><span>longest: day ' + Math.max(...rows.map(r => r.n)) + '</span></span>' : '';
+  const seg = '<div class="abfilter"><span class="lbl">Show</span><div class="segs" role="group" aria-label="Site">' + [['both', 'Both'], ['RB', 'Redbubble'], ['TP', 'TeePublic']].map(o => '<button type="button" data-absite="' + o[0] + '" aria-pressed="' + (f === o[0]) + '">' + o[1] + '</button>').join('') + '</div></div>';
+  return '<section class="sview"><div class="vhead vhl">' + abHeadline() + '</div>' + seg +
+    '<div class="group trun"><div class="ghead"><h3>Running</h3>' + facts + '</div>' + ABHEAD + '<div class="rows">' + (rows.length ? rows.map(r => r.html).join('') : '<p class="cap">No tests running here right now.</p>') + '</div></div>' +
     shippedHtml() +
-    (EXPS.soon && EXPS.soon.length ? soonHtml() : '') + '</section>';
+    (EXPS.soon && EXPS.soon.some(x => abSiteOk(x.site)) ? soonHtml() : '') + '</section>';
 }
 
 /* ---------- Coming soon: what each product team is working on, what's next, and what moved ---------- */
@@ -3431,6 +3466,8 @@ document.addEventListener('click', ev => {
   if (t.closest('#aboutbtn')) { const m = $('#amenu'); m.hidden = !m.hidden; $('#aboutbtn').setAttribute('aria-expanded', String(!m.hidden)); return; }
   if (!t.closest('#amenu') && $('#amenu')) $('#amenu').hidden = true;
   const wt = t.closest('[data-watch]'); if (wt) { const [wb, wk] = wt.dataset.watch.split('|'); state.view = 'daily'; state.tab = wb; if (wk !== 'pay') state.open.add(wk); render(); const el = wk === 'pay' ? document.getElementById('g-pay') : document.querySelector('[data-row="' + CSS.escape(wk) + '"]'); if (el) { window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 110 }); el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 2600); } return; }
+  const abs = t.closest('[data-absite]'); if (abs) { state.abSite = abs.dataset.absite; return renderKeep(); }
+  const tpx = t.closest('[data-tpx]'); if (tpx) return tpDetailModal(+tpx.dataset.tpx);
   const xr = t.closest('[data-xrow]'); if (xr) return testDetailModal(xr.dataset.xrow);
   const why = t.closest('[data-why]'); if (why) { ev.stopPropagation(); return whyModal(why.dataset.why); }
   const mode = t.closest('[data-cmpmode]'); if (mode) { state.cmpMode = mode.dataset.cmpmode; const [cb, ck] = state.cmp.split('|'); const m = findMetric(cb, state.cmp.slice(cb.length + 1)); if (m) compareModal(m); return; }

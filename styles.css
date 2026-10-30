@@ -3546,7 +3546,7 @@ a.pvwhere { color: var(--ctl); text-decoration: underline; text-underline-offset
 .ghead .gsrc { text-align: right; } .ghead .gsrc .tipsrcbox { text-align: left; max-width: 520px; margin-top: 6px; font-size: 12.5px; }
 .ghead .gsrc .srcbtn { padding: 0; border: 0; background: none; color: var(--ctl); font: 600 12.5px var(--body); cursor: pointer; }
 /* A/B tests: one column per exec question (Sam, standup Oct 30) */
-:root:not(#z):not(#y) .abcols, :root:not(#z):not(#y) .abrow { grid-template-columns: minmax(240px, 1.15fr) 92px 150px 142px 142px minmax(170px, 1fr) 18px; gap: 0 14px; }
+:root:not(#z):not(#y) .abcols, :root:not(#z):not(#y) .abrow { grid-template-columns: minmax(240px, 1.28fr) 92px 150px 142px 142px minmax(170px, 1fr) 18px; gap: 0 14px; }
 .abm { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; border-bottom: 0 !important; }
 .abm.na { color: var(--faint); }
 .abv { font: 700 15.5px var(--body); color: var(--ink); white-space: nowrap; }
@@ -3636,7 +3636,7 @@ a.pvwhere { color: var(--ctl); text-decoration: underline; text-underline-offset
 
 /* Recently shipped and Coming soon as tables (design agency, Oct 30) */
 :root:not(#z):not(#y) .ertc, :root:not(#z):not(#y) .erow { grid-template-columns: minmax(240px, 1.15fr) 96px 150px minmax(240px, 2fr) 18px; gap: 0 14px; }
-:root:not(#z):not(#y) .stc, :root:not(#z):not(#y) .strow { grid-template-columns: minmax(240px, 1.15fr) 140px 210px minmax(240px, 2fr) 18px; gap: 0 14px; }
+:root:not(#z):not(#y) .stc, :root:not(#z):not(#y) .strow { grid-template-columns: minmax(240px, 1.28fr) 140px 210px minmax(240px, 2fr) 18px; gap: 0 14px; }
 a.trow.erow { color: inherit; text-decoration: none; }
 .erlt { font-size: 13.5px; color: var(--ink-2); line-height: 1.4; min-width: 0; }
 .erow .chev, .strow .chev { transform: none !important; }
@@ -3652,3 +3652,5 @@ a.trow.erow { color: inherit; text-decoration: none; }
 .hlink[data-jt] { cursor: pointer; }
 
 a.trow.abrow { color: inherit; text-decoration: none; }
+
+.abfilter { display: flex; align-items: center; gap: 10px; margin: 18px 0 6px; } .abfilter .lbl { font: 600 12px var(--body); color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
