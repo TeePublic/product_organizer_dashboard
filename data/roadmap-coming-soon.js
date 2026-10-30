@@ -232,7 +232,7 @@ const TESTTALK = [
 ];
 
 // What is selling: outside signals, checked against the web.
-const SELLCALL = {"e":"📈","tk":"Brewers designs ~4 to 37× usual. Push them?","title":"Brewers designs are still selling at several times usual. Keep pushing them?","body":"All seven top TeePublic designs on Oct 29 were Brewers, led by one at 64 orders. The series may end Oct 31.","ask":"Keep them in paid social, email and on-site through the last game, then move Halloween placements to Thanksgiving and holidays.","src":""};
+const SELLCALL = {"e":"📈","tk":"Brewers designs are selling 37× usual. Push them?","title":"Brewers designs are still selling at several times usual. Keep pushing them?","body":"All seven top TeePublic designs on Oct 29 were Brewers, led by one at 64 orders. The series may end Oct 31.","ask":"Keep them in paid social, email and on-site through the last game, then move Halloween placements to Thanksgiving and holidays.","src":""};
 
 // Vibe check: patterns across Slack and meetings. Never names, never complaints about people.
 const VIBE = { e: '🌤️', mood: 'Busy but steady', summary: 'Pre-peak crunch with Cyber promos now scheduled. Teams are trading small items to protect bigger ones, and a World Series bump on TeePublic is cooling. Energy is good; the risk is launches stacking up before the freeze.',

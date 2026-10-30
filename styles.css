@@ -3546,7 +3546,7 @@ a.pvwhere { color: var(--ctl); text-decoration: underline; text-underline-offset
 .ghead .gsrc { text-align: right; } .ghead .gsrc .tipsrcbox { text-align: left; max-width: 520px; margin-top: 6px; font-size: 12.5px; }
 .ghead .gsrc .srcbtn { padding: 0; border: 0; background: none; color: var(--ctl); font: 600 12.5px var(--body); cursor: pointer; }
 /* A/B tests: one column per exec question (Sam, standup Oct 30) */
-:root:not(#z):not(#y) .abcols, :root:not(#z):not(#y) .abrow { grid-template-columns: minmax(260px, 1.9fr) 76px 124px 124px 112px minmax(130px, .6fr) 18px; gap: 0 14px; }
+:root:not(#z):not(#y) .abcols, :root:not(#z):not(#y) .abrow { grid-template-columns: minmax(240px, 1.15fr) 92px 150px 142px 142px minmax(170px, 1fr) 18px; gap: 0 14px; }
 .abm { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; border-bottom: 0 !important; }
 .abm.na { color: var(--faint); }
 .abv { font: 700 15.5px var(--body); color: var(--ink); white-space: nowrap; }
@@ -3566,7 +3566,7 @@ a.pvwhere { color: var(--ctl); text-decoration: underline; text-underline-offset
 .abans > div { display: flex; flex-direction: column; gap: 2px; } .abans .lbl { font-size: 12px; color: var(--muted); } .abans b { font-size: 14px; }
 .abvr { margin-bottom: 14px; overflow-x: auto; } .abvr table { border-collapse: collapse; font-size: 13.5px; } .abvr th, .abvr td { padding: 5px 14px 5px 0; text-align: left; white-space: nowrap; }
 .abvr th { font-size: 12px; color: var(--muted); font-weight: 600; } .abvr td.b { color: var(--good); font-weight: 700; } .abvr td.w { color: var(--bad); font-weight: 700; } .abvr td.ns, .abvr td.na { color: var(--muted); }
-@media (min-width: 761px) and (max-width: 1240px) { :root:not(#z):not(#y) .abcols, :root:not(#z):not(#y) .abrow { grid-template-columns: minmax(170px, 1.5fr) 60px 100px 92px 88px minmax(110px, .7fr) 14px; gap: 0 10px; } .abv { font-size: 14px; } }
+@media (min-width: 761px) and (max-width: 1240px) { :root:not(#z):not(#y) .abcols, :root:not(#z):not(#y) .abrow { grid-template-columns: minmax(160px, 1fr) 62px 104px 96px 96px minmax(120px, .9fr) 14px; gap: 0 10px; } .abv { font-size: 14px; } }
 @media (max-width: 760px) { :root:not(#z):not(#y) .abrow { grid-template-columns: repeat(2, 1fr); gap: 10px 12px; } .abrow .tname, .abrow .abcall { grid-column: 1 / -1; } .abrow .chev { display: none; } }
 :root:not(#z):not(#y) .hint.abm { display: inline-flex !important; flex-direction: column; align-items: flex-start; gap: 2px; border-bottom: 0 !important; text-decoration: none !important; justify-self: start; }
 :root:not(#z):not(#y) .hint.abm .abs { display: block; }
@@ -3618,3 +3618,27 @@ a.pvwhere { color: var(--ctl); text-decoration: underline; text-underline-offset
 .botsay .botpts { margin: 8px 14px 14px; padding-left: 18px; font-size: 13.5px; color: var(--ink-2); display: grid; gap: 4px; }
 .abt th, .abt td { text-align: left !important; }
 .abt td:first-child { min-width: 140px; }
+
+/* Two tiles in the opened test, table padding, calmer nav (design agency, Oct 30) */
+.abgrid { display: grid; grid-template-columns: minmax(220px, 1fr) 3fr; gap: 16px; align-items: start; }
+@media (max-width: 900px) { .abgrid { grid-template-columns: 1fr; } }
+.abwhat { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px 20px; display: flex; flex-direction: column; gap: 10px; align-items: flex-start; }
+.abwl { font: 700 13px var(--body); }
+.abwhat p { margin: 0; font-size: 14px; line-height: 1.5; } .abwhat .abflag { color: var(--muted); font-size: 13px; }
+.abcard { padding: 8px 0 6px; }
+.abt th, .abt td { padding-left: 14px; padding-right: 14px; }
+.abt th:first-child, .abt td:first-child { padding-left: 20px; } .abt th:last-child, .abt td:last-child { padding-right: 20px; }
+.abt td { padding-top: 12px; padding-bottom: 12px; } .abt th { padding-top: 10px; padding-bottom: 8px; }
+.navbusy .tk-track, .navbusy .cdtop, .navbusy .cdt2.sec b, .navbusy .tkdot { animation-play-state: paused !important; }
+.tk-view { contain: paint; } .tk-track { will-change: transform; }
+
+.abv.big.lite { font-weight: 500; }
+
+/* Recently shipped and Coming soon as tables (design agency, Oct 30) */
+:root:not(#z):not(#y) .ertc, :root:not(#z):not(#y) .erow { grid-template-columns: minmax(240px, 1.15fr) 96px 150px minmax(240px, 2fr) 18px; gap: 0 14px; }
+:root:not(#z):not(#y) .stc, :root:not(#z):not(#y) .strow { grid-template-columns: minmax(240px, 1.15fr) 140px 210px minmax(240px, 2fr) 18px; gap: 0 14px; }
+a.trow.erow { color: inherit; text-decoration: none; }
+.erlt { font-size: 13.5px; color: var(--ink-2); line-height: 1.4; min-width: 0; }
+.erow .chev, .strow .chev { transform: none !important; }
+@media (min-width: 761px) and (max-width: 1240px) { :root:not(#z):not(#y) .ertc, :root:not(#z):not(#y) .erow { grid-template-columns: minmax(160px, 1fr) 80px 120px minmax(150px, 1.4fr) 14px; gap: 0 10px; } :root:not(#z):not(#y) .stc, :root:not(#z):not(#y) .strow { grid-template-columns: minmax(160px, 1fr) 100px 140px minmax(150px, 1.4fr) 14px; gap: 0 10px; } }
+@media (max-width: 760px) { :root:not(#z):not(#y) .erow, :root:not(#z):not(#y) .strow { grid-template-columns: 1fr; gap: 6px; } .erow .chev, .strow .chev { display: none; } }

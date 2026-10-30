@@ -294,13 +294,13 @@ const metricsFor = b => MCACHE[b] || (MCACHE[b] = metricList(b));
 // Where the CVR page's numbers come from, with links out (Allison, Oct 28: "I need reassurance that it is confirmed correct").
 const AMPD = { strong: 'lm29400h', max: '5ec1pe2j' }, AMPY = { tp: 'usaj36an', rb: 'zvsdv2k8' };
 // Every named source is a link (Mike, Oct 28: "All sources should always be linkable").
-const SLK = (id, name) => '<a href="https://grid-articore.enterprise.slack.com/archives/' + id + '" target="_blank" rel="noopener">#' + name + ' ↗</a>';
-const LNK = (u, t) => '<a href="' + u + '" target="_blank" rel="noopener">' + t + ' ↗</a>';
+const SLK = (id, name) => '<a href="https://grid-articore.enterprise.slack.com/archives/' + id + '" target="_blank" rel="noopener">#' + name + ' ↗</a>';
+const LNK = (u, t) => '<a href="' + u + '" target="_blank" rel="noopener">' + t + ' ↗</a>';
 const JIRA = LNK('https://articore.atlassian.net/jira/software/c/projects/DEAP/issues', 'Jira (DEAP)'), AMPX = LNK('https://app.amplitude.com/experiment/tpub', 'Amplitude Experiment'), SIGMA = LNK('https://app.sigmacomputing.com/teepublic/workbook/GA4-Search-Experiments-7wRanD8z9Oa0ZcLIk3FW7T', 'Sigma "[GA4] Search Experiments"');
 const METRICS = [['C0ASAJUSD6D', 'Customer'], ['C0ARR26TXHS', 'PLC'], ['C0B3HBAA691', 'Data Engineering'], ['C0AUA7R32VC', 'Dashery'], ['C0AR87G1755', 'Search'], ['C0ASTL7LK6C', 'Artist'], ['C0AS67UT41M', 'Core']].map(x => '<a href="https://grid-articore.enterprise.slack.com/archives/' + x[0] + '" target="_blank" rel="noopener">' + x[1] + '</a>').join(', ');
 // The other pages' hovers: where that page's facts come from (Mike, Oct 28: "There should always be a source link").
 function pageSrcHtml(html) {
-  const sheet = '<a href="https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU" target="_blank" rel="noopener">roadmap sheet ↗</a>', v = state.view, L = [];
+  const sheet = '<a href="https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU" target="_blank" rel="noopener">roadmap sheet ↗</a>', v = state.view, L = [];
   if (v === 'soon') {
     L.push('🗂️ <b>Projects, owners and goals:</b> the ' + sheet + ', with newer news overriding it');
     L.push('🎙️ <b>Official updates:</b> the fortnightly Executive Roadmap Review');
@@ -339,15 +339,15 @@ const SECAMP = {
 };
 function secSrc(b, sec) {
   const bf = state.botf === 'strong' ? 'strong' : 'max', ch = ((SECAMP[bf] || {})[b] || {})[sec] || [], L = [];
-  const ac = (id, t) => '<a href="https://app.amplitude.com/analytics/tpub/chart/' + id + '" target="_blank" rel="noopener">' + esc(t) + ' ↗</a>';
+  const ac = (id, t) => '<a href="https://app.amplitude.com/analytics/tpub/chart/' + id + '" target="_blank" rel="noopener">' + esc(t) + ' ↗</a>';
   if (ch.length) L.push('📊 <b>Amplitude charts (' + BOTF[bf].l + ' bot filter):</b> ' + ch.map(x => ac(x[1], x[0])).join(' · '));
   if (sec === 'product') L.push('📊 <b>Amplitude, pulled each morning:</b> people who viewed a product page of each type, then ordered that type within 24 hours, divided by those viewers (Maximum bot filter).');
-  L.push('🗂️ <b>Dashboard:</b> <a href="https://app.amplitude.com/analytics/tpub/dashboard/' + AMPD[bf] + '" target="_blank" rel="noopener">CVR Pacer, ' + BOTF[bf].l + ' bot filter ↗</a>' + (sec === 'geo' && bf === 'max' ? '. Maximum counts a few countries as one audience, so regions come from the same charts split by country.' : ''));
+  L.push('🗂️ <b>Dashboard:</b> <a href="https://app.amplitude.com/analytics/tpub/dashboard/' + AMPD[bf] + '" target="_blank" rel="noopener">CVR Pacer, ' + BOTF[bf].l + ' bot filter ↗</a>' + (sec === 'geo' && bf === 'max' ? '. Maximum counts a few countries as one audience, so regions come from the same charts split by country.' : ''));
   return '<div class="tipsrcw gsrc"><button type="button" class="srcbtn tipsrc" data-tipsrc="1">ⓘ Sources</button><div class="tipsrcbox" hidden><ul class="hul nrul">' + L.map(x => '<li>' + x + '</li>').join('') + '</ul></div></div>';
 }
 function tipSrcHtml(html) {
   if (state.view !== 'daily') return pageSrcHtml(html);
-  const b = state.tab, bf = state.botf === 'strong' ? 'strong' : 'max', a = (id, t) => '<a href="https://app.amplitude.com/analytics/tpub/dashboard/' + id + '" target="_blank" rel="noopener">' + t + ' ↗</a>', L = [];
+  const b = state.tab, bf = state.botf === 'strong' ? 'strong' : 'max', a = (id, t) => '<a href="https://app.amplitude.com/analytics/tpub/dashboard/' + id + '" target="_blank" rel="noopener">' + t + ' ↗</a>', L = [];
   L.push('📊 <b>The numbers:</b> ' + a(AMPD[bf], 'Amplitude, CVR Pacer dashboard (' + BOTF[bf].l + ' bot filter)') + '. CVR is people who viewed a page and ordered within a day, divided by people who viewed a page.');
   L.push('🔁 <b>Cross-check:</b> ' + a(AMPY[b], BR[b].name + ' Yesterday\'s Performance') + '. Its filters differ, so numbers can be a little different.');
   if (/last year|vs last year|2025/i.test(html)) L.push('📅 <b>Last year:</b> the same ' + a(AMPD[bf], 'Amplitude charts') + ', run for the same weekday 364 days back.');
@@ -1506,12 +1506,15 @@ function abHeadline() {
   const tn = t => hint(esc(midCase(t.name)), 'verd n2 hlink" data-jt="' + esc(t.id), card(t));
   const li = (t, x) => '<li>' + testE(t.name) + ' <b>' + esc(t.name) + '</b>' + (x ? ': ' + x : '') + '</li>';
   const words = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'];
-  const h1 = live.length ? hint((String(words[live.length] || live.length)).replace(/^./, c => c.toUpperCase()) + (live.length === 1 ? ' test is' : ' tests are'), 'verd n2', hlist('Running now', live.map(t => li(t, 'day ' + testDays(t))))) + ' running' + (() => { const br = [...new Set(live.map(t => testSite(t)).filter(Boolean))]; return br.length === 1 && br[0] !== 'Both' && live.length > 1 ? ', all on ' + esc(SITEN(br[0])) : ''; })() + '.' : 'No tests are running right now.';
-  // Never say a test is or isn't "near a call": calls can come early (Mike, Oct 27).
-  const sub = [], call = live.filter(t => t.p != null && conf(t) >= 95), lead = live.slice().sort((a, b) => imp(b) - imp(a))[0];
-  const s1 = call.length ? esc(call[0].name) + ' has a clear result.' : lead ? ucf(esc(midCase(lead.name))) + ' leads at ' + sgn(imp(lead), 1) + ' sitewide CVR.' : '';
-  const s2 = [done.length ? done.length + ' decided' : '', soon.length ? soon.length + ' queued' : ''].filter(Boolean).join(', ');
-  return '<p class="verdict vtests">' + h1 + '</p><p class="sulead">' + [s1, s2 ? ucf(s2) + '.' : ''].filter(Boolean).join(' ') + '</p>';
+  const rpvOf = t => ((abRd(t).m || {}).rpv || {}).v, asOfD = parse(EXPS_AS_OF);
+  const recent = live.filter(t => (asOfD - parse(t.start)) / DAY <= 2).sort((p, q) => parse(q.start) - parse(p.start))[0];
+  const next24 = (EXPS.soon || []).find(x => x.start && (parse(x.start) - asOfD) / DAY >= 0 && (parse(x.start) - asOfD) / DAY <= 1);
+  const pool = live.filter(t => abRd(t).verdict[0] !== 'paused' && rpvOf(t) != null && t !== recent).sort((p, q) => rpvOf(q) - rpvOf(p));
+  const promising = pool[0], latest = live.slice().sort((p, q) => parse(q.start) - parse(p.start))[0];
+  const launchedS = t => esc(t.name) + ' launched ' + short(t.start) + '.', promisingS = t => esc(t.name) + ' is the most promising, at ' + sgn(rpvOf(t), 1) + ' revenue per user.';
+  const title = recent ? launchedS(recent) : promising ? promisingS(promising) : live.length ? esc(latest.name) + ' started ' + short(latest.start) + '.' : 'No tests are running right now.';
+  const subtitle = next24 ? esc(next24.name) + ' launches ' + short(next24.start) + '.' : recent ? (promising ? promisingS(promising) : '') : (promising && latest && latest !== promising ? esc(latest.name) + ' started ' + short(latest.start) + '.' : '');
+  return '<p class="verdict vtests">' + title + '</p>' + (subtitle ? '<p class="sulead">' + subtitle + '</p>' : '');
 }
 function trHeadline() {
   const L = (typeof SLACK !== 'undefined' ? SLACK : []).slice(0, 2), tn = (s, k) => hint(esc(/^(TeePublic|Redbubble|Dashery|Google|Amazon|Apple|USA|Black|Meta)\b/.test(s.title) || !k ? s.title : s.title.charAt(0).toLowerCase() + s.title.slice(1)), 'verd n2 hlink" data-say="' + SLACK.indexOf(s), '<b>' + esc(s.title) + '</b><br>' + esc(s.tldr || sents(s.body)[0] || '') + '<span class="segmore">Click for the full read →</span>');
@@ -1526,12 +1529,19 @@ function trHeadline() {
   return '<p class="verdict">' + h1 + '</p>' + (sub ? '<p class="sulead">' + ucf(sub) + '</p>' : '');
 }
 // Earlier tests as cards (Mike, Oct 27), Amplitude Experiment and Search (Sigma) tests together, newest first.
+// Recently shipped and Coming soon share the main table's look (Mike, Oct 30): same header, rows and name cell.
+const erSite = s => /tee/i.test(s || '') ? 'TP' : /both/i.test(s || '') ? 'Both' : 'RB';
+const erName = (name, team, site) => '<span class="tname tnico"><span class="ge gico g-CVR" aria-hidden="true">' + projIco({ t: name, obj: 'CVR' }) + '</span><b>' + esc(name) + '</b><span class="cap tmeta">' + teamTag(team) + '<span class="tloc">' + siteDot(erSite(site)) + '</span></span></span>';
 function earlierHtml() {
   const cut = addDays(EXPS_AS_OF, -21), sx = (typeof SEXP !== 'undefined' ? SEXP.items : []).filter(x => x.end < cut);
-  const A = EXPS.older.map((o, i) => ({ end: o.end, html: '<article class="ecard" role="button" tabindex="0" data-told="' + i + '"><span class="tse" aria-hidden="true">' + testE(o.name) + '</span><div><b>' + esc(o.name) + '</b><span class="epill ' + (o.status === 'shipped' ? 'good' : '') + '">' + (o.status === 'shipped' ? 'Shipped' : 'Kept control') + '</span><p>' + esc(o.note) + '</p><span class="cap">Redbubble · ended ' + short(o.end) + '</span></div></article>' }));
-  const B = sx.map(x => ({ end: x.end, html: hint('<span class="tse" aria-hidden="true">' + x.e + '</span><div><b>' + esc(x.name) + '</b><span class="epill">' + (x.verdict === 'win' ? 'Clear winner' : x.verdict === 'loss' ? 'Clear loser' : 'Inconclusive') + '</span><p>' + esc(x.metric) + ': ' + x.vars.map(v => esc(v[0].replace('Variant ', '')) + ' ' + sgn(v[1], 1)).join(', ') + ', none stat sig.</p><span class="cap">' + esc(x.site) + ' search · ended ' + short(x.end) + ' · <a href="' + SEXP.url + '" target="_blank" rel="noopener">Sigma ↗</a></span></div>', 'ecard', '<b>' + esc(x.name) + '</b><br>' + esc(x.what) + '<ul class="hul nrul"><li>🤷 <b>Inconclusive</b> means no variant reached stat sig, not that nothing changed.</li><li>🔎 All search types combined.</li></ul>') }));
-  const all = A.concat(B).sort((a, z) => a.end < z.end ? 1 : -1);
-  return all.length ? '<div class="group"><div class="ghead"><h3>Earlier</h3><span class="sfacts">' + all.length + ' tests</span></div><div class="egrid">' + all.map(x => x.html).join('') + '</div></div>' : '';
+  const day = d => '<span class="abday"><b>' + short(d) + '</b><small>ended</small></span>';
+  const A = EXPS.older.map((o, i) => ({ end: o.end, html: '<div class="rowwrap"><div class="trow erow" role="button" tabindex="0" data-told="' + i + '">' + erName(o.name, 'customer', 'Redbubble') + day(o.end) + '<span class="abcall"><span class="abv2 ' + (o.status === 'shipped' ? 'v-ship' : '') + '">' + (o.status === 'shipped' ? 'Shipped' : 'Kept control') + '</span></span><span class="erlt">' + esc(o.note) + '</span><span class="chev" aria-hidden="true">›</span></div></div>' }));
+  const B = sx.map(x => ({ end: x.end, html: '<div class="rowwrap"><a class="trow erow" href="' + esc(SEXP.url) + '" target="_blank" rel="noopener">' + erName(x.name, 'search', x.site) + day(x.end) + '<span class="abcall"><span class="abv2 ' + (x.verdict === 'win' ? 'v-ship' : '') + '">' + (x.verdict === 'win' ? 'Clear winner' : x.verdict === 'loss' ? 'Clear loser' : 'Inconclusive') + '</span></span><span class="erlt">' + esc(x.metric) + ': ' + x.vars.map(v => esc(v[0].replace('Variant ', '')) + ' ' + sgn(v[1], 1)).join(', ') + ', none stat sig.</span><span class="chev" aria-hidden="true">↗</span></a></div>' }));
+  const all = A.concat(B).sort((p, q) => p.end < q.end ? 1 : -1);
+  return all.length ? '<div class="group"><div class="ghead"><h3>Recently shipped</h3><span class="sfacts">' + all.length + ' tests</span></div><div class="tcols ertc"><span>Test</span><span>Ended</span><span>Decision</span><span>What happened</span><span></span></div><div class="rows">' + all.map(x => x.html).join('') + '</div></div>' : '';
+}
+function soonHtml() {
+  return '<div class="group"><div class="ghead"><h3>Coming soon</h3><span class="sfacts">' + EXPS.soon.length + ' queued</span></div><div class="tcols stc"><span>Test</span><span>Where</span><span>When</span><span>What it tests</span><span></span></div><div class="rows">' + EXPS.soon.map((x, i) => '<div class="rowwrap"><div class="trow strow" role="button" tabindex="0" data-tsoon="' + i + '">' + erName(x.name, x.team || 'customer', x.site) + '<span class="erlt">' + esc(x.where) + '</span><span class="erlt">' + esc(x.when) + '</span><span class="erlt">' + esc(x.what) + '</span><span class="chev" aria-hidden="true">›</span></div></div>').join('') + '</div></div>';
 }
 function searchTestsHtml() {
   if (typeof SEXP === 'undefined' || !SEXP.items.length) return '';
@@ -1542,7 +1552,7 @@ function searchTestsHtml() {
       '<p class="stw">' + esc(x.what) + '</p><p class="stv">' + verd[0] + ' <b>' + verd[1] + '</b></p>' +
       '<div class="stm"><span class="lbl">' + esc(x.metric) + ' vs control (' + pct(x.base, 1) + ')</span><ul>' + x.vars.map(row).join('') + '</ul></div>' +
       (x.second || []).map(s2 => '<div class="stm sec"><span class="lbl">' + esc(s2[0]) + '</span><ul>' + s2[1].map(row).join('') + '</ul></div>').join('') + '</article>'; };
-  return '<div class="group"><div class="ghead"><h3>Search tests</h3><span class="sfacts">' + hint('From Sigma · how to read these', 'sfact', RULES) + ' · <a href="' + SEXP.url + '" target="_blank" rel="noopener">Open in Sigma ↗</a></span></div><div class="stgrid">' + SEXP.items.map(card).join('') + '</div></div>';
+  return '<div class="group"><div class="ghead"><h3>Search tests</h3><span class="sfacts">' + hint('From Sigma · how to read these', 'sfact', RULES) + ' · <a href="' + SEXP.url + '" target="_blank" rel="noopener">Open in Sigma ↗</a></span></div><div class="stgrid">' + SEXP.items.map(card).join('') + '</div></div>';
 }
 function sayList(list, max) {
   const tone = { bad: 'bad', warn: 'warn', good: 'good' };
@@ -1675,7 +1685,7 @@ const bIcon = e => e.bot === false ? (e.emoji || '📈') : '🤖';
 const botOn = (e, d) => d >= e.date && d <= (e.end || e.date);
 function botHtml(m) {
   const ev = botFor(m).slice().sort((a, z) => z.date < a.date ? -1 : 1); if (!ev.length) return '';
-  const row = e => '<li><span class="bnd">' + short(e.date) + (e.end ? '–' + short(e.end) : '') + '</span><div><b>' + (e.emoji || bIcon(e)) + ' ' + esc(e.short || e.title) + ':</b> ' + esc(e.sum || e.note) + (e.link ? ' <a href="' + esc(e.link) + '" target="_blank" rel="noopener">Slack ↗</a>' : '') + '</div></li>';
+  const row = e => '<li><span class="bnd">' + short(e.date) + (e.end ? '–' + short(e.end) : '') + '</span><div><b>' + (e.emoji || bIcon(e)) + ' ' + esc(e.short || e.title) + ':</b> ' + esc(e.sum || e.note) + (e.link ? ' <a href="' + esc(e.link) + '" target="_blank" rel="noopener">Slack ↗</a>' : '') + '</div></li>';
   const top = ev.slice(0, 3), more = ev.slice(3);
   return '<div class="botnotes bwlist"><span class="lbl">🤖 Bot traffic notes from the Bot Squad</span><p class="bnsub">Dated markers on the chart above. These events move sessions and CVR without any change in shopper behavior.</p><ul>' + top.map(row).join('') + '</ul>' +
     (more.length ? '<details><summary>' + more.length + ' earlier note' + (more.length > 1 ? 's' : '') + '</summary><ul>' + more.map(row).join('') + '</ul></details>' : '') + '</div>';
@@ -1850,7 +1860,7 @@ function sellingHtml() {
   const hot = all.filter(r => r.x >= 1.15).sort((a, z) => z.x - a.x).slice(0, 4), cold = all.filter(r => r.x <= 0.8).sort((a, z) => a.x - z.x).slice(0, 3), mx = Math.max(...hot.map(r => r.x), 2);
   const mover = (r, up) => '<li><a href="https://www.teepublic.com/t-shirts?query=' + encodeURIComponent(r.n) + '" target="_blank" rel="noopener">' + esc(r.n) + '</a><span class="mvbar"><i class="' + (up ? 'up' : 'down') + '" style="width:' + (up ? (r.x / mx * 100) : (r.x * 100)).toFixed(0) + '%"></i></span><b class="' + (up ? 'b' : 'dimx') + '">' + r.x.toFixed(1) + '×</b></li>';
   const movers = '<div class="movers"><h4>🔥 Heating up</h4><ol>' + hot.map(r => mover(r, true)).join('') + '</ol><h4>🧊 Cooling off</h4><ol>' + cold.map(r => mover(r, false)).join('') + '</ol><p class="cap">× = share of the last 24 hours\' orders compared with its share over the 7 days before. 1.0× is normal.</p></div>';
-  const call = typeof SELLCALL !== 'undefined' ? '<div class="sellcall"><span class="sbig" aria-hidden="true">' + SELLCALL.e + '</span><div><b>' + esc(SELLCALL.title) + '</b><p>' + esc(SELLCALL.body) + '</p><p class="ask">👉 ' + esc(SELLCALL.ask) + ' <a href="' + esc(SELLCALL.src) + '" target="_blank" rel="noopener">Source ↗</a></p></div></div>' : '';
+  const call = typeof SELLCALL !== 'undefined' ? '<div class="sellcall"><span class="sbig" aria-hidden="true">' + SELLCALL.e + '</span><div><b>' + esc(SELLCALL.title) + '</b><p>' + esc(SELLCALL.body) + '</p><p class="ask">👉 ' + esc(SELLCALL.ask) + ' <a href="' + esc(SELLCALL.src) + '" target="_blank" rel="noopener">Source ↗</a></p></div></div>' : '';
   return '<div class="selling">' + pie + movers + '</div>';
 }
 const TOPIC = [[/brewers/i, 'Brewers World Series'], [/rays/i, 'World Series'], [/eagles/i, 'Philadelphia Eagles'], [/twenty one pilots/i, 'Twenty One Pilots'], [/kentucky|football/i, 'College football'], [/oozma|kappa/i, 'Monsters University'], [/usps|postal/i, 'US Postal Service']];
@@ -1866,7 +1876,7 @@ function topsHtml() {
   return '<div class="topgrid">' + TOPS.items.map((t, i) => '<a class="top" href="https://www.teepublic.com/t-shirt/' + TOP_IDS[i] + '" target="_blank" rel="noopener"><span class="rank">' + (i + 1) + '</span><img src="' + t.img + '" alt="' + esc(t.title) + '" loading="lazy"><b title="' + esc(t.title) + '">' + esc(t.title) + '</b>' + (topicOf(t.title) ? '<span class="ttag' + (hotTopic(topicOf(t.title)) ? ' hot' : '') + '" title="Topic this design rides on' + (hotTopic(topicOf(t.title)) ? ', heating up right now' : '') + '">' + (hotTopic(topicOf(t.title)) ? '🔥 ' : '#') + esc(topicOf(t.title)) + '</span>' : '') + '<span class="cap">' + int(t.orders) + ' orders</span></a>').join('') + '</div>';
 }
 function trendingHtml() {
-  const call = typeof SELLCALL !== 'undefined' ? '<section class="callcard2"><h3>' + SELLCALL.e + ' ' + esc(SELLCALL.title) + '</h3><p>' + esc(SELLCALL.body) + '</p><p class="ask">💰 ' + esc(SELLCALL.ask) + '</p><a class="ref ext" href="' + esc(SELLCALL.src) + '" target="_blank" rel="noopener">Series preview ↗</a></section>' : '';
+  const call = typeof SELLCALL !== 'undefined' ? '<section class="callcard2"><h3>' + SELLCALL.e + ' ' + esc(SELLCALL.title) + '</h3><p>' + esc(SELLCALL.body) + '</p><p class="ask">💰 ' + esc(SELLCALL.ask) + '</p><a class="ref ext" href="' + esc(SELLCALL.src) + '" target="_blank" rel="noopener">Series preview ↗</a></section>' : '';
   return '<section class="sview"><div class="vhead vhl">' + trHeadline() + '</div>' +
     // Topics go straight under the title (Mike, Oct 22): four cards, then a one-time "Show N more".
     (() => { const L = SLACK, more = L.length - 4; return '<section class="bare tsay"><div class="ghead"><div class="gt"><h3>💬 What people are saying</h3><p class="gsub">The last 48 hours.</p></div></div>' + (L.length ? '' : '<p class="cap">Quiet: nothing new in the last 48 hours.</p>') + sayList(state.sayAll ? L : L.slice(0, 4), state.sayAll ? L.length : 4) + (more > 0 && !state.sayAll ? '<button type="button" class="linkbtn saymore" data-saymore="1">Show ' + more + ' more</button>' : '') + '</section>'; })() +
@@ -1938,14 +1948,14 @@ function abCell(t, k) {
   return hint('<span class="abv ' + cls + '">' + (goal ? '<i class="abgoal" aria-label="Goal metric">🎯</i>' : '') + sgn(x.v, 1) + '</span>' + (k === 'cvr' ? '<small class="abs ' + x.s + '">' + (x.s === 'sig' ? '✓ ' : '') + esc(scope) + '</small>' : x.s === 'sig' || (x.c && x.c >= 80) ? '<small class="abs ' + x.s + '">' + abSure(x) + '</small>' : ''), 'abm', tip);
 }
 const abSig = t => { const r = abRd(t), g = (r.m || {})[r.goal], nm = (g && g.name) || ABK.find(z => z[0] === r.goal)[1];
-  const o = !g ? ['na', '–', '', ''] : g.s === 'sig' ? ['yes', 'Yes', '95%+ sure', 'At least 95% sure this is a true difference.'] : g.s === 'early' ? ['early', 'Too early', 'few days of data', 'Not enough days of data to say anything yet.'] : g.s === 'nb' ? ['nb', 'Can\'t tell', 'no error bar', 'Amplitude gives no error bar for this metric.'] : g.c ? ['not', 'Not yet', g.c + '% sure', 'Needs 95% before we call it.'] : ['not', 'Not yet', 'could be noise', 'Under 95% sure, so it could still be noise.'];
-  return hint('<span class="abst ' + o[0] + '">' + o[1] + '</span><small class="abs">' + (o[2] ? o[2] + ' · ' : '') + 'on ' + esc(nm.toLowerCase()) + '</small>', 'abm', o[3]);
+  const o = !g ? ['na', '–', '', ''] : g.s === 'sig' ? ['yes', 'Yes', '95%+ sure', 'At least 95% sure this is a true difference.'] : g.s === 'early' ? ['early', 'Too early', 'few days of data', 'Not enough days to say anything yet.'] : g.s === 'nb' ? ['nb', 'Can\'t tell', 'no error bar', 'Amplitude gives no error bar for this metric.'] : g.c ? ['not', 'Not yet', g.c + '% sure', 'Needs 95% before we call it.'] : ['not', 'Not yet', 'could be noise', 'Under 95% sure, so it could still be noise.'];
+  return hint('<span class="abst ' + o[0] + '">' + o[1] + '</span><small class="abs">' + (o[2] ? o[2] + ' · ' : '') + 'on ' + esc(nm.toLowerCase()) + '</small>', 'abm', '<span class="nosrc">' + o[3] + '</span>');
 };
-const abImp = t => { const v = siteImp(t.cvr.rel, t.reach); return hint('<span class="abv big ' + (v >= 0 ? 'b' : 'w') + '">' + sp(v, 1) + '</span><small class="abs">' + Math.round(t.reach * 100) + '% reach</small>', 'abm', 'In the test group: ' + pct(t.cvr.a, t.cvr.a < 0.1 ? 2 : 1) + ' → ' + pct(t.cvr.b, t.cvr.b < 0.1 ? 2 : 1) + ' CVR (' + sgn(t.cvr.rel, 1) + ').'); };
-const abRpu = t => { const x = (abRd(t).m || {}).rpv; if (!x) return '<span class="abm na" title="Not measured on this test">–</span>'; return hint('<span class="abv big ' + (x.v >= 0 ? 'b' : 'w') + '">' + sgn(x.v, 1) + '</span><small class="abs">in test group</small>', 'abm', abVal(x, x.a) + ' → ' + abVal(x, x.b) + ' per user.'); };
+const abImp = t => { const v = siteImp(t.cvr.rel, t.reach); return hint('<span class="abv big lite ' + (v >= 0 ? 'b' : 'w') + '">' + sp(v, 1) + '</span><small class="abs">' + Math.round(t.reach * 100) + '% reach</small>', 'abm', '<span class="nosrc">In the test group: ' + pct(t.cvr.a, t.cvr.a < 0.1 ? 2 : 1) + ' → ' + pct(t.cvr.b, t.cvr.b < 0.1 ? 2 : 1) + ' CVR (' + sgn(t.cvr.rel, 1) + ').</span>'); };
+const abRpu = t => { const x = (abRd(t).m || {}).rpv; if (!x) return '<span class="abm na" title="Not measured on this test">–</span>'; return hint('<span class="abv big ' + (x.v >= 0 ? 'b' : 'w') + '">' + sgn(x.v, 1) + '</span><small class="abs">in test group</small>', 'abm', '<span class="nosrc">' + abVal(x, x.a) + ' → ' + abVal(x, x.b) + ' per user.</span>'); };
 const abDay = t => t.status === 'running' ? '<span class="abday"><b>Day ' + testDays(t) + '</b><small>since ' + short(t.start) + '</small></span>' : '<span class="abday"><b>' + (Math.round((parse(t.end) - parse(t.start)) / DAY) + 1) + ' days</b><small>ended ' + short(t.end) + '</small></span>';
-const abCall = t => { const r = abRd(t), pill = '<span class="abv2 v-' + r.verdict[0] + '">' + esc(r.verdict[1]) + '</span>'; return r.next && t.status === 'running' ? hint(pill, 'abcall', esc(r.next)) : '<span class="abcall">' + pill + '</span>'; };
-const ABHEAD = '<div class="tcols abcols"><span>Test</span><span>Running</span>' + hint('Stat sig ⓘ', 'soft', '<b>Stat sig</b><br>Are we 95% sure the main metric moved, not noise?') + hint('Sitewide CVR impact ⓘ', 'soft', '<b>Sitewide CVR impact</b><br>The test group\'s CVR change, scaled by the share of orders it reaches: what it would do to the whole site.') + hint('Revenue per user ⓘ', 'soft', '<b>Revenue per user</b><br>Revenue per user in the test group vs control.') + '<span>The call</span><span></span></div>';
+const abCall = t => { const r = abRd(t), pill = '<span class="abv2 v-' + r.verdict[0] + '">' + esc(r.verdict[1]) + '</span>'; return r.next && t.status === 'running' ? hint(pill, 'abcall', '<span class="nosrc">' + esc(r.next) + '</span>') : '<span class="abcall">' + pill + '</span>'; };
+const ABHEAD = '<div class="tcols abcols"><span>Test</span><span>Running</span>' + hint('Stat sig ⓘ', 'soft', '<span class="nosrc"><b>Stat sig</b><br>Are we 95% sure the main metric moved, not noise?</span>') + hint('Sitewide CVR impact ⓘ', 'soft', '<span class="nosrc"><b>Sitewide CVR impact</b><br>The test group\'s CVR change, scaled by the share of orders it reaches: what it would do to the whole site.</span>') + hint('Revenue per user ⓘ', 'soft', '<span class="nosrc"><b>Revenue per user</b><br>Revenue per user in the test group vs control.</span>') + '<span>The call</span><span></span></div>';
 function testRow(t) {
   const site = siteImp(t.cvr.rel, t.reach), open = state.open.has('x' + t.id), r = Math.round(t.reach * 100);
   const st = t.status === 'running' ? 'Running' : t.status === 'shipped' ? 'Shipped' : 'Kept control';
@@ -1964,7 +1974,7 @@ function testRow(t) {
     const tbl = R.vrows
       ? '<table class="abt"><thead><tr><th>Version</th>' + cols.map(k => '<th>' + esc(lab(k)) + '</th>').join('') + '</tr></thead><tbody>' + [['All versions together', Object.fromEntries(cols.map(k => [k[0], R.m[k[0]].v])), '']].concat(R.vrows.map(v => [v[0], v[1], (R.vdef || {})[v[0]] || ''])).map(v => '<tr><td><b>' + esc(v[0]) + '</b>' + (v[2] ? '<small>' + esc(v[2]) + '</small>' : '') + '</td>' + cols.map(k => { const x = v[1][k[0]]; return x == null ? '<td class="na">–</td>' : '<td>' + ch(x) + '</td>'; }).join('') + '</tr>').join('') + '</tbody></table>'
       : '<table class="abt"><thead><tr><th>Metric</th><th>Control</th><th>Test</th><th>Change</th><th>Stat sig</th></tr></thead><tbody>' + cols.map(k => { const x = R.m[k[0]]; return '<tr><td><b>' + esc(lab(k)) + '</b></td><td>' + abVal(x, x.a) + '</td><td>' + abVal(x, x.b) + '</td><td>' + ch(x.v) + '</td><td>' + sureOf(x) + '</td></tr>'; }).join('') + '</tbody></table>';
-    h += '<div class="detail tdet2 abd"><div class="abcard"><div class="abtop"><p class="abhy"><b>🧪 What we are testing:</b> ' + esc(t.hyp) + '</p><span class="ablinks"><a class="srclink" href="' + t.url + '" target="_blank" rel="noopener">Open in Amplitude ↗</a>' + srcBtn('test:' + t.id) + '</span></div>' + (R.flag ? '<p class="abflag">⚠️ <b>Read with care:</b> ' + esc(R.flag) + '</p>' : '') + tbl + '</div></div>'; 
+    h += '<div class="detail tdet2 abd"><div class="abgrid"><div class="abwhat"><span class="abwl">🧪 What we are testing</span><p>' + esc(t.hyp) + '</p>' + (R.flag ? '<p class="abflag">⚠️ ' + esc(R.flag) + '</p>' : '') + srcBtn('test:' + t.id) + '</div><div class="abcard">' + tbl + '</div></div></div>'; // two tiles; the Amplitude and Jira links live behind Sources (Mike, Oct 30)
     // sources now sit behind the Sources link in the opened view, not in a box under it (Mike, Oct 30)
   }
   return h + '</div>';
@@ -2007,15 +2017,15 @@ function testModal(kind, i) {
   return openModal('<div class="mhead"><h3 id="mtitle">' + testE(o.name) + ' ' + esc(o.name) + '</h3></div><div class="mtags"><span class="rtag">Redbubble</span></div>' +
     '<div class="mfacts">' + fact('Ended', short(o.end)) + fact('Decision', o.status === 'shipped' ? 'Shipped' : 'Kept control') + fact('Impact', o.status === 'shipped' ? 'Positive' : 'No measurable impact') + '</div>' +
     '<div class="pbox"><h4 class="ph">📝 What happened</h4>' + (wu && wu[1] ? '<p>' + esc(wu[1]) + '</p>' : '') + '<p>' + esc(o.note) + '</p></div>' +
-    '<div class="pbox"><h4 class="ph">🔗 Links</h4><p><a href="' + esc(o.url) + '" target="_blank" rel="noopener">Open the test in Amplitude Experiment ↗</a></p>' + (wu && /^https?:/.test(wu[0]) ? '<p><a href="' + esc(wu[0]) + '" target="_blank" rel="noopener">Read the write-up in Confluence ↗</a></p>' : '') + '</div>');
+    '<div class="pbox"><h4 class="ph">🔗 Links</h4><p><a href="' + esc(o.url) + '" target="_blank" rel="noopener">Open the test in Amplitude Experiment ↗</a></p>' + (wu && /^https?:/.test(wu[0]) ? '<p><a href="' + esc(wu[0]) + '" target="_blank" rel="noopener">Read the write-up in Confluence ↗</a></p>' : '') + '</div>');
 }
 function testsHtml() {
   const all = [].concat(EXPS.live, EXPS.done), best = all.reduce((a, t) => Math.max(a, siteImp(t.cvr.rel, t.reach)), 0);
   const head = ABHEAD;
   return '<section class="sview"><div class="vhead vhl">' + abHeadline() + '</div>' +
-    '<div class="group trun"><div class="ghead"><h3>Running</h3>' + abFacts(EXPS.live, true) + '</div><p class="abkey"><span class="abv b">Green</span> is up, <span class="abv w">red</span> is down. Stat sig says whether to trust it. Open a test for every metric against control.</p>' + head + '<div class="rows">' + EXPS.live.slice().sort((p, q) => parse(q.start) - parse(p.start)).map(testRow).join('') + '</div></div>' +
+    '<div class="group trun"><div class="ghead"><h3>Running</h3>' + abFacts(EXPS.live, true) + '</div>' + head + '<div class="rows">' + EXPS.live.slice().sort((p, q) => parse(q.start) - parse(p.start)).map(testRow).join('') + '</div></div>' +
     '<div class="group"><div class="ghead"><h3>Decided in the last three weeks</h3>' + abFacts(EXPS.done, false) + '</div>' + head + '<div class="rows">' + EXPS.done.slice().sort((p, q) => parse(q.end) - parse(p.end)).map(testRow).join('') + '</div></div>' +
-    (EXPS.soon ? '<div class="group"><div class="ghead"><h3>Coming soon</h3><span class="sfacts">' + EXPS.soon.length + ' queued</span></div><div class="tsoon">' + EXPS.soon.map((x, i) => '<div class="tsc" role="button" tabindex="0" data-tsoon="' + i + '"><span class="tse" aria-hidden="true">' + x.e + '</span><div><b>' + esc(x.name) + '</b><p>' + esc(x.what) + '</p><span class="cap">' + esc(x.where) + ' · ' + esc(x.site) + ' · ' + esc(x.when) + '</span>' + refsHtml(x.refs) + '</div></div>').join('') + '</div></div>' : '') +
+    (EXPS.soon && EXPS.soon.length ? soonHtml() : '') +
     earlierHtml() + '</section>';
 }
 
@@ -2291,13 +2301,13 @@ function burnChart(it) {
     '<svg class="burnsvg" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Work remaining over time">' + g + '</svg>' +
     '<div class="burnkey"><span><i class="bk rem"></i>Work left</span>' + (B.scope && B.scope.length ? '<span><i class="bk scope"></i>Total scope</span>' : '') + (eta ? '<span><i class="bk ideal"></i>Pace needed from today</span>' : '') + '</div>' +
     '<p class="burnsum"><b>' + Math.round(rem * 10) / 10 + ' of ' + Math.round((B.total || top) * 10) / 10 + ' ' + u + ' left</b>' + (B.lastDone ? ' · last done ' + esc(short(B.lastDone)) : '') + (need != null && rem > 0 ? ' · needs about ' + (Math.round(need * 10) / 10) + ' ' + u + ' a week to land ' + esc(rng(it.eta)) : rem === 0 ? ' · all Jira work done' : '') + '.</p>' +
-    (S ? '<div class="sprintread"><span class="lbl">Sprint read · ' + esc(TEAMS(teamKey(it.team))) + (S.date ? ' · ' + esc(short(S.date)) : '') + '</span><p>' + (note ? '<b>' + esc(note) + '</b> ' : '') + esc(S.summary || '') + (S.completed != null && S.committed != null ? ' (' + S.completed + ' of ' + S.committed + ' committed done' + (S.carryover ? ', ' + S.carryover + ' carried over' : '') + ')' : '') + '</p>' + (S.link ? '<a class="ref ext" href="' + esc(S.link) + '" target="_blank" rel="noopener">Sprint metrics post ↗</a>' : '') + '</div>' : '') + '</div>';
+    (S ? '<div class="sprintread"><span class="lbl">Sprint read · ' + esc(TEAMS(teamKey(it.team))) + (S.date ? ' · ' + esc(short(S.date)) : '') + '</span><p>' + (note ? '<b>' + esc(note) + '</b> ' : '') + esc(S.summary || '') + (S.completed != null && S.committed != null ? ' (' + S.completed + ' of ' + S.committed + ' committed done' + (S.carryover ? ', ' + S.carryover + ' carried over' : '') + ')' : '') + '</p>' + (S.link ? '<a class="ref ext" href="' + esc(S.link) + '" target="_blank" rel="noopener">Sprint metrics post ↗</a>' : '') + '</div>' : '') + '</div>';
 }
 // Latest update, always shown: newest note from the project's channel, the sprint metrics channels or Jira, dated and linked (Mike, Oct 27).
 function latestBox(it, L, upd) {
   const fd = d => { const x = new Date(d + 'T12:00:00Z'); return WD[x.getUTCDay()] + ' ' + MON[x.getUTCMonth()] + ' ' + x.getUTCDate(); };
   const over = [it.sheetS ? 'status ' + esc(it.sheetS) + ' → ' + esc(it.s) : '', it.sheetEta ? 'launch ' + esc(it.sheetEta) + ' → ' + esc(it.eta) : ''].filter(Boolean);
-  const body = L ? '<p>' + esc(L.text) + '</p><p class="cap">' + fd(L.date) + ' · ' + (L.url ? '<a href="' + esc(L.url) + '" target="_blank" rel="noopener">' + esc(L.src) + ' ↗</a>' : esc(L.src)) + (over.length ? ' · Newer than the roadmap sheet, so it updates the ' + over.join(' and ') : '') + '</p>'
+  const body = L ? '<p>' + esc(L.text) + '</p><p class="cap">' + fd(L.date) + ' · ' + (L.url ? '<a href="' + esc(L.url) + '" target="_blank" rel="noopener">' + esc(L.src) + ' ↗</a>' : esc(L.src)) + (over.length ? ' · Newer than the roadmap sheet, so it updates the ' + over.join(' and ') : '') + '</p>'
     : upd ? '<p>' + esc(upd) + '</p><p class="cap">From standups and Jira comments, Oct 22</p>' : '<p class="cap">Nothing new in its project channel, the sprint metrics channels or Jira since the roadmap sheet was synced (' + esc(COMING.asOf) + ').</p>';
   return '<div class="pbox upd"><h4 class="ph">🔔 Latest update</h4>' + body + '</div>';
 }
@@ -2331,7 +2341,7 @@ function lbModal2(ref) {
 // A source recorded by the refresh (src/sources.json) wins; otherwise the default says where that field is read from.
 const SHEET_URL = 'https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU';
 // Same "Where this comes from" box for tests and recent impact (Mike, Oct 28). rows: [label, value, source html].
-const provLnk = (txt, url) => url ? '<a href="' + esc(url) + '" target="_blank" rel="noopener">' + esc(txt) + ' ↗</a>' : esc(txt);
+const provLnk = (txt, url) => url ? '<a href="' + esc(url) + '" target="_blank" rel="noopener">' + esc(txt) + ' ↗</a>' : esc(txt);
 const provBox = rows => '<div class="pbox prov"><h4 class="ph">🔎 Where this comes from</h4><dl class="provl">' + rows.filter(Boolean).map(r => '<dt>' + r[0] + '</dt><dd>' + (r[1] ? '<b>' + r[1] + '</b> · ' : '') + '<span class="cap">' + r[2] + '</span></dd>').join('') + '</dl></div>';
 function testProv(t) {
   const R = (typeof SRCS !== 'undefined' && SRCS[t.name]) || {}, pick = (k, d) => R[k] ? provLnk(R[k].from || R[k].where || 'Source', R[k].url) : d, amp = provLnk('Amplitude Experiment', t.url), tm = testTeam(t), tk = COMING.teams.find(x => x.key === tm) || {}, pm = pmOf(t.name, tm), site = testSite(t);
@@ -2431,7 +2441,7 @@ function soonSummary() {
 // Write-ups: readouts with results get the gold link; specs and design docs are ordinary links.
 const WU = { 'Remove shipping options from cart': ['https://articore.atlassian.net/wiki/spaces/EC1/pages/5056036893/RB+A+B+Cart+Shipping+Options+Test+-+Post-Project+Analysis', 'Cart-to-order CVR up 2.0% (48.3% to 49.2%) and cart-to-checkout up 19%. Shipped to 100% Sep 8.'] };
 const SPECS = { 'Dashery cart sticker upsell': ['https://articore.atlassian.net/wiki/spaces/EDTP/pages/5076320263/2609+Cart+Upsell+TDD', 'Technical design'], 'Exact US sales tax at Redbubble checkout': ['https://articore.atlassian.net/wiki/spaces/PL/pages/5112266767/PLC-5977+Tax+Amount+Based+on+Full+Address', 'Design doc'], 'Sign in with Google': ['https://articore.atlassian.net/wiki/spaces/EC1/pages/4959797251/C26TP+Product+Spec+Google+Sign-In+for+TeePublic', 'Product spec'], 'Marketing opt-in on Express Pay': ['https://articore.atlassian.net/wiki/spaces/EC1/pages/5047943343/RB2609+Product+Spec+Marketing+Opt-In+for+Express+Payment+Purchasers', 'Product spec'] };
-const wuLink = it => WU[it.t] ? '<a class="wugold" href="' + WU[it.t][0] + '" target="_blank" rel="noopener">🏅 Read the write-up ↗</a>' : '';
+const wuLink = it => WU[it.t] ? '<a class="wugold" href="' + WU[it.t][0] + '" target="_blank" rel="noopener">🏅 Read the write-up ↗</a>' : '';
 const IMPSH = { 'Bug fix: men\'s tee images back in the Shopping feed': ['Fixed', 'bug fix'], 'Sign in with Google': ['Live', 'feature shipped'], 'Marketing opt-in on Express Pay': ['Working', 'feature shipped'], 'Flat-lay T-shirt thumbnails in search': ['+1.0% CVR', 'whole-site'], 'Product image first on all apparel': ['+1.2% CVR', 'in the test'], 'Dashery cart sticker upsell': ['17% → 30%', 'sticker attach'], 'Exact US sales tax at Redbubble checkout': ['82%', 'of US orders covered'], 'Remove shipping options from cart': ['+2.0% CVR', 'cart to order'] };
 // Annual revenue impact. Every figure here is Claude's estimate: lift × share of revenue it touches × that site's run rate.
 const REVEST = {
@@ -2473,7 +2483,7 @@ async function flagSave(t, v, note) {
 function impModal(i) {
   const it = impactList()[i], o = OUTN[it.out];
   openModal('<div class="mhead"><h3 id="mtitle">' + it.e + ' ' + esc(it.t) + '</h3></div><div class="pmeta"><div><span class="lbl">Result</span><b>' + o[0] + ' ' + o[1] + '</b></div><div><span class="lbl">Shipped or decided</span><b>' + esc(it.when) + '</b></div><div><span class="lbl">Team</span>' + esc(TEAMS(it.team)) + '</div>' + (it.site ? '<div><span class="lbl">Site</span>' + esc(SITEN(it.site)) + '</div>' : '') + '</div>' +
-    (revEst(it) ? '<div class="pbox"><h4 class="ph">💵 Projected annual revenue</h4><p><b>' + revEst(it).short + '</b></p><p class="cap">Claude\'s estimate. ' + esc(revEst(it).how) + '</p></div>' : '') + '<div class="pbox imp"><h4 class="ph">📊 What happened</h4><p><b>' + it.imp + '</b></p><p class="cap">Source: ' + esc(it.src || '') + '</p>' + wuLink(it) + (!WU[it.t] ? '<p class="cap">📝 No results write-up in Confluence yet.' + (SPECS[it.t] ? ' <a class="ref ext" href="' + SPECS[it.t][0] + '" target="_blank" rel="noopener">' + SPECS[it.t][1] + ' ↗</a>' : '') + '</p>' : '') + '</div>' +
+    (revEst(it) ? '<div class="pbox"><h4 class="ph">💵 Projected annual revenue</h4><p><b>' + revEst(it).short + '</b></p><p class="cap">Claude\'s estimate. ' + esc(revEst(it).how) + '</p></div>' : '') + '<div class="pbox imp"><h4 class="ph">📊 What happened</h4><p><b>' + it.imp + '</b></p><p class="cap">Source: ' + esc(it.src || '') + '</p>' + wuLink(it) + (!WU[it.t] ? '<p class="cap">📝 No results write-up in Confluence yet.' + (SPECS[it.t] ? ' <a class="ref ext" href="' + SPECS[it.t][0] + '" target="_blank" rel="noopener">' + SPECS[it.t][1] + ' ↗</a>' : '') + '</p>' : '') + '</div>' +
     '<div class="pbox"><h4 class="ph">💡 What it means</h4><p>' + (it.out === 'win' ? 'Keep it, and look for the next version of the same idea.' : it.out === 'loss' ? 'We kept the old version. The learning feeds the next test in this area.' : it.out === 'measuring' ? 'Too early to call. This updates when enough data is in.' : 'No measurable difference, so we kept the simpler option.') + '</p></div>' + impProv(it) + refsHtml(it.refs));
 }
 // Headline: the biggest win in one short line. Subhead: the next two, with their numbers.
@@ -2830,7 +2840,7 @@ function comingHtml() {
   const status = it => { const k = phaseIx(it.s), why = UPD[it.t] || it.why || ''; return hint(phaseBar(it.s), 'stcell', '<b>' + esc(it.s || 'TBD') + '</b><br>' + PHASES.map((p, i) => i === k ? '<b>▸ ' + p + '</b>' : p).join(' → ') + (k < 5 && !stuck(it.s) ? '<br>Next: ' + PHASES[k + 1] : '') + (stuck(it.s) && why ? '<br><br><b>Why:</b> ' + esc(why) : '')); };
   // UX column: the project's Figma or design spec, when there is one (Mike, Oct 26: people like seeing the UX).
   const hasUX = () => typeof UXL !== 'undefined' && Object.keys(UXL).length > 0; // the column only shows once there are links
-  const uxCell = it => { const L = (typeof UXL !== 'undefined' && UXL[it.t]) || []; return L.length ? '<a class="uxl" href="' + esc(L[0].url) + '" target="_blank" rel="noopener" title="' + esc(L[0].l) + '">' + (/figma/i.test(L[0].url) ? 'Figma' : 'Design') + ' ↗</a>' : '<span class="faint">–</span>'; };
+  const uxCell = it => { const L = (typeof UXL !== 'undefined' && UXL[it.t]) || []; return L.length ? '<a class="uxl" href="' + esc(L[0].url) + '" target="_blank" rel="noopener" title="' + esc(L[0].l) + '">' + (/figma/i.test(L[0].url) ? 'Figma' : 'Design') + ' ↗</a>' : '<span class="faint">–</span>'; };
   const row = it => { const tg = tagsOf(it); return '<div class="rmrow' + (prev && liveChg(it, prev).length ? ' chg' + (isRev(it, prev) ? ' rev' : '') : '') + '" role="button" tabindex="0" data-lbm2="' + it.ref + '"><span class="lbe" aria-hidden="true">' + it.e + '</span><span class="tmn"><b class="rmt">' + esc(it.t) + srcBtn('rm:' + it.ref) + '</b>' +
     '<span class="lbd rmd">' + esc(it.d || '') + '</span>' + (tg ? '<span class="rmchg">' + tg + '</span>' : '') + '<span class="rmpills">' + labelPills(it) + '</span></span>' +
     '<span' + (prev && liveChg(it, prev).some(c => c.k === 'phase' || c.k === 'blocked') ? ' class="chgv' + (isRev(it, prev) ? ' rev' : '') + '"' : '') + '>' + status(it) + '</span><span class="lbeta' + (prev && liveChg(it, prev).some(c => c.k === 'date') ? ' chgv' + (isRev(it, prev) ? ' rev' : '') : '') + '">' + esc(rng(it.eta)) + '</span><span>' + (impCell(it) || '<span class="faint">' + (/^(Ops|Data|Compliance)$/.test(it.obj || '') ? 'No direct revenue' : 'Not sized') + '</span>') + '</span><span>' + confCell(it) + '</span>' + (hasUX() ? '<span class="rmux">' + uxCell(it) + '</span>' : '') + '</div>'; };
@@ -3079,7 +3089,7 @@ const smIco = t => { const k = /refresh/i.test(t) ? 'refresh' : /driver/i.test(t
 // Menu items: plain links with a small line icon each (Mike, Oct 22: icons back, regular weight).
 const srcMenu = cvr => srcMenu0(cvr).replace(/>(?:\p{Extended_Pictographic}|[↻↗])\uFE0F?\s*/gu, '>').replace(/\s*↗</g, '<').replace(/(<(?:a|button) role="menuitem"[^>]*>)([^<]+)</g, (m, open, txt) => open + smIco(txt) + '<span>' + txt + '</span><');
 function srcMenu0(cvr) {
-  const a = (u, l) => '<a role="menuitem" href="' + u + '" target="_blank" rel="noopener">' + l + ' ↗</a>', SHEET = 'https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit?gid=579410268#gid=579410268';
+  const a = (u, l) => '<a role="menuitem" href="' + u + '" target="_blank" rel="noopener">' + l + ' ↗</a>', SHEET = 'https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit?gid=579410268#gid=579410268';
   const how = '<button role="menuitem" data-act="refresh">↻ How this refreshes</button>';
   if (cvr) return a('https://app.amplitude.com/analytics/tpub/dashboard/lm29400h', '📊 CVR data in Amplitude') + how + '<button role="menuitem" data-act="drivers">📉 How drivers are picked</button><button role="menuitem" data-act="guide">📖 How to read this page</button>';
   const v = state.view;
@@ -3136,6 +3146,17 @@ function segPills() {
     const put = r => { p.style.transform = 'translate(' + r[0] + 'px,' + r[1] + 'px)'; p.style.width = r[2] + 'px'; p.style.height = r[3] + 'px'; };
     p.style.transition = 'none'; put(from); void p.offsetWidth; p.style.transition = ''; put(to); SEGPOS[g.dataset.seg] = to;
   });
+}
+function pillTo(sel) {
+  const wrap = document.querySelector('.bar-in'), p = document.getElementById('navpill'); if (!wrap || !p || !p._bw || !sel) return;
+  const w = wrap.getBoundingClientRect(), r = sel.getBoundingClientRect();
+  p.style.setProperty('--c', getComputedStyle(sel).getPropertyValue('--c') || 'var(--accent)');
+  p.style.transform = 'translate(' + (r.left - w.left) + 'px,' + (r.top - w.top) + 'px) scale(' + (r.width / p._bw) + ',' + (r.height / p._bh) + ')';
+}
+function navRender(sel) {
+  const root = document.documentElement; try { pillTo(sel); } catch (e) {}
+  root.classList.add('navbusy');
+  requestAnimationFrame(() => requestAnimationFrame(() => { render(); setTimeout(() => root.classList.remove('navbusy'), 500); }));
 }
 function movePill() {
   const wrap = document.querySelector('.bar-in'), sel = document.querySelector('#tabs [aria-selected="true"]'); if (!wrap) return;
@@ -3206,7 +3227,7 @@ const botSec = b => '<section class="botsec" id="g-bots"><div class="bothead"><h
 const botTipOf = (e, x) => { if (!e) return x ? '<b>' + esc(x.m.label) + '</b><br>' + esc(x.why) + '.' : '';
   const aff = [...new Set((e.metrics || []).map(k => k === 'overall' ? 'Overall CVR' : k.split('/').pop()))].slice(0, 5).join(', ');
   const kv = [['When', short(e.date) + (e.end ? ' to ' + short(e.end) : ' onward')], ['Site', e.site === 'both' ? 'Both sites' : SITEN(String(e.site || '').toUpperCase())], aff ? ['Affects', aff] : null].filter(Boolean);
-  return '<div class="gtipc"><b class="gtt">' + (e.emoji || '🤖') + ' ' + esc(e.short || e.title) + '</b><div class="gkv">' + kv.map(r => '<span class="gk">' + r[0] + '</span><span class="gv">' + esc(r[1]) + '</span>').join('') + '</div>' + (e.link ? '<a class="segmore" href="' + esc(e.link) + '" target="_blank" rel="noopener">Open the Bot Squad thread ↗</a>' : '') + '</div>'; };
+  return '<div class="gtipc"><b class="gtt">' + (e.emoji || '🤖') + ' ' + esc(e.short || e.title) + '</b><div class="gkv">' + kv.map(r => '<span class="gk">' + r[0] + '</span><span class="gv">' + esc(r[1]) + '</span>').join('') + '</div>' + (e.link ? '<a class="segmore" href="' + esc(e.link) + '" target="_blank" rel="noopener">Open the Bot Squad thread ↗</a>' : '') + '</div>'; };
 function botRow(b, flat) {
   // A short bot report in plain words (Mike, Oct 26): what looks skewed today, then what the Bot Squad found or changed this week.
   // Only the key words hover (each with a small tip); the full notes sit behind "More info".
@@ -3243,7 +3264,7 @@ function botRow(b, flat) {
 function botWatchModal(b) {
   // Scannable at a glance: emoji + short title, one sentence, a quiet Slack link (Mike, Oct 26).
   const all = botNotesFor(b).filter(e => e.date <= addDays(D.asOf, 2));
-  const row = e => '<li><span class="bnd">' + short(e.date) + (e.end ? '–' + short(e.end) : '') + '</span><div><b>' + (e.emoji || bIcon(e)) + ' ' + esc(e.short || e.title) + ':</b> ' + esc(e.sum || e.note) + (e.link ? ' <a href="' + esc(e.link) + '" target="_blank" rel="noopener">Slack ↗</a>' : '') + '</div></li>';
+  const row = e => '<li><span class="bnd">' + short(e.date) + (e.end ? '–' + short(e.end) : '') + '</span><div><b>' + (e.emoji || bIcon(e)) + ' ' + esc(e.short || e.title) + ':</b> ' + esc(e.sum || e.note) + (e.link ? ' <a href="' + esc(e.link) + '" target="_blank" rel="noopener">Slack ↗</a>' : '') + '</div></li>';
   openModal('<div class="mhead"><h3 id="mtitle">🤖 Bot watch: ' + BR[b].name + '</h3></div><p class="cap">From the Bot Squad, newest first.</p><div class="botnotes bwlist"><ul>' + all.map(row).join('') + '</ul></div>');
 }
 function paint() {
@@ -3363,7 +3384,7 @@ document.addEventListener('click', ev => {
   else if (ht) { ev.stopPropagation(); if (pinned === ht) { hideHint(); } else { showHint(ht); pinned = ht; } return; }
   if (pinned && !t.closest('#hintbox')) hideHint();
   if (t.closest('.mclose') || t.id === 'modal') return closeModal();
-  const tab = t.closest('[data-tab]'); if (tab) { if (state.tab === 'tp' || state.tab === 'rb') state.days[state.tab] = state.day; state.tab = tab.dataset.tab; state.day = state.days[state.tab] || D.asOf; state.view = 'daily'; state.cmpEdit = false; state.open.clear(); state.full.clear(); state.payChart = false; window.scrollTo(0, 0); return render(); }
+  const tab = t.closest('[data-tab]'); if (tab) { if (state.tab === 'tp' || state.tab === 'rb') state.days[state.tab] = state.day; state.tab = tab.dataset.tab; state.day = state.days[state.tab] || D.asOf; state.view = 'daily'; state.cmpEdit = false; state.open.clear(); state.full.clear(); state.payChart = false; window.scrollTo(0, 0); return navRender(tab); }
   if (t.closest('#guide')) return guideModal();
   if (t.closest('#refresh')) return refreshModal();
   if (t.closest('#salecal')) { state.calSite = null; state.calDay = null; return saleCalModal(); }
@@ -3379,7 +3400,7 @@ document.addEventListener('click', ev => {
   const ccmm = t.closest('[data-ccm]'); if (ccmm) { state.ccm = ccmm.dataset.ccm; return renderKeep(); }
   if (t.closest('[data-ccsess]')) { state.ccOff = !state.ccOff; return renderKeep(); }
   const stg = t.closest('[data-sesstog]'); if (stg) { const k = stg.dataset.sesstog; state.sessOff.has(k) ? state.sessOff.delete(k) : state.sessOff.add(k); return renderKeep(); }
-  const vw = t.closest('[data-view]'); if (vw) { state.view = vw.dataset.view; window.scrollTo(0, 0); try { history.replaceState(null, '', '#' + (state.view === 'daily' ? state.tab : state.view)); } catch (e) { /* ignore */ } return render(); }
+  const vw = t.closest('[data-view]'); if (vw) { state.view = vw.dataset.view; window.scrollTo(0, 0); try { history.replaceState(null, '', '#' + (state.view === 'daily' ? state.tab : state.view)); } catch (e) { /* ignore */ } return navRender(vw); }
   const tk = t.closest('[data-tick]'); if (tk && TKSH && RT.db) { const [dt, k] = tk.dataset.tick.split(':'), cur = Object.assign({}, SHT[dt] || {}); cur['k' + k] = !cur['k' + k]; SHT[dt] = cur; renderKeep(); RT.db.collection('ticks').doc(dt).set(cur).catch(() => { TKSH = false; renderKeep(); }); return; }
   if (tk) { const k = tk.dataset.tick; TICKS.has(k) ? TICKS.delete(k) : TICKS.add(k); try { localStorage.setItem('pod.ticks', JSON.stringify([...TICKS])); } catch (e) { /* ignore */ } return renderKeep(); }
   const gt = t.closest('[data-goto]'); if (gt) { let [v, sel] = gt.dataset.goto.split('|'); if (v === 'standuplast') { v = 'standup'; state.su = 'last'; state.view = ''; } if (state.view !== v) { state.view = v; render(); } const el = document.querySelector(sel); if (el) { window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 110 }); el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 2600); } return; }
@@ -3464,7 +3485,7 @@ window.addEventListener('scroll', () => {
 { const hb = document.createElement('div'); hb.id = 'hintbox'; hb.className = 'hintbox'; hb.hidden = true; hb.setAttribute('role', 'tooltip'); document.body.appendChild(hb); }
 // One footer for every page: what this is, when it refreshes, where the data comes from, who to ask.
 $('#foot').innerHTML = '<div class="fin"><div class="fbrand"><b>' + LOGO('pod', 22) + ' Product Org Dashboard</b>How the Articore product org is doing: CVR, what is shipping, what we are testing and what changed.<p class="fsmall">Built by Mike Carafa with Claude. Updates at 8:30 AM, 2:30 PM and 4:30 PM ET.</p></div>' +
-  '<div><h4>Feedback or ideas for this dashboard</h4><a href="https://grid-articore.enterprise.slack.com/team/U2XU2NP7T" target="_blank" rel="noopener">Ask Mike in Slack ↗</a></div></div>';
+  '<div><h4>Feedback or ideas for this dashboard</h4><a href="https://grid-articore.enterprise.slack.com/team/U2XU2NP7T" target="_blank" rel="noopener">Ask Mike in Slack ↗</a></div></div>';
 try { state.tipOther = localStorage.getItem('pod.tipo') === '1'; state.ccOth = localStorage.getItem('pod.ccoth2') === 'on'; } catch (e) {}
 // The viewer never updates the address bar, so a link's #tab sticks after clicking around. On a reload of the same link,
 // go back to the tab last viewed; a different (or new) link still opens its own tab (Mike, Oct 26).
