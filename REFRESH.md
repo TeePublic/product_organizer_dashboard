@@ -40,6 +40,16 @@ Always edit the existing file and keep its shape: open the current dataset, chan
 ## Prompt for Claude (paste with the repo folder open)
 > Read REFRESH.md. Update the data files in `data/` from the sources I give you, keeping every field name and structure exactly as it is now. Only change files inside `data/`: do not touch any other file. Update the as-of dates and header comments. Keep to the shareable-only rule. Then run `npm run check`, fix any FAIL, and tell me in plain language what changed, which items still have no source link, and whether the check passed. Do not commit or push if anything fails, fix everything before push command.
 
+## Branch rules (read before committing)
+
+- Always work on `master`. Before any commit, run `git branch --show-current`
+  and confirm it prints `master`. If it doesn't, stop and tell the user.
+- Run `git pull origin master` before making changes, so you start from the latest version.
+- Never check out, commit to, merge, or push to the `okta-auth` branch.
+- Never force-push, and never rewrite history.
+- Do not edit `middleware.js`, `lib/auth.js`, or anything under `api/auth/`.
+  Those files are managed separately.
+
 If Node is not installed on your computer, `npm run check` will not run. Tell Claude to skip it: GitHub runs the same check after you push and emails you if it fails.
 
 ## Rules for the content
