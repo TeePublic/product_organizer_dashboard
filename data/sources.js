@@ -365,11 +365,12 @@ const SRCS = {
   },
   "s": {
    "kind": "jira",
-   "where": "Jira DEAP-5099",
-   "who": "Jonathan Tan",
-   "date": "2026-10-27",
+   "where": "Jira DEAP-5099, status change",
+   "who": "Oliver Belmont",
+   "date": "2026-10-28",
    "url": "https://articore.atlassian.net/browse/DEAP-5099",
-   "what": "Still in Backlog status; added to Sprint 29 (Oct 27 to Nov 10) and ranked higher on Oct 27"
+   "what": "Moved to In Development on Oct 28",
+   "say": "DEAP-5099, assigned to Oliver Belmont, moved from Backlog to In Development on Oct 28."
   },
   "eta": {
    "kind": "jira",
@@ -422,12 +423,13 @@ const SRCS = {
    "what": "Brand: TPO (TeePublic)"
   },
   "s": {
-   "kind": "jira",
-   "where": "Jira DEAP-5518",
-   "who": "Milan Sacher",
-   "date": "2026-10-27",
-   "url": "https://articore.atlassian.net/browse/DEAP-5518",
-   "what": "Final QA, YouTube regression and rollout ticket marked Released; YouTube linking still works"
+   "kind": "slack",
+   "where": "#temp-google-sign-up",
+   "who": "Allison Cassara",
+   "date": "2026-10-28",
+   "url": "https://grid-articore.enterprise.slack.com/archives/C0BPU9P07UK/p1793199445224809",
+   "what": "Really close to release; final QA after the sign-up method event fix (DEAP-6834)",
+   "say": "Allison Cassara posted in #temp-google-sign-up on Oct 28 that release is close and final QA follows a fix so sign-ups record email or Google."
   },
   "s_sheet": {
    "kind": "sheet",
@@ -448,6 +450,15 @@ const SRCS = {
    "date": "2026-08-04",
    "url": "https://articore.atlassian.net/browse/DEAP-4481",
    "what": "Feasibility research ticket moved to In Development on Aug 4"
+  },
+  "eta": {
+   "kind": "slack",
+   "where": "#temp-google-sign-up",
+   "who": "Allison Cassara",
+   "date": "2026-10-28",
+   "url": "https://grid-articore.enterprise.slack.com/archives/C0BPU9P07UK/p1793199445224809",
+   "what": "Launch waits on DEAP-6834, then a final round of QA",
+   "say": "Allison Cassara posted in #temp-google-sign-up on Oct 28 that launch waits on the sign-up event fix (DEAP-6834) and a final QA round, so it did not launch Oct 28."
   }
  },
  "Simon event matching": {
@@ -668,10 +679,12 @@ const SRCS = {
   },
   "s": {
    "kind": "jira",
-   "where": "Jira DEAP-6499 and DEAP-6613, status",
+   "where": "Jira DEAP-6499, status change",
+   "who": "Dustin Chen",
+   "date": "2026-10-28",
    "url": "https://articore.atlassian.net/browse/DEAP-6499",
-   "who": "Dustin",
-   "what": "Both feed tickets are in Backlog"
+   "what": "Add Greeting Cards to TeePublic product feed moved to In Development on Oct 28",
+   "say": "DEAP-6499 (greeting cards in the TeePublic feed), assigned to Dustin Chen, moved to In Development on Oct 28."
   },
   "eta": {
    "kind": "slack",
@@ -719,10 +732,11 @@ const SRCS = {
   "s": {
    "kind": "jira",
    "where": "Jira DEAP-5869, status change",
+   "who": "Amelia Cacchione",
+   "date": "2026-10-28",
    "url": "https://articore.atlassian.net/browse/DEAP-5869",
-   "who": "Dustin",
-   "date": "2026-10-27",
-   "what": "Moved from In QA to Approved on Oct 27; the code merged Oct 26 and Simon was told about the new column"
+   "what": "Moved to Released on Oct 28; one item from Simon still pending",
+   "say": "Amelia Cacchione moved DEAP-5869 to Released on Oct 28 to close the sprint, noting one item from Simon is still pending."
   },
   "start": {
    "kind": "jira",
@@ -731,6 +745,15 @@ const SRCS = {
    "who": "Dustin",
    "date": "2026-10-20",
    "what": "Moved to In Development on Oct 20"
+  },
+  "eta": {
+   "kind": "jira",
+   "where": "Jira DEAP-5869, status change",
+   "who": "Amelia Cacchione",
+   "date": "2026-10-28",
+   "url": "https://articore.atlassian.net/browse/DEAP-5869",
+   "what": "Released Oct 28",
+   "say": "DEAP-5869 moved to Released on Oct 28."
   }
  },
  "Lifecycle reporting fixes": {
@@ -1016,10 +1039,11 @@ const SRCS = {
   "s": {
    "kind": "jira",
    "where": "Jira DEAP-4278, status change",
-   "who": "Nishant Chauhan",
-   "date": "2026-10-27",
    "url": "https://articore.atlassian.net/browse/DEAP-4278",
-   "what": "Moved from Backlog back to In Development on Oct 27"
+   "what": "Moved from In Development to Code Review on Oct 29",
+   "who": "Vaibhav Soni",
+   "date": "2026-10-29",
+   "say": "Vaibhav Soni moved DEAP-4278 from In Development to Code Review on Oct 29."
   },
   "start": {
    "kind": "jira",
@@ -1721,12 +1745,13 @@ const SRCS = {
    "what": "Brand: RBO (Redbubble)"
   },
   "s": {
-   "kind": "slack",
-   "where": "#temp-rbo-trucker-hat-line-extension",
-   "who": "Ashley Iwafuchi",
-   "date": "2026-10-26",
-   "url": "https://grid-articore.enterprise.slack.com/archives/C0C451JHHU7/p1793033264354529",
-   "what": "Fulfillment team still to set up the hat in the routing system by Oct 28 and load pricing by Oct 29, once pricing is ready"
+   "kind": "jira",
+   "where": "Jira DEAP-6261, status change",
+   "url": "https://articore.atlassian.net/browse/DEAP-6261",
+   "what": "Launch epic moved to In QA; routing, ordering and pricing tickets Released, end-to-end test In Development",
+   "who": "Matthew Wills",
+   "date": "2026-10-29",
+   "say": "The trucker hat launch epic (DEAP-6261) moved to In QA on Oct 29, with its routing, ordering and pricing tickets released and the end-to-end staging test in development."
   },
   "s_sheet": {
    "kind": "sheet",
@@ -1968,11 +1993,12 @@ const SRCS = {
   },
   "s": {
    "kind": "jira",
-   "where": "Jira DEAP-6198, status history",
-   "url": "https://articore.atlassian.net/browse/DEAP-6198",
-   "what": "Moved from In Development to Approved, then Released, on Oct 28",
-   "who": "Bishal Shrestha",
-   "date": "2026-10-28"
+   "where": "Jira DEAP-6421, status change",
+   "who": "Ayush Yadav",
+   "date": "2026-10-28",
+   "url": "https://articore.atlassian.net/browse/DEAP-6421",
+   "what": "Sunset products phase 4 (offsite feeds) Released Oct 28",
+   "say": "DEAP-6421, the feed step of the product sunset, moved to Released on Oct 28."
   },
   "s_sheet": {
    "kind": "sheet",
@@ -2353,11 +2379,12 @@ const SRCS = {
   },
   "s": {
    "kind": "jira",
-   "where": "Jira DEAP-6615, status",
+   "where": "Jira DEAP-6615, status change",
    "url": "https://articore.atlassian.net/browse/DEAP-6615",
-   "what": "Ticket to make the search box more prominent opened Oct 21, still in Backlog",
-   "who": "Wendy Fullam",
-   "date": "2026-10-21"
+   "what": "Moved from Backlog to In Development on Oct 29",
+   "who": "Mohit Bansal",
+   "date": "2026-10-29",
+   "say": "Mohit Bansal moved DEAP-6615 from Backlog to In Development on Oct 29."
   },
   "s_sheet": {
    "kind": "sheet",
@@ -2383,6 +2410,15 @@ const SRCS = {
    "where": "Roadmap sheet, Active Work tab, Estimated ROI column, row 25",
    "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A25",
    "what": "Raise the share of sessions that search from 9% to 15%"
+  },
+  "start": {
+   "kind": "jira",
+   "where": "Jira DEAP-6615, status change",
+   "url": "https://articore.atlassian.net/browse/DEAP-6615",
+   "what": "Work started Oct 29",
+   "who": "Mohit Bansal",
+   "date": "2026-10-29",
+   "say": "Work started Oct 29, when DEAP-6615 moved to In Development."
   }
  },
  "Bad-art detection research": {
@@ -3068,6 +3104,639 @@ const SRCS = {
    "where": "Roadmap sheet, Active Work tab, Status column, row 139",
    "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A139",
    "what": "Not Started"
+  }
+ },
+ "SEO: 20 results per search page": {
+  "s": {
+   "kind": "jira",
+   "where": "Jira DEAP-6285, status change",
+   "who": "Mohit Bansal",
+   "date": "2026-10-28",
+   "url": "https://articore.atlassian.net/browse/DEAP-6285",
+   "what": "Moved to Code Review on Oct 28",
+   "say": "DEAP-6285, assigned to Mohit Bansal, moved to Code Review on Oct 28."
+  }
+ },
+ "Sticker sizes and finishes on TeePublic": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 3",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A3",
+   "date": "2026-10-28",
+   "what": "The roadmap sheet's Active Work tab lists this project (row 3); it was missing from the dashboard until the Oct 28 4:30 PM refresh."
+  },
+  "team": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 3",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A3",
+   "date": "2026-10-28",
+   "what": "The roadmap sheet lists the team as Core."
+  },
+  "s": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 3",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A3",
+   "date": "2026-10-28",
+   "what": "The roadmap sheet shows Impact Analysis, On Track, phase Aug 5 to Aug 28 (read Oct 28)."
+  }
+ },
+ "Vintage tee on Redbubble": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 4",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A4",
+   "date": "2026-10-28",
+   "what": "The roadmap sheet's Active Work tab lists this project (row 4); it was missing from the dashboard until the Oct 28 4:30 PM refresh."
+  },
+  "team": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 4",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A4",
+   "date": "2026-10-28",
+   "what": "The roadmap sheet lists the team as Core."
+  },
+  "s": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 4",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A4",
+   "date": "2026-10-28",
+   "what": "The roadmap sheet shows Impact Analysis, On Track, phase Jul 15 to Aug 25 (read Oct 28)."
+  }
+ },
+ "Cards, bags and mugs on TeePublic": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 6",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A6",
+   "date": "2026-10-28",
+   "what": "The roadmap sheet's Active Work tab lists this project (row 6); it was missing from the dashboard until the Oct 28 4:30 PM refresh."
+  },
+  "team": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 6",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A6",
+   "date": "2026-10-28",
+   "what": "The roadmap sheet lists the team as Core."
+  },
+  "s": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 6",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A6",
+   "date": "2026-10-28",
+   "what": "The roadmap sheet shows In Dev, On Track (read Oct 28)."
+  }
+ },
+ "More poster inventory on Redbubble": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 11",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A11",
+   "date": "2026-10-28",
+   "what": "The roadmap sheet's Active Work tab lists this project (row 11); it was missing from the dashboard until the Oct 28 4:30 PM refresh."
+  },
+  "team": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 11",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A11",
+   "date": "2026-10-28",
+   "what": "The roadmap sheet lists the team as Core."
+  },
+  "s": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 11",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A11",
+   "date": "2026-10-28",
+   "what": "The roadmap sheet shows Ready for Dev, On Track, phase Oct 14 to Oct 16 (read Oct 28)."
+  }
+ },
+ "Move hosting from ECS to EKS": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 91",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A91",
+   "date": "2026-10-28",
+   "what": "The roadmap sheet's Active Work tab lists this project (row 91); it was missing from the dashboard until the Oct 28 4:30 PM refresh."
+  },
+  "team": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 91",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A91",
+   "date": "2026-10-28",
+   "what": "The roadmap sheet lists the team as Infra."
+  },
+  "s": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 91",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A91",
+   "date": "2026-10-28",
+   "what": "The roadmap sheet shows In Dev, On Track, phase Oct 7 to Apr 30 (read Oct 28)."
+  }
+ },
+ "Bestol integration": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 54",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A54",
+   "date": "2026-10-28",
+   "what": "The roadmap sheet's Active Work tab lists this project (row 54); it was missing from the dashboard until the Oct 28 4:30 PM refresh."
+  },
+  "team": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 54",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A54",
+   "date": "2026-10-28",
+   "what": "The roadmap sheet lists the team as PLC."
+  },
+  "s": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 54",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A54",
+   "date": "2026-10-28",
+   "what": "The roadmap sheet shows In Dev, On Track, phase Oct 1 to Oct 15 (read Oct 28)."
+  }
+ },
+ "Purepack integration": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 55",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A55",
+   "date": "2026-10-28",
+   "what": "The roadmap sheet's Active Work tab lists this project (row 55); it was missing from the dashboard until the Oct 28 4:30 PM refresh."
+  },
+  "team": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 55",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A55",
+   "date": "2026-10-28",
+   "what": "The roadmap sheet lists the team as PLC."
+  },
+  "s": {
+   "kind": "slack",
+   "where": "#released, Oct 28",
+   "url": "https://grid-articore.enterprise.slack.com/archives/C0V4PM9DW/p1793215062374939",
+   "date": "2026-10-28",
+   "who": "Jenna Monnoleto",
+   "what": "Jenna Monnoleto posted in #released on Oct 28 that Purepack is live on TeePublic, starting with posters and socks."
+  }
+ },
+ "Product localization 2.0": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 48",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A48",
+   "date": "2026-10-28",
+   "what": "The roadmap sheet's Active Work tab lists this project (row 48); it was missing from the dashboard until the Oct 28 4:30 PM refresh."
+  },
+  "team": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 48",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A48",
+   "date": "2026-10-28",
+   "what": "The roadmap sheet lists the team as PLC."
+  },
+  "s": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 48",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A48",
+   "date": "2026-10-28",
+   "what": "The roadmap sheet shows In Dev, On Track, phase Sep 1 to Sep 15 (read Oct 28)."
+  }
+ },
+ "Rounded prices on Redbubble": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 62",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A62",
+   "date": "2026-10-28",
+   "what": "The roadmap sheet's Active Work tab lists this project (row 62); it was missing from the dashboard until the Oct 28 4:30 PM refresh."
+  },
+  "team": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 62",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A62",
+   "date": "2026-10-28",
+   "what": "The roadmap sheet lists the team as PLC."
+  },
+  "s": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 62",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A62",
+   "date": "2026-10-28",
+   "what": "The roadmap sheet shows In Dev, Blocked, phase Sep 1 to Oct 15 (read Oct 28)."
+  }
+ },
+ "Topics-first navigation on Redbubble": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 32",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A32",
+   "date": "2026-10-28",
+   "what": "The roadmap sheet's Active Work tab lists this project (row 32); it was missing from the dashboard until the Oct 28 4:30 PM refresh."
+  },
+  "team": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 32",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A32",
+   "date": "2026-10-28",
+   "what": "The roadmap sheet lists the team as Customer."
+  },
+  "s": {
+   "kind": "meeting",
+   "where": "Daily Performance Standup, Oct 28",
+   "url": "https://app.amplitude.com/experiment/tpub/774278/config/1409398",
+   "date": "2026-10-28",
+   "what": "At the Oct 28 Daily Performance Standup the team said the topics-first navigation test lowers CVR but lifts engagement a lot; the A/B test is live in Amplitude Experiment."
+  }
+ },
+ "Topics-first navigation, version 2": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 33",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A33",
+   "date": "2026-10-28",
+   "what": "The roadmap sheet's Active Work tab lists this project (row 33); it was missing from the dashboard until the Oct 28 4:30 PM refresh."
+  },
+  "team": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 33",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A33",
+   "date": "2026-10-28",
+   "what": "The roadmap sheet lists the team as Customer."
+  },
+  "s": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 33",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A33",
+   "date": "2026-10-28",
+   "what": "The roadmap sheet shows Dev Done, On Track (read Oct 28)."
+  }
+ },
+ "Recently viewed on Redbubble search and product pages": {
+  "origin": {
+   "kind": "slack",
+   "where": "#cfx-deap-peak-2026-planning",
+   "url": "https://grid-articore.enterprise.slack.com/archives/C0CAD7Q83B8/p1793239498250889",
+   "what": "Search and Content proposed adding the recently viewed row before peak, with ticket DEAP-6870",
+   "who": "Wendy Fullam",
+   "date": "2026-10-28",
+   "say": "Wendy Fullam posted in #cfx-deap-peak-2026-planning on Oct 28 that Search and Content would like to add the recently viewed row, with ticket DEAP-6870 and a product spec."
+  },
+  "s": {
+   "kind": "slack",
+   "where": "#cfx-deap-peak-2026-planning",
+   "url": "https://grid-articore.enterprise.slack.com/archives/C0CAD7Q83B8/p1793275558427659?thread_ts=1793239498.250889&cid=C0CAD7Q83B8",
+   "what": "Proposed; a reply favors just doing it",
+   "who": "Allison Cassara",
+   "date": "2026-10-29",
+   "say": "Allison Cassara replied in #cfx-deap-peak-2026-planning on Oct 29 that she favors just doing it, since it looks low risk; the ticket DEAP-6870 is still in Backlog."
+  },
+  "eta": {
+   "kind": "slack",
+   "where": "#cfx-deap-peak-2026-planning",
+   "url": "https://grid-articore.enterprise.slack.com/archives/C0CAD7Q83B8/p1793239498250889",
+   "what": "Proposed for before peak",
+   "who": "Wendy Fullam",
+   "date": "2026-10-28",
+   "say": "Wendy Fullam proposed it in the peak planning channel on Oct 28 as work to pick up before peak, so it shows the Nov 20 freeze as its target."
+  },
+  "team": {
+   "kind": "jira",
+   "where": "Jira DEAP-6870",
+   "url": "https://articore.atlassian.net/browse/DEAP-6870",
+   "what": "Ticket sits in the Search and Content holiday readiness epic",
+   "who": "Wendy Fullam",
+   "date": "2026-10-29",
+   "say": "DEAP-6870 sits in Search and Content's holiday readiness epic (DEAP-5962), and the Oct 28 proposal came from that team."
+  }
+ },
+ "Selling blanks on TeePublic": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 63",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A63",
+   "what": "Row \"Selling Blanks\", PLC, Discovery/Spec, Delayed",
+   "who": "",
+   "date": "2026-10-29",
+   "say": "The roadmap sheet's Active Work tab lists \"Selling Blanks\" under PLC as Discovery/Spec, Delayed (read Oct 29)."
+  }
+ },
+ "TeePublic GRIN webhook tracking": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 154",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A154",
+   "what": "Row \"TP: GRIN webhook eventing instrumentation\", MarTech, In Dev, On Track",
+   "who": "",
+   "date": "2026-10-29",
+   "say": "The roadmap sheet's Active Work tab added \"TP: GRIN webhook eventing instrumentation\" under MarTech, listed as In Dev, On Track (read Oct 29)."
+  },
+  "s": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 154",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A154",
+   "what": "Row \"TP: GRIN webhook eventing instrumentation\", MarTech, In Dev, On Track",
+   "who": "",
+   "date": "2026-10-29",
+   "say": "The roadmap sheet's Active Work tab added \"TP: GRIN webhook eventing instrumentation\" under MarTech, listed as In Dev, On Track (read Oct 29)."
+  },
+  "eta": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 154",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A154",
+   "what": "Row \"TP: GRIN webhook eventing instrumentation\", MarTech, In Dev, On Track",
+   "who": "",
+   "date": "2026-10-29",
+   "say": "The roadmap sheet's Active Work tab added \"TP: GRIN webhook eventing instrumentation\" under MarTech, listed as In Dev, On Track (read Oct 29)."
+  }
+ },
+ "Redbubble search tracking": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 155",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A155",
+   "what": "Row \"RB: Search eventing instrumentation\", MarTech, In Dev, On Track",
+   "who": "",
+   "date": "2026-10-29",
+   "say": "The roadmap sheet's Active Work tab added \"RB: Search eventing instrumentation\" under MarTech, listed as In Dev, On Track (read Oct 29)."
+  },
+  "s": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 155",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A155",
+   "what": "Row \"RB: Search eventing instrumentation\", MarTech, In Dev, On Track",
+   "who": "",
+   "date": "2026-10-29",
+   "say": "The roadmap sheet's Active Work tab added \"RB: Search eventing instrumentation\" under MarTech, listed as In Dev, On Track (read Oct 29)."
+  },
+  "eta": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 155",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A155",
+   "what": "Row \"RB: Search eventing instrumentation\", MarTech, In Dev, On Track",
+   "who": "",
+   "date": "2026-10-29",
+   "say": "The roadmap sheet's Active Work tab added \"RB: Search eventing instrumentation\" under MarTech, listed as In Dev, On Track (read Oct 29)."
+  }
+ },
+ "One data layer across Redbubble and TeePublic": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 156",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A156",
+   "what": "Row \"Unified data layer across RB and TP\", MarTech, In Dev, On Track",
+   "who": "",
+   "date": "2026-10-29",
+   "say": "The roadmap sheet's Active Work tab added \"Unified data layer across RB and TP\" under MarTech, listed as In Dev, On Track (read Oct 29)."
+  },
+  "s": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 156",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A156",
+   "what": "Row \"Unified data layer across RB and TP\", MarTech, In Dev, On Track",
+   "who": "",
+   "date": "2026-10-29",
+   "say": "The roadmap sheet's Active Work tab added \"Unified data layer across RB and TP\" under MarTech, listed as In Dev, On Track (read Oct 29)."
+  },
+  "eta": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 156",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A156",
+   "what": "Row \"Unified data layer across RB and TP\", MarTech, In Dev, On Track",
+   "who": "",
+   "date": "2026-10-29",
+   "say": "The roadmap sheet's Active Work tab added \"Unified data layer across RB and TP\" under MarTech, listed as In Dev, On Track (read Oct 29)."
+  }
+ },
+ "Redbubble GA4 purchase tracking fix": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 157",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A157",
+   "what": "Row \"RB: GA4 null user_pseudo_id\", MarTech, Impact Analysis, On Track",
+   "who": "",
+   "date": "2026-10-29",
+   "say": "The roadmap sheet's Active Work tab added \"RB: GA4 null user_pseudo_id\" under MarTech, listed as Impact Analysis, On Track (read Oct 29)."
+  },
+  "s": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 157",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A157",
+   "what": "Row \"RB: GA4 null user_pseudo_id\", MarTech, Impact Analysis, On Track",
+   "who": "",
+   "date": "2026-10-29",
+   "say": "The roadmap sheet lists \"RB: GA4 null user_pseudo_id\" in Impact Analysis, but the Data Engineering ticket for the dropped purchases (DEAP-5542) is still in Backlog, so this dashboard shows In dev."
+  },
+  "eta": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 157",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A157",
+   "what": "Row \"RB: GA4 null user_pseudo_id\", MarTech, Impact Analysis, On Track",
+   "who": "",
+   "date": "2026-10-29",
+   "say": "The roadmap sheet's Active Work tab added \"RB: GA4 null user_pseudo_id\" under MarTech, listed as Impact Analysis, On Track (read Oct 29)."
+  }
+ },
+ "Tracking on search and remaining pages": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 159",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A159",
+   "what": "Row \"Eventing SRP + remaining pages (First MarTech-owned delivery)\", MarTech, Not Started, phase end Mar 31",
+   "who": "",
+   "date": "2026-10-29",
+   "say": "The roadmap sheet's Active Work tab added \"Eventing SRP + remaining pages (First MarTech-owned delivery)\" under MarTech, listed as Not Started, phase end Mar 31 (read Oct 29)."
+  },
+  "s": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 159",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A159",
+   "what": "Row \"Eventing SRP + remaining pages (First MarTech-owned delivery)\", MarTech, Not Started, phase end Mar 31",
+   "who": "",
+   "date": "2026-10-29",
+   "say": "The roadmap sheet's Active Work tab added \"Eventing SRP + remaining pages (First MarTech-owned delivery)\" under MarTech, listed as Not Started, phase end Mar 31 (read Oct 29)."
+  },
+  "eta": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 159",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A159",
+   "what": "Row \"Eventing SRP + remaining pages (First MarTech-owned delivery)\", MarTech, Not Started, phase end Mar 31",
+   "who": "",
+   "date": "2026-10-29",
+   "say": "The roadmap sheet's Active Work tab added \"Eventing SRP + remaining pages (First MarTech-owned delivery)\" under MarTech, listed as Not Started, phase end Mar 31 (read Oct 29)."
+  }
+ },
+ "Automated tracking QA": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 160",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A160",
+   "what": "Row \"QA + automated testing\", MarTech, Not Started, phase end Jun 30",
+   "who": "",
+   "date": "2026-10-29",
+   "say": "The roadmap sheet's Active Work tab added \"QA + automated testing\" under MarTech, listed as Not Started, phase end Jun 30 (read Oct 29)."
+  },
+  "s": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 160",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A160",
+   "what": "Row \"QA + automated testing\", MarTech, Not Started, phase end Jun 30",
+   "who": "",
+   "date": "2026-10-29",
+   "say": "The roadmap sheet's Active Work tab added \"QA + automated testing\" under MarTech, listed as Not Started, phase end Jun 30 (read Oct 29)."
+  },
+  "eta": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 160",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A160",
+   "what": "Row \"QA + automated testing\", MarTech, Not Started, phase end Jun 30",
+   "who": "",
+   "date": "2026-10-29",
+   "say": "The roadmap sheet's Active Work tab added \"QA + automated testing\" under MarTech, listed as Not Started, phase end Jun 30 (read Oct 29)."
+  }
+ },
+ "Redbubble app analytics": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 161",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A161",
+   "what": "Row \"Mobile app analytics — Redbubble\", MarTech, Not Started, phase end Jun 30",
+   "who": "",
+   "date": "2026-10-29",
+   "say": "The roadmap sheet's Active Work tab added \"Mobile app analytics — Redbubble\" under MarTech, listed as Not Started, phase end Jun 30 (read Oct 29)."
+  },
+  "s": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 161",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A161",
+   "what": "Row \"Mobile app analytics — Redbubble\", MarTech, Not Started, phase end Jun 30",
+   "who": "",
+   "date": "2026-10-29",
+   "say": "The roadmap sheet's Active Work tab added \"Mobile app analytics — Redbubble\" under MarTech, listed as Not Started, phase end Jun 30 (read Oct 29)."
+  },
+  "eta": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 161",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A161",
+   "what": "Row \"Mobile app analytics — Redbubble\", MarTech, Not Started, phase end Jun 30",
+   "who": "",
+   "date": "2026-10-29",
+   "say": "The roadmap sheet's Active Work tab added \"Mobile app analytics — Redbubble\" under MarTech, listed as Not Started, phase end Jun 30 (read Oct 29)."
+  }
+ },
+ "One consent platform across all brands": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 162",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A162",
+   "what": "Row \"unified consent management platform across all brands.\", MarTech, Not Started, phase end Dec 31",
+   "who": "",
+   "date": "2026-10-29",
+   "say": "The roadmap sheet's Active Work tab added \"unified consent management platform across all brands.\" under MarTech, listed as Not Started, phase end Dec 31 (read Oct 29)."
+  },
+  "s": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 162",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A162",
+   "what": "Row \"unified consent management platform across all brands.\", MarTech, Not Started, phase end Dec 31",
+   "who": "",
+   "date": "2026-10-29",
+   "say": "The roadmap sheet's Active Work tab added \"unified consent management platform across all brands.\" under MarTech, listed as Not Started, phase end Dec 31 (read Oct 29)."
+  },
+  "eta": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 162",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A162",
+   "what": "Row \"unified consent management platform across all brands.\", MarTech, Not Started, phase end Dec 31",
+   "who": "",
+   "date": "2026-10-29",
+   "say": "The roadmap sheet's Active Work tab added \"unified consent management platform across all brands.\" under MarTech, listed as Not Started, phase end Dec 31 (read Oct 29)."
+  }
+ },
+ "Communication preference management": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 163",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A163",
+   "what": "Row \"Comms preference management infrastructure\", MarTech, Not Started, phase end Jun 30",
+   "who": "",
+   "date": "2026-10-29",
+   "say": "The roadmap sheet's Active Work tab added \"Comms preference management infrastructure\" under MarTech, listed as Not Started, phase end Jun 30 (read Oct 29)."
+  },
+  "s": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 163",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A163",
+   "what": "Row \"Comms preference management infrastructure\", MarTech, Not Started, phase end Jun 30",
+   "who": "",
+   "date": "2026-10-29",
+   "say": "The roadmap sheet's Active Work tab added \"Comms preference management infrastructure\" under MarTech, listed as Not Started, phase end Jun 30 (read Oct 29)."
+  },
+  "eta": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 163",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A163",
+   "what": "Row \"Comms preference management infrastructure\", MarTech, Not Started, phase end Jun 30",
+   "who": "",
+   "date": "2026-10-29",
+   "say": "The roadmap sheet's Active Work tab added \"Comms preference management infrastructure\" under MarTech, listed as Not Started, phase end Jun 30 (read Oct 29)."
+  }
+ },
+ "Artist tracking and audiences": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 164",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A164",
+   "what": "Row \"Artist-based tracking\", MarTech, Not Started, no dates",
+   "who": "",
+   "date": "2026-10-29",
+   "say": "The roadmap sheet's Active Work tab added \"Artist-based tracking\" under MarTech, listed as Not Started, no dates (read Oct 29)."
+  },
+  "s": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 164",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A164",
+   "what": "Row \"Artist-based tracking\", MarTech, Not Started, no dates",
+   "who": "",
+   "date": "2026-10-29",
+   "say": "The roadmap sheet's Active Work tab added \"Artist-based tracking\" under MarTech, listed as Not Started, no dates (read Oct 29)."
+  },
+  "eta": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 164",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A164",
+   "what": "Row \"Artist-based tracking\", MarTech, Not Started, no dates",
+   "who": "",
+   "date": "2026-10-29",
+   "say": "The roadmap sheet's Active Work tab added \"Artist-based tracking\" under MarTech, listed as Not Started, no dates (read Oct 29)."
+  }
+ },
+ "Make the sites ready for AI shopping": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 165",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A165",
+   "what": "Row \"Agentic readiness\", MarTech, Not Started, no dates",
+   "who": "",
+   "date": "2026-10-29",
+   "say": "The roadmap sheet's Active Work tab added \"Agentic readiness\" under MarTech, listed as Not Started, no dates (read Oct 29)."
+  },
+  "s": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 165",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A165",
+   "what": "Row \"Agentic readiness\", MarTech, Not Started, no dates",
+   "who": "",
+   "date": "2026-10-29",
+   "say": "The roadmap sheet's Active Work tab added \"Agentic readiness\" under MarTech, listed as Not Started, no dates (read Oct 29)."
+  },
+  "eta": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 165",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A165",
+   "what": "Row \"Agentic readiness\", MarTech, Not Started, no dates",
+   "who": "",
+   "date": "2026-10-29",
+   "say": "The roadmap sheet's Active Work tab added \"Agentic readiness\" under MarTech, listed as Not Started, no dates (read Oct 29)."
   }
  }
 };

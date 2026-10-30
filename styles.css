@@ -3314,9 +3314,9 @@ a.pvwhere { color: var(--ctl); text-decoration: underline; text-underline-offset
 .mbox .tipsrcbox a { color: var(--ctl); font-weight: 600; text-decoration: none; } .mbox .tipsrcbox a:hover { text-decoration: underline; }
 .gpill.gflag { background: color-mix(in srgb, #f5c518 22%, var(--surface)); border-color: color-mix(in srgb, #c99a00 45%, var(--surface)); font-weight: 600; cursor: default; }
 /* Payment brand-adjacent colors (Allison, Oct 28) */
-:root { --pay-card: #c3c8d0; --pay-apple: #1d1d1f; --pay-apple-ink: #fff; --pay-apple2: #55555a; --pay-google: #4285f4; --pay-paypal: #003087; --pay-paypal-ink: #fff; --pay-klarna: #ffb3c7; }
+:root { --pay-card: #e3a33a; --pay-apple: #1d1d1f; --pay-apple-ink: #fff; --pay-apple2: #55555a; --pay-google: #4285f4; --pay-paypal: #003087; --pay-paypal-ink: #fff; --pay-klarna: #ffb3c7; }
 /* The page picks its theme with a class (th-dark, th-noir, ...), not the OS setting, so the dark values follow those classes. */
-:root:not(#z):not(#y).th-dark, :root:not(#z):not(#y).th-noir, :root:not(#z):not(#y).th-spooky, :root:not(#z):not(#y).matrix { --pay-card: #6b7280; --pay-apple2: #a1a1a6; --pay-apple: #f5f5f7; --pay-apple-ink: #1d1d1f; --pay-paypal: #ffc439; --pay-paypal-ink: #1d1d1f; }
+:root:not(#z):not(#y).th-dark, :root:not(#z):not(#y).th-noir, :root:not(#z):not(#y).th-spooky, :root:not(#z):not(#y).matrix { --pay-card: #e3a33a; --pay-apple2: #a1a1a6; --pay-apple: #f5f5f7; --pay-apple-ink: #1d1d1f; --pay-paypal: #009cde; --pay-paypal-ink: #1d1d1f; }
 .donut .slab { font: 700 8.5px var(--body, system-ui); pointer-events: none; letter-spacing: .01em; }
 /* Overview card (Allison and Mike, Oct 28): one wide card holds the day's read and its chart; last year sits beside it */
 :root:not(#z) .keys.kov { grid-template-columns: minmax(0, 2.6fr) minmax(0, 1fr); }
@@ -3374,9 +3374,174 @@ a.pvwhere { color: var(--ctl); text-decoration: underline; text-underline-offset
 .bfdd .bfitem:hover { background: var(--sunk); }
 .bfdd .bfdef { font-weight: 500; color: var(--muted); font-size: 11.5px; margin-left: 4px; }
 /* Ripple halos that fade out, smaller (Mike, Oct 28: "dissipate out, dissipate out") */
-:root:not(#z) .cmpglow { fill: none !important; stroke: var(--ctl); stroke-width: 2; opacity: 0; transform-box: fill-box; transform-origin: center; animation: cmpRipple 2.4s ease-out infinite !important; }
+:root:not(#z) .cmpglow { transform-box: fill-box; transform-origin: center; animation: cmpRipple 2.4s ease-out infinite !important; }
 :root:not(#z) .cmpglow.g2 { animation-delay: 1.2s !important; }
 @keyframes cmpRipple { 0% { transform: scale(.8); opacity: .55; } 100% { transform: scale(2.4); opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { :root:not(#z) .cmpglow { animation: none !important; opacity: .35; } }
 .tchart .hint.tdot { fill: transparent; cursor: pointer; border: 0 !important; }
 .key.hero.kwide .kexp { display: block; margin-top: 3px; font-size: 13px; color: var(--muted); line-height: 1.45; }
+/* Scorecard without the prior-day column (Mike, Oct 28) */
+:root:not(#z) .colhead, :root:not(#z) .row { grid-template-columns: minmax(170px, 1.5fr) 84px 196px 112px 104px 112px 128px 20px !important; }
+:root:not(#z) .score.nly .colhead, :root:not(#z) .score.nly .row { grid-template-columns: minmax(170px, 1.6fr) 84px 196px 112px 112px 128px 20px !important; }
+@media (max-width: 1250px) and (min-width: 761px) { :root:not(#z) .colhead, :root:not(#z) .row { grid-template-columns: minmax(130px, 1.3fr) 72px 170px 92px 88px 92px 112px 18px !important; } :root:not(#z) .score.nly .colhead, :root:not(#z) .score.nly .row { grid-template-columns: minmax(130px, 1.4fr) 72px 170px 92px 92px 112px 18px !important; } }
+@media (max-width: 760px) { :root:not(#z) .colhead, :root:not(#z) .row, :root:not(#z) .score.nly .row { grid-template-columns: 1fr auto !important; } }
+.dprior { display: inline-flex; align-items: baseline; gap: 6px; font-size: 13px; padding: 4px 10px; border-radius: 8px; background: var(--sunk); }
+.dprior .lbl { font-size: 12px; color: var(--muted); }
+/* No dotted underline on hover numbers inside scorecard rows (Mike, Oct 28) */
+:root:not(#z) .row .hint, :root:not(#z) .row .hint.verd { border-bottom: 0 !important; text-decoration: none !important; }
+/* Overview card fixes (Mike, Oct 28) */
+.key.hero.kwide .kleft .nrpanel { padding-top: 14px !important; padding-bottom: 14px !important; margin: 14px 0 16px !important; }
+.key.hero.kwide .kmore { align-self: flex-start; margin-top: 10px; font-size: 13px; }
+.tckey { margin-top: 10px !important; }
+:root:not(#z) .tchart .tcband { fill: color-mix(in srgb, var(--ctl) 10%, transparent); stroke: none; }
+.tchart .tcbl { stroke: color-mix(in srgb, var(--ctl) 45%, transparent); stroke-width: 1; stroke-dasharray: 3 3; }
+@keyframes cmpRipple { 0% { transform: scale(.85); opacity: .55; } 100% { transform: scale(1.7); opacity: 0; } }
+/* Sale days: one warm yellow everywhere (red is the code freeze) (Mike, Oct 28) */
+:root { --sale-tint: rgba(240, 180, 30, .13); --sale-strip: #e8b23a; --sale-edge: rgba(200, 145, 10, .45); }
+/* The range bar's dot pulses like the chart's dots */
+:root:not(#z) .nrh .nrdot::after { content: ""; position: absolute; inset: -1.5px; border-radius: 50%; background: inherit; animation: dotRipple 2.4s ease-out infinite; opacity: 0; z-index: -1; }
+@keyframes dotRipple { 0% { transform: scale(.85); opacity: .55; } 100% { transform: scale(1.9); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { :root:not(#z) .nrh .nrdot::after { animation: none; } }
+/* The range box: room inside, verdict first */
+:root:not(#z) .nrpanel { padding: 14px 16px 12px !important; }
+:root:not(#z) .nrpanel .nrp2 { display: block; margin-bottom: 6px; }
+:root:not(#z) .nrpanel .nrp1 { display: block; margin-bottom: 6px; }
+/* A fresher sessions green (Mike, Oct 28: "a more attractive green") */
+:root { --sess: #2fb57f !important; }
+/* Sale pill in the header, next to the logo (Mike, Oct 28) */
+.hsale { align-self: center; justify-self: start; margin-left: 14px; font-size: 13.5px; font-weight: 700; padding: 5px 12px; border-radius: 999px; background: color-mix(in srgb, var(--accent) 12%, var(--surface)); color: var(--accent); border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--surface)); white-space: nowrap; }
+.hsale.off { background: var(--sunk); color: var(--muted); border-color: var(--line); font-weight: 600; }
+/* More room between the ticker and the page headline, on every page (Mike, Oct 28) */
+:root:not(#z) .wrap { padding-top: 40px !important; }
+/* 90-day chart: room around the controls and legend (Mike, Oct 28) */
+:root:not(#z) .cvrchart .cchead { margin-bottom: 14px; gap: 14px; }
+:root:not(#z) .cvrchart .ccctl { gap: 12px; align-items: center; }
+:root:not(#z) .cvrchart .ckey { gap: 8px 22px; margin: 4px 0 16px; }
+:root:not(#z) .cvrchart .chart { padding-top: 6px; }
+/* Top chart, full version: room for the key above (Mike, Oct 28) */
+.tchart.tcfull .tckey { margin: 0 0 8px !important; }
+/* 90-day chart: inner padding so CVR, Sessions per day and the dates don't touch the card edges (Mike, Oct 28) */
+:root:not(#z) .cvrchart .chart { padding: 18px 22px 14px !important; box-sizing: border-box; }
+.bfwrap { display: flex; align-items: center; gap: 8px; }
+.bfwrap .bftitle { font-size: 12px; font-weight: 600; color: var(--muted); }
+.nrtip .tipsub { display: block; margin-top: 3px; font-size: 12.5px; color: var(--muted); }
+.tckey .tk-sess { border-radius: 2px; width: 12px; height: 8px; background: var(--sess); opacity: .45; }
+/* Sale pill in Articore indigo and coral (Mike, Oct 28) */
+:root:not(#z) .hsale { display: inline-flex; align-items: center; gap: 0; padding: 0; overflow: hidden; border-radius: 999px; background: #1c174d; color: #fff; border: 0; font-size: 13px; font-weight: 600; box-shadow: 0 2px 10px rgba(28, 23, 77, .18); }
+:root:not(#z) .hsale .hsk { align-self: stretch; display: inline-flex; align-items: center; padding: 0 11px; background: #f0586c; color: #fff; font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+:root:not(#z) .hsale .hsv { padding: 6px 10px 6px 12px; font-weight: 700; }
+:root:not(#z) .hsale .hss { color: #f0586c; margin-right: 6px; font-weight: 800; }
+:root:not(#z) .hsale .hsd { display: inline-flex; align-items: center; gap: 8px; padding: 6px 13px 6px 10px; border-left: 1px solid rgba(255, 255, 255, .18); color: rgba(255, 255, 255, .85); font-weight: 500; }
+:root:not(#z) .hsale .hsdots { display: inline-flex; gap: 3px; }
+:root:not(#z) .hsale .hsdots i { width: 6px; height: 6px; border-radius: 50%; background: rgba(255, 255, 255, .25); }
+:root:not(#z) .hsale .hsdots i.on { background: #f0586c; }
+:root:not(#z) .hsale .hsep { width: 1px; align-self: stretch; background: rgba(255, 255, 255, .25); }
+:root:not(#z) .hsale.off { background: var(--sunk); color: var(--muted); box-shadow: none; border: 1px solid var(--line); padding: 5px 12px; }
+/* Scorecard columns rebalanced (Mike, Oct 28): narrower name, room for the day's value, a tighter comparable-days column, space before sessions, sessions wide enough for one line */
+:root:not(#z) .colhead, :root:not(#z) .row { grid-template-columns: minmax(140px, 1fr) 112px 176px 136px 104px 200px 150px 20px !important; gap: 0 26px !important; }
+:root:not(#z) .score.nly .colhead, :root:not(#z) .score.nly .row { grid-template-columns: minmax(140px, 1fr) 112px 176px 136px 200px 150px 20px !important; }
+@media (max-width: 1250px) and (min-width: 761px) { :root:not(#z) .colhead, :root:not(#z) .row { grid-template-columns: minmax(120px, 1fr) 96px 160px 110px 88px 170px 120px 18px !important; gap: 0 16px !important; } :root:not(#z) .score.nly .colhead, :root:not(#z) .score.nly .row { grid-template-columns: minmax(120px, 1fr) 96px 160px 110px 170px 120px 18px !important; } }
+:root:not(#z) .row .ss .cap, :root:not(#z) .row .ss .surge { white-space: nowrap; }
+/* Back to the soft pulse: a filled blue halo breathing around the dot (Mike, Oct 28: the ripple was aggressive) */
+:root:not(#z) .cmpglow { fill: color-mix(in srgb, var(--ctl) 24%, transparent); stroke: none !important; opacity: 1; transform-box: fill-box; transform-origin: center; animation: cmpPulse 3s ease-in-out infinite !important; }
+:root:not(#z) .cmpglow.g2 { display: none; }
+@keyframes cmpPulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.35); opacity: .55; } }
+:root:not(#z) .nrh .nrdot::after { inset: -4px; opacity: .3; animation: dotPulse 3s ease-in-out infinite; }
+@keyframes dotPulse { 0%, 100% { transform: scale(1); opacity: .3; } 50% { transform: scale(1.4); opacity: .12; } }
+/* Sale pill in the page's own pill style: a line around a dimmed inside, theme-aware, in Articore's indigo and coral tokens (Mike, Oct 28) */
+:root:not(#z) .hsale { background: color-mix(in srgb, var(--art) 7%, var(--surface)); color: var(--art); border: 1px solid color-mix(in srgb, var(--art) 30%, var(--surface)); box-shadow: none; }
+:root:not(#z) .hsale .hsk { background: color-mix(in srgb, var(--art-2, #f0586c) 16%, transparent); color: var(--art-2, #d8445a); border-right: 1px solid color-mix(in srgb, var(--art-2, #f0586c) 35%, transparent); }
+:root:not(#z) .hsale .hss { color: var(--art-2, #d8445a); }
+:root:not(#z) .hsale .hsd { color: color-mix(in srgb, var(--art) 75%, var(--surface)); border-left: 1px solid color-mix(in srgb, var(--art) 20%, var(--surface)); }
+:root:not(#z) .hsale .hsdots i { background: color-mix(in srgb, var(--art) 18%, var(--surface)); }
+:root:not(#z) .hsale .hsdots i.on { background: var(--art-2, #f0586c); }
+:root:not(#z) .hsale .hsep { background: color-mix(in srgb, var(--art) 20%, var(--surface)); }
+:root:not(#z):not(#y).th-dark .hsale, :root:not(#z):not(#y).th-noir .hsale, :root:not(#z):not(#y).th-spooky .hsale, :root:not(#z):not(#y).matrix .hsale { --art: #b9b3f7; --art-2: #f47a8a; }
+/* Dots: solid blue circle with a soft pulsing halo, no white ring (Mike, Oct 28) */
+.tchart .hint.tdot { fill: transparent; }
+.tchart .hint.tdot:hover { fill: color-mix(in srgb, var(--ctl) 8%, transparent); }
+/* More room inside the range box (Mike, Oct 28) */
+:root:not(#z) .key.hero.kwide .kleft .nrpanel, :root:not(#z) .nrpanel { padding: 18px 22px 16px !important; }
+/* Sale pill, third pass: more Articore indigo, theme-aware (Mike, Oct 28) */
+:root { --sale-ink: #1c174d; --sale-on: #ffffff; --sale-coral: #f0586c; }
+:root:not(#z):not(#y).th-dark, :root:not(#z):not(#y).th-noir, :root:not(#z):not(#y).th-spooky, :root:not(#z):not(#y).matrix { --sale-ink: #b9b3f7; --sale-on: #141126; --sale-coral: #f47a8a; }
+:root:not(#z):not(#y) .hsale { display: inline-flex; align-items: stretch; padding: 0; overflow: hidden; border-radius: 999px; font-size: 13px; font-weight: 600; background: color-mix(in srgb, var(--sale-ink) 8%, var(--surface)); color: var(--sale-ink); border: 1.5px solid var(--sale-ink); box-shadow: none; }
+:root:not(#z):not(#y) .hsale .hsk { display: inline-flex; align-items: center; padding: 0 12px; background: var(--sale-ink); color: var(--sale-on); font-size: 11px; font-weight: 800; letter-spacing: .09em; text-transform: uppercase; border: 0; }
+:root:not(#z):not(#y) .hsale .hsk::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--sale-coral); margin-right: 7px; }
+:root:not(#z):not(#y) .hsale .hsv { display: inline-flex; align-items: center; gap: 8px; padding: 5px 12px; font-weight: 800; color: var(--sale-ink); }
+:root:not(#z):not(#y) .hsale .hsdate { font-weight: 500; font-size: 12px; color: color-mix(in srgb, var(--sale-ink) 60%, var(--surface)); }
+:root:not(#z):not(#y) .hsale .hsd { display: inline-flex; align-items: center; gap: 7px; padding: 5px 13px 5px 11px; border-left: 1px solid color-mix(in srgb, var(--sale-ink) 25%, var(--surface)); color: var(--sale-ink); font-weight: 600; }
+:root:not(#z):not(#y) .hsale .hsdots i { width: 6px; height: 6px; border-radius: 50%; background: color-mix(in srgb, var(--sale-ink) 18%, var(--surface)); }
+:root:not(#z):not(#y) .hsale .hsdots i.on { background: var(--sale-coral); }
+:root:not(#z):not(#y) .hsale.off { padding: 5px 13px; gap: 8px; align-items: center; border: 1px solid var(--line); background: var(--sunk); color: var(--muted); font-weight: 600; }
+/* Range box: generous inside padding (Mike, Oct 28: "still not enough internal padding") */
+:root:not(#z):not(#y) .key.hero.kwide .kleft .nrpanel, :root:not(#z):not(#y) .nrpanel { padding: 26px 32px 22px !important; border-radius: 14px; }
+:root:not(#z):not(#y) .nrpanel .nrp2 { margin-bottom: 12px !important; }
+:root:not(#z):not(#y) .nrpanel .nrp1 { margin-bottom: 12px !important; }
+/* Range box, redesigned (Mike, Oct 28) */
+.nrbox { margin: 14px 0 18px; padding: 22px 26px 18px; border-radius: 14px; background: color-mix(in srgb, var(--ctl) 7%, var(--surface)); }
+.nrbox.nrhi { background: var(--good-bg); } .nrbox.nrlo { background: var(--bad-bg); }
+.nrbox .nrtop { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
+.nrbox .nrchg { font-size: 15px; color: var(--muted); }
+.nrbox .nrchg b { font-size: 24px; font-weight: 800; margin-right: 6px; letter-spacing: -.01em; }
+.nrbox .nrchg b.tin { color: var(--ctl); } .nrbox .nrchg b.thi { color: var(--good); } .nrbox .nrchg b.tlo { color: var(--bad); }
+.nrbox .nrbadge { font-size: 12.5px; font-weight: 700; padding: 4px 11px; border-radius: 999px; border: 1px solid; }
+.nrbox .nrbadge.bin { color: var(--ctl); border-color: color-mix(in srgb, var(--ctl) 40%, transparent); background: color-mix(in srgb, var(--ctl) 8%, var(--surface)); }
+.nrbox .nrbadge.bhi { color: var(--good); border-color: color-mix(in srgb, var(--good) 40%, transparent); background: color-mix(in srgb, var(--good) 8%, var(--surface)); }
+.nrbox .nrbadge.blo { color: var(--bad); border-color: color-mix(in srgb, var(--bad) 40%, transparent); background: color-mix(in srgb, var(--bad) 8%, var(--surface)); }
+.nrbox .nbtrack { position: relative; height: 26px; border-radius: 13px; background: color-mix(in srgb, var(--ink) 6%, var(--surface)); }
+.nrbox .nbband { position: absolute; left: 25%; right: 25%; top: 0; bottom: 0; border-radius: 13px; background: color-mix(in srgb, var(--ctl) 20%, var(--surface)); border: 1px solid color-mix(in srgb, var(--ctl) 40%, transparent); display: flex; align-items: center; justify-content: center; }
+.nrbox .nbbl { font-size: 11px; font-weight: 700; letter-spacing: .02em; color: color-mix(in srgb, var(--ctl) 85%, var(--ink)); }
+.nrbox .nbzero { position: absolute; left: 50%; top: 4px; bottom: 4px; width: 1.5px; background: color-mix(in srgb, var(--ctl) 55%, transparent); }
+.nrbox .nbpt { position: absolute; top: 50%; width: 16px; height: 16px; margin: -8px 0 0 -8px; border-radius: 50%; background: var(--ctl); box-shadow: 0 0 0 3px var(--surface); }
+.nrbox .nbpt.thi { background: var(--good); } .nrbox .nbpt.tlo { background: var(--bad); }
+.nrbox .nbpt::after { content: ""; position: absolute; inset: -5px; border-radius: 50%; background: inherit; opacity: .25; animation: dotPulse 3s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .nrbox .nbpt::after { animation: none; } }
+.nrbox .nbticks { position: relative; height: 18px; margin-top: 6px; font-size: 11.5px; color: var(--muted); }
+.nrbox .nbticks span { position: absolute; transform: translateX(-50%); }
+/* Sale pill, a notch quieter (Mike, Oct 28: "slightly less attention drawing") */
+:root:not(#z):not(#y) .hsale { border-width: 1px; border-color: color-mix(in srgb, var(--sale-ink) 45%, var(--surface)); background: color-mix(in srgb, var(--sale-ink) 5%, var(--surface)); font-size: 12.5px; }
+:root:not(#z):not(#y) .hsale .hsk { background: color-mix(in srgb, var(--sale-ink) 88%, var(--surface)); font-size: 10.5px; padding: 0 10px; }
+:root:not(#z):not(#y) .hsale .hsk::before { width: 5px; height: 5px; margin-right: 6px; }
+:root:not(#z):not(#y) .hsale .hsv { font-weight: 700; padding: 4px 11px; }
+:root:not(#z):not(#y) .hsale .hsd { font-weight: 500; padding: 4px 12px 4px 10px; }
+:root:not(#z):not(#y) .hsale .hsdots { gap: 2.5px; }
+:root:not(#z):not(#y) .hsale .hsdots i { width: 5px; height: 5px; }
+:root:not(#z):not(#y) .hsale .hsdots i.on { background: color-mix(in srgb, var(--sale-coral) 85%, var(--surface)); }
+#hsale { align-self: center; margin-left: 14px; }
+#hsale .hsale { margin: 0; }
+.vsalew.vsale2 { margin: 0 0 12px; }
+/* Sale pill above the headline: Articore indigo, not the site color, so a sale never reads as bad on Redbubble's red (Mike, Oct 28) */
+:root:not(#z):not(#y) .vsalew .vsale:not(.off) { background: color-mix(in srgb, var(--sale-ink) 7%, var(--surface)) !important; color: var(--sale-ink) !important; border: 1px solid color-mix(in srgb, var(--sale-ink) 32%, var(--surface)) !important; }
+/* Range bar, evolved for the elevated range box (Mike, Oct 28: same visual as everywhere else, just bigger and with a bit more to it). Same parts: track, band, zero tick, dot, edge labels. */
+:root:not(#z):not(#y) .nrpanel .nrh { height: 30px; margin-top: 6px; }
+:root:not(#z):not(#y) .nrpanel .nrtrack { top: 14px; height: 2px; border-radius: 1px; background: color-mix(in srgb, var(--ctl) 18%, var(--line-2)); }
+:root:not(#z):not(#y) .nrpanel .nrband { top: 3px; height: 24px; border-radius: 12px; background: linear-gradient(90deg, color-mix(in srgb, var(--ctl) 10%, transparent), color-mix(in srgb, var(--ctl) 24%, transparent) 50%, color-mix(in srgb, var(--ctl) 10%, transparent)); box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--ctl) 50%, transparent), 0 1px 6px color-mix(in srgb, var(--ctl) 14%, transparent); }
+:root:not(#z):not(#y) .nrpanel .nrzero { top: -1px; height: 32px; width: 2px; margin-left: -1px; border-radius: 1px; background: color-mix(in srgb, var(--ctl) 60%, transparent); }
+:root:not(#z):not(#y) .nrpanel .nrdot { top: 0.5px; width: 24px; height: 24px; margin-left: -14.5px; border: 2.5px solid var(--surface); box-shadow: 0 2px 8px rgb(0 0 0 / 22%); z-index: 1; }
+:root:not(#z):not(#y) .nrpanel .nrdot::after { inset: -7px; } /* dot (29px with its ring) is slightly wider than the 24px band (Mike, Oct 28) */
+:root:not(#z):not(#y) .nrpanel .nrhl { height: 18px; margin-top: 6px; font: 700 12.5px var(--body); }
+/* Sale tag at the top of the comparable-days hover, same indigo as the sale pill (Mike, Oct 28) */
+.tiptag { display: inline-flex; align-self: flex-start; width: fit-content; margin: 6px 0 2px; padding: 3px 10px; border-radius: 999px; font: 600 12px var(--body); background: color-mix(in srgb, var(--sale-ink) 7%, var(--surface)); color: var(--sale-ink); border: 1px solid color-mix(in srgb, var(--sale-ink) 32%, var(--surface)); }
+.tiptag.off { background: var(--sunk); color: var(--muted); border-color: var(--line); }
+.nrtip .tiptag + .tipv { margin-top: 6px; }
+/* Overview comparison bars (Mike, Oct 28) */
+.cbars .cbv { font: 600 11.5px var(--body); fill: var(--muted); }
+.cbars .cbt { font-weight: 800; fill: var(--ink); }
+.cbars .cbv.cbt { font-size: 13px; }
+.cbars .cbavg { stroke: var(--ctl); stroke-width: 1.5; stroke-dasharray: 1 3.5; stroke-linecap: round; }
+.cbars .cbsep { stroke: var(--line-2); stroke-width: 1; stroke-dasharray: 3 3; }
+.tckey .tk-cbar { display: inline-block; width: 10px; height: 10px; border-radius: 2px; background: color-mix(in srgb, var(--ctl) 55%, var(--surface)); }
+.tckey .tk-avg { display: inline-block; width: 16px; height: 0; border-top: 2px dotted var(--ctl); vertical-align: middle; }
+/* 90-day chart: Sources inside the chart box, bottom left (Mike, Oct 28). The box styling moves from .chart to its wrapper. */
+:root:not(#z):not(#y) .cvrchart .ccbox { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px 22px 16px; }
+:root:not(#z):not(#y) .cvrchart .ccbox .chart { border: 0 !important; border-radius: 0; padding: 0 !important; background: none; }
+:root:not(#z):not(#y) .cvrchart .ccbox .csrc { margin-top: 10px; padding-left: 2px; }
+/* Sale pill: violet, a little stronger than the quiet indigo (Mike, Oct 28). Not red, green or yellow, so it never reads as good or bad. */
+:root { --promo-ink: #5b21b6; --promo-bg: #ede4fd; --promo-line: #b9a1ef; }
+:root:not(#z):not(#y).th-dark, :root:not(#z):not(#y).th-noir, :root:not(#z):not(#y).th-spooky, :root:not(#z):not(#y).matrix { --promo-ink: #d4c2ff; --promo-bg: #2c2147; --promo-line: #6a55a8; }
+:root:not(#z):not(#y) .vsalew .vsale:not(.off), .tiptag:not(.off) { background: var(--promo-bg) !important; color: var(--promo-ink) !important; border: 1.5px solid var(--promo-line) !important; font-weight: 700; }
+.segbtn { display: block; margin-top: 8px; padding: 0; border: 0; background: none; font: 600 13px var(--body); color: var(--ctl); cursor: pointer; text-align: left; } .segbtn:hover { text-decoration: underline; }
+.ghead .gacts { display: flex; align-items: flex-start; gap: 18px; flex-wrap: wrap; justify-content: flex-end; }
+.ghead .gsrc { text-align: right; } .ghead .gsrc .tipsrcbox { text-align: left; max-width: 520px; margin-top: 6px; font-size: 12.5px; }
+.ghead .gsrc .srcbtn { padding: 0; border: 0; background: none; color: var(--ctl); font: 600 12.5px var(--body); cursor: pointer; }
