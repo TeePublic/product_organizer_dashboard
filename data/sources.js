@@ -1,4 +1,1137 @@
 const SRCS = {
+ "Trending tag on product pages test": {
+  "origin": {
+   "kind": "release",
+   "where": "#released",
+   "who": "Jonathan Tan",
+   "date": "2026-10-23",
+   "url": "https://grid-articore.enterprise.slack.com/archives/C0V4PM9DW",
+   "what": "Jonathan Tan posted in #released on Oct 23 that the TeePublic product page A/B test of a trending tag, in the gallery or above the design title, against no tag, is live"
+  },
+  "s": {
+   "kind": "release",
+   "where": "#released",
+   "who": "Jonathan Tan",
+   "date": "2026-10-23",
+   "url": "https://grid-articore.enterprise.slack.com/archives/C0V4PM9DW",
+   "what": "Jonathan Tan posted in #released on Oct 23 that the TeePublic product page A/B test of a trending tag, in the gallery or above the design title, against no tag, is live"
+  },
+  "eta": {
+   "kind": "release",
+   "where": "#released",
+   "who": "Jonathan Tan",
+   "date": "2026-10-23",
+   "url": "https://grid-articore.enterprise.slack.com/archives/C0V4PM9DW",
+   "what": "Jonathan Tan posted in #released on Oct 23 that the TeePublic product page A/B test of a trending tag, in the gallery or above the design title, against no tag, is live"
+  }
+ },
+ "Crop Crewnecks etc. for closer view on PDP": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 93",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A93",
+   "what": "Row \"Crop Crewnecks etc. for closer view on PDP\", Customer, Not Started (status blank), launch not set",
+   "who": "",
+   "date": "2026-10-31",
+   "say": "The roadmap sheet's Active Work tab lists \"Crop Crewnecks etc. for closer view on PDP\" under Customer as Not Started (status blank), with no launch date (read Oct 31)."
+  },
+  "team": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Team column, row 93",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A93",
+   "what": "Team: Customer"
+  },
+  "site": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Brand column, row 93",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A93",
+   "what": "Brand: RBO"
+  },
+  "s": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Status column, row 93",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A93",
+   "what": "Not Started (status blank)"
+  },
+  "eta": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Est. Launch Date column, row 93",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A93",
+   "what": "No launch date listed"
+  },
+  "obj": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, OKR and Pillar columns, row 93",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A93",
+   "what": "Goal: CVR"
+  }
+ },
+ "Tag Page FIRST Swim Lanes should be Best Sellers": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 94",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A94",
+   "what": "Row \"Tag Page FIRST Swim Lanes should be Best Sellers\", Customer, Not Started (status blank), launch not set",
+   "who": "",
+   "date": "2026-10-31",
+   "say": "The roadmap sheet's Active Work tab lists \"Tag Page FIRST Swim Lanes should be Best Sellers\" under Customer as Not Started (status blank), with no launch date (read Oct 31)."
+  },
+  "team": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Team column, row 94",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A94",
+   "what": "Team: Customer"
+  },
+  "site": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Brand column, row 94",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A94",
+   "what": "Brand: RBO"
+  },
+  "s": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Status column, row 94",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A94",
+   "what": "Not Started (status blank)"
+  },
+  "eta": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Est. Launch Date column, row 94",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A94",
+   "what": "No launch date listed"
+  },
+  "obj": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, OKR and Pillar columns, row 94",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A94",
+   "what": "Goal: CVR"
+  }
+ },
+ "Simplify or Remove Print Location Choice": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 95",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A95",
+   "what": "Row \"Simplify or Remove Print Location Choice\", Customer, Blocked, launch Q4 '27",
+   "who": "",
+   "date": "2026-10-31",
+   "say": "The roadmap sheet's Active Work tab lists \"Simplify or Remove Print Location Choice\" under Customer as Blocked, with launch listed as Q4 '27 (read Oct 31)."
+  },
+  "team": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Team column, row 95",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A95",
+   "what": "Team: Customer"
+  },
+  "site": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Brand column, row 95",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A95",
+   "what": "Brand: RBO"
+  },
+  "s": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Status column, row 95",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A95",
+   "what": "Blocked"
+  },
+  "eta": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Est. Launch Date column, row 95",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A95",
+   "what": "Launch listed as Q4 '27"
+  },
+  "obj": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, OKR and Pillar columns, row 95",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A95",
+   "what": "Goal: CVR"
+  }
+ },
+ "Redesign Nav Taxonomy and Hover States": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 96",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A96",
+   "what": "Row \"Redesign Nav Taxonomy and Hover States\", Customer, Blocked, launch Q4 '27",
+   "who": "",
+   "date": "2026-10-31",
+   "say": "The roadmap sheet's Active Work tab lists \"Redesign Nav Taxonomy and Hover States\" under Customer as Blocked, with launch listed as Q4 '27 (read Oct 31)."
+  },
+  "team": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Team column, row 96",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A96",
+   "what": "Team: Customer"
+  },
+  "site": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Brand column, row 96",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A96",
+   "what": "Brand: RBO"
+  },
+  "s": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Status column, row 96",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A96",
+   "what": "Blocked"
+  },
+  "eta": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Est. Launch Date column, row 96",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A96",
+   "what": "Launch listed as Q4 '27"
+  },
+  "obj": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, OKR and Pillar columns, row 96",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A96",
+   "what": "Goal: CVR"
+  }
+ },
+ "Improve Cart Upsell (Sticker w/Same Design)": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 97",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A97",
+   "what": "Row \"Improve Cart Upsell (Sticker w/Same Design)\", Customer, Blocked, launch Q4 '27",
+   "who": "",
+   "date": "2026-10-31",
+   "say": "The roadmap sheet's Active Work tab lists \"Improve Cart Upsell (Sticker w/Same Design)\" under Customer as Blocked, with launch listed as Q4 '27 (read Oct 31)."
+  },
+  "team": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Team column, row 97",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A97",
+   "what": "Team: Customer"
+  },
+  "site": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Brand column, row 97",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A97",
+   "what": "Brand: RBO"
+  },
+  "s": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Status column, row 97",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A97",
+   "what": "Blocked"
+  },
+  "eta": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Est. Launch Date column, row 97",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A97",
+   "what": "Launch listed as Q4 '27"
+  },
+  "obj": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, OKR and Pillar columns, row 97",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A97",
+   "what": "Goal: AOV"
+  }
+ },
+ "Add Account management path on Mobile Nav": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 98",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A98",
+   "what": "Row \"Add Account management path on Mobile Nav\", Customer, Discovery/Spec, launch Q4 '27",
+   "who": "",
+   "date": "2026-10-31",
+   "say": "The roadmap sheet's Active Work tab lists \"Add Account management path on Mobile Nav\" under Customer as Discovery/Spec, with launch listed as Q4 '27 (read Oct 31)."
+  },
+  "team": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Team column, row 98",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A98",
+   "what": "Team: Customer"
+  },
+  "site": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Brand column, row 98",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A98",
+   "what": "Brand: RBO"
+  },
+  "s": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Status column, row 98",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A98",
+   "what": "Discovery/Spec"
+  },
+  "eta": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Est. Launch Date column, row 98",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A98",
+   "what": "Launch listed as Q4 '27"
+  },
+  "obj": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, OKR and Pillar columns, row 98",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A98",
+   "what": "Goal: Retention"
+  }
+ },
+ "Add Checkout Button to Cart Tray": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 99",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A99",
+   "what": "Row \"Add Checkout Button to Cart Tray\", Customer, Paused, launch June '26",
+   "who": "",
+   "date": "2026-10-31",
+   "say": "The roadmap sheet's Active Work tab lists \"Add Checkout Button to Cart Tray\" under Customer as Paused, with launch listed as June '26 (read Oct 31)."
+  },
+  "team": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Team column, row 99",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A99",
+   "what": "Team: Customer"
+  },
+  "site": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Brand column, row 99",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A99",
+   "what": "Brand: RBO"
+  },
+  "s": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Status column, row 99",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A99",
+   "what": "Paused"
+  },
+  "eta": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Est. Launch Date column, row 99",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A99",
+   "what": "Launch listed as June '26"
+  },
+  "obj": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, OKR and Pillar columns, row 99",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A99",
+   "what": "Goal: CVR"
+  }
+ },
+ "Remove Member Offer from Cart & Checkout": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 101",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A101",
+   "what": "Row \"Remove Member Offer from Cart & Checkout\", Customer, Paused, launch On hold",
+   "who": "",
+   "date": "2026-10-31",
+   "say": "The roadmap sheet's Active Work tab lists \"Remove Member Offer from Cart & Checkout\" under Customer as Paused, with launch listed as On hold (read Oct 31)."
+  },
+  "team": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Team column, row 101",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A101",
+   "what": "Team: Customer"
+  },
+  "site": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Brand column, row 101",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A101",
+   "what": "Brand: RBO"
+  },
+  "s": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Status column, row 101",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A101",
+   "what": "Paused"
+  },
+  "eta": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Est. Launch Date column, row 101",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A101",
+   "what": "Launch listed as On hold"
+  },
+  "obj": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, OKR and Pillar columns, row 101",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A101",
+   "what": "Goal: CVR"
+  }
+ },
+ "Best-Practice Style Selector UX (RB T-shirts)": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 102",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A102",
+   "what": "Row \"Best-Practice Style Selector UX (RB T-shirts)\", Customer, In Dev / On Track, launch Oct '26",
+   "who": "",
+   "date": "2026-10-31",
+   "say": "The roadmap sheet's Active Work tab lists \"Best-Practice Style Selector UX (RB T-shirts)\" under Customer as In Dev / On Track, with launch listed as Oct '26 (read Oct 31)."
+  },
+  "team": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Team column, row 102",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A102",
+   "what": "Team: Customer"
+  },
+  "site": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Brand column, row 102",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A102",
+   "what": "Brand: RBO"
+  },
+  "s": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Status column, row 102",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A102",
+   "what": "In Dev / On Track"
+  },
+  "eta": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Est. Launch Date column, row 102",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A102",
+   "what": "Launch listed as Oct '26"
+  },
+  "obj": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, OKR and Pillar columns, row 102",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A102",
+   "what": "Goal: AOV"
+  }
+ },
+ "Add Express Pay Methods to Cart Tray": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 104",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A104",
+   "what": "Row \"Add Express Pay Methods to Cart Tray\", Customer, Complete / Delayed, launch July '26",
+   "who": "",
+   "date": "2026-10-31",
+   "say": "The roadmap sheet's Active Work tab lists \"Add Express Pay Methods to Cart Tray\" under Customer as Complete / Delayed, with launch listed as July '26 (read Oct 31)."
+  },
+  "team": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Team column, row 104",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A104",
+   "what": "Team: Customer"
+  },
+  "site": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Brand column, row 104",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A104",
+   "what": "Brand: RBO"
+  },
+  "s": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Status column, row 104",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A104",
+   "what": "Complete / Delayed"
+  },
+  "eta": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Est. Launch Date column, row 104",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A104",
+   "what": "Launch listed as July '26"
+  },
+  "obj": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, OKR and Pillar columns, row 104",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A104",
+   "what": "Goal: CVR"
+  }
+ },
+ "Remove artist-specific paths from Customer accounts": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 118",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A118",
+   "what": "Row \"Remove artist-specific paths from Customer accounts\", Customer, Not Started, launch Q4 '27",
+   "who": "",
+   "date": "2026-10-31",
+   "say": "The roadmap sheet's Active Work tab lists \"Remove artist-specific paths from Customer accounts\" under Customer as Not Started, with launch listed as Q4 '27 (read Oct 31)."
+  },
+  "team": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Team column, row 118",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A118",
+   "what": "Team: Customer"
+  },
+  "site": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Brand column, row 118",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A118",
+   "what": "Brand: RBO"
+  },
+  "s": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Status column, row 118",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A118",
+   "what": "Not Started"
+  },
+  "eta": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Est. Launch Date column, row 118",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A118",
+   "what": "Launch listed as Q4 '27"
+  },
+  "obj": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, OKR and Pillar columns, row 118",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A118",
+   "what": "Goal: CVR"
+  }
+ },
+ "Promote RB App Without Interrupting Purchase Funnel": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 119",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A119",
+   "what": "Row \"Promote RB App Without Interrupting Purchase Funnel\", Customer, Not Started, launch not set",
+   "who": "",
+   "date": "2026-10-31",
+   "say": "The roadmap sheet's Active Work tab lists \"Promote RB App Without Interrupting Purchase Funnel\" under Customer as Not Started, with no launch date (read Oct 31)."
+  },
+  "team": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Team column, row 119",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A119",
+   "what": "Team: Customer"
+  },
+  "site": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Brand column, row 119",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A119",
+   "what": "Brand: TPO"
+  },
+  "s": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Status column, row 119",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A119",
+   "what": "Not Started"
+  },
+  "eta": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Est. Launch Date column, row 119",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A119",
+   "what": "No launch date listed"
+  },
+  "obj": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, OKR and Pillar columns, row 119",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A119",
+   "what": "Goal: Retention"
+  }
+ },
+ "Consolidate to Single-Page Checkout": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 120",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A120",
+   "what": "Row \"Consolidate to Single-Page Checkout\", Customer, Not Started, launch not set",
+   "who": "",
+   "date": "2026-10-31",
+   "say": "The roadmap sheet's Active Work tab lists \"Consolidate to Single-Page Checkout\" under Customer as Not Started, with no launch date (read Oct 31)."
+  },
+  "team": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Team column, row 120",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A120",
+   "what": "Team: Customer"
+  },
+  "site": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Brand column, row 120",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A120",
+   "what": "Brand: TPO"
+  },
+  "s": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Status column, row 120",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A120",
+   "what": "Not Started"
+  },
+  "eta": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Est. Launch Date column, row 120",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A120",
+   "what": "No launch date listed"
+  },
+  "obj": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, OKR and Pillar columns, row 120",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A120",
+   "what": "Goal: CVR"
+  }
+ },
+ "Checkout Best Practice Redesign": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 121",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A121",
+   "what": "Row \"Checkout Best Practice Redesign\", Customer, Not Started, launch not set",
+   "who": "",
+   "date": "2026-10-31",
+   "say": "The roadmap sheet's Active Work tab lists \"Checkout Best Practice Redesign\" under Customer as Not Started, with no launch date (read Oct 31)."
+  },
+  "team": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Team column, row 121",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A121",
+   "what": "Team: Customer"
+  },
+  "site": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Brand column, row 121",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A121",
+   "what": "Brand: RBO"
+  },
+  "s": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Status column, row 121",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A121",
+   "what": "Not Started"
+  },
+  "eta": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Est. Launch Date column, row 121",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A121",
+   "what": "No launch date listed"
+  },
+  "obj": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, OKR and Pillar columns, row 121",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A121",
+   "what": "Goal: CVR"
+  }
+ },
+ "Cross-Sell Module on PDP": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 122",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A122",
+   "what": "Row \"Cross-Sell Module on PDP\", Customer, Not Started, launch Q4 '27",
+   "who": "",
+   "date": "2026-10-31",
+   "say": "The roadmap sheet's Active Work tab lists \"Cross-Sell Module on PDP\" under Customer as Not Started, with launch listed as Q4 '27 (read Oct 31)."
+  },
+  "team": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Team column, row 122",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A122",
+   "what": "Team: Customer"
+  },
+  "site": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Brand column, row 122",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A122",
+   "what": "Brand: TPO"
+  },
+  "s": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Status column, row 122",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A122",
+   "what": "Not Started"
+  },
+  "eta": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Est. Launch Date column, row 122",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A122",
+   "what": "Launch listed as Q4 '27"
+  },
+  "obj": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, OKR and Pillar columns, row 122",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A122",
+   "what": "Goal: AOV"
+  }
+ },
+ "Login Option on Checkout": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 123",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A123",
+   "what": "Row \"Login Option on Checkout\", Customer, Not Started, launch not set",
+   "who": "",
+   "date": "2026-10-31",
+   "say": "The roadmap sheet's Active Work tab lists \"Login Option on Checkout\" under Customer as Not Started, with no launch date (read Oct 31)."
+  },
+  "team": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Team column, row 123",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A123",
+   "what": "Team: Customer"
+  },
+  "site": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Brand column, row 123",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A123",
+   "what": "Brand: RBO"
+  },
+  "s": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Status column, row 123",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A123",
+   "what": "Not Started"
+  },
+  "eta": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Est. Launch Date column, row 123",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A123",
+   "what": "No launch date listed"
+  },
+  "obj": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, OKR and Pillar columns, row 123",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A123",
+   "what": "Goal: CVR"
+  }
+ },
+ "Shop Pay": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 124",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A124",
+   "what": "Row \"Shop Pay\", Customer, Not Started, launch not set",
+   "who": "",
+   "date": "2026-10-31",
+   "say": "The roadmap sheet's Active Work tab lists \"Shop Pay\" under Customer as Not Started, with no launch date (read Oct 31)."
+  },
+  "team": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Team column, row 124",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A124",
+   "what": "Team: Customer"
+  },
+  "site": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Brand column, row 124",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A124",
+   "what": "Brand: RBO"
+  },
+  "s": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Status column, row 124",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A124",
+   "what": "Not Started"
+  },
+  "eta": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Est. Launch Date column, row 124",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A124",
+   "what": "No launch date listed"
+  },
+  "obj": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, OKR and Pillar columns, row 124",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A124",
+   "what": "Goal: CVR"
+  }
+ },
+ "Thank You Page Upsell (RBO)": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 125",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A125",
+   "what": "Row \"Thank You Page Upsell (RBO)\", Customer, Not Started, launch not set",
+   "who": "",
+   "date": "2026-10-31",
+   "say": "The roadmap sheet's Active Work tab lists \"Thank You Page Upsell (RBO)\" under Customer as Not Started, with no launch date (read Oct 31)."
+  },
+  "team": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Team column, row 125",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A125",
+   "what": "Team: Customer"
+  },
+  "site": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Brand column, row 125",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A125",
+   "what": "Brand: RBO"
+  },
+  "s": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Status column, row 125",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A125",
+   "what": "Not Started"
+  },
+  "eta": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Est. Launch Date column, row 125",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A125",
+   "what": "No launch date listed"
+  },
+  "obj": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, OKR and Pillar columns, row 125",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A125",
+   "what": "Goal: AOV"
+  }
+ },
+ "Further Incentivize Account Sign Up": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 126",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A126",
+   "what": "Row \"Further Incentivize Account Sign Up\", Customer, Ready for Dev, launch Q4 '27",
+   "who": "",
+   "date": "2026-10-31",
+   "say": "The roadmap sheet's Active Work tab lists \"Further Incentivize Account Sign Up\" under Customer as Ready for Dev, with launch listed as Q4 '27 (read Oct 31)."
+  },
+  "team": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Team column, row 126",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A126",
+   "what": "Team: Customer"
+  },
+  "site": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Brand column, row 126",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A126",
+   "what": "Brand: RBO"
+  },
+  "s": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Status column, row 126",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A126",
+   "what": "Ready for Dev"
+  },
+  "eta": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Est. Launch Date column, row 126",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A126",
+   "what": "Launch listed as Q4 '27"
+  },
+  "obj": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, OKR and Pillar columns, row 126",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A126",
+   "what": "Goal: CVR"
+  }
+ },
+ "Trust Pilot on RB cart page/tray": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 130",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A130",
+   "what": "Row \"Trust Pilot on RB cart page/tray\", Customer, Not Started (status blank), launch not set",
+   "who": "",
+   "date": "2026-10-31",
+   "say": "The roadmap sheet's Active Work tab lists \"Trust Pilot on RB cart page/tray\" under Customer as Not Started (status blank), with no launch date (read Oct 31)."
+  },
+  "team": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Team column, row 130",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A130",
+   "what": "Team: Customer"
+  },
+  "site": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Brand column, row 130",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A130",
+   "what": "Brand: TPO"
+  },
+  "s": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Status column, row 130",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A130",
+   "what": "Not Started (status blank)"
+  },
+  "eta": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Est. Launch Date column, row 130",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A130",
+   "what": "No launch date listed"
+  },
+  "obj": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, OKR and Pillar columns, row 130",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A130",
+   "what": "Goal: CVR"
+  }
+ },
+ "Cross-sell module in the TPO cart tray": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 131",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A131",
+   "what": "Row \"Cross-sell module in the TPO cart tray\", Customer, Not Started (status blank), launch not set",
+   "who": "",
+   "date": "2026-10-31",
+   "say": "The roadmap sheet's Active Work tab lists \"Cross-sell module in the TPO cart tray\" under Customer as Not Started (status blank), with no launch date (read Oct 31)."
+  },
+  "team": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Team column, row 131",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A131",
+   "what": "Team: Customer"
+  },
+  "site": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Brand column, row 131",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A131",
+   "what": "Brand: RBO"
+  },
+  "s": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Status column, row 131",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A131",
+   "what": "Not Started (status blank)"
+  },
+  "eta": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Est. Launch Date column, row 131",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A131",
+   "what": "No launch date listed"
+  },
+  "obj": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, OKR and Pillar columns, row 131",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A131",
+   "what": "Goal: AOV"
+  }
+ },
+ "Sticker quick ATC in the cart tray cross-sell": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 132",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A132",
+   "what": "Row \"Sticker quick ATC in the cart tray cross-sell\", Customer, Not Started (status blank), launch not set",
+   "who": "",
+   "date": "2026-10-31",
+   "say": "The roadmap sheet's Active Work tab lists \"Sticker quick ATC in the cart tray cross-sell\" under Customer as Not Started (status blank), with no launch date (read Oct 31)."
+  },
+  "team": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Team column, row 132",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A132",
+   "what": "Team: Customer"
+  },
+  "site": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Brand column, row 132",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A132",
+   "what": "Brand: RBO"
+  },
+  "s": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Status column, row 132",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A132",
+   "what": "Not Started (status blank)"
+  },
+  "eta": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Est. Launch Date column, row 132",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A132",
+   "what": "No launch date listed"
+  },
+  "obj": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, OKR and Pillar columns, row 132",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A132",
+   "what": "Goal: AOV"
+  }
+ },
+ "Quick ATC for tees on TPO": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 133",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A133",
+   "what": "Row \"Quick ATC for tees on TPO\", Customer, Not Started (status blank), launch not set",
+   "who": "",
+   "date": "2026-10-31",
+   "say": "The roadmap sheet's Active Work tab lists \"Quick ATC for tees on TPO\" under Customer as Not Started (status blank), with no launch date (read Oct 31)."
+  },
+  "team": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Team column, row 133",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A133",
+   "what": "Team: Customer"
+  },
+  "site": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Brand column, row 133",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A133",
+   "what": "Brand: TPO"
+  },
+  "s": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Status column, row 133",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A133",
+   "what": "Not Started (status blank)"
+  },
+  "eta": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Est. Launch Date column, row 133",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A133",
+   "what": "No launch date listed"
+  },
+  "obj": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, OKR and Pillar columns, row 133",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A133",
+   "what": "Goal: AOV"
+  }
+ },
+ "Trending on Subnav ( links to trending CLP )": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 138",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A138",
+   "what": "Row \"Trending on Subnav ( links to trending CLP )\", Customer (Tiger), Not Started (status blank), launch not set",
+   "who": "",
+   "date": "2026-10-31",
+   "say": "The roadmap sheet's Active Work tab lists \"Trending on Subnav ( links to trending CLP )\" under Customer (Tiger) as Not Started (status blank), with no launch date (read Oct 31)."
+  },
+  "team": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Team column, row 138",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A138",
+   "what": "Team: Customer (Tiger)"
+  },
+  "site": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Brand column, row 138",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A138",
+   "what": "Brand: TPO"
+  },
+  "s": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Status column, row 138",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A138",
+   "what": "Not Started (status blank)"
+  },
+  "eta": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Est. Launch Date column, row 138",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A138",
+   "what": "No launch date listed"
+  },
+  "obj": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, OKR and Pillar columns, row 138",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A138",
+   "what": "Goal: CVR"
+  }
+ },
+ "PDP image gallery crops": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 147",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A147",
+   "what": "Row \"PDP image gallery crops\", Customer (Tiger), Not Started, launch not set",
+   "who": "",
+   "date": "2026-10-31",
+   "say": "The roadmap sheet's Active Work tab lists \"PDP image gallery crops\" under Customer (Tiger) as Not Started, with no launch date (read Oct 31)."
+  },
+  "team": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Team column, row 147",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A147",
+   "what": "Team: Customer (Tiger)"
+  },
+  "site": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Brand column, row 147",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A147",
+   "what": "Brand: TPO"
+  },
+  "s": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Status column, row 147",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A147",
+   "what": "Not Started"
+  },
+  "eta": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Est. Launch Date column, row 147",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A147",
+   "what": "No launch date listed"
+  },
+  "obj": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, OKR and Pillar columns, row 147",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A147",
+   "what": "Goal: CVR"
+  }
+ },
+ "Round Product Pricing": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 127",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A127",
+   "what": "Row \"Round Product Pricing\", PLC, Not Started, launch not set",
+   "who": "",
+   "date": "2026-10-31",
+   "say": "The roadmap sheet's Active Work tab lists \"Round Product Pricing\" under PLC as Not Started, with no launch date (read Oct 31)."
+  },
+  "team": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Team column, row 127",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A127",
+   "what": "Team: PLC"
+  },
+  "site": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Brand column, row 127",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A127",
+   "what": "Brand: RBO"
+  },
+  "s": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Status column, row 127",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A127",
+   "what": "Not Started"
+  },
+  "eta": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Est. Launch Date column, row 127",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A127",
+   "what": "No launch date listed"
+  },
+  "obj": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, OKR and Pillar columns, row 127",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A127",
+   "what": "Goal: CVR"
+  }
+ },
+ "Fix SRP Image Crop in RB App": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 129",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A129",
+   "what": "Row \"Fix SRP Image Crop in RB App\", Content & Search, Not Started, launch not set",
+   "who": "",
+   "date": "2026-10-31",
+   "say": "The roadmap sheet's Active Work tab lists \"Fix SRP Image Crop in RB App\" under Content & Search as Not Started, with no launch date (read Oct 31)."
+  },
+  "team": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Team column, row 129",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A129",
+   "what": "Team: Content & Search"
+  },
+  "site": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Brand column, row 129",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A129",
+   "what": "Brand: RBO"
+  },
+  "s": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Status column, row 129",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A129",
+   "what": "Not Started"
+  },
+  "eta": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Est. Launch Date column, row 129",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A129",
+   "what": "No launch date listed"
+  },
+  "obj": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, OKR and Pillar columns, row 129",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A129",
+   "what": "Goal: CVR"
+  }
+ },
  "Checkout email opt-in and hashing": {
   "origin": {
    "kind": "jira",

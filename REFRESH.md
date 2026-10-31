@@ -37,7 +37,10 @@ For data, edit the existing file and keep its shape: change values, keep every f
 - The data files are large (`sources.js` alone is about 160 KB). Ask for targeted edits, never whole-file rewrites.
 - For a UI change, name the part of the page (for example "the scorecard header") so Claude can grep for it.
 
-## Each refresh
+## Automatic refreshes
+Scheduled tasks refresh `data/` at 8:30 AM, 2:30 PM and 4:30 PM ET every day, plus the Tuesday before each Executive Roadmap Review (5:31 PM). Each run checks every source, runs `npm run check`, and **commits to `master` locally. It never pushes.** You get a notification; open GitHub Desktop and click **Push origin**. A run stops without committing if you have uncommitted changes in this folder (it will not touch your work), and the computer has to be awake and the Claude app open for a run to happen. If GitHub Desktop shows nothing to push, the run did not commit: look at the Refresh log in `work/projects/cvr-pacer.md` in the AI Mike folder.
+
+## Each refresh (by hand)
 1. In GitHub Desktop, click Fetch origin, then Pull if it offers one, so you start from the latest version.
 2. Paste the prompt below into Claude with the folder open.
 3. When Claude is done, read its summary. It should say which files changed and the check result.

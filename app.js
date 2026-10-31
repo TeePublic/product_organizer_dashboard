@@ -1927,7 +1927,7 @@ function scoreHtml(b) {
 }
 
 /* ---------- A/B tests: its own page, because it is a weekly decision review, not the daily pulse ---------- */
-const EXPS_AS_OF = '2026-10-30';
+const EXPS_AS_OF = '2026-10-31';
 const testDays = t => Math.round((parse(EXPS_AS_OF) - parse(t.start)) / DAY) + 1;
 const siteImp = (rel, reach) => rel * reach;
 // Where a test's whole-site number comes from, for every hover that shows one.
