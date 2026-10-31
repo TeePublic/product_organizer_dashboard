@@ -1,4 +1,30 @@
 const SRCS = {
+ "Real-time Amplitude": {
+  "origin": {
+   "kind": "meeting",
+   "where": "MarTech roadmap and data foundation meeting, Oct 21 (meeting notes)",
+   "who": "",
+   "date": "2026-10-21",
+   "url": "https://notes.granola.ai/d/ca7b50b9-4f99-44ab-8749-ab887f62eab8",
+   "what": "In the Oct 21 MarTech roadmap meeting, real-time streaming analytics (event pipeline plus Amplitude) was described as a goal for next year. Not a row on the Active Work tab (checked Oct 31)."
+  },
+  "s": {
+   "kind": "meeting",
+   "where": "MarTech roadmap and data foundation meeting, Oct 21 (meeting notes)",
+   "who": "",
+   "date": "2026-10-21",
+   "url": "https://notes.granola.ai/d/ca7b50b9-4f99-44ab-8749-ab887f62eab8",
+   "what": "In the Oct 21 MarTech roadmap meeting, real-time streaming analytics (event pipeline plus Amplitude) was described as a goal for next year. Not a row on the Active Work tab (checked Oct 31)."
+  },
+  "eta": {
+   "kind": "meeting",
+   "where": "MarTech roadmap and data foundation meeting, Oct 21 (meeting notes)",
+   "who": "",
+   "date": "2026-10-21",
+   "url": "https://notes.granola.ai/d/ca7b50b9-4f99-44ab-8749-ab887f62eab8",
+   "what": "In the Oct 21 MarTech roadmap meeting, real-time streaming analytics (event pipeline plus Amplitude) was described as a goal for next year. Not a row on the Active Work tab (checked Oct 31)."
+  }
+ },
  "Trending tag on product pages test": {
   "origin": {
    "kind": "release",

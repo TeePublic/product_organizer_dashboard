@@ -1,5 +1,5 @@
 
-// Ledger series pulled 2026-10-31 from Amplitude (bot score >=70; RB also excludes JA4 t13d1517h2_8daaf6152771_cb7bf5808d99; TP also excludes verified bots). Filters re-read from dashboard lm29400h 2026-10-31, unchanged. Daily from 2026-08-01 (91 days, through 2026-10-30; Oct 26-29 re-pulled since values revise) for this year, 2025-09-01 (61 days, through 2025-10-31) for last year. Redbubble has Oct 30 events now, so its Oct 29 value is no longer low.
+// Ledger series pulled 2026-10-31 from Amplitude (bot score >=70; RB also excludes JA4 t13d1517h2_8daaf6152771_cb7bf5808d99; TP also excludes verified bots). Filters re-read from dashboard lm29400h 2026-10-31 (8:30 AM and 2:40 PM ET), unchanged; overall CVR and sessions re-checked for Oct 27-30 at 2:40 PM ET, unchanged, so segment series were held. Daily from 2026-08-01 (91 days, through 2026-10-30; Oct 26-29 re-pulled since values revise) for this year, 2025-09-01 (61 days, through 2025-10-31) for last year. Redbubble has Oct 30 events now, so its Oct 29 value is no longer low.
 // v = conversion rate, s = sessions.
 const L = {
   tp: {

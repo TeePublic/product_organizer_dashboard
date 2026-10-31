@@ -1,6 +1,6 @@
 
-// Snapshot pulled 2026-10-31 from the Amplitude "CVR Pacer · TP + RB (bot score >=70)" dashboard (lm29400h) via typed queries with the dashboard's filters (TP: score >=70, verified bots excluded; RB: score >=70, excludes JA4 t13d1517h2_8daaf6152771_cb7bf5808d99). Dashboard filters re-read 2026-10-31, unchanged.
-// Values truncated to 6 decimals. Last complete day = 2026-10-30 for both sites (Oct 26-29 re-pulled since values revise). tpLY runs 2025-09-01 .. 2025-10-31. Redbubble has Oct 30 events now, so its Oct 29 value is no longer low.
+// Snapshot pulled 2026-10-31 from the Amplitude "CVR Pacer · TP + RB (bot score >=70)" dashboard (lm29400h) via typed queries with the dashboard's filters (TP: score >=70, verified bots excluded; RB: score >=70, excludes JA4 t13d1517h2_8daaf6152771_cb7bf5808d99). Dashboard filters re-read 2026-10-31 (8:30 AM and 2:40 PM ET runs), unchanged.
+// Values truncated to 6 decimals. Last complete day = 2026-10-30 for both sites (Oct 26-29 re-pulled since values revise). tpLY runs 2025-09-01 .. 2025-10-31. Redbubble has Oct 30 events now, so its Oct 29 value is no longer low. Re-checked 2026-10-31 ~2:40 PM ET: TP and RB CVR and sessions for Oct 27-30 unchanged; Redbubble payment mix for Oct 26-30 revised (RB order data shifted between days). Oct 31 is not complete yet (RB has no Oct 31 events so far).
 const D = {
   asOf: '2026-10-30',
   tp: {
@@ -81,11 +81,11 @@ const D = {
     },
     rb: {
       // Split with wallet_type on order_completed (Oct 26). Card includes Stripe Link (saved cards). All orders, no bot filter: bots don't place orders.
-      'Card': [3186,3107,3096,4164,4029,3838,4009,3796,3813,3878,4185,2980,2871,2974,3083,2849,2900,3003,3100,3094,4041,3790,3741,3710,3987,4250,2815,2707,2581,2730],
-      'Apple Pay': [1734,1739,1797,2536,2177,2158,2153,2202,2218,2386,2506,1711,1726,1712,1673,1713,1676,1763,1631,1838,2319,2151,2198,2244,2324,2337,1478,1440,1516,1486],
-      'Google Pay': [249,268,302,354,353,346,370,388,365,309,341,286,238,255,249,266,239,242,264,276,335,321,333,327,326,361,240,242,225,264],
-      'PayPal': [1595,1479,1602,2275,2022,1915,2058,1991,1916,2078,2215,1495,1405,1432,1440,1462,1407,1550,1412,1524,1961,1830,1946,2019,2216,2220,1431,1331,1454,1473],
-      'Klarna, Afterpay': [189,200,222,260,270,263,281,307,249,264,303,198,180,212,187,194,184,192,210,225,282,285,298,287,337,307,185,169,194,196]
+      'Card': [3186,3107,3096,4164,4029,3838,4009,3796,3813,3878,4185,2980,2871,2974,3083,2849,2900,3003,3100,3094,4041,3790,3741,3710,3987,4247,2685,2715,2602,2713],
+      'Apple Pay': [1734,1739,1797,2536,2177,2158,2153,2202,2218,2386,2506,1711,1726,1712,1673,1713,1676,1763,1631,1838,2319,2151,2198,2244,2324,2317,1445,1442,1521,1476],
+      'Google Pay': [249,268,302,354,353,346,370,388,365,309,341,286,238,255,249,266,239,242,264,276,335,321,333,327,326,355,240,241,229,265],
+      'PayPal': [1595,1479,1602,2275,2022,1915,2058,1991,1916,2078,2215,1495,1405,1432,1440,1462,1407,1550,1412,1524,1961,1830,1946,2019,2216,2227,1390,1334,1458,1451],
+      'Klarna, Afterpay': [189,200,222,260,270,263,281,307,249,264,303,198,180,212,187,194,184,192,210,225,282,285,298,287,337,305,178,172,198,183]
     }
   }
 };

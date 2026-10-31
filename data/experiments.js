@@ -114,11 +114,11 @@ const SEXP = { url: 'https://app.sigmacomputing.com/teepublic/workbook/GA4-Searc
   ] };
 
 
-// TeePublic A/B tests, read from the Split dashboard (https://www.teepublic.com/manage/split) on Oct 31 2026. Only tests launched in the last 30 days
+// TeePublic A/B tests, read from the Split dashboard (https://www.teepublic.com/manage/split) on Oct 31 2026 (2:35 PM ET). Only tests launched in the last 30 days
 // that have numbers (Mike and Jon, Oct 30): the date beside each experiment name is its launch date. Older tests and tests with no completed
 // conversions are left out. Split reports each test's own conversion goal, so these rates are not sitewide CVR. conf is Split's confidence, null for "Insufficient".
 const TPEXPS = { asOf: '2026-10-31', url: 'https://www.teepublic.com/manage/split', items: [
-  { id: 'pdp_bestseller_badge', name: 'Bestseller badge on product pages', start: '2026-10-27', where: 'PDP', control: { p: 5726, conv: 0.0809 }, variants: [{ n: 'Title badge', p: 5962, conv: 0.0889, rel: 0.0994, conf: null }, { n: 'Gallery badge', p: 5851, conv: 0.0916, rel: 0.1329, conf: 95 }], call: ['lean', 'Gallery badge up at 95%, early'] },
-  { id: 'pdp_trending_badge', name: 'Trending badge on product pages', start: '2026-10-23', where: 'PDP', control: { p: 464084, conv: 0.0120 }, variants: [{ n: 'Title badge', p: 463599, conv: 0.0123, rel: 0.0204, conf: null }, { n: 'Gallery badge', p: 462830, conv: 0.0122, rel: 0.0194, conf: null }], call: ['early', 'Too early'] },
-  { id: 'thankyou_mobile_layout', name: 'Thank-you page layout on mobile', start: '2026-10-23', where: 'Thank-you page', control: { p: 10136, conv: 0.0178 }, variants: [{ n: 'Layout A', p: 10100, conv: 0.0188, rel: 0.0593, conf: null }, { n: 'Layout B', p: 10175, conv: 0.0181, rel: 0.0183, conf: null }, { n: 'Layout C', p: 10151, conv: 0.0202, rel: 0.1372, conf: null }], call: ['early', 'Too early'] }
+  { id: 'pdp_bestseller_badge', name: 'Bestseller badge on product pages', start: '2026-10-27', where: 'PDP', control: { p: 6009, conv: 0.0852 }, variants: [{ n: 'Title badge', p: 6194, conv: 0.0888, rel: 0.0421, conf: null }, { n: 'Gallery badge', p: 6132, conv: 0.0928, rel: 0.0890, conf: null }], call: ['early', 'Gallery badge ahead, below 95% again'] },
+  { id: 'pdp_trending_badge', name: 'Trending badge on product pages', start: '2026-10-23', where: 'PDP', control: { p: 465851, conv: 0.0121 }, variants: [{ n: 'Title badge', p: 465399, conv: 0.0124, rel: 0.0215, conf: null }, { n: 'Gallery badge', p: 464562, conv: 0.0123, rel: 0.0161, conf: null }], call: ['early', 'Too early'] },
+  { id: 'thankyou_mobile_layout', name: 'Thank-you page layout on mobile', start: '2026-10-23', where: 'Thank-you page', control: { p: 10377, conv: 0.0175 }, variants: [{ n: 'Layout A', p: 10327, conv: 0.0185, rel: 0.0545, conf: null }, { n: 'Layout B', p: 10421, conv: 0.0182, rel: 0.0395, conf: null }, { n: 'Layout C', p: 10382, conv: 0.0200, rel: 0.1423, conf: null }], call: ['early', 'Too early'] }
 ] };
