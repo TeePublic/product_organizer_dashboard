@@ -27,14 +27,14 @@ const EXPS = { metricNote: 'Each test has a primary metric (what it was built to
       variants: [['Timer all sale', 0.0105], ['Timer last 48 hours', 0.0223], ['Timer last 72 hours', 0.0143]],
       n: 8371467, sig: false, call: 'Only collects during sales, and the last sale ended Oct 26, so 0 new visitors since then; paused until the next one. All three timers finished ahead of no timer, with the 48-hour timer leading at about +2.2% CVR and +2.5% revenue per user. CVR is not significant yet; Amplitude says about 32 more sale days to read it.',
       url: 'https://app.amplitude.com/experiment/tpub/774278/config/1492400' },
-    { id: '1569370', kind: 'aov', sec: [{ name: 'Sitewide CVR (people in test)', a: 0.014326, b: 0.014160, rel: -0.0116, f: 'pct' }, { name: 'Revenue per user', a: 0.7521, b: 0.7688, rel: 0.0222, f: 'usd', note: 'Amplitude can\'t put a reliable error bar on this one' }], p: null, name: 'T-shirt style pills on product pages', where: 'Product page', start: '2026-10-27', status: 'running', owners: 'Jon, Allison, Oliver',
+    { id: '1569370', kind: 'aov', sec: [{ name: 'Sitewide CVR (people in test)', a: 0.014326, b: 0.014160, rel: -0.0116, f: 'pct' }, { name: 'Revenue per user', a: 0.7521, b: 0.7688, rel: 0.0222, f: 'usd', note: 'Amplitude can\'t put a reliable error bar on this one' }], p: null, name: 'T-shirt style pills on product pages', where: 'PDP', start: '2026-10-27', status: 'running', owners: 'Jon, Allison, Oliver',
       hyp: 'Showing every T-shirt style up front with fit labels, instead of the style picker pop-up, makes choosing easier and nudges people to premium styles.',
       primary: { name: 'Revenue per user', a: 0.7521, b: 0.7688, rel: 0.0222 }, cvr: { a: 0.014326, b: 0.014160, rel: -0.0116 }, reach: 0.32,
       n: 241898, sig: false, call: 'Three days (Oct 27 to 29): style pills now lead on revenue per user (about +2.2%), reversing day one, while Sitewide CVR is slightly lower (-1.2%, not significant). Amplitude flags a targeting change and uneven group sizes, now counts about 242K visitors (643K on Oct 29) and can\'t put a reliable error bar on revenue per user, so treat the lead as early.',
       url: 'https://app.amplitude.com/experiment/tpub/774278/config/1569370' },
-    { id: '1434686', kind: 'cvr', sec: [{ name: 'Sitewide CVR (people in test)', a: 0.02267, b: 0.02267, rel: -0.0001, f: 'pct' }, { name: 'Revenue per user', a: 0.9671, b: 0.9647, rel: -0.0024, f: 'usd', note: 'Amplitude can\'t put a reliable error bar on this one' }], p: 0.67, name: 'Mobile color swatches shown by default', where: 'Product page, mobile', start: '2026-09-11', status: 'running', owners: 'Jon, Allison',
+    { id: '1434686', kind: 'cvr', sec: [{ name: 'Sitewide CVR (people in test)', a: 0.02267, b: 0.02267, rel: -0.0001, f: 'pct' }, { name: 'Revenue per user', a: 0.9671, b: 0.9647, rel: -0.0024, f: 'usd', note: 'Amplitude can\'t put a reliable error bar on this one' }], p: 0.67, name: 'Mobile color swatches shown by default', where: 'PDP, mobile', start: '2026-09-11', status: 'running', owners: 'Jon, Allison',
       hyp: 'Showing every color without the "+N colors" tap makes it easier to pick and buy.',
-      primary: { name: 'Product page to order rate', a: 0.02239, b: 0.02233, rel: -0.0027 }, cvr: { a: 0.02267, b: 0.02267, rel: -0.0001 }, reach: 0.76,
+      primary: { name: 'PDP to order rate', a: 0.02239, b: 0.02233, rel: -0.0027 }, cvr: { a: 0.02267, b: 0.02267, rel: -0.0001 }, reach: 0.76,
       n: 6359340, sig: false, call: 'Six weeks in and dead flat. Call it: ship whichever is simpler to maintain.',
       url: 'https://app.amplitude.com/experiment/tpub/774278/config/1434686' }
   ],
@@ -44,9 +44,9 @@ const EXPS = { metricNote: 'Each test has a primary metric (what it was built to
       primary: { name: 'Cart to order rate', a: 0.4751, b: 0.4707, rel: -0.0093 }, cvr: { a: 0.4807, b: 0.4765, rel: -0.0088 }, reach: 1,
       n: 163456, sig: false, call: 'Kept the badges. A slight dip in CVR; retesting with cross-sell and fewer trust signals.',
       url: 'https://app.amplitude.com/experiment/tpub/774278/config/1484334' },
-    { id: '1427597', kind: 'cvr', sec: [{ name: 'Sitewide CVR (people in test)', a: 0.03249, b: 0.03294, rel: 0.0141, f: 'pct' }, { name: 'Revenue per user', a: 1.419, b: 1.435, rel: 0.0114, f: 'usd', note: 'Amplitude can\'t put a reliable error bar on this one' }], p: 0.25, name: 'Flat-lay T-shirt thumbnails in search', where: 'Search results', start: '2026-10-05', end: '2026-10-19', status: 'shipped', owners: 'Oliver, Efren, Jon',
+    { id: '1427597', kind: 'cvr', sec: [{ name: 'Sitewide CVR (people in test)', a: 0.03249, b: 0.03294, rel: 0.0141, f: 'pct' }, { name: 'Revenue per user', a: 1.419, b: 1.435, rel: 0.0114, f: 'usd', note: 'Amplitude can\'t put a reliable error bar on this one' }], p: 0.25, name: 'Flat-lay T-shirt thumbnails in search', where: 'SRP', start: '2026-10-05', end: '2026-10-19', status: 'shipped', owners: 'Oliver, Efren, Jon',
       hyp: 'Leading with the product image, not the model, shows the design better in search results.',
-      primary: { name: 'Search to order rate', a: 0.02975, b: 0.03020, rel: 0.0153 }, cvr: { a: 0.03249, b: 0.03294, rel: 0.0141 }, reach: 0.69,
+      primary: { name: 'SRP to order rate', a: 0.02975, b: 0.03020, rel: 0.0153 }, cvr: { a: 0.03249, b: 0.03294, rel: 0.0141 }, reach: 0.69,
       n: 1443475, sig: false, call: 'Shipped on a positive but not significant read.',
       url: 'https://app.amplitude.com/experiment/tpub/774278/config/1427597' }
   ],
@@ -65,8 +65,8 @@ const EXPS = { metricNote: 'Each test has a primary metric (what it was built to
 EXPS.reads = {
   '1569370': { goal: 'rpv', verdict: ['lean', 'Promising, not proven'], next: 'Read again Tue Nov 3, after 4 to 5 more days. Finance to check the extra order value isn\'t lower-margin tees.', decides: 'Customer team, with Finance on margin', flag: 'Uneven group sizes and a targeting change on Oct 27, so read it loosely.',
     m: { rpv: { v: 0.0168, s: 'ns', a: 0.7415, b: 0.7539, f: 'usd', note: 'Amplitude\'s headline +2.2% "roll out" comes from a revenue metric with a broken error bar. This is the version with a working one: +1.7%, could still be noise.' },
-         cvr: { v: -0.0149, s: 'ns', a: 0.014167, b: 0.013956, name: 'Product page to order rate' },
-         atc: { v: -0.0679, s: 'ns', c: 93, a: 0.0386, b: 0.0360, name: 'Add to cart rate (product page)', note: '93% confidence it\'s lower; we call it at 95%. Steering people to pricier styles can lower add to cart while raising order value, which is what TeePublic saw.' },
+         cvr: { v: -0.0149, s: 'ns', a: 0.014167, b: 0.013956, name: 'PDP to order rate' },
+         atc: { v: -0.0679, s: 'ns', c: 93, a: 0.0386, b: 0.0360, name: 'Add to cart rate (PDP)', note: '93% confidence it\'s lower; we call it at 95%. Steering people to pricier styles can lower add to cart while raising order value, which is what TeePublic saw.' },
          aov: { v: 0.0244, s: 'nb', a: 50.90, b: 52.14, f: 'usd', note: 'Revenue ÷ orders. Amplitude\'s own "AOV" divides by everyone in the test, which is why it showed about $0.74.' } } },
   '1409398': {vdef: { 'Topics nav': 'The nav is organized by topic instead of product type.', 'T-shirt default': 'Clicking a topic opens the regular T-shirt results for it, whatever the mix would be.', 'Topic runs a search': 'Clicking a topic runs a normal search for it, so results mix product types (more stickers show up) and the system picks the style.' },  goal: 'cvr', verdict: ['mixed', 'Engagement up, CVR flat'], next: 'Decide whether +13% engagement is worth flat CVR (more engaged visitors feed retargeting). Check revenue per buyer on the T-shirt default.', decides: 'Exec team (the board asked for this test)', flag: 'Uneven group sizes, so read it loosely.',
     m: { rpv: { v: -0.0027, s: 'nb', a: 0.5004, b: 0.4991, f: 'usd', note: 'Topics nav −0.3%, T-shirt default −0.3%, topic runs a search −1.8%.' },
@@ -93,7 +93,7 @@ EXPS.reads = {
 // Set by the daily refresh task.
 EXPS.soon = [
   { e: '🧪', name: 'Cart tray vs cart page (A/B/C)', where: 'Cart', site: 'Both', when: 'After cross-sell ships', what: 'Where cross-sell converts best, with fewer trust signals.', refs: [{ soon: 'customer', l: 'Customer priorities' }] },
-  { e: '🍎', name: 'Apple Pay buy-now on product pages', where: 'Product page', site: 'Redbubble', when: 'Scoping ends about Oct 27', what: 'One-tap checkout from product pages for peak; it would check out the whole cart and can be switched off.' }
+  { e: '🍎', name: 'Apple Pay buy-now on product pages', where: 'PDP', site: 'Redbubble', when: 'Scoping ends about Oct 27', what: 'One-tap checkout from product pages for peak; it would check out the whole cart and can be switched off.' }
 ];
 // Tests Mike asked to drop from the dashboard even though they are still enabled in Amplitude.
 EXPS.hide = ['1434686'];
@@ -118,7 +118,7 @@ const SEXP = { url: 'https://app.sigmacomputing.com/teepublic/workbook/GA4-Searc
 // that have numbers (Mike and Jon, Oct 30): the date beside each experiment name is its launch date. Older tests and tests with no completed
 // conversions are left out. Split reports each test's own conversion goal, so these rates are not sitewide CVR. conf is Split's confidence, null for "Insufficient".
 const TPEXPS = { asOf: '2026-10-30', url: 'https://www.teepublic.com/manage/split', items: [
-  { id: 'pdp_bestseller_badge', name: 'Bestseller badge on product pages', start: '2026-10-27', where: 'Product page', control: { p: 4753, conv: 0.0797 }, variants: [{ n: 'Title badge', p: 4991, conv: 0.0827, rel: 0.0377, conf: null }, { n: 'Gallery badge', p: 4932, conv: 0.0896, rel: 0.1239, conf: 90 }], call: ['lean', 'Leaning up'] },
-  { id: 'pdp_trending_badge', name: 'Trending badge on product pages', start: '2026-10-23', where: 'Product page', control: { p: 452020, conv: 0.0119 }, variants: [{ n: 'Title badge', p: 451481, conv: 0.0121, rel: 0.0182, conf: null }, { n: 'Gallery badge', p: 450610, conv: 0.0121, rel: 0.017, conf: null }], call: ['early', 'Too early'] },
+  { id: 'pdp_bestseller_badge', name: 'Bestseller badge on product pages', start: '2026-10-27', where: 'PDP', control: { p: 4753, conv: 0.0797 }, variants: [{ n: 'Title badge', p: 4991, conv: 0.0827, rel: 0.0377, conf: null }, { n: 'Gallery badge', p: 4932, conv: 0.0896, rel: 0.1239, conf: 90 }], call: ['lean', 'Leaning up'] },
+  { id: 'pdp_trending_badge', name: 'Trending badge on product pages', start: '2026-10-23', where: 'PDP', control: { p: 452020, conv: 0.0119 }, variants: [{ n: 'Title badge', p: 451481, conv: 0.0121, rel: 0.0182, conf: null }, { n: 'Gallery badge', p: 450610, conv: 0.0121, rel: 0.017, conf: null }], call: ['early', 'Too early'] },
   { id: 'thankyou_mobile_layout', name: 'Thank-you page layout on mobile', start: '2026-10-23', where: 'Thank-you page', control: { p: 9492, conv: 0.0177 }, variants: [{ n: 'Layout A', p: 9475, conv: 0.0182, rel: 0.0256, conf: null }, { n: 'Layout B', p: 9610, conv: 0.0186, rel: 0.0524, conf: null }, { n: 'Layout C', p: 9504, conv: 0.0198, rel: 0.1176, conf: null }], call: ['early', 'Too early'] }
 ] };
