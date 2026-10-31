@@ -3731,3 +3731,4 @@ details.pbox.prov > summary { cursor: pointer; list-style: none; } details.pbox.
   .abfilter { flex-wrap: wrap; gap: 6px 10px; } .abfilter .lbl { white-space: nowrap; } .abfilter .segs { max-width: 100%; overflow-x: auto; }
   .group.trun .abfilter { margin: 6px 0 0; width: 100%; }
 }
+.xbar { margin: 0 0.28em; text-decoration: overline; text-decoration-thickness: 1.2px; text-underline-offset: 0; }

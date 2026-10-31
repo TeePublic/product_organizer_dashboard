@@ -23,6 +23,7 @@ const int = v => Math.round(v).toLocaleString('en-US');
 const usd = v => '$' + Math.round(v).toLocaleString('en-US');
 const MINUS = '−';
 const sgn = (x, d = 1) => (x < 0 ? MINUS : '+') + Math.abs(x * 100).toFixed(d) + '%';
+const xbar = s => s.replace(/x\u0304/g, '<span class="xbar">x</span>');
 const upDown = x => (x < 0 ? 'down ' : 'up ') + Math.abs(x * 100).toFixed(Math.abs(x) < 0.1 ? 1 : 0) + '%';
 const sum = a => a.reduce((p, c) => p + c, 0);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -1282,7 +1283,7 @@ function movedHtml0() {
     const flag = f.mix ? '<span class="mvr spike">Traffic spike ' + sgn(f.c.sessMom, 0) + '</span>' : '';
     const tip = esc(f.m.label) + ' ' + sgn(f.c.mom, 0) + ' vs comparable days · ' + share(f) + (facts.length ? ' · ' + facts.map(z => esc(z[1])).join(' · ') : '');
     return '<button class="mv" data-moved="' + i + '" data-hint="' + (HINTS.push(segTip2(f, tot)) - 1) + '" aria-label="' + tip + '"><span class="mvl"><span aria-hidden="true">' + em(f.m.label) + '</span><b>' + esc(f.m.label) + '</b>' + (f.mix ? '<span class="mvv">traffic spike</span>' : '') + '<span class="d">' + sgn(f.c.mom, 0) /* just the number, no "fell"/"rose"; negatives carry a minus (Mike, Oct 28) */ + '</span></span>' +
-      (facts.length ? '<span class="mvr roll' + (facts.length > 1 ? ' multi' : '') + '">' + facts.map((z, k) => '<span class="rf ' + z[0] + (k ? '' : ' on') + '"' + (z[2] ? ' data-jumpsec="' + z[2] + '" role="link" aria-label="Jump to ' + esc(SECS[z[2]] || z[2]) + '"' : '') + '>' + esc(z[1]) + '</span>').join('') + '</span>' : '') + flag + '</button>';
+      (facts.length ? '<span class="mvr roll' + (facts.length > 1 ? ' multi' : '') + '">' + facts.map((z, k) => '<span class="rf ' + z[0] + (k ? '' : ' on') + '"' + (z[2] ? ' data-jumpsec="' + z[2] + '" role="link" aria-label="Jump to ' + esc(SECS[z[2]] || z[2]) + '"' : '') + '>' + xbar(esc(z[1])) + '</span>').join('') + '</span>' : '') + flag + '</button>';
   };
   const tier = (cls, list) => list.map(r => pill(r.f, r.i).replace('<button class="mv"', '<button class="mv ' + cls + '"')).join('');
   if (state.view === 'daily') {
