@@ -116,7 +116,8 @@ const TRENDS = {
 };
 
 // Share of TeePublic orders by top-level category, same 24 hours (items with no category left out: 1,362).
-const CATPIE = { total: 7770, none: 1994, slices: [['Sports', 1858], ['Music', 1457], ['Movies', 721], ['Funny', 337], ['Television', 316], ['Animals', 314]] };
+// Third value = momentum: category share of items on Thu Oct 29 (ET) divided by its share over Oct 22-28, 1.0 = normal (pulled Fri Oct 30 ~7 PM ET). restX = same ratio for everything else.
+const CATPIE = { total: 7770, none: 1994, slices: [['Sports', 1858, 1.58], ['Music', 1457, 0.89], ['Movies', 721, 0.86], ['Funny', 337, 1.05], ['Television', 316, 0.87], ['Animals', 314, 0.88]], restX: 0.9 };
 
 // One-sentence takeaways that reconcile a day's CVR with what the next day's standup said about it. Keyed by site, then the data day.
 // Written by the refresh after each standup; when there is none, the page falls back to listing the standup's open items.

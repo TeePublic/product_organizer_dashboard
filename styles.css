@@ -3679,3 +3679,7 @@ div.abrow .chev, div.strow .chev, div.erow .chev { visibility: hidden; }
 .abst.yes { color: var(--good); } .abst.early, .abst.nb, .abst.tbd { color: var(--muted); }
 .rtag i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; flex: none; }
 .sitepill[data-absite] { cursor: pointer; } .sitepill[data-absite]:hover { background: color-mix(in srgb, var(--ctl) 14%, var(--sunk)); color: var(--ink); }
+
+/* Momentum beside each category's share, the lesser number (Mike, Oct 31) */
+.catleg li { grid-template-columns: 12px 1fr auto 46px !important; }
+.catleg .catx { font-style: normal; font-weight: 500; font-size: 13px; color: var(--muted); text-align: right; } .catleg .catx.up { color: var(--good); }

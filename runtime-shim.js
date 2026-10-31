@@ -106,18 +106,20 @@
   function css() {
     if (document.getElementById('pod-who-css')) return;
     var st = document.createElement('style'); st.id = 'pod-who-css';
-    var base = 'position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:9999;display:flex;align-items:center;background:var(--surface,#fff);color:var(--muted,#5d6b7b);border:1px solid var(--line,#cbd4de);font:12.5px var(--body,-apple-system,BlinkMacSystemFont,sans-serif);box-shadow:0 4px 14px rgba(16,28,43,.12);max-width:calc(100vw - 32px);';
     st.textContent =
-      '.podchip{' + base + 'gap:8px;border-radius:999px;padding:5px 12px 5px 6px;opacity:.38;transition:opacity .2s}' +
-      '.podchip:hover,.podchip:focus-within{opacity:1}' +
-      '.podwho{' + base + 'flex-wrap:wrap;gap:8px;border-radius:22px;padding:6px 8px 6px 6px;width:max-content;max-width:min(380px,calc(100vw - 32px))}' +
-      '.podwho i,.podchip i{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:var(--ctl,#4e64df);color:#fff;font:700 11px var(--body,inherit);font-style:normal;flex:none}' +
-      '.podwho select,.podwho input{padding:5px 8px;border:1px solid var(--line,#cbd4de);border-radius:999px;background:var(--bg,#fff);color:var(--ink,#14202e);font:inherit;min-width:0;max-width:190px}' +
+      '.podwho{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:9999;width:310px;max-width:calc(100vw - 32px);background:var(--surface,#fff);color:var(--ink,#14202e);border:1px solid var(--line,#cbd4de);border-radius:16px;box-shadow:0 14px 44px rgba(16,28,43,.25);padding:20px 18px 16px;font:14px/1.45 var(--body,-apple-system,BlinkMacSystemFont,sans-serif);overflow:hidden}' +
+      '.podwho::before{content:"";position:absolute;left:0;top:0;right:0;height:4px;background:linear-gradient(90deg,#f0586c,#5a4fcf)}' +
+      '.podwho h4{margin:0 0 4px;font:700 18px/1.2 var(--display,inherit)}' +
+      '.podwho p{margin:0 0 14px;color:var(--muted,#5d6b7b);font-size:13px}' +
+      '.podwho select,.podwho input{width:100%;box-sizing:border-box;padding:10px 11px;border:1px solid var(--line,#cbd4de);border-radius:10px;background:var(--bg,#fff);color:inherit;font:inherit;margin:0 0 10px}' +
       '.podwho select:focus,.podwho input:focus{outline:2px solid var(--ctl,#4e64df);outline-offset:1px}' +
-      '.podwho .go{padding:5px 12px;border:0;border-radius:999px;background:var(--ctl,#4e64df);color:#fff;font:700 12.5px var(--body,inherit);cursor:pointer}' +
-      '.podwho .skip{padding:4px 6px;border:0;background:none;color:var(--muted,#5d6b7b);cursor:pointer;font:inherit;text-decoration:underline}' +
-      '.podwho .msg{flex-basis:100%;margin:0;padding:2px 8px 0 30px;font-size:12px;color:var(--muted,#5d6b7b)}' +
-      '.podwho .err{flex-basis:100%;margin:0;padding:0 8px 0 30px;font-size:12px;color:var(--bad,#c23a46)}' +
+      '.podwho .row{display:flex;gap:10px;align-items:center}' +
+      '.podwho .go{flex:1;padding:10px 14px;border:0;border-radius:10px;background:var(--ctl,#4e64df);color:#fff;font:700 14px var(--body,inherit);cursor:pointer}' +
+      '.podwho .skip{padding:10px 6px;border:0;background:none;color:var(--muted,#5d6b7b);cursor:pointer;font:inherit;font-size:13px;text-decoration:underline}' +
+      '.podwho .err{color:var(--bad,#c23a46);font-size:12.5px;margin:-4px 0 10px}' +
+      '.podchip{opacity:.38;transition:opacity .2s;position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:9999;display:flex;align-items:center;gap:8px;background:var(--surface,#fff);color:var(--muted,#5d6b7b);border:1px solid var(--line,#cbd4de);border-radius:999px;padding:5px 12px 5px 6px;font:12.5px var(--body,-apple-system,BlinkMacSystemFont,sans-serif);box-shadow:0 4px 14px rgba(16,28,43,.12)}' +
+      '.podchip i{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:var(--ctl,#4e64df);color:#fff;font:700 11px var(--body,inherit);font-style:normal}' +
+      '.podchip:hover,.podchip:focus-within{opacity:1}' +
       '.podchip b{color:var(--ink,#14202e)} .podchip em{font-style:normal;font-weight:700;font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--good,#1f7a4d);background:color-mix(in srgb,var(--good,#1f7a4d) 12%,transparent);padding:1px 6px;border-radius:99px}' +
       '.podchip a{color:var(--ctl,#4e64df)}';
     document.head.appendChild(st);
@@ -125,7 +127,7 @@
 
   function chip(w) {
     css();
-    var el = document.createElement('div'); el.className = 'podchip'; el.title = 'Hover to change who is viewing';
+    var el = document.createElement('div'); el.className = 'podchip';
     el.innerHTML = '<i>' + esc((w.name || '?').trim().charAt(0).toUpperCase()) + '</i><span>Viewing as <b>' + esc(w.name) + '</b></span>' + (w.auth ? '<em>Admin</em>' : '') + '<a href="#">change</a>';
     el.querySelector('a').addEventListener('click', function (ev) { ev.preventDefault(); try { localStorage.removeItem(WHO_KEY); } catch (e) {} location.reload(); });
     document.body.appendChild(el);
@@ -134,18 +136,17 @@
   function chooser() {
     css();
     return new Promise(function (resolve) {
-      var box = document.createElement('div'); box.className = 'podwho'; box.setAttribute('role', 'group'); box.setAttribute('aria-label', 'Who is viewing');
+      var box = document.createElement('div'); box.className = 'podwho';
       function done(w) { saveWho(w); box.remove(); chip(w); resolve(w); }
       function guest() { done({ id: 'guest-' + Math.random().toString(36).slice(2, 10), name: 'Guest' }); }
       function pick() {
         var list = knownNames();
-        box.innerHTML = '<i>?</i>' +
-          '<select id="pod-who-sel" aria-label="Who is viewing"><option value="">Who’s viewing?</option>' + list.map(function (n) { return '<option>' + esc(n) + '</option>'; }).join('') + '<option value="__other">Someone else…</option></select>' +
+        box.innerHTML = '<h4>Who’s viewing?</h4><p>For admin access.</p>' +
+          '<select id="pod-who-sel" aria-label="Your name"><option value="">Choose your name…</option>' + list.map(function (n) { return '<option>' + esc(n) + '</option>'; }).join('') + '<option value="__other">Someone else…</option></select>' +
           '<input id="pod-who-name" placeholder="Your name" maxlength="40" aria-label="Your name" style="display:none">' +
-          '<button class="go" id="pod-who-go" type="button">Continue</button><button class="skip" id="pod-who-skip" type="button">Just looking</button>' +
-          '<p class="msg">Only used to label what you add or tick. Not used to track you.</p>';
+          '<div class="row"><button class="go" id="pod-who-go" type="button">Continue</button><button class="skip" id="pod-who-skip" type="button">Just looking</button></div>';
         var sel = box.querySelector('#pod-who-sel'), nm = box.querySelector('#pod-who-name');
-        sel.addEventListener('change', function () { nm.style.display = sel.value === '__other' ? 'block' : 'none'; if (sel.value === '__other') nm.focus(); });
+        sel.addEventListener('change', function () { nm.style.display = sel.value === '__other' ? 'block' : 'none'; });
         box.querySelector('#pod-who-go').addEventListener('click', function () {
           if (sel.value === '__other') { var n = nm.value.trim(); if (n) done({ id: 'x-' + slug(n), name: n }); }
           else if (sel.value) password(sel.value);
@@ -153,11 +154,10 @@
         box.querySelector('#pod-who-skip').addEventListener('click', guest);
       }
       function password(name) {
-        box.innerHTML = '<i>' + esc(name.trim().charAt(0).toUpperCase()) + '</i>' +
+        box.innerHTML = '<h4>Hi, ' + esc(name.split(' ')[0]) + '</h4><p>Enter password to have admin controls over parts of the dashboard.</p>' +
           '<input id="pod-who-pw" type="password" placeholder="Password" autocomplete="off" aria-label="Password">' +
-          '<button class="go" id="pod-who-go" type="button">Continue</button><button class="skip" id="pod-who-back" type="button">Back</button>' +
-          '<p class="msg">Enter password to have admin controls over parts of the dashboard.</p>' +
-          '<p class="err" id="pod-who-err" hidden>That password does not match. Try again.</p>';
+          '<div class="err" id="pod-who-err" hidden>That password does not match. Try again.</div>' +
+          '<div class="row"><button class="go" id="pod-who-go" type="button">Continue</button><button class="skip" id="pod-who-back" type="button">Back</button></div>';
         var pw = box.querySelector('#pod-who-pw'), err = box.querySelector('#pod-who-err');
         function tryIt() { if (passOk(name, pw.value)) done({ id: slug(name), name: name, auth: true }); else { err.hidden = false; pw.select(); } }
         box.querySelector('#pod-who-go').addEventListener('click', tryIt);

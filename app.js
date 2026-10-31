@@ -151,6 +151,9 @@ const POPS = {
 // Keep any countdown in the hover ticking.
 const tickCD = () => { document.querySelectorAll('.cdlive').forEach(c => { let ms = Math.max(0, +c.dataset.to - Date.now()); const d = Math.floor(ms / 864e5); ms -= d * 864e5; const h = Math.floor(ms / 36e5); ms -= h * 36e5; const m = Math.floor(ms / 6e4); ms -= m * 6e4; const s2 = Math.floor(ms / 1e3); const tile = (v, u, cls) => '<span class="cdt2' + (cls || '') + '"><b>' + v + '</b><i>' + u + '</i></span>'; c.innerHTML = tile(d, 'd') + tile(String(h).padStart(2, '0'), 'h') + tile(String(m).padStart(2, '0'), 'm') + tile(String(s2).padStart(2, '0'), 's', ' sec'); }); document.querySelectorAll('#hintbox .cdclock').forEach(c => { let ms = Math.max(0, +c.dataset.to - Date.now()); const u = [[86400000, 'days'], [3600000, 'hrs'], [60000, 'min'], [1000, 'sec']].map(([d, l]) => { const v = Math.floor(ms / d); ms -= v * d; return '<span class="cdu"><b>' + String(v).padStart(2, '0') + '</b><i>' + l + '</i></span>'; }); c.innerHTML = u.join(''); }); };
 setInterval(tickCD, 1000);
+// Big targets (cards) anchor their tip to the pointer, like a small word does, instead of dropping it below the whole card.
+const PTR = { x: 0, y: 0 };
+['pointerover', 'pointermove'].forEach(t => document.addEventListener(t, ev => { PTR.x = ev.clientX; PTR.y = ev.clientY; }, { passive: true, capture: true }));
 function showHint(el) {
   const box = $('#hintbox'), html = el.dataset.pop ? POPS[el.dataset.pop] : HINTS[+el.dataset.hint]; if (!html) return;
   box.innerHTML = html; box.hidden = false; if (html.indexOf('cdclock') >= 0) tickCD();
@@ -158,6 +161,7 @@ function showHint(el) {
   const r = el.getBoundingClientRect(), bw = box.offsetWidth, bh = box.offsetHeight;
   let left = Math.min(Math.max(8, r.left + r.width / 2 - bw / 2), window.innerWidth - bw - 8);
   let top = r.bottom + 8; if (top + bh > window.innerHeight - 8) top = Math.max(8, r.top - bh - 8);
+  if (r.height > 110 && PTR.y >= r.top && PTR.y <= r.bottom) { left = Math.min(Math.max(8, PTR.x - bw / 2), window.innerWidth - bw - 8); top = PTR.y + 14; if (top + bh > window.innerHeight - 8) top = Math.max(8, PTR.y - bh - 14); }
   // .hup opens above (over the header if needed), so it doesn't cover the headline under it (Mike, Oct 26).
   if (el.classList.contains('hup')) { top = Math.max(8, r.top - bh - 8); }
   box.style.left = left + 'px'; box.style.top = top + 'px';
@@ -1270,7 +1274,7 @@ function movedHtml0() {
   const pill = (f, i) => {
     const a = ALERTS.get(f.m.key), x = sibsOf(f.m, state.day), facts = [], ov = cellsFor(metricsFor(f.m.b).overall[0], state.day, compsFor(f.m.b, state.day));
     if (f.m.sec === 'funnel' && ov.bs != null) facts.push(['sib', 'CVR ' + sgn(ov.bs, 0)]);
-    if (x) facts.push(['sib', (x.rest.length === 1 ? x.rest[0].m.label : 'Other ' + x.n[1]) + ' ' + sgn(x.rest.length === 1 ? x.rest[0].mom : x.restMom, 0), f.m.sec]); // no "on average" in the pills, it crowds them (Mike, Oct 28)
+    if (x) facts.push(['sib', (x.rest.length === 1 ? x.rest[0].m.label + ' ' : 'Other ' + x.n[1] + ' x\u0304 ') + sgn(x.rest.length === 1 ? x.rest[0].mom : x.restMom, 0), f.m.sec]); // no "on average" in the pills, it crowds them (Mike, Oct 28)
     if (f.c.sessMom != null && f.m.sec !== 'funnel') facts.push(['traffic', 'Traffic ' + sgn(f.c.sessMom, 0)]);
     if (facts.length < 2 && f.c.pd != null) facts.push(['sib', 'vs prior day ' + sgn(f.c.pd, 0)]);
     const flag = f.mix ? '<span class="mvr spike">Traffic spike ' + sgn(f.c.sessMom, 0) + '</span>' : '';
@@ -1874,7 +1878,7 @@ function sellingHtml() {
   let a = 0, g = '';
   sl.forEach((x, j) => { const sh = x[1] / CATPIE.total, s2 = sh * 6.2832; g += '<path class="slice hint" tabindex="0" data-hint="' + (HINTS.push('<b>' + esc(x[0]) + '</b><br>' + pct(sh, 1) + ' of categorized items ordered (' + int(x[1]) + ')') - 1) + '" d="' + arc(90, 90, 48, 80, a, a + s2) + '" style="fill:' + CATC[j] + ';stroke:var(--surface);stroke-width:2"/>'; a += s2; });
   const pie = '<div class="catpie"><svg class="donut" viewBox="0 0 180 180" width="250" height="250" role="img" aria-label="Share of orders by category">' + g + '<text x="90" y="88" text-anchor="middle" style="font:700 15px var(--display);fill:var(--ink)">' + int(CATPIE.total) + '</text><text x="90" y="104" text-anchor="middle" style="font:500 11px var(--body);fill:var(--muted)">items</text></svg><ul class="catleg">' +
-    sl.map((x, j) => '<li><i style="background:' + CATC[j] + '"></i><span>' + esc(x[0]) + '</span><b>' + pct(x[1] / CATPIE.total, 0) + '</b></li>').join('') + '</ul></div>';
+    sl.map((x, j) => '<li><i style="background:' + CATC[j] + '"></i><span>' + esc(x[0]) + '</span><b>' + pct(x[1] / CATPIE.total, 0) + '</b>' + (() => { const m = x[2] != null ? x[2] : (j === sl.length - 1 && typeof CATPIE.restX === 'number' ? CATPIE.restX : null); return m == null ? '<em class="catx"></em>' : '<em class="catx' + (m >= 1.15 ? ' up' : '') + '">' + m.toFixed(1) + '×</em>'; })() + '</li>').join('') + '</ul></div>';
   const all = TRENDS.tags.concat(TRENDS.cats).map(r => ({ n: r[0].replace(/-/g, ' '), c: r[1], x: r[2] }));
   const hot = all.filter(r => r.x >= 1.15).sort((a, z) => z.x - a.x).slice(0, 4), cold = all.filter(r => r.x <= 0.8).sort((a, z) => a.x - z.x).slice(0, 3), mx = Math.max(...hot.map(r => r.x), 2);
   const mover = (r, up) => '<li><a href="https://www.teepublic.com/t-shirts?query=' + encodeURIComponent(r.n) + '" target="_blank" rel="noopener">' + esc(r.n) + '</a><span class="mvbar"><i class="' + (up ? 'up' : 'down') + '" style="width:' + (up ? (r.x / mx * 100) : (r.x * 100)).toFixed(0) + '%"></i></span><b class="' + (up ? 'b' : 'dimx') + '">' + r.x.toFixed(1) + '×</b></li>';
@@ -3679,7 +3683,7 @@ if (state.openTok) { const [k, v] = state.openTok, M = metricsFor(state.tab); le
   const rail = document.createElement('nav'); rail.id = 'srail'; rail.setAttribute('aria-label', 'Sections on this page'); rail.hidden = true; document.body.appendChild(rail);
   let items = [], active = -1, ticking = false;
   const offset = () => (document.querySelector('.bar') ? document.querySelector('.bar').offsetHeight : 60) + 90;
-  const RAILI = [[/^past their/i, 'late'], [/^launching in/i, 'rocket'], [/^in progress, launching/i, 'build'], [/^just getting/i, 'sprout'], [/^launched$/i, 'done'], [/^running|in progress/i, 'run'], [/^decided|shipped/i, 'done'], [/^coming|not started/i, 'soon'], [/^earlier/i, 'past'], [/experiment/i, 'flask'], [/next half/i, 'cal'], [/people are saying/i, 'chat'], [/customer service/i, 'help'], [/what is selling/i, 'tag'], [/double down/i, 'bulb'], [/top designs/i, 'star'], [/shout-out/i, 'heart']];
+  const RAILI = [[/bot squad/i, 'bots'], [/^past their/i, 'late'], [/^launching in/i, 'rocket'], [/^in progress, launching/i, 'build'], [/^just getting/i, 'sprout'], [/^launched$/i, 'done'], [/^running|in progress/i, 'run'], [/^decided|shipped/i, 'done'], [/^coming|not started/i, 'soon'], [/^earlier/i, 'past'], [/experiment/i, 'flask'], [/next half/i, 'cal'], [/people are saying/i, 'chat'], [/customer service/i, 'help'], [/what is selling/i, 'tag'], [/double down/i, 'bulb'], [/top designs/i, 'star'], [/shout-out/i, 'heart']];
   function targets() {
     const out = [];
     // Other pages: Overview plus each top-level section heading (Mike, Oct 26: a rail on every page).
