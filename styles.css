@@ -3720,7 +3720,6 @@ details.pbox.prov > summary { cursor: pointer; list-style: none; } details.pbox.
   .bar-meta { flex-wrap: wrap; gap: 6px 10px; }
   .mbox .abt.tpv { display: block; overflow-x: auto; }
   .abt.tpv th:first-child, .abt.tpv td:first-child { padding-left: 14px; min-width: 120px; } .abt.tpv th:last-child, .abt.tpv td:last-child { padding-right: 14px; }
-  .podwho { padding: 14px 14px 12px; }
 }
 @media (max-width: 760px) {
   .bar-meta { overflow: visible; } .bar-meta .util { flex-wrap: wrap; width: 100%; min-width: 0; gap: 6px 10px; }

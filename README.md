@@ -31,5 +31,4 @@ Changes go through the repo first, then Vercel deploys.
 - `runtime-shim.js`: answers the page's existing `claude.use('db')` / `claude.use('user')` calls using that endpoint, so `app.js` is unchanged
   apart from three UI messages. It does nothing when the page runs inside claude.ai.
 - Updates appear within about 15 seconds, and polling only runs while the tab is visible (keeps the free Neon compute asleep when nobody is looking).
-- Identity is a name picker, not a login. Roles (Mike = owner, Matt Swope = reviewer, team editors) are enforced by the page only, so anyone who can open
-  the site could choose any name. Fine behind Vercel login; replace with real auth before opening the site wider.
+- There is no sign-in or name picker (removed Oct 31). Features that need to know who someone is (adding roundtable topics, Reorder, flagging an estimate) are hidden until identity comes back, probably through Okta.

@@ -1335,7 +1335,7 @@ function rtHtml(date) {
   RT.date = date;
   const can = RT.db && RT.me;
   return '<div class="rt rttop"><div class="rthead"><b>➕ Add a topic for ' + label(nextWeekday(date)) + '</b></div>' +
-    (can ? '<form class="rtform" id="rtform"><input id="rtname" maxlength="40" required placeholder="Your name" aria-label="Your name"><input id="rtin" maxlength="200" required placeholder="What do you want to talk about?" aria-label="Topic"><button class="btn pri sm" type="submit">Add topic</button></form>' : '<p class="cap">Pick your name (bottom right) to add a topic.</p>') +
+    (can ? '<form class="rtform" id="rtform"><input id="rtname" maxlength="40" required placeholder="Your name" aria-label="Your name"><input id="rtin" maxlength="200" required placeholder="What do you want to talk about?" aria-label="Topic"><button class="btn pri sm" type="submit">Add topic</button></form>' : '') +
     '<div id="rtbody">' + rtInner(date) + '</div></div>';
 }
 function prefillName() { const nm = document.getElementById('rtname'); if (nm && !nm.value) { try { nm.value = localStorage.getItem('pod.name') || ''; } catch (e) { /* ignore */ } } }
@@ -2521,7 +2521,7 @@ function flagModal(t) {
     (can ? '<form class="flagf" data-flagf="' + esc(it.t) + '"><div class="flagv" role="radiogroup" aria-label="Your read"><label><input type="radio" name="fv" value="off"' + (mine.v !== 'good' ? ' checked' : '') + '> ⚑ Looks inaccurate</label><label><input type="radio" name="fv" value="good"' + (mine.v === 'good' ? ' checked' : '') + '> 👍 This was helpful</label></div>' +
       '<label class="flagn"><span class="lbl">Why? What would make it right?</span><textarea name="note" rows="3" maxlength="600" placeholder="e.g. the lift only applies to Redbubble apparel, not the whole site">' + esc(mine.note || '') + '</textarea></label>' +
       '<div class="flagact"><button type="submit" class="btn pri">' + (mine.v ? 'Update' : 'Send') + '</button>' + (mine.v ? '<button type="button" class="linkbtn" data-flagdel="' + esc(it.t) + '">Remove my flag</button>' : '') + '<span class="cap">' + (n.off || n.good ? n.off + ' flagged inaccurate · ' + n.good + ' marked helpful so far' : 'Mike reviews these and updates the numbers.') + '</span></div></form>'
-      : '<p class="cap">Pick your name (bottom right) to flag an estimate.</p>'));
+      : ''));
 }
 async function flagSave(t, v, note) {
   const it = impactList().find(x => x.t === t); if (!it || !RT.db || !RT.me) return;
