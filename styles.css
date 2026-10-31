@@ -3700,3 +3700,35 @@ details.pbox.prov > summary { cursor: pointer; list-style: none; } details.pbox.
 .mstep li.c.bad::before { background: var(--bad); } .mstep li.c.bad .dot { background: var(--bad); border-color: var(--bad); color: var(--bad); animation: none; box-shadow: 0 0 0 5px var(--bad-bg); }
 /* About this data: no bump on hover (Mike, Oct 30) */
 #aboutbtn:hover, .util #aboutbtn:hover { transform: none !important; }
+/* Sources link keeps room from the card's bottom edge (Mike, Oct 30) */
+.hintbox .tipsrcw { padding-bottom: 6px; } .mbox .tipsrcw { padding-bottom: 8px; } .hintbox .tipsrcw .srcbtn, .mbox .tipsrcw .srcbtn { padding-left: 2px !important; }
+
+/* ===== Mobile pass (Mike, Oct 30): everything below is phone-only, so desktop is untouched ===== */
+@media (max-width: 760px) {
+  .rmtools .rmend { order: 9; margin-left: 0; padding-left: 0; border-left: 0; width: 100%; flex-wrap: wrap; }
+  .rmtools .rmend .vtog { margin-left: auto; }
+  .gkeys, .cap.gkeys { white-space: normal; flex-wrap: wrap; max-width: 100%; }
+}
+@media (max-width: 760px) { .vtog button[data-rmview="gantt"] { display: none; } .vtog { display: none; } }
+
+/* Test overlay table: real room at the edges, no wrapped headers, hoverable metric headers (Mike, Oct 30) */
+:root:not(#z):not(#y) .mbox .abt.tpv { table-layout: auto; } .abt.tpv th { white-space: nowrap; } .abt.tpv td { white-space: nowrap; }
+.abt.tpv th:first-child, .abt.tpv td:first-child { padding-left: 28px; min-width: 170px; } .abt.tpv th:last-child, .abt.tpv td:last-child { padding-right: 28px; }
+.abt.tpv .thhint { cursor: pointer; } .abt.tpv .thi { color: var(--ctl); font-weight: 700; margin-left: 2px; text-transform: none; }
+.abt.tpv .thhint:hover { color: var(--ink); }
+@media (max-width: 760px) {
+  .bar-meta { flex-wrap: wrap; gap: 6px 10px; }
+  .mbox .abt.tpv { display: block; overflow-x: auto; }
+  .abt.tpv th:first-child, .abt.tpv td:first-child { padding-left: 14px; min-width: 120px; } .abt.tpv th:last-child, .abt.tpv td:last-child { padding-right: 14px; }
+  .podwho { padding: 14px 14px 12px; }
+}
+@media (max-width: 760px) {
+  .bar-meta { overflow: visible; } .bar-meta .util { flex-wrap: wrap; width: 100%; min-width: 0; gap: 6px 10px; }
+  .bar-meta .util .rfl { overflow: visible; white-space: normal; flex: 1 1 100%; }
+  .cvrchart .csrc { padding-bottom: 12px; }
+}
+.cvrchart .csrc { padding-bottom: 12px; }
+@media (max-width: 760px) {
+  .abfilter { flex-wrap: wrap; gap: 6px 10px; } .abfilter .lbl { white-space: nowrap; } .abfilter .segs { max-width: 100%; overflow-x: auto; }
+  .group.trun .abfilter { margin: 6px 0 0; width: 100%; }
+}

@@ -135,6 +135,8 @@ function defOf(m) {
 }
 
 const state = { rmGantt: true, gGroup: 'stage', tsort: { k: 'eta', dir: 1 }, mvAll: false, sphase: 'pre', prog: 'all', obj: 'all', stage: 'all', fteam: 'all', phase: 'pre', su: 'next', days: { tp: D.asOf, rb: D.asOf }, cust: { tp: null, rb: null }, cmpEdit: false, defOn: new Set(), view: 'daily', tab: 'tp', day: D.asOf, thr: {}, open: new Set(), sessOff: new Set(), full: new Set(), payChart: false, cmp: null, cmpMode: 'overlay' };
+// Phones open the roadmap as a list: the timeline needs width (Mike, Oct 30). Desktop keeps the timeline.
+if (window.matchMedia && matchMedia('(max-width: 760px)').matches) state.rmGantt = false;
 Object.keys(SECS).forEach(k => { state.thr[k] = { g: 3, r: 5 }; });
 try { const t = JSON.parse(localStorage.getItem('cvrpacer.thr6') || 'null'); if (t) Object.keys(SECS).forEach(k => { if (t[k]) state.thr[k] = t[k]; }); } catch (e) { /* storage unavailable */ }
 const saveThr = () => { try { localStorage.setItem('cvrpacer.thr6', JSON.stringify(state.thr)); } catch (e) { /* ignore */ } };
@@ -2058,7 +2060,8 @@ function tpRow(x, i) {
 function tpDetailModal(i) {
   const x = typeof TPEXPS !== 'undefined' ? TPEXPS.items[i] : null; if (!x) return;
   const rows = [{ n: 'Control', p: x.control.p, c: x.control.conv, rel: null }].concat(x.variants.map(v => ({ n: v.n, p: v.p, c: v.conv, rel: v.rel, conf: v.conf })));
-  const tbl = '<table class="abt"><thead><tr><th>Version</th><th>Participants</th><th>Conversion</th><th>Change</th><th>Confidence</th></tr></thead><tbody>' + rows.map(r => '<tr><td>' + esc(r.n) + '</td><td>' + int(r.p) + '</td><td>' + pct(r.c, r.c < 0.1 ? 2 : 1) + '</td><td>' + (r.rel == null ? '–' : '<span class="chn ' + (r.rel >= 0 ? 'b' : 'w') + '">' + sgn(r.rel, 1) + '</span>') + '</td><td>' + (r.rel == null ? '–' : r.conf ? r.conf + '% confidence' : 'Not enough yet') + '</td></tr>').join('') + '</tbody></table>';
+  const mtip = 'This is still measured in an old Ruby gem, so we can\'t say which metric it is. Ask Jon or Mike. We\'ll pull these tests into Amplitude soon.', mh = t => hint(t + ' <span class="thi" aria-hidden="true">ⓘ</span>', 'thhint', mtip);
+  const tbl = '<table class="abt tpv"><thead><tr><th>Version</th><th>Participants</th><th>' + mh('Metric') + '</th><th>' + mh('Metric change') + '</th><th>Confidence</th></tr></thead><tbody>' + rows.map(r => '<tr><td>' + esc(r.n) + '</td><td>' + int(r.p) + '</td><td>' + pct(r.c, r.c < 0.1 ? 2 : 1) + '</td><td>' + (r.rel == null ? '–' : '<span class="chn ' + (r.rel >= 0 ? 'b' : 'w') + '">' + sgn(r.rel, 1) + '</span>') + '</td><td>' + (r.rel == null ? '–' : r.conf ? r.conf + '% confidence' : 'Not enough yet') + '</td></tr>').join('') + '</tbody></table>';
   openModal('<span class="tipsrc" hidden></span><div class="mhead"><h3 id="mtitle">' + esc(x.name) + '</h3></div><div class="mtags"><span class="rtag">' + siteDot('TP') + '</span><span class="rtag">' + esc(x.where) + '</span><span class="rtag">Day ' + tpDays(x) + ', since ' + short(x.start) + '</span><span class="abv2 v-' + x.call[0] + '">' + esc(x.call[1]) + '</span></div><div class="abwhat2"><h4 class="ph">🧪 About this test</h4><p>Read from the Split dashboard on ' + short(TPEXPS.asOf) + '. Split reports each test\'s own conversion goal, so these rates are not comparable across tests and none of them is sitewide CVR.</p></div>' + tbl + '<div class="abfoot2"><a class="srclink" href="' + esc(TPEXPS.url) + '" target="_blank" rel="noopener">Open in Split\u00a0↗</a></div>');
 }
 function testsHtml() {
