@@ -1,6 +1,6 @@
 
-// Snapshot pulled 2026-10-31 from the Amplitude "CVR Pacer · TP + RB (bot score >=70)" dashboard (lm29400h) via typed queries with the dashboard's filters (TP: score >=70, verified bots excluded; RB: score >=70, excludes JA4 t13d1517h2_8daaf6152771_cb7bf5808d99). Dashboard filters re-read 2026-10-31 (8:30 AM and 2:40 PM ET runs), unchanged.
-// Values truncated to 6 decimals. Last complete day = 2026-10-30 for both sites (Oct 26-29 re-pulled since values revise). tpLY runs 2025-09-01 .. 2025-10-31. Redbubble has Oct 30 events now, so its Oct 29 value is no longer low. Re-checked 2026-10-31 ~2:40 PM ET: TP and RB CVR and sessions for Oct 27-30 unchanged; Redbubble payment mix for Oct 26-30 revised (RB order data shifted between days). Oct 31 is not complete yet (RB has no Oct 31 events so far).
+// Snapshot pulled 2026-10-31 from the Amplitude "CVR Pacer · TP + RB (bot score >=70)" dashboard (lm29400h) via typed queries with the dashboard's filters (TP: score >=70, verified bots excluded; RB: score >=70, excludes JA4 t13d1517h2_8daaf6152771_cb7bf5808d99). Dashboard filters re-read 2026-10-31 (8:30 AM, 2:40 PM and 4:40 PM ET runs), unchanged.
+// Values truncated to 6 decimals. Last complete day = 2026-10-30 for both sites (Oct 26-29 re-pulled since values revise). tpLY runs 2025-09-01 .. 2025-10-31. Redbubble has Oct 30 events now, so its Oct 29 value is no longer low. Re-checked 2026-10-31 ~2:40 PM ET: TP and RB CVR and sessions for Oct 27-30 unchanged; Redbubble payment mix for Oct 26-30 revised (RB order data shifted between days). Re-checked again ~4:40 PM ET: CVR, sessions and payment mix for both sites unchanged for Oct 26-30. Oct 31 is not complete yet (RB still has no Oct 31 events).
 const D = {
   asOf: '2026-10-30',
   tp: {
