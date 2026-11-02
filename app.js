@@ -200,8 +200,8 @@ function compDate(b, d, kind) {
   if (kind === 'yoy' && isHoliday(d)) {
     // Nov 1 to Dec 31 (Mike, Nov 2): the exact same weekday 364 days back (Mon Nov 2 vs Mon Nov 3, 2025), so Thanksgiving, Black Friday and Cyber Monday line up.
     // Sale status is not required to match; the other months keep the rules below.
-    const cd = addDays(d, -364); if (lyIndex(cd) < 0) return null; const ci = infoLY(cd);
-    return { off: 364, date: cd, dates: [cd], n: 1, from: cd, to: cd, ok: true, exact: true, pos: ci.pos, label: ci.label, lab: 'same weekday last year' };
+    const cd = addDays(d, -364); if (lyIndex(cd) < 0) return null; const ci = infoLY(cd), ds = lyDays(d);
+    return { off: 364, date: cd, dates: ds, n: ds.length, from: ds[0], to: ds[ds.length - 1], ok: true, exact: true, pos: ci.pos, label: ci.label, lab: 'same date and weekday last year' };
   }
   const st = infoNow(b, d), pk = posKey(st);
   if (pk && kind === 'wow') {
@@ -250,9 +250,12 @@ const COMPC = {};
 /* Nov and Dec on TeePublic (Mike, Nov 2): a toggle swaps "comparable days" for the same weekday last year (Redbubble has no last year, so no toggle). */
 const basisOn = (b, d) => b === 'tp' && state.basis !== 'cmp' && isHoliday(d) && lyIndex(addDays(d, -364)) >= 0;
 const wsh = z => WD[dow(z)] + ' ' + short(z);
-const lyBody = d => { const cd = addDays(d, -364); return wsh(cd) + ', ' + cd.slice(0, 4) + ' lines up with ' + wsh(d) + ', ' + d.slice(0, 4) + '. In November and December we match the day of the week, not the date, so Thanksgiving, Black Friday and Cyber Monday land on each other.'; };
-const lyExact = d => '<b>Same weekday, last year</b><br>' + lyBody(d);
-const cw = h => (typeof h === 'string' && state.view === 'daily' && state.tab === 'tp' && basisOn('tp', state.day)) ? h.replace(/the comparable days/g, 'the same day last year').replace(/Comparable days/g, 'Same day last year').replace(/comparable days/g, 'the same day last year') : h;
+const lyDays = d => [addDays(d, -365), addDays(d, -364)].filter(z => lyIndex(z) >= 0); // same date, then same weekday (Mike, Nov 2)
+const lyKind = (d, z) => z === addDays(d, -365) ? 'date' : 'weekday';
+const lyPhrase = d => 'last year\'s ' + lyDays(d).map(short).join(' and ');
+const lyBody = d => { const a = addDays(d, -365), c = addDays(d, -364); return wsh(a) + ', ' + a.slice(0, 4) + ' is the same date and ' + wsh(c) + ', ' + c.slice(0, 4) + ' is the same weekday as ' + wsh(d) + ', ' + d.slice(0, 4) + '. We average the two, because in November and December both the date and the weekday matter for Thanksgiving, Black Friday and Cyber Monday.'; };
+const lyExact = d => '<b>Same date and weekday, last year</b><br>' + lyBody(d);
+const cw = h => (typeof h === 'string' && state.view === 'daily' && state.tab === 'tp' && basisOn('tp', state.day)) ? h.replace(/the comparable days/g, lyPhrase(state.day)).replace(/Comparable days/g, ucf(lyPhrase(state.day))).replace(/comparable days/g, lyPhrase(state.day)) : h;
 function compsDefault(b, d) {
   const k = b + d + (basisOn(b, d) ? '|ly' : ''); if (COMPC[k]) return COMPC[k];
   const pd = addDays(d, -1), bd = baseDays(b, d);
@@ -260,7 +263,7 @@ function compsDefault(b, d) {
     pd: SER[b].idx[pd] !== undefined ? { date: pd, dates: [pd], lab: 'prior day' } : null,
     bs: bd.length ? { dates: bd, n: bd.length, tierMix: bd.tierMix, near: bd.near, from: bd[0], to: bd[bd.length - 1], lab: 'comparable days' } : null }));
 }
-const basisSwap = (b, d, c) => { if (basisOn(b, d) && c.yoy && c.yoy.exact) c.bs = { dates: [c.yoy.date], n: 1, from: c.yoy.date, to: c.yoy.date, ly: true, lab: 'same day last year' }; return c; };
+const basisSwap = (b, d, c) => { if (basisOn(b, d) && c.yoy && c.yoy.exact) c.bs = { dates: c.yoy.dates, n: c.yoy.n, from: c.yoy.from, to: c.yoy.to, ly: true, lab: 'same date and weekday last year' }; return c; };
 function compsFor(b, d) {
   const c = compsDefault(b, d), cu = state.cust[b];
   if (!cu || d !== state.days[b]) return c;
@@ -270,7 +273,7 @@ function compsFor(b, d) {
 // An average's days: a plain range only when every day in it is used; a handful of scattered days (like two sale day 1s) are listed by date.
 const listed = c => !c.custom && c.dates && c.dates.length <= 4 && (parse(c.to) - parse(c.from)) / DAY + 1 !== c.dates.length;
 const spanOf = c => { if (!listed(c)) return range(c.from, c.to); const ds = c.dates.slice().sort().map(short); return ds.length === 1 ? ds[0] : ds.slice(0, -1).join(', ') + ' and ' + ds[ds.length - 1]; };
-const cmpLabel = (cmp, kind) => !cmp ? '' : kind === 'pd' ? dmy(cmp.date) : kind === 'bs' ? 'avg of ' + cmp.n + ' matching days' : kind === 'yoy' && cmp.exact ? dmy(cmp.date, true) : kind === 'yoy' && cmp.dates ? 'avg of ' + cmp.n + ' day' + (cmp.n === 1 ? '' : 's') + (cmp.mlab ? ' in ' + cmp.mlab : ' around ' + short(cmp.around || addDays(state.day, -364)) + ', 2025') : kind === 'yoy' ? dmy(cmp.date, true) : kind === 'wow' ? dmy(cmp.date) : 'avg of ' + spanOf(cmp) + (listed(cmp) ? '' : ' (' + cmp.n + ' days)');
+const cmpLabel = (cmp, kind) => !cmp ? '' : kind === 'pd' ? dmy(cmp.date) : kind === 'bs' ? 'avg of ' + cmp.n + ' matching days' : kind === 'yoy' && cmp.exact ? 'avg of ' + cmp.dates.map(z => dmy(z, true)).join(' and ') : kind === 'yoy' && cmp.dates ? 'avg of ' + cmp.n + ' day' + (cmp.n === 1 ? '' : 's') + (cmp.mlab ? ' in ' + cmp.mlab : ' around ' + short(cmp.around || addDays(state.day, -364)) + ', 2025') : kind === 'yoy' ? dmy(cmp.date, true) : kind === 'wow' ? dmy(cmp.date) : 'avg of ' + spanOf(cmp) + (listed(cmp) ? '' : ' (' + cmp.n + ' days)');
 const cmpShort = (cmp, kind) => !cmp ? '' : kind === 'mom' ? spanOf(cmp) : cmpLabel(cmp, kind);
 const lead = (b, d) => (b === 'tp' && isHoliday(d)) ? 'yoy' : 'wow';
 const KIND = {
@@ -997,7 +1000,7 @@ function verdictHtml(b) {
 function cmpControls(b, d) {
   const def = compsDefault(b, d).mom, cu = state.cust[b], st = infoNow(b, d);
   const why = def && def.pk ? 'This uses the ' + def.n + ' earlier ' + POSN[def.pk] + 's in the ' + ((parse(d) - parse(def.from)) / DAY > 35 ? 'nine' : 'five') + ' weeks before ' + short(d) + ' (' + spanOf(def) + '). Sale days are only averaged with the same point in other sales.' : def ? 'Last month\'s average uses the ' + def.n + ' ' + (st.sale ? 'sale' : 'non-sale') + ' days in the 4 weeks before ' + short(d) + ' (' + spanOf(def) + '). Same sale status, so a sale day is never averaged against normal days.' : 'Too few matching days in the 4 weeks before for a fair average.';
-  let h = '<div class="cmpbar"><span>Comparing with <b>' + (cu ? 'your range</b> (' + range(cu.from, cu.to) + ')' : 'the prior day</b> (' + dmy(addDays(d, -1)) + ')') + (basisOn(b, d) ? ' and <b>last year\'s same weekday</b>' : ', <b>comparable days</b>' + (b === 'tp' ? ' and <b>last year</b>' : '')) + '.</span>' +
+  let h = '<div class="cmpbar"><span>Comparing with <b>' + (cu ? 'your range</b> (' + range(cu.from, cu.to) + ')' : 'the prior day</b> (' + dmy(addDays(d, -1)) + ')') + (basisOn(b, d) ? ' and <b>' + lyPhrase(d) + '</b>' : ', <b>comparable days</b>' + (b === 'tp' ? ' and <b>last year</b>' : '')) + '.</span>' +
     (cu ? '<button class="linkbtn" id="cmpreset">Back to the prior day</button>' : '') + '</div>';
   if (state.cmpEdit) h += '<div class="cmpedit"><label>Average of <input type="date" class="pick" id="cfrom" min="' + SER[b].dates[0] + '" max="' + D.asOf + '" value="' + (cu ? cu.from : def ? def.from : addDays(d, -28)) + '"></label><label>to <input type="date" class="pick" id="cto" min="' + SER[b].dates[0] + '" max="' + D.asOf + '" value="' + (cu ? cu.to : def ? def.to : addDays(d, -1)) + '"></label><button class="btn pri" id="cmpapply">Compare</button><p class="cap">' + why + ' Pick one day or a range to compare ' + short(d) + ' against instead. Custom ranges use every day in the range and are not graded red or green.</p></div>';
   return h;
@@ -1010,7 +1013,7 @@ const BDC = {};
 const stretchNote = (b, d, bd) => { if (!bd || !bd.topped) return ''; const st = infoNow(b, d), e = st.sale ? null : edgeOf(b, d);
   return ' ⚠️ Rule stretched: ' + (st.sale ? 'too few recent sales at this point, so an older one was added.' : e !== 'plain' ? 'too few recent ' + EDGEN[e].replace('day', 'days') + ', so an older one was added.' : 'too few recent ' + WDL[dow(d)] + 's with no sale, so the nearest ' + WKGN[wkGrp(d)] + ' was added (' + bd.filter(x => dow(x) !== dow(d)).map(x => short(x) + ', a ' + WDL[dow(x)]).join('; ') + ').'); };
 function baseDays(b, d) {
-  if (basisOn(b, d)) { const o = [addDays(d, -364)]; o.ly = true; return o; } // Nov and Dec on the year-over-year basis: last year's same weekday is the one comparison day
+  if (basisOn(b, d)) { const o = lyDays(d); o.ly = true; return o; } // Nov and Dec on the year-over-year basis: last year's same weekday is the one comparison day
   const key = b + '|' + d + '|' + BASE_START; if (key in BDC) return BDC[key];
   const out = baseDays0(b, d); if (out.length >= 2) return (BDC[key] = out);
   const st = infoNow(b, d), pk = posKey(st), e = st.sale ? null : edgeOf(b, d), S = SER[b];
@@ -1096,7 +1099,7 @@ function topHtml(b) {
   // The range box as before, without its hover (Mike, Oct 28: the chart beside it already does that; the redesign was reverted).
   // Name the days it's compared with (Mike, Oct 28): "compared with the 3 most recent second-to-last sale days".
   const cst = infoNow(b, d), cpk = cst.sale ? posKey(cst) : null, cn = (hb.bd || []).length;
-  const lyb = basisOn(b, d), ckind = lyb ? 'last year\'s ' + WDL[dow(addDays(d, -364))] + ', ' + short(addDays(d, -364)) : !cn ? 'comparable days' : 'the ' + (cn > 1 ? cn + ' ' : '') + 'most recent ' + (cst.sale ? (cpk && POSN[cpk] ? POSN[cpk] : 'sale day') + (cn > 1 ? 's' : '') : noSaleKind(b, d, cn));
+  const lyb = basisOn(b, d), ckind = lyb ? lyPhrase(d) : !cn ? 'comparable days' : 'the ' + (cn > 1 ? cn + ' ' : '') + 'most recent ' + (cst.sale ? (cpk && POSN[cpk] ? POSN[cpk] : 'sale day') + (cn > 1 ? 's' : '') : noSaleKind(b, d, cn));
   const nrRow = hr ? '<span class="nrpanel nr' + hr.st + '"><span class="nrp2">' + (hr.st === 'in' ? '<b>Within normal range:</b> compared with ' + ckind + ', and within the normal ±' + hw + '% swing' : hr.st === 'hi' ? '<b>Above normal range:</b> compared with ' + ckind + ', more than the normal ±' + hw + '% swing' : '<b>Below normal range:</b> compared with ' + ckind + ', more than the normal ±' + hw + '% swing') + '</span><span class="nrp1"><b class="t' + htc + '">' + sgn(bx, 0) + '</b> vs comparable days</span>' + nrBarH(bx, hr.w) + '</span>' : '';
   let keys = '<div class="key hero' + (hr ? (htc === 'hi' ? ' kup' : htc === 'lo' ? ' kdn' : ' kin') : lt == null || yoyBot(lt) ? '' : lt > 0 ? ' kup' : lt < 0 ? ' kdn' : '') + '"><span class="lbl">Conversion rate <span class="lbld">' + label(d) + ' · ' + lcx(st.label) + '</span></span><span class="big">' + hint(pct(c.val), 'kbig', cmpTip(b, d, 'hero', 'cvr')) + '</span>' + nrRow + '@@SR@@' + aovRow(b, d) + '</div>';
   const comp = k => {
@@ -1141,7 +1144,7 @@ function topHtml(b) {
   keys = keys.replace('@@SR@@', plain('Sessions', int(cs.val)) + line('Revenue', cr2.mom, cr2.val, cr2.momV, usd)); // sessions plain here (Mike, Oct 28)
   keys = kadd(keys, kon ? orow(obc.mom, obc.val, obc.momV, nrOf(om, obc.mom), 'comparable\u200b days').replace('<span class="kow">was</span>', '<span class="kow">CVR was</span> <b>' + pct(oc.val) + '</b>,') : '');
   const kop = keys.indexOf('>') + 1, kch = cmpBars(m, bd, c2.momV, htc === 'lo' ? 'bad' : htc === 'hi' ? 'good' : null, hr ? hr.w : 0) || tipChart(m, bd, c2.momV, htc === 'lo' ? 'bad' : htc === 'hi' ? 'good' : null, { band: hr ? hr.w : 0, h: 200, w: 560, dots: true });
-  keys = keys.slice(0, kop).replace('class="key hero', 'class="key hero kwide') + '<div class="kleft">' + keys.slice(kop, -6) + '</div>' + (kch ? '<div class="kright"><span class="lbl">Against its comparison days</span><span class="kexp">' + (bd.length ? (bd.ly ? 'For November to December, we compare year over year on the same day of the week.' : 'Compared with ' + esc(cmpKind(b, d, bd.length)) + ' (' + bd.map(z => short(z)).join(', ') + '). The band is the normal range around their average.' + stretchNote(b, d, bd)) : 'No comparable days yet.') + '</span>' + kch + '</div>' : '') + '</div>' +
+  keys = keys.slice(0, kop).replace('class="key hero', 'class="key hero kwide') + '<div class="kleft">' + keys.slice(kop, -6) + '</div>' + (kch ? '<div class="kright"><span class="lbl">Against its comparison days</span><span class="kexp">' + (bd.length ? (bd.ly ? 'For November to December, we compare year over year on the same date and the same day of the week.' : 'Compared with ' + esc(cmpKind(b, d, bd.length)) + ' (' + bd.map(z => short(z)).join(', ') + '). The band is the normal range around their average.' + stretchNote(b, d, bd)) : 'No comparable days yet.') + '</span>' + kch + '</div>' : '') + '</div>' +
     (c.custom ? kadd(comp('mom'), orow(op.mom, op.val, op.momV, null, 'range')) : '') + ''; // no last-year tile on either site: the RB layout reads better, and YoY lives in the H1 and the scorecard (Mike, Oct 28)
   // The day controls live in a small chip at the top right; click it for the full panel (pick a day, edit comparisons, sale calendar).
   const saleTxt = st.sale && tierOf(b, d) ? 'Up to ' + tierOf(b, d) + '% off sale · day ' + st.pos + ' of ' + st.len : st.label;
@@ -1642,9 +1645,9 @@ function cmpBars(m, bd, bv, tone, bw) {
   g += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + y(bv).toFixed(1) + '" y2="' + y(bv).toFixed(1) + '" class="cbavg"/>';
   // Each bar hovers: its date, what kind of day, its number.
   const hit = (x, z, v, tag) => hint('', 'tdot', '<b>' + (isLY(z) ? wsh(z) + ', ' + z.slice(0, 4) : label(z)) + '</b><br>' + (isLY(z) ? '' : esc(dayKind(m.b, z)) + '<br>') + esc(tipName(m)) + ': <b>' + fmtVal(m, v) + '</b><br><span class="cap">' + tag + '</span>').replace('<span ', '<rect x="' + (x - slot / 2).toFixed(1) + '" y="' + T + '" width="' + slot.toFixed(1) + '" height="' + (H - B - T + 20) + '" ').replace('></span>', '/>');
-  days.forEach((z, k) => { g += hit(cx(k), z, vv(z), isLY(z) ? '📅 ' + lyExact(state.day) : '🎯 A comparison day for ' + short(state.day)); });
+  days.forEach((z, k) => { g += hit(cx(k), z, vv(z), isLY(z) ? '📅 <b>' + (lyKind(state.day, z) === 'date' ? 'Same date' : 'Same weekday') + ', last year</b><br>' + lyBody(state.day) : '🎯 A comparison day for ' + short(state.day)); });
   g += hit(tx, state.day, today, '📍 The day you\'re reading: ' + sgn(today / bv - 1, 0) + ' vs the average (' + fmtVal(m, bv) + ')');
-  const key = '<span class="tckey"><span><i class="tk-cbar"></i>' + (days.length && isLY(days[0]) ? 'Same weekday last year' : 'Comparison days') + '</span><span><i class="tk-day" style="background:' + col + '"></i>' + short(state.day) + '</span><span><i class="tk-avg"></i>Average ' + fmtVal(m, bv) + '</span>' + (band ? '<span><i class="tk-band"></i>Normal range</span>' : '') + '</span>';
+  const key = '<span class="tckey"><span><i class="tk-cbar"></i>' + (days.length && isLY(days[0]) ? 'Last year: same date and weekday' : 'Comparison days') + '</span><span><i class="tk-day" style="background:' + col + '"></i>' + short(state.day) + '</span><span><i class="tk-avg"></i>Average ' + fmtVal(m, bv) + '</span>' + (band ? '<span><i class="tk-band"></i>Normal range</span>' : '') + '</span>';
   return '<span class="tchart tcfull cbars">' + key + '<svg viewBox="0 0 ' + W + ' ' + H + '" width="' + W + '" height="' + H + '" aria-hidden="true">' + g + '</svg></span>';
 }
 function tipChart(m, bd, bv, tone, opt) {
