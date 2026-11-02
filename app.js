@@ -253,7 +253,7 @@ const wsh = z => WD[dow(z)] + ' ' + short(z);
 const lyDays = d => [addDays(d, -365), addDays(d, -364)].filter(z => lyIndex(z) >= 0); // same date, then same weekday (Mike, Nov 2)
 const lyKind = (d, z) => z === addDays(d, -365) ? 'date' : 'weekday';
 const lyPhrase = d => 'last year\'s ' + lyDays(d).map(short).join(' and ');
-const lyBody = d => { const a = addDays(d, -365), c = addDays(d, -364); return wsh(a) + ', ' + a.slice(0, 4) + ' is the same date and ' + wsh(c) + ', ' + c.slice(0, 4) + ' is the same weekday as ' + wsh(d) + ', ' + d.slice(0, 4) + '. We average the two, because in November and December both the date and the weekday matter for Thanksgiving, Black Friday and Cyber Monday.'; };
+const lyBody = d => 'Last year\'s same date (' + wsh(addDays(d, -365)) + ') and same weekday (' + wsh(addDays(d, -364)) + '), averaged.';
 const lyExact = d => '<b>Same date and weekday, last year</b><br>' + lyBody(d);
 const cw = h => (typeof h === 'string' && state.view === 'daily' && state.tab === 'tp' && basisOn('tp', state.day)) ? h.replace(/the comparable days/g, lyPhrase(state.day)).replace(/Comparable days/g, ucf(lyPhrase(state.day))).replace(/comparable days/g, lyPhrase(state.day)) : h;
 function compsDefault(b, d) {
@@ -1144,7 +1144,7 @@ function topHtml(b) {
   keys = keys.replace('@@SR@@', plain('Sessions', int(cs.val)) + line('Revenue', cr2.mom, cr2.val, cr2.momV, usd)); // sessions plain here (Mike, Oct 28)
   keys = kadd(keys, kon ? orow(obc.mom, obc.val, obc.momV, nrOf(om, obc.mom), 'comparable\u200b days').replace('<span class="kow">was</span>', '<span class="kow">CVR was</span> <b>' + pct(oc.val) + '</b>,') : '');
   const kop = keys.indexOf('>') + 1, kch = cmpBars(m, bd, c2.momV, htc === 'lo' ? 'bad' : htc === 'hi' ? 'good' : null, hr ? hr.w : 0) || tipChart(m, bd, c2.momV, htc === 'lo' ? 'bad' : htc === 'hi' ? 'good' : null, { band: hr ? hr.w : 0, h: 200, w: 560, dots: true });
-  keys = keys.slice(0, kop).replace('class="key hero', 'class="key hero kwide') + '<div class="kleft">' + keys.slice(kop, -6) + '</div>' + (kch ? '<div class="kright"><span class="lbl">Against its comparison days</span><span class="kexp">' + (bd.length ? (bd.ly ? 'For November to December, we compare year over year on the same date and the same day of the week.' : 'Compared with ' + esc(cmpKind(b, d, bd.length)) + ' (' + bd.map(z => short(z)).join(', ') + '). The band is the normal range around their average.' + stretchNote(b, d, bd)) : 'No comparable days yet.') + '</span>' + kch + '</div>' : '') + '</div>' +
+  keys = keys.slice(0, kop).replace('class="key hero', 'class="key hero kwide') + '<div class="kleft">' + keys.slice(kop, -6) + '</div>' + (kch ? '<div class="kright"><span class="lbl">Against its comparison days</span><span class="kexp">' + (bd.length ? (bd.ly ? 'For November and December, YOY looks at both the same <b>date</b> and <b>day</b> last year.' : 'Compared with ' + esc(cmpKind(b, d, bd.length)) + ' (' + bd.map(z => short(z)).join(', ') + '). The band is the normal range around their average.' + stretchNote(b, d, bd)) : 'No comparable days yet.') + '</span>' + kch + '</div>' : '') + '</div>' +
     (c.custom ? kadd(comp('mom'), orow(op.mom, op.val, op.momV, null, 'range')) : '') + ''; // no last-year tile on either site: the RB layout reads better, and YoY lives in the H1 and the scorecard (Mike, Oct 28)
   // The day controls live in a small chip at the top right; click it for the full panel (pick a day, edit comparisons, sale calendar).
   const saleTxt = st.sale && tierOf(b, d) ? 'Up to ' + tierOf(b, d) + '% off sale · day ' + st.pos + ' of ' + st.len : st.label;
@@ -1278,7 +1278,7 @@ function movedHtml0() {
   const ovb = cellsFor(metricsFor(state.tab).overall[0], state.day, compsFor(state.tab, state.day)).bs, up = ovb != null && ovb >= 0.02;
   const totS = cellsFor(metricsFor(state.tab).overall[0], state.day, compsFor(state.tab, state.day)).sess;
   // Pills are the day's callouts now (Allison and Mike, Oct 28): name, what it did, then its peers; hover for the read, click for the full view.
-  const lpill = (f, i) => '<button class="mv up" data-lift="' + i + '" data-hint="' + (HINTS.push(segTip2(f, totS)) - 1) + '"><span class="mvl"><span aria-hidden="true">' + em(f.m.label) + '</span><b>' + esc(f.m.label) + '</b><span class="mvv">did best</span><span class="d">' + sgn(f.c.mom, 0) + '</span></span>' + (f.rest != null ? '<span class="mvr roll"><span class="rf sib on" data-jumpsec="' + f.m.sec + '" role="link" aria-label="Jump to ' + esc(SECS[f.m.sec] || f.m.sec) + '">' + esc(ucf(f.peers)) + ' ' + sgn(f.rest, 0) + '</span></span>' : '') + '</button>';
+  const lpill = (f, i) => '<button class="mv up" data-lift="' + i + '" data-hint="' + (HINTS.push(segTip2(f, totS)) - 1) + '"><span class="mvl"><span aria-hidden="true">' + em(f.m.label) + '</span><b>' + esc(f.m.label) + '</b><span class="d">' + sgn(f.c.mom, 0) + '</span></span>' + (f.rest != null ? '<span class="mvr roll"><span class="rf sib on" data-jumpsec="' + f.m.sec + '" role="link" aria-label="Jump to ' + esc(SECS[f.m.sec] || f.m.sec) + '">' + esc(ucf(f.peers)) + ' ' + sgn(f.rest, 0) + '</span></span>' : '') + '</button>';
   const liftTier = up && LIFTS.length ? LIFTS.map(lpill).join('') : '';
   if (up) MVUP = liftTier;
   const how = t => hint('How drivers are picked ⓘ', 'soft mvhowh', '<b>What counts as a driver</b><br>' + t + '<br><br><b>Colors:</b> red pills are the biggest drags on total CVR, yellow ones are smaller, green ones lifted it.');
@@ -1293,8 +1293,8 @@ function movedHtml0() {
     cand.sort((a, z) => Math.abs(z.gap) - Math.abs(a.gap)).slice(0, 2 - have).forEach(f => { if (f.gap >= 0) { f.lift = true; LIFTS.push(f); } else MOVED.push(f); });
   }
   const liftAll = up && LIFTS.length ? LIFTS.map(lpill).join('') : LIFTS.filter(f => f.pad).map((f, k) => lpill(f, LIFTS.indexOf(f))).join('');
-  if (!MOVED.length && !liftAll) return '<div class="moved inhead"><div class="mvlist">' + drvLbl() + '<span class="cap">none today. Every device, region, channel and funnel step is within its normal range.</span></div></div>';
-  if (!MOVED.length) return '<div class="moved inhead"><div class="mvlist">' + drvLbl() + '' + liftAll + '</div></div>';
+  if (state.view !== 'daily' && !MOVED.length && !liftAll) return '<div class="moved inhead"><div class="mvlist">' + drvLbl() + '<span class="cap">none today. Every device, region, channel and funnel step is within its normal range.</span></div></div>';
+  if (state.view !== 'daily' && !MOVED.length) return '<div class="moved inhead"><div class="mvlist">' + drvLbl() + '' + liftAll + '</div></div>';
   if (false) return '<div class="moved inhead"><span class="cap">No single driver: every device, region, channel and funnel step moved about the same as the rest of its group.</span></div>';
   // Weight = how far below usual × share of traffic it carries (funnel steps touch everyone).
   const tot = rankTot(), ranked = rankMoved(), top = ranked[0] ? ranked[0].w : 0;
@@ -1645,7 +1645,7 @@ function cmpBars(m, bd, bv, tone, bw) {
   g += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + y(bv).toFixed(1) + '" y2="' + y(bv).toFixed(1) + '" class="cbavg"/>';
   // Each bar hovers: its date, what kind of day, its number.
   const hit = (x, z, v, tag) => hint('', 'tdot', '<b>' + (isLY(z) ? wsh(z) + ', ' + z.slice(0, 4) : label(z)) + '</b><br>' + (isLY(z) ? '' : esc(dayKind(m.b, z)) + '<br>') + esc(tipName(m)) + ': <b>' + fmtVal(m, v) + '</b><br><span class="cap">' + tag + '</span>').replace('<span ', '<rect x="' + (x - slot / 2).toFixed(1) + '" y="' + T + '" width="' + slot.toFixed(1) + '" height="' + (H - B - T + 20) + '" ').replace('></span>', '/>');
-  days.forEach((z, k) => { g += hit(cx(k), z, vv(z), isLY(z) ? '📅 <b>' + (lyKind(state.day, z) === 'date' ? 'Same date' : 'Same weekday') + ', last year</b><br>' + lyBody(state.day) : '🎯 A comparison day for ' + short(state.day)); });
+  days.forEach((z, k) => { g += hit(cx(k), z, vv(z), isLY(z) ? '📅 <b>' + (lyKind(state.day, z) === 'date' ? 'Same date' : 'Same weekday') + ' as ' + wsh(state.day) + '</b><br>Averaged with ' + wsh(lyDays(state.day).find(q => q !== z) || z) + ', the ' + (lyKind(state.day, z) === 'date' ? 'same weekday' : 'same date') + '.' : '🎯 A comparison day for ' + short(state.day)); });
   g += hit(tx, state.day, today, '📍 The day you\'re reading: ' + sgn(today / bv - 1, 0) + ' vs the average (' + fmtVal(m, bv) + ')');
   const key = '<span class="tckey"><span><i class="tk-cbar"></i>' + (days.length && isLY(days[0]) ? 'Last year: same date and weekday' : 'Comparison days') + '</span><span><i class="tk-day" style="background:' + col + '"></i>' + short(state.day) + '</span><span><i class="tk-avg"></i>Average ' + fmtVal(m, bv) + '</span>' + (band ? '<span><i class="tk-band"></i>Normal range</span>' : '') + '</span>';
   return '<span class="tchart tcfull cbars">' + key + '<svg viewBox="0 0 ' + W + ' ' + H + '" width="' + W + '" height="' + H + '" aria-hidden="true">' + g + '</svg></span>';
