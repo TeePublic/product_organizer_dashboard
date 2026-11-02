@@ -1772,9 +1772,12 @@ function detailHtml(m) {
   const GN = { all: 'All', US: 'USA', GB: 'UK', AU: 'Australia', CA: 'Canada', DE: 'Germany', FR: 'France', NZ: 'New Zealand' }, pg = (state.pgeo || {})[m.key] || 'all';
   const geoTog = m.pgeo && Object.keys(m.pgeo).length ? '<div class="segs pgeo" role="group" aria-label="Country">' + ['all'].concat(Object.keys(m.pgeo)).map(g => '<button type="button" data-pgeo="' + esc(m.key + '|' + g) + '" aria-pressed="' + (pg === g) + '">' + (GN[g] || g) + '</button>').join('') + '</div>' : '';
   const gs = pg !== 'all' && m.pgeo && m.pgeo[pg] ? (m.pgeo[pg].s || []).filter(x => x != null).slice(-14).sort((x, y) => x - y) : [], thin = gs.length && gs[Math.floor(gs.length / 2)] < 100;
-  return '<div class="devtop"><div class="devl"><div class="dhead"><div class="dtitle"><h4>' + em(m.label) + ' ' + esc(m.label) + ' <span>' + BR[m.b].name + (pg !== 'all' ? ', ' + (GN[pg] || pg) : '') + ', last 90 days</span></h4><p class="dsub">' + esc(defOf(m)) + (thin ? ' <b>Under 100 product-page viewers a day here, so daily swings are mostly noise.</b>' : '') + '</p></div><div class="dbtns">' + geoTog +
+  // The row above already names the metric, so no second title (Mike, Nov 2). Order: what it is, the two verdict cards side by side, then the 90-day line full width with its controls on top.
+  return '<p class="dsub">' + esc(defOf(m)) + (thin ? ' <b>Under 100 product-page viewers a day here, so daily swings are mostly noise.</b>' : '') + '</p>' +
+    '<div class="dx2">' + cbBlock(m) + sibHtml(m) + '</div>' +
+    '<div class="dctl"><div class="dctl1"><span class="lbl">Last 90 days</span>' + leg + '</div><div class="dbtns">' + geoTog +
     (m.sess && !m.isSess ? '<button type="button" class="swtog" role="switch" data-sesstog="' + esc(m.key) + '" aria-checked="' + sessOn + '"><span class="trk"><span class="knb"></span></span>Sessions</button>' : '') +
-    '<button type="button" class="actbtn" data-cmp="' + esc(m.key) + '" data-from="' + m.b + '">👀 Compare with ' + ob + '</button>' + detailPrior(m) + '</div></div></div>' + sibHtml(m) + '</div>' + cbBlock(m) + leg +
+    '<button type="button" class="actbtn" data-cmp="' + esc(m.key) + '" data-from="' + m.b + '">👀 Compare with ' + ob + '</button>' + detailPrior(m) + '</div></div>' +
     '<div class="chart" data-chart="' + esc(m.key) + '"></div>' + '<div class="tbox">' + metricTable(m) + '</div>';
 }
 /* table cells are only red or green: better or worse than usual */

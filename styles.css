@@ -3764,3 +3764,22 @@ details.pbox.prov > summary { cursor: pointer; list-style: none; } details.pbox.
 .dcbp { margin: 4px 0 10px; font-size: 14.5px; line-height: 1.5; color: var(--ink-2); max-width: none; }
 .dcb .cbars { display: block; } .dcb .cbars svg { width: 100%; height: auto; max-height: 230px; }
 
+
+/* Row expansion, tightened (Mike, Nov 2): no second title, two verdict cards side by side, controls on the line chart */
+.detail > .dsub { margin: 0; }
+.dx2 { display: grid; grid-template-columns: minmax(300px, 500px) minmax(0, 1fr); gap: 12px; align-items: stretch; }
+.dx2:has(> :only-child) { grid-template-columns: minmax(0, 1fr); }
+.dx2 > .dcb, .dx2 > .sibs { margin: 0; height: 100%; box-sizing: border-box; }
+.dx2 > .dcb { padding: 12px 14px 8px; display: flex; flex-direction: column; }
+.dx2 .dcbp { font-size: 13px; line-height: 1.45; margin: 2px 0 6px; }
+.dx2 .dcb .cbars { margin: auto 0 0; } .dx2 .dcb .cbars svg { width: 100%; height: auto; max-height: 210px; }
+.dx2 .dcb .tckey { font-size: 11px; gap: 4px 10px; }
+.dx2 > .sibs { display: grid; grid-template-columns: minmax(220px, 1fr) minmax(0, 1.5fr); grid-template-areas: "l l" "p b"; gap: 4px 28px; align-content: start; padding: 12px 16px; }
+.dx2 > .sibs .lbl { grid-area: l; font: 700 13px var(--body); color: var(--ink); }
+.dx2 > .sibs p { grid-area: p; font-size: 13.5px; line-height: 1.45; }
+.dx2 > .sibs .sbars { grid-area: b; max-width: none; align-content: start; }
+.dx2 > .sibs .sbrow { grid-template-columns: 130px 1fr 48px; }
+.dctl { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; }
+.dctl1 { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 16px; }
+.dctl1 .lbl { font: 700 13px var(--body); color: var(--ink); }
+@media (max-width: 900px) { .dx2 { grid-template-columns: minmax(0, 1fr); } .dx2 > .sibs { grid-template-columns: minmax(0, 1fr); grid-template-areas: "l" "p" "b"; } }
