@@ -3734,8 +3734,8 @@ details.pbox.prov > summary { cursor: pointer; list-style: none; } details.pbox.
 .xbar { margin: 0 0.28em; text-decoration: overline; text-decoration-thickness: 1.2px; text-underline-offset: 0; }
 
 /* Nov and Dec on TeePublic: compare with comparable days or the same weekday last year (Mike, Nov 2) */
-.basistog { margin-left: auto; display: inline-flex; border: 1px solid var(--line, #d8dce6); border-radius: 8px; overflow: hidden; align-self: center; }
-.basistog button { font: inherit; font-size: 12.5px; padding: 5px 11px; background: transparent; color: var(--muted); border: 0; cursor: pointer; }
-.basistog button + button { border-left: 1px solid var(--line, #d8dce6); }
-.basistog button[aria-pressed="true"] { background: var(--ctl); color: #fff; font-weight: 600; }
+.basistog { margin-left: auto; display: inline-flex; align-self: center; gap: 2px; padding: 3px; border: 1px solid var(--line); border-radius: 10px; background: var(--sunk); box-shadow: 0 1px 2px rgba(20, 20, 50, .06); }
+.basistog button { font: inherit; font-size: 13.5px; font-weight: 500; padding: 5px 14px; background: transparent; color: var(--muted); border: 0; border-radius: 7px; cursor: pointer; }
+.basistog button:hover { color: var(--ink); }
+.basistog button[aria-pressed="true"] { background: var(--surface); color: var(--ink); font-weight: 600; box-shadow: 0 1px 3px rgba(20, 20, 50, .18), 0 0 0 1px var(--line); }
 @media (max-width: 760px) { .basistog { margin-left: 0; width: 100%; } .basistog button { flex: 1; } }
