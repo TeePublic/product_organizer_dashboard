@@ -1144,7 +1144,7 @@ function topHtml(b) {
   keys = keys.replace('@@SR@@', plain('Sessions', int(cs.val)) + line('Revenue', cr2.mom, cr2.val, cr2.momV, usd)); // sessions plain here (Mike, Oct 28)
   keys = kadd(keys, kon ? orow(obc.mom, obc.val, obc.momV, nrOf(om, obc.mom), 'comparable\u200b days').replace('<span class="kow">was</span>', '<span class="kow">CVR was</span> <b>' + pct(oc.val) + '</b>,') : '');
   const kop = keys.indexOf('>') + 1, kch = cmpBars(m, bd, c2.momV, htc === 'lo' ? 'bad' : htc === 'hi' ? 'good' : null, hr ? hr.w : 0) || tipChart(m, bd, c2.momV, htc === 'lo' ? 'bad' : htc === 'hi' ? 'good' : null, { band: hr ? hr.w : 0, h: 200, w: 560, dots: true });
-  keys = keys.slice(0, kop).replace('class="key hero', 'class="key hero kwide') + '<div class="kleft">' + keys.slice(kop, -6) + '</div>' + (kch ? '<div class="kright"><span class="lbl">Against its comparison days</span><span class="kexp">' + (bd.length ? (bd.ly ? 'For November and December, YOY looks at both the same <b>date</b> and <b>day</b> last year.' : 'Compared with ' + esc(cmpKind(b, d, bd.length)) + ' (' + bd.map(z => short(z)).join(', ') + '). The band is the normal range around their average.' + stretchNote(b, d, bd)) : 'No comparable days yet.') + '</span>' + kch + '</div>' : '') + '</div>' +
+  keys = keys.slice(0, kop).replace('class="key hero', 'class="key hero kwide') + '<div class="kleft">' + keys.slice(kop, -6) + '</div>' + (kch ? '<div class="kright"><span class="lbl">Against its comparison days</span><span class="kexp">' + (bd.length ? (bd.ly ? 'For November and December, YoY looks at both the same <b>date</b> and <b>day</b> last year.' : 'Compared with ' + esc(cmpKind(b, d, bd.length)) + ' (' + bd.map(z => short(z)).join(', ') + '). The band is the normal range around their average.' + stretchNote(b, d, bd)) : 'No comparable days yet.') + '</span>' + kch + '</div>' : '') + '</div>' +
     (c.custom ? kadd(comp('mom'), orow(op.mom, op.val, op.momV, null, 'range')) : '') + ''; // no last-year tile on either site: the RB layout reads better, and YoY lives in the H1 and the scorecard (Mike, Oct 28)
   // The day controls live in a small chip at the top right; click it for the full panel (pick a day, edit comparisons, sale calendar).
   const saleTxt = st.sale && tierOf(b, d) ? 'Up to ' + tierOf(b, d) + '% off sale · day ' + st.pos + ' of ' + st.len : st.label;
@@ -1248,7 +1248,7 @@ function rankMoved() {
 function basisTog() {
   const b = state.tab, d = state.day; if (b !== 'tp' || !isHoliday(d) || lyIndex(addDays(d, -364)) < 0) return '';
   const on = basisOn(b, d), bt = (k, t, tip) => '<button type="button" data-basis="' + k + '" aria-pressed="' + (on === (k === 'yoy')) + '" title="' + esc(tip) + '">' + t + '</button>';
-  return '<span class="basiswrap"><span class="btl">Compare with</span><span class="basistog" role="group" aria-label="Compare with">' + bt('cmp', 'Recent comparison days', 'Recent days like this one: the same weekday, or the same point in a sale') + bt('yoy', 'YOY', 'Year over year: ' + lyBody(d)) + '</span></span>';
+  return '<span class="basiswrap"><span class="btl">Compare with</span><span class="basistog" role="group" aria-label="Compare with">' + bt('cmp', 'Recent days', 'Recent days like this one: the same weekday, or the same point in a sale') + bt('yoy', 'YoY', 'Year over year: ' + lyBody(d)) + '</span></span>';
 }
 function movedHtml() { const h = movedHtmlB(), tg = basisTog(); return tg ? h.replace(/<\/div><\/div>$/, tg + '</div></div>') : h; }
 function movedHtmlB() {
