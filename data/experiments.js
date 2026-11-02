@@ -125,6 +125,6 @@ const TPEXPS = { asOf: '2026-11-02', url: 'https://www.teepublic.com/manage/spli
   ,
   { id: 'beam_ab_test_live', name: 'Beam conversion test', start: '2026-10-19', where: 'Cart', control: null, variants: [{ n: 'Version A', conf: null }, { n: 'Version B', conf: null }], call: ['early', 'Too early to tell: every metric is inside its margin of error'],
     statsig: { url: 'https://console.statsig.com/shared_report/o5gEO9yaWHK?ref=pulse_public_share&experiment_name=beam_ab_test_live&custom_query_id=2uH7MYmCac7TZsUVzRLEcw', portal: 'https://partner-portal.beamimpact.com/overview', through: '2026-11-01', exposures: '9.78M', split: 'about a third of shoppers each in control, Version A and Version B', ci: 90,
-      beam: { asOf: '2026-11-02', month: 'October', aovNo: 36.75, aovBeam: 44.02, aovLift: 0.198, ccrBeam: 0.583, ccrNo: 0.330, users: 210, redeemed: 1578 },
+      beam: { asOf: '2026-11-02', month: 'October', aovNo: 36.75, aovBeam: 44.02, aovLift: 0.198, ccrBeam: 0.583, ccrNo: 0.330, users: 210, redeemed: 1585, donated: 699, rate: 0.02 },
       metrics: [{ name: 'Total revenue', a: 0.017, aw: 0.033, b: -0.003, bw: 0.033 }, { name: 'Average order value', a: 0.013, aw: 0.021, b: 0.003, bw: 0.021 }, { name: 'Conversions', a: 0.005, aw: 0.025, b: -0.006, bw: 0.025 }, { name: 'Cart CVR', a: 0.006, aw: 0.022, b: 0.005, bw: 0.022 }] } }
 ] };
