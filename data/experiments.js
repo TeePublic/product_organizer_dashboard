@@ -1,4 +1,4 @@
-// A/B tests from Amplitude Experiment (Redbubble project 774278), pulled Nov 2 2026, 2:40 PM ET (Nov 1 the last complete day).
+// A/B tests from Amplitude Experiment (Redbubble project 774278), pulled Nov 2 2026, 4:40 PM ET (Nov 1 the last complete day).
 // cvr = Sitewide CVR (h1f2lfvq, pageview to order in a day) among exposed users. reach = estimated share of all site orders
 // that come from users the test touches (exposed converters / site orders over the same days, with a 0.6 repeat-buyer factor
 // calibrated on the two site-wide tests, capped at 100%). site = cvr lift x reach = what the variant does to whole-site CVR.
@@ -115,13 +115,13 @@ const SEXP = { url: 'https://app.sigmacomputing.com/teepublic/workbook/GA4-Searc
   ] };
 
 
-// TeePublic A/B tests, read from the Split dashboard (https://www.teepublic.com/manage/split) on Nov 2 2026 (2:45 PM ET). Only tests launched in the last 30 days
+// TeePublic A/B tests, read from the Split dashboard (https://www.teepublic.com/manage/split) on Nov 2 2026 (4:40 PM ET). Only tests launched in the last 30 days
 // that have numbers (Mike and Jon, Oct 30): the date beside each experiment name is its launch date. Older tests and tests with no completed
 // conversions are left out. Split reports each test's own conversion goal, so these rates are not sitewide CVR. conf is Split's confidence, null for "Insufficient".
 const TPEXPS = { asOf: '2026-11-02', url: 'https://www.teepublic.com/manage/split', items: [
-  { id: 'pdp_bestseller_badge', name: 'Bestseller badge on product pages', start: '2026-10-27', where: 'PDP', control: { p: 9487, conv: 0.1130 }, variants: [{ n: 'Title badge', p: 9707, conv: 0.1083, rel: -0.0418, conf: null }, { n: 'Gallery badge', p: 9627, conv: 0.1124, rel: -0.0053, conf: null }], call: ['early', 'Both within about 4% of control, too early to tell'] },
-  { id: 'pdp_trending_badge', name: 'Trending badge on product pages', start: '2026-10-23', where: 'PDP', control: { p: 567827, conv: 0.0129 }, variants: [{ n: 'Title badge', p: 567170, conv: 0.0131, rel: 0.0169, conf: null }, { n: 'Gallery badge', p: 566519, conv: 0.0132, rel: 0.0247, conf: null }], call: ['early', 'Too early'] },
-  { id: 'thankyou_mobile_layout', name: 'Thank-you page layout on mobile', start: '2026-10-23', where: 'Thank-you page', control: { p: 13833, conv: 0.0175 }, variants: [{ n: 'Layout A', p: 13704, conv: 0.0180, rel: 0.0303, conf: null }, { n: 'Layout B', p: 13870, conv: 0.0180, rel: 0.0303, conf: null }, { n: 'Layout C', p: 13759, conv: 0.0201, rel: 0.1466, conf: null }], call: ['early', 'Too early'] }
+  { id: 'pdp_bestseller_badge', name: 'Bestseller badge on product pages', start: '2026-10-27', where: 'PDP', control: { p: 9659, conv: 0.1134 }, variants: [{ n: 'Title badge', p: 9877, conv: 0.1086, rel: -0.0417, conf: null }, { n: 'Gallery badge', p: 9811, conv: 0.1132, rel: -0.0011, conf: null }], call: ['early', 'Both within about 4% of control, too early to tell'] },
+  { id: 'pdp_trending_badge', name: 'Trending badge on product pages', start: '2026-10-23', where: 'PDP', control: { p: 573869, conv: 0.0130 }, variants: [{ n: 'Title badge', p: 573110, conv: 0.0132, rel: 0.0161, conf: null }, { n: 'Gallery badge', p: 572473, conv: 0.0133, rel: 0.0240, conf: null }], call: ['early', 'Too early'] },
+  { id: 'thankyou_mobile_layout', name: 'Thank-you page layout on mobile', start: '2026-10-23', where: 'Thank-you page', control: { p: 14027, conv: 0.0174 }, variants: [{ n: 'Layout A', p: 13892, conv: 0.0178, rel: 0.0221, conf: null }, { n: 'Layout B', p: 14066, conv: 0.0178, rel: 0.0258, conf: null }, { n: 'Layout C', p: 13942, conv: 0.0202, rel: 0.1587, conf: 90 }], call: ['early', 'Layout C leads at +15.9% with 90% confidence, short of the 95% bar; too early to call'] }
   ,
   { id: 'beam_ab_test_live', name: 'Beam conversion test', start: '2026-10-19', where: 'Cart', control: null, variants: [{ n: 'Version A', conf: null }, { n: 'Version B', conf: null }], call: ['early', 'Too early to tell: every metric is inside its margin of error'],
     statsig: { url: 'https://console.statsig.com/shared_report/o5gEO9yaWHK?ref=pulse_public_share&experiment_name=beam_ab_test_live&custom_query_id=2uH7MYmCac7TZsUVzRLEcw', portal: 'https://partner-portal.beamimpact.com/overview', through: '2026-11-01', exposures: '9.78M', split: 'about a third of shoppers each in control, Version A and Version B', ci: 90,

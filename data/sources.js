@@ -2668,11 +2668,12 @@ const SRCS = {
   },
   "s": {
    "kind": "jira",
-   "where": "Jira DEAP-4484, status history",
-   "url": "https://articore.atlassian.net/browse/DEAP-4484",
-   "what": "Moved from UAT / Product Verification to Released on Oct 27",
-   "who": "Umidjon Ustabaev",
-   "date": "2026-10-27"
+   "where": "#released, Print Logistics in Poland post",
+   "url": "https://grid-articore.enterprise.slack.com/archives/C0V4PM9DW/p1793654918497839",
+   "what": "Announced live on TeePublic from the Poland site with throw pillows, tote bags and canvas tote bags, which previously shipped from the USA; the financial impact is to follow",
+   "who": "Jenna Monnoleto",
+   "date": "2026-11-02",
+   "say": "Jenna Monnoleto announced in #released on Nov 2 that Print Logistics in Poland is live on TeePublic with throw pillows, tote bags and canvas tote bags, and that the financial impact will follow. Jira DEAP-4484 moved to Released on Oct 27."
   },
   "s_sheet": {
    "kind": "sheet",
@@ -3817,8 +3818,8 @@ const SRCS = {
    "who": "Milan Sacher",
    "date": "2026-11-02",
    "url": "https://grid-articore.enterprise.slack.com/archives/C0BU9AUHX2N/p1793631976814439?thread_ts=1793308013.785129&cid=C0BU9AUHX2N",
-   "what": "Engineering estimated 2 to 3 weeks to build both design options; a half-day spike on the design-tile option was requested first, and Redbubble mock-ups were added",
-   "say": "Milan Sacher estimated 2 to 3 weeks for both options in the #temp-tpo-peak-2026-cvr-upsells sticker multi-add thread on Nov 2, and a half-day spike on the design-tile option was asked for the same afternoon."
+   "what": "Engineering estimated 2 to 3 weeks to build both design options; a half-day spike on the design-tile option was requested first, and Redbubble mock-ups were added; at 4:31 PM Karl Fleener shared a prototype of add-to-cart button placement options for TeePublic tiles",
+   "say": "Milan Sacher estimated 2 to 3 weeks for both options in the #temp-tpo-peak-2026-cvr-upsells sticker multi-add thread on Nov 2, and a half-day spike on the design-tile option was asked for the same afternoon. Karl Fleener then shared a prototype of the button placements, recommending the icon on the image or a full-width Add to Cart button."
   },
   "s_sheet": {
    "kind": "sheet",
