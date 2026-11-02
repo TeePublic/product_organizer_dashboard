@@ -1,4 +1,4 @@
-// A/B tests from Amplitude Experiment (Redbubble project 774278), pulled Nov 2 2026, 7:30 AM ET (Nov 1 the last complete day).
+// A/B tests from Amplitude Experiment (Redbubble project 774278), pulled Nov 2 2026, 8:40 AM ET (Nov 1 the last complete day).
 // cvr = Sitewide CVR (h1f2lfvq, pageview to order in a day) among exposed users. reach = estimated share of all site orders
 // that come from users the test touches (exposed converters / site orders over the same days, with a 0.6 repeat-buyer factor
 // calibrated on the two site-wide tests, capped at 100%). site = cvr lift x reach = what the variant does to whole-site CVR.
@@ -115,11 +115,11 @@ const SEXP = { url: 'https://app.sigmacomputing.com/teepublic/workbook/GA4-Searc
   ] };
 
 
-// TeePublic A/B tests, read from the Split dashboard (https://www.teepublic.com/manage/split) on Nov 2 2026 (7:35 AM ET). Only tests launched in the last 30 days
+// TeePublic A/B tests, read from the Split dashboard (https://www.teepublic.com/manage/split) on Nov 2 2026 (8:45 AM ET). Only tests launched in the last 30 days
 // that have numbers (Mike and Jon, Oct 30): the date beside each experiment name is its launch date. Older tests and tests with no completed
 // conversions are left out. Split reports each test's own conversion goal, so these rates are not sitewide CVR. conf is Split's confidence, null for "Insufficient".
 const TPEXPS = { asOf: '2026-11-02', url: 'https://www.teepublic.com/manage/split', items: [
-  { id: 'pdp_bestseller_badge', name: 'Bestseller badge on product pages', start: '2026-10-27', where: 'PDP', control: { p: 9045, conv: 0.1095 }, variants: [{ n: 'Title badge', p: 9239, conv: 0.1059, rel: -0.0329, conf: null }, { n: 'Gallery badge', p: 9168, conv: 0.1090, rel: -0.0044, conf: null }], call: ['early', 'Both within about 3% of control, too early to tell'] },
-  { id: 'pdp_trending_badge', name: 'Trending badge on product pages', start: '2026-10-23', where: 'PDP', control: { p: 546462, conv: 0.0128 }, variants: [{ n: 'Title badge', p: 545815, conv: 0.0130, rel: 0.0175, conf: null }, { n: 'Gallery badge', p: 545333, conv: 0.0130, rel: 0.0219, conf: null }], call: ['early', 'Too early'] },
-  { id: 'thankyou_mobile_layout', name: 'Thank-you page layout on mobile', start: '2026-10-23', where: 'Thank-you page', control: { p: 13254, conv: 0.0176 }, variants: [{ n: 'Layout A', p: 13113, conv: 0.0184, rel: 0.0455, conf: null }, { n: 'Layout B', p: 13281, conv: 0.0180, rel: 0.0237, conf: null }, { n: 'Layout C', p: 13143, conv: 0.0200, rel: 0.1383, conf: null }], call: ['early', 'Too early'] }
+  { id: 'pdp_bestseller_badge', name: 'Bestseller badge on product pages', start: '2026-10-27', where: 'PDP', control: { p: 9108, conv: 0.1098 }, variants: [{ n: 'Title badge', p: 9302, conv: 0.1059, rel: -0.0355, conf: null }, { n: 'Gallery badge', p: 9235, conv: 0.1090, rel: -0.0068, conf: null }], call: ['early', 'Both within about 4% of control, too early to tell'] },
+  { id: 'pdp_trending_badge', name: 'Trending badge on product pages', start: '2026-10-23', where: 'PDP', control: { p: 549011, conv: 0.0128 }, variants: [{ n: 'Title badge', p: 548467, conv: 0.0130, rel: 0.0173, conf: null }, { n: 'Gallery badge', p: 547862, conv: 0.0130, rel: 0.0211, conf: null }], call: ['early', 'Too early'] },
+  { id: 'thankyou_mobile_layout', name: 'Thank-you page layout on mobile', start: '2026-10-23', where: 'Thank-you page', control: { p: 13313, conv: 0.0175 }, variants: [{ n: 'Layout A', p: 13177, conv: 0.0183, rel: 0.0450, conf: null }, { n: 'Layout B', p: 13346, conv: 0.0180, rel: 0.0275, conf: null }, { n: 'Layout C', p: 13202, conv: 0.0200, rel: 0.1426, conf: null }], call: ['early', 'Too early'] }
 ] };
