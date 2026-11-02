@@ -29,6 +29,7 @@ For data, edit the existing file and keep its shape: change values, keep every f
 - **Titles are verbatim from the sheet** (tidied for spaces only), and the **Team column on the sheet decides the team**. Do not rephrase a title or infer a team.
 - **Goals come from the sheet only.** Dashery has not broken its goal into OKRs, so Dashery projects show no goal.
 - **A result appears only after the Product Manager has posted it.** A test going live is not a result; do not put it on Recent impact.
+- **Dashery's roadmap also lives on a Confluence whiteboard, "Roadmap CY2027"** (https://articore.atlassian.net/wiki/x/MADaLAE; it is temporary until Dashery moves to Jira and a spreadsheet). It is a reference point only: the Active Work tab stays the source of truth. Read it each refresh (Confluence `getConfluenceContent` with `content_format: svg`; bars are labeled DISCOVERY, DESIGN or DEV, laid out by month, in Pillar 1 and Pillar 2 lanes) and use it to cross-check Dashery phases and dates. If it disagrees with the sheet, keep the sheet and mention the difference in the refresh summary. Never add a project that is only on the whiteboard.
 - **TeePublic tests come from the Split dashboard** (teepublic.com/manage/split, sign in through the browser pane): only tests launched in the last 30 days that have completed conversions. The date beside the experiment name is the launch date.
 
 
