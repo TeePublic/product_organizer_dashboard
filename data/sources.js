@@ -2813,11 +2813,10 @@ const SRCS = {
   },
   "s": {
    "kind": "jira",
-   "where": "Jira DEAP-5143, child of DEAP-5046",
-   "url": "https://articore.atlassian.net/browse/DEAP-5143",
-   "what": "Customer self-service flow moved to Released on Oct 28; customer emails and the agent queue are in Code Review, Zendesk hookup in In Development",
-   "who": "Danila Hlazau",
-   "date": "2026-10-28"
+   "where": "Jira DEAP-5046 children DEAP-5186, DEAP-5187, DEAP-5188",
+   "url": "https://articore.atlassian.net/browse/DEAP-5046",
+   "date": "2026-11-02",
+   "what": "Customer emails, the agent queue and the Zendesk integration moved to UAT / Product Verification on Nov 2; the epic is still In Development"
   },
   "s_sheet": {
    "kind": "sheet",
@@ -2965,12 +2964,11 @@ const SRCS = {
    "what": "Brand: RBO (Redbubble)"
   },
   "s": {
-   "kind": "slack",
-   "where": "#temp-rbo-trucker-hat-line-extension",
-   "who": "Ashley Iwafuchi",
-   "date": "2026-10-26",
-   "url": "https://grid-articore.enterprise.slack.com/archives/C0C451JHHU7/p1793033262175579",
-   "what": "Weekly update: on track for launch next week"
+   "kind": "jira",
+   "where": "Jira DEAP-6717, summary and comment",
+   "url": "https://articore.atlassian.net/browse/DEAP-6717",
+   "date": "2026-11-02",
+   "what": "Search extension ticket for the Redbubble trucker hats says on track for launch Nov 3 USA / Nov 4 AU; a comment notes a bug found in search keyword mapping during implementation"
   },
   "s_sheet": {
    "kind": "sheet",
@@ -2979,12 +2977,11 @@ const SRCS = {
    "what": "In Dev / On Track"
   },
   "eta": {
-   "kind": "slack",
-   "where": "#temp-rbo-trucker-hat-line-extension",
-   "who": "Ashley Iwafuchi",
-   "date": "2026-10-26",
-   "url": "https://grid-articore.enterprise.slack.com/archives/C0C451JHHU7/p1793033262175579",
-   "what": "Launch Nov 3 in the USA, Nov 4 in AU"
+   "kind": "jira",
+   "where": "Jira DEAP-6717, summary",
+   "url": "https://articore.atlassian.net/browse/DEAP-6717",
+   "date": "2026-11-02",
+   "what": "On track for launch: Nov 3 (USA) / Nov 4 (AU)"
   },
   "eta_sheet": {
    "kind": "sheet",
@@ -4321,11 +4318,18 @@ const SRCS = {
    "what": "The roadmap sheet lists the team as Core."
   },
   "s": {
-   "kind": "sheet",
-   "where": "Roadmap sheet, Active Work tab, row 6",
-   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A6",
-   "date": "2026-10-28",
-   "what": "The roadmap sheet shows In Dev, On Track (read Oct 28)."
+   "kind": "slack",
+   "where": "#temp-tpo-greeting-card-postcard-launch",
+   "url": "https://grid-articore.enterprise.slack.com/archives/C0BRM7CP7KL",
+   "date": "2026-11-01",
+   "what": "Project channel update Nov 1: Nov 3 is a Melbourne public holiday, so the team is targeting first thing Wed Nov 4 AU time; all else is ready, waiting on confirmation from the fulfillment partner"
+  },
+  "eta": {
+   "kind": "slack",
+   "where": "#temp-tpo-greeting-card-postcard-launch",
+   "url": "https://grid-articore.enterprise.slack.com/archives/C0BRM7CP7KL",
+   "date": "2026-11-01",
+   "what": "Project channel update Nov 1: Nov 3 is a Melbourne public holiday, so the team is targeting first thing Wed Nov 4 AU time; all else is ready, waiting on confirmation from the fulfillment partner"
   }
  },
  "More poster inventory on Redbubble": {
@@ -4927,6 +4931,13 @@ const SRCS = {
    "where": "Roadmap sheet, Active Work tab, Project Name column, row 22",
    "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A22",
    "what": "The roadmap sheet lists \"RETENTION: Simon email recommendations\" on the Active Work tab"
+  },
+  "s": {
+   "kind": "jira",
+   "where": "Jira DEAP-6933, status",
+   "url": "https://articore.atlassian.net/browse/DEAP-6933",
+   "date": "2026-11-02",
+   "what": "Geo levels sizing exploration for email recommendations moved to In Development on Nov 2"
   }
  },
  "Related tag improvements": {
