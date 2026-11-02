@@ -3734,9 +3734,10 @@ details.pbox.prov > summary { cursor: pointer; list-style: none; } details.pbox.
 .xbar { margin: 0 0.28em; text-decoration: overline; text-decoration-thickness: 1.2px; text-underline-offset: 0; }
 
 /* Nov and Dec on TeePublic: compare with comparable days or the same weekday last year (Mike, Nov 2) */
-.basistog { margin-left: auto; display: inline-flex; align-self: center; gap: 2px; padding: 3px; border: 1px solid var(--line); border-radius: 10px; background: var(--sunk); box-shadow: 0 1px 2px rgba(20, 20, 50, .06); }
+.basiswrap { margin-left: auto; display: inline-flex; align-items: center; gap: 8px; align-self: center; }
+.basiswrap .btl { font-size: 12px; font-weight: 600; color: var(--muted); white-space: nowrap; }
+.basistog { display: inline-flex; align-self: center; gap: 2px; padding: 3px; border: 1px solid var(--line); border-radius: 10px; background: var(--sunk); box-shadow: 0 1px 2px rgba(20, 20, 50, .06); }
 .basistog button { font: inherit; font-size: 13.5px; font-weight: 500; padding: 5px 14px; background: transparent; color: var(--muted); border: 0; border-radius: 7px; cursor: pointer; }
-.basistog .btl { align-self: center; padding: 0 10px 0 9px; font-size: 12px; font-weight: 600; color: var(--muted); letter-spacing: .02em; white-space: nowrap; }
 .basistog button:hover { color: var(--ink); }
 .basistog button[aria-pressed="true"] { background: var(--surface); color: var(--ink); font-weight: 600; box-shadow: 0 1px 3px rgba(20, 20, 50, .18), 0 0 0 1px var(--line); }
-@media (max-width: 760px) { .basistog { margin-left: 0; width: 100%; } .basistog button { flex: 1; } .basistog .btl { display: none; } }
+@media (max-width: 760px) { .basistog { margin-left: 0; width: 100%; } .basistog button { flex: 1; } 

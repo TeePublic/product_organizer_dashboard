@@ -1248,7 +1248,7 @@ function rankMoved() {
 function basisTog() {
   const b = state.tab, d = state.day; if (b !== 'tp' || !isHoliday(d) || lyIndex(addDays(d, -364)) < 0) return '';
   const on = basisOn(b, d), bt = (k, t, tip) => '<button type="button" data-basis="' + k + '" aria-pressed="' + (on === (k === 'yoy')) + '" title="' + esc(tip) + '">' + t + '</button>';
-  return '<span class="basistog" role="group" aria-label="Compare with"><span class="btl">Compare with</span>' + bt('cmp', 'Recent comparison days', 'Recent days like this one: the same weekday, or the same point in a sale') + bt('yoy', 'YOY', 'Year over year: ' + lyBody(d)) + '</span>';
+  return '<span class="basiswrap"><span class="btl">Compare with</span><span class="basistog" role="group" aria-label="Compare with">' + bt('cmp', 'Recent comparison days', 'Recent days like this one: the same weekday, or the same point in a sale') + bt('yoy', 'YOY', 'Year over year: ' + lyBody(d)) + '</span></span>';
 }
 function movedHtml() { const h = movedHtmlB(), tg = basisTog(); return tg ? h.replace(/<\/div><\/div>$/, tg + '</div></div>') : h; }
 function movedHtmlB() {
@@ -2026,7 +2026,7 @@ function testDetailModal(id) {
     : '<table class="abt"><thead><tr><th>Metric</th><th>Control</th><th>Test</th><th>Change</th><th>Stat sig</th></tr></thead><tbody>' + cols.map(k => { const x = R.m[k[0]]; return '<tr><td>' + esc(lab(k)) + '</td><td>' + abVal(x, x.a) + '</td><td>' + abVal(x, x.b) + '</td><td>' + ch(x.v, k[0] === 'rpv') + '</td><td>' + sureOf(x) + '</td></tr>'; }).join('') + '</tbody></table>';
   const pill = '<span class="abv2 v-' + R.verdict[0] + '">' + esc(R.verdict[1]) + '</span>';
   openModal('<div class="mhead"><h3 id="mtitle">' + esc(t.name) + '</h3></div><div class="mtags"><span class="rtag">' + siteDot(testSite(t)) + '</span><span class="rtag">' + esc(t.where) + '</span><span class="rtag">' + (t.status === 'running' ? 'Day ' + days + ', since ' + short(t.start) : days + ' days, ended ' + short(t.end)) + '</span>' + pill + '</div>' +
-    '<div class="abwhat2"><h4 class="ph">🧪 What we are testing</h4><p>' + esc(t.hyp) + '</p>' + (R.flag ? '<p class="abflag">⚠️ ' + esc(R.flag) + '</p>' : '') + '</div>' + tbl + (R.wg ? '<div class="abwhat2"><h4 class="ph">📌 Working group, Nov 2</h4><ul class="hul nrul">' + R.wg.map(x => '<li>' + esc(x) + '</li>').join('') + '</ul></div>' : '') + (t.status === 'running' ? '<div class="abwhat2"><h4 class="ph">📱 Desktop vs mobile</h4>' + (R.dev ? '<ul class="hul nrul">' + R.dev.map(x => '<li>' + esc(x) + '</li>').join('') + '</ul>' : '<p class="cap">TBD: the split by device has not been pulled yet. Desktop can drag a result down, so it is read next.</p>') + '</div>' : '') + '<div class="abfoot2">' + srcBtn('test:' + t.id) + '</div>');
+    '<div class="abwhat2"><h4 class="ph">🧪 What we are testing</h4><p>' + esc(t.hyp) + '</p>' + '</div>' + tbl + (R.wg ? '<div class="abwhat2"><h4 class="ph">📌 Working group, Nov 2</h4><ul class="hul nrul">' + R.wg.map(x => '<li>' + esc(x) + '</li>').join('') + '</ul></div>' : '') + (t.status === 'running' ? '<div class="abwhat2"><h4 class="ph">📱 Desktop vs mobile</h4>' + (R.dev ? '<ul class="hul nrul">' + R.dev.map(x => '<li>' + esc(x) + '</li>').join('') + '</ul>' : '<p class="cap">TBD: the split by device has not been pulled yet. Desktop can drag a result down, so it is read next.</p>') + '</div>' : '') + '<div class="abfoot2">' + srcBtn('test:' + t.id) + '</div>');
 }
 function testRow(t) {
   const site = siteImp(t.cvr.rel, t.reach), open = state.open.has('x' + t.id), r = Math.round(t.reach * 100);
