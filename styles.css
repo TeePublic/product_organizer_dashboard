@@ -3740,4 +3740,5 @@ details.pbox.prov > summary { cursor: pointer; list-style: none; } details.pbox.
 .basistog button { font: inherit; font-size: 13.5px; font-weight: 500; padding: 5px 14px; background: transparent; color: var(--muted); border: 0; border-radius: 7px; cursor: pointer; }
 .basistog button:hover { color: var(--ink); }
 .basistog button[aria-pressed="true"] { background: var(--surface); color: var(--ink); font-weight: 600; box-shadow: 0 1px 3px rgba(20, 20, 50, .18), 0 0 0 1px var(--line); }
-@media (max-width: 760px) { .basistog { margin-left: 0; width: 100%; } .basistog button { flex: 1; } 
+@media (max-width: 760px) { .basistog { margin-left: 0; width: 100%; } .basistog button { flex: 1; } .basiswrap { margin-left: 0; width: 100%; } }
+.abfilter .lbl + .segs + .lbl { margin-left: 8px; }
