@@ -2076,13 +2076,22 @@ function testModal(kind, i) {
 const abSiteOk = s => { const f = state.abSite || 'both'; if (f === 'both') return true; const c = /dashery|^da$/i.test(s || '') ? 'DA' : /tee|^tp$/i.test(s || '') ? 'TP' : /both/i.test(s || '') ? 'B' : 'RB'; return f === 'DA' ? c === 'DA' : (c === 'B' || c === f); };
 const tpDays = x => Math.round((parse(EXPS_AS_OF) - parse(x.start)) / DAY) + 1;
 function tpRow(x, i) {
-  const best = x.variants.reduce((m, v) => Math.max(m, v.conf || 0), 0), dash = '<span class="abtbd"><b>TBD</b><small>not in Split</small></span>';
+  const best = x.variants.reduce((m, v) => Math.max(m, v.conf || 0), 0), dash = '<span class="abtbd"><b>TBD</b><small>' + (x.statsig ? 'see test' : 'not in Split') + '</small></span>';
   const chip = best >= 95 ? '<span class="abst yes">Yes</span>' : '<span class="abst">' + (best >= 80 ? 'Not yet · ' + best + '%' : 'Not yet') + '</span>';
   const tip = best >= 95 ? 'At least 95% confidence of a true difference.' : best >= 80 ? 'The best version has ' + best + '% confidence. It needs 95%.' : 'No version is close to 95% yet.';
   return '<div class="rowwrap"><div class="trow abrow" role="button" tabindex="0" data-tpx="' + i + '"><span class="tname tnico"><span class="ge gico g-CVR" aria-hidden="true">' + projIco({ t: x.name, obj: 'CVR' }) + '</span><b>' + esc(x.name) + '</b><span class="cap tmeta">' + sitePill('TP') + '<span class="tloc">' + esc(x.where) + '</span></span></span><span class="abday"><b>Day ' + tpDays(x) + '</b><small>since ' + short(x.start) + '</small></span>' + chip + dash + dash + '<span class="abcall"><span class="abv2 v-' + x.call[0] + '">' + esc(x.call[1]) + '</span></span><span class="chev" aria-hidden="true">▾</span></div></div>';
 }
+function statsigModal(x) {
+  const g = x.statsig, d = v => '<span class="chn n">' + sgn(v, 1) + '</span>', row = m => '<tr><td>' + esc(m.name) + '</td><td>' + d(m.a) + ' <span class="cap">±' + (m.aw * 100).toFixed(1) + '%</span></td><td>' + d(m.b) + ' <span class="cap">±' + (m.bw * 100).toFixed(1) + '%</span></td></tr>';
+  const tbl = '<table class="abt tpv"><thead><tr><th>Metric vs control</th><th>Version A</th><th>Version B</th></tr></thead><tbody>' + g.metrics.map(row).join('') + '</tbody></table>';
+  openModal('<span class="tipsrc" hidden></span><div class="mhead"><h3 id="mtitle">' + esc(x.name) + '</h3></div><div class="mtags"><span class="rtag">' + siteDot('TP') + '</span><span class="rtag">' + esc(x.where) + '</span><span class="rtag">Day ' + tpDays(x) + ', since ' + short(x.start) + '</span><span class="abv2 v-' + x.call[0] + '">' + esc(x.call[1]) + '</span></div>' +
+    '<div class="abwhat2"><h4 class="ph">🧪 About this test</h4><p>One test with three groups: ' + esc(g.split) + '. ' + g.exposures + ' shoppers so far. Read from Statsig on ' + short(TPEXPS.asOf) + ', covering ' + short(x.start) + ' to ' + short(g.through) + '.</p></div>' + tbl +
+    '<div class="abwhat2"><h4 class="ph">📏 How to read it</h4><p>Each number is the change vs control, with its margin of error at ' + g.ci + '% confidence. When the margin is bigger than the change, we can\'t tell it from zero yet. Today that is true of every metric.</p></div>' +
+    '<div class="abfoot2"><a class="srclink" href="' + esc(g.url) + '" target="_blank" rel="noopener">Open in Statsig\u00a0↗</a> <a class="srclink" href="' + esc(g.portal) + '" target="_blank" rel="noopener">Beam partner portal\u00a0↗</a></div>');
+}
 function tpDetailModal(i) {
   const x = typeof TPEXPS !== 'undefined' ? TPEXPS.items[i] : null; if (!x) return;
+  if (x.statsig) return statsigModal(x);
   const rows = [{ n: 'Control', p: x.control.p, c: x.control.conv, rel: null }].concat(x.variants.map(v => ({ n: v.n, p: v.p, c: v.conv, rel: v.rel, conf: v.conf })));
   const mtip = 'This is still measured in an old Ruby gem, so we can\'t say which metric it is. Ask Jon or Mike. We\'ll pull these tests into Amplitude soon.', mh = t => hint(t + ' <span class="thi" aria-hidden="true">ⓘ</span>', 'thhint', mtip);
   const tbl = '<table class="abt tpv"><thead><tr><th>Version</th><th>Participants</th><th>' + mh('Metric') + '</th><th>' + mh('Metric change') + '</th><th>Confidence</th></tr></thead><tbody>' + rows.map(r => '<tr><td>' + esc(r.n) + '</td><td>' + int(r.p) + '</td><td>' + pct(r.c, r.c < 0.1 ? 2 : 1) + '</td><td>' + (r.rel == null ? '–' : '<span class="chn ' + (r.rel >= 0 ? 'b' : 'w') + '">' + sgn(r.rel, 1) + '</span>') + '</td><td>' + (r.rel == null ? '–' : r.conf ? r.conf + '% confidence' : 'Not enough yet') + '</td></tr>').join('') + '</tbody></table>';
@@ -2201,7 +2210,7 @@ const UPD = {
   'Search cluster migration': 'Traffic is off the old cluster and in a bake period; decommissioning slipped a week. About 11 new index tickets opened Oct 21 are still in backlog with the Nov 7 deadline close.',
   'Learn to Rank rerun': 'Model work is nearly done in Jira; the production rerun is next.',
   'Thank-you page upsell, 6 slots': 'Code is ready (PR up Oct 20); shipping this week.',
-  'Beam conversion test': 'Live in Statsig until about Nov 18; trending positively so far, but still very early (Oct 23).',
+  'Beam conversion test': 'Live in Statsig until about Nov 18. As of Nov 1 no metric has moved beyond its margin of error (Version A revenue +1.7% ±3.3%).',
   'Cart and cart-tray cross-sell': 'Live on TeePublic; Redbubble version (stickers, cart page only) is in final QA for Oct 27 to 28. Before launch: tracking for carousel adds and an API caching question. Runs as an A/B on cart-to-checkout CVR.',
   'Delivery-issue resolution queue': 'Code is up for review for the self-service flow and the agent queue (Oct 20 to 21); email templates are ready.',
   'Trucker hat fulfillment': 'Prices aren\'t final, but that doesn\'t block the fulfillment launch (it can start at baseball-cap prices). Packaging is settled.',
