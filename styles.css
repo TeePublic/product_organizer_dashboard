@@ -3756,3 +3756,11 @@ details.pbox.prov > summary { cursor: pointer; list-style: none; } details.pbox.
 .abbox td.na { color: var(--faint); }
 @media (max-width: 760px) { .abbox { overflow-x: auto; } .abbox th:first-child, .abbox td:first-child { min-width: 140px; } }
 .abbox .chn { font-weight: 600; } .abbox .chn.b { color: var(--good); } .abbox .chn.w { color: var(--bad); }
+
+/* Comparison-days picture inside an opened scorecard row (Mike, Nov 2) */
+.dcb { margin: 6px 0 16px; padding: 16px 20px 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
+.dcbt { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; margin-bottom: 4px; } .dcbt .lbl { font: 700 13px var(--body); }
+.dcbs { font-size: 14px; color: var(--ink-2); } .dcbs b.w { color: var(--bad); } .dcbs b.b { color: var(--good); }
+.dcbp { margin: 4px 0 10px; font-size: 14.5px; line-height: 1.5; color: var(--ink-2); max-width: none; }
+.dcb .cbars { display: block; } .dcb .cbars svg { width: 100%; height: auto; max-height: 230px; }
+

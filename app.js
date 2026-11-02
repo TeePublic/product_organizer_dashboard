@@ -1316,7 +1316,7 @@ function movedHtml0() {
     FLAGGED = flaggedFor(state.tab, state.day);
     // Drags first (below their normal range), then what lifted the day; two show, the rest sit behind "View N more" (Mike, Nov 2).
     // Each red pill says what its number is against: the day's value, the baseline value and the days averaged (Mike, Nov 2).
-    const flagTip = f => { const b = state.tab, d = state.day, c = cellsFor(f.m, d, compsFor(b, d)), bd = baseDays(b, d), e = infoNow(b, d).sale ? null : edgeOf(b, d), what = basisOn(b, d) ? lyPhrase(d) : e === 'before' || e === 'after' ? 'the day ' + e + ' each of the last ' + bd.length + ' sales' : cmpKind(b, d, bd.length);
+    const flagTip = f => { const b = state.tab, d = state.day, c = cellsFor(f.m, d, compsFor(b, d)), bd = baseDays(b, d), what = daysPhrase(b, d, bd);
       return '<b>' + esc(f.m.label) + ' ' + sgn(f.c.mom, 0) + ' vs ' + (basisOn(b, d) ? lyPhrase(d) : 'comparable days') + '</b><ul class="hul nrul"><li>📍 <b>' + short(d) + ':</b> ' + fmtVal(f.m, c.val) + '</li><li>📏 <b>Compared with:</b> ' + fmtVal(f.m, c.bsV) + ', the average of ' + bd.map(x => short(x)).join(', ') + '</li><li>🎯 <b>Those days are:</b> ' + esc(what) + '</li></ul>'; };
     const items = FLAGGED.map((f, i) => pill(f, i).replace('data-moved=', 'data-fl=').replace(/ data-hint="\d+"/, '').replace('<button class="mv"', '<button class="mv big" data-hint="' + (HINTS.push(flagTip(f)) - 1) + '"')).concat(LIFTS.map(lpill));
     return '<div class="moved inhead"><div class="mvlist">' + (items.length ? items.slice(0, state.flAll ? 99 : 2).join('') + (items.length > 2 ? '<button type="button" class="linkbtn mvmore" data-flmore="1">' + (state.flAll ? 'Show fewer' : 'View ' + (items.length - 2) + ' more') + '</button>' : '') : '<span class="cap">✅ Nothing is below its normal range today.</span>') + '</div></div>';
@@ -1756,6 +1756,17 @@ function detailRange(m) {
 }
 // Expanded row: the prior day, as context (it left the row, Mike, Oct 28). The comparable-days read is already on the row, so it isn't repeated here.
 function detailPrior(m) { const d = state.day, c = cellsFor(m, d, compsFor(m.b, d)); return c.pd == null ? '' : '<span class="dprior"><span class="lbl">vs prior day, ' + short(addDays(d, -1)) + '</span> <b>' + sgn(c.pd, 1) + '</b> <span class="cap">' + fmtVal(m, c.pdV) + ' → ' + fmtVal(m, c.val) + ', context only</span></span>'; }
+// What the comparison days are, in plain words (Mike, Nov 2).
+const daysPhrase = (b, d, bd) => { if (basisOn(b, d)) return lyPhrase(d); const e = infoNow(b, d).sale ? null : edgeOf(b, d); const st = infoNow(b, d), pk = st.sale ? posKey(st) : null, n = bd.length, PN = { first: 'the first day', last: 'the last day', last2: 'the second-to-last day', last3: 'the third-to-last day', mid: 'a middle day' };
+  if (pk) return PN[pk] + ' of each of the last ' + n + ' sales';
+  return e === 'before' || e === 'after' ? 'the day ' + e + ' each of the last ' + n + ' sales' : 'the last ' + n + ' ' + noSaleKind(b, d, n); };
+// A row's expansion opens with the same picture as the CVR card: the comparison days, their average, the normal range and the day itself.
+function cbBlock(m) {
+  const b = m.b, d = state.day, comps = compsFor(b, d), c = cellsFor(m, d, comps), bd = baseDays(b, d); if (c.bs == null || c.bsV == null || !bd.length) return '';
+  const r = nrOf(m, c.bs), tone = r ? (r.st === 'lo' ? 'bad' : r.st === 'hi' ? 'good' : null) : null, chart = cmpBars(m, bd, c.bsV, tone, r ? r.w : 0); if (!chart) return '';
+  const verdict = r ? (r.st === 'in' ? 'within' : r.st === 'hi' ? 'above' : 'below') + ' its normal range' : '';
+  return '<div class="dcb"><div class="dcbt"><span class="lbl">Against its comparison days</span><span class="dcbs"><b class="' + (tone === 'bad' ? 'w' : tone === 'good' ? 'b' : '') + '">' + sgn(c.bs, 0) + '</b> ' + esc(verdict) + '</span></div><p class="dcbp">' + esc(m.label) + ' was <b>' + fmtVal(m, c.val) + '</b> on ' + short(d) + ', against <b>' + fmtVal(m, c.bsV) + '</b> on average across ' + esc(daysPhrase(b, d, bd)) + (basisOn(b, d) ? '' : ' (' + bd.map(z => short(z)).join(', ') + ')') + '. The shaded band is its normal range.</p>' + chart + '</div>';
+}
 function detailHtml(m) {
   const sessOn = !state.sessOff.has(m.key), ob = BR[BR[m.b].other].name;
   const leg = '<div class="legend"><span><i class="sw" style="background:' + BR[m.b].color + '"></i>' + esc(m.axis) + '</span>' + (m.ly ? '<span><i class="sw dash"></i>Same weekday last year</span>' : '') + (sessOn ? '<span><i class="sw blk" style="background:var(--sess);opacity:.5"></i>Sessions per day</span>' : '') + '<span><i class="sw blk" style="background:' + BR[m.b].band + ';outline:1px solid ' + BR[m.b].strip + '"></i>Sale days</span></div>';
@@ -1765,7 +1776,7 @@ function detailHtml(m) {
   const gs = pg !== 'all' && m.pgeo && m.pgeo[pg] ? (m.pgeo[pg].s || []).filter(x => x != null).slice(-14).sort((x, y) => x - y) : [], thin = gs.length && gs[Math.floor(gs.length / 2)] < 100;
   return '<div class="devtop"><div class="devl"><div class="dhead"><div class="dtitle"><h4>' + em(m.label) + ' ' + esc(m.label) + ' <span>' + BR[m.b].name + (pg !== 'all' ? ', ' + (GN[pg] || pg) : '') + ', last 90 days</span></h4><p class="dsub">' + esc(defOf(m)) + (thin ? ' <b>Under 100 product-page viewers a day here, so daily swings are mostly noise.</b>' : '') + '</p></div><div class="dbtns">' + geoTog +
     (m.sess && !m.isSess ? '<button type="button" class="swtog" role="switch" data-sesstog="' + esc(m.key) + '" aria-checked="' + sessOn + '"><span class="trk"><span class="knb"></span></span>Sessions</button>' : '') +
-    '<button type="button" class="actbtn" data-cmp="' + esc(m.key) + '" data-from="' + m.b + '">👀 Compare with ' + ob + '</button>' + detailPrior(m) + '</div></div></div>' + sibHtml(m) + '</div>' + leg +
+    '<button type="button" class="actbtn" data-cmp="' + esc(m.key) + '" data-from="' + m.b + '">👀 Compare with ' + ob + '</button>' + detailPrior(m) + '</div></div></div>' + sibHtml(m) + '</div>' + cbBlock(m) + leg +
     '<div class="chart" data-chart="' + esc(m.key) + '"></div>' + '<div class="tbox">' + metricTable(m) + '</div>';
 }
 /* table cells are only red or green: better or worse than usual */
