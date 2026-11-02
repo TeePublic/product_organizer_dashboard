@@ -3742,5 +3742,17 @@ details.pbox.prov > summary { cursor: pointer; list-style: none; } details.pbox.
 .basistog button[aria-pressed="true"] { background: var(--surface); color: var(--ink); font-weight: 600; box-shadow: 0 1px 3px rgba(20, 20, 50, .18), 0 0 0 1px var(--line); }
 @media (max-width: 760px) { .basistog { margin-left: 0; width: 100%; } .basistog button { flex: 1; } .basiswrap { margin-left: 0; width: 100%; } }
 
-.abt th { white-space: nowrap; }
-.modal .abt th, .modal .abt td { padding-left: 10px; padding-right: 10px; }
+/* Opened test: all users, desktop and mobile as three matching tables (Mike, Nov 2) */
+.mbox:has(.abtab) { width: min(980px, 94vw); max-width: none; }
+.abtab { margin-top: 22px; }
+.abtab h4.ph { display: flex; align-items: baseline; gap: 10px; margin: 0 0 10px; font-size: 15px; }
+.abtab .abn { font-size: 12.5px; font-weight: 500; }
+.abbox { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--surface); }
+.abbox table { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+.abbox th { background: var(--sunk); padding: 11px 18px !important; font-size: 11.5px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); font-weight: 700; white-space: nowrap; text-align: left; }
+.abbox td { padding: 13px 18px !important; border-top: 1px solid var(--line); vertical-align: top; text-align: left; }
+.abbox th:first-child, .abbox td:first-child { padding-left: 24px !important; min-width: 190px; }
+.abbox td small { display: block; margin-top: 3px; font-size: 12px; font-weight: 400; color: var(--muted); }
+.abbox td.na { color: var(--faint); }
+@media (max-width: 760px) { .abbox { overflow-x: auto; } .abbox th:first-child, .abbox td:first-child { min-width: 140px; } }
+.abbox .chn { font-weight: 600; } .abbox .chn.b { color: var(--good); } .abbox .chn.w { color: var(--bad); }
