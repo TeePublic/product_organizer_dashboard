@@ -3094,7 +3094,7 @@ b.nrin { color: var(--ctl); } b.nrhi { color: var(--good); } b.nrlo { color: var
 .ngrp { padding: 0 !important; gap: 0 !important; overflow: hidden; }
 #tabs button { padding-block: 9px !important; border-radius: 9px; }
 #tabs button[aria-selected="true"] { color: var(--ink); font-weight: 700; }
-#navpill { border-radius: 9px !important; background: color-mix(in srgb, var(--c, var(--accent)) 17%, transparent) !important; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--c, var(--accent)) 34%, transparent), inset 0 -2px 0 color-mix(in srgb, var(--c, var(--accent)) 70%, transparent) !important; transition: transform .45s cubic-bezier(.5, 1.6, .4, 1), width .45s cubic-bezier(.5, 1.6, .4, 1), height .2s, opacity .2s, background-color .3s !important; }
+#navpill { border-radius: 9px !important; background: color-mix(in srgb, var(--c, var(--accent)) 17%, transparent) !important; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--c, var(--accent)) 34%, transparent), inset 0 -2px 0 color-mix(in srgb, var(--c, var(--accent)) 70%, transparent) !important; transition: transform .38s cubic-bezier(.4, 1.1, .5, 1), opacity .2s, background-color .3s !important; will-change: transform; }
 /* ===== end NAV fill ===== */
 /* No orphan words on a headline's last line (Mike, Oct 27). */
 :root .wrap .sulead, :root .wrap .rmlead { text-wrap: pretty !important; }
@@ -3220,8 +3220,8 @@ a.pvwhere { color: var(--ctl); text-decoration: underline; text-underline-offset
 /* Halfway between the centered and baseline positions (Mike, Oct 28) */
 .gnt > b .srcbtn, .rmt .srcbtn, .irow b .srcbtn, .tname b .srcbtn { position: relative !important; top: -0.5px !important; }
 /* Peer fact in a driver pill jumps to its section (Mike, Oct 28) */
-.mv .rf[data-jumpsec] { cursor: pointer; text-decoration: underline dotted; text-underline-offset: 3px; }
-.mv .rf[data-jumpsec]:hover { color: var(--ctl); text-decoration-style: solid; }
+.mv .rf[data-jumpsec] { cursor: pointer; text-decoration: none; }
+.mv .rf[data-jumpsec]:hover { color: var(--ctl); }
 /* Thin baseline note in the driver pop-up (Mike, Oct 28) */
 .mvfacts .thinb { display: block; margin-top: 2px; font-size: 12.5px; color: var(--muted); }
 /* Timeline: solid up to today, faded after it; a projected slip is hatched red, not a third color (Mike, Oct 28) */
@@ -3314,9 +3314,9 @@ a.pvwhere { color: var(--ctl); text-decoration: underline; text-underline-offset
 .mbox .tipsrcbox a { color: var(--ctl); font-weight: 600; text-decoration: none; } .mbox .tipsrcbox a:hover { text-decoration: underline; }
 .gpill.gflag { background: color-mix(in srgb, #f5c518 22%, var(--surface)); border-color: color-mix(in srgb, #c99a00 45%, var(--surface)); font-weight: 600; cursor: default; }
 /* Payment brand-adjacent colors (Allison, Oct 28) */
-:root { --pay-card: #c3c8d0; --pay-apple: #1d1d1f; --pay-apple-ink: #fff; --pay-apple2: #55555a; --pay-google: #4285f4; --pay-paypal: #003087; --pay-paypal-ink: #fff; --pay-klarna: #ffb3c7; }
+:root { --pay-card: #e3a33a; --pay-apple: #1d1d1f; --pay-apple-ink: #fff; --pay-apple2: #55555a; --pay-google: #4285f4; --pay-paypal: #003087; --pay-paypal-ink: #fff; --pay-klarna: #ffb3c7; }
 /* The page picks its theme with a class (th-dark, th-noir, ...), not the OS setting, so the dark values follow those classes. */
-:root:not(#z):not(#y).th-dark, :root:not(#z):not(#y).th-noir, :root:not(#z):not(#y).th-spooky, :root:not(#z):not(#y).matrix { --pay-card: #6b7280; --pay-apple2: #a1a1a6; --pay-apple: #f5f5f7; --pay-apple-ink: #1d1d1f; --pay-paypal: #ffc439; --pay-paypal-ink: #1d1d1f; }
+:root:not(#z):not(#y).th-dark, :root:not(#z):not(#y).th-noir, :root:not(#z):not(#y).th-spooky, :root:not(#z):not(#y).matrix { --pay-card: #e3a33a; --pay-apple2: #a1a1a6; --pay-apple: #f5f5f7; --pay-apple-ink: #1d1d1f; --pay-paypal: #009cde; --pay-paypal-ink: #1d1d1f; }
 .donut .slab { font: 700 8.5px var(--body, system-ui); pointer-events: none; letter-spacing: .01em; }
 /* Overview card (Allison and Mike, Oct 28): one wide card holds the day's read and its chart; last year sits beside it */
 :root:not(#z) .keys.kov { grid-template-columns: minmax(0, 2.6fr) minmax(0, 1fr); }
@@ -3374,9 +3374,368 @@ a.pvwhere { color: var(--ctl); text-decoration: underline; text-underline-offset
 .bfdd .bfitem:hover { background: var(--sunk); }
 .bfdd .bfdef { font-weight: 500; color: var(--muted); font-size: 11.5px; margin-left: 4px; }
 /* Ripple halos that fade out, smaller (Mike, Oct 28: "dissipate out, dissipate out") */
-:root:not(#z) .cmpglow { fill: none !important; stroke: var(--ctl); stroke-width: 2; opacity: 0; transform-box: fill-box; transform-origin: center; animation: cmpRipple 2.4s ease-out infinite !important; }
+:root:not(#z) .cmpglow { transform-box: fill-box; transform-origin: center; animation: cmpRipple 2.4s ease-out infinite !important; }
 :root:not(#z) .cmpglow.g2 { animation-delay: 1.2s !important; }
 @keyframes cmpRipple { 0% { transform: scale(.8); opacity: .55; } 100% { transform: scale(2.4); opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { :root:not(#z) .cmpglow { animation: none !important; opacity: .35; } }
 .tchart .hint.tdot { fill: transparent; cursor: pointer; border: 0 !important; }
 .key.hero.kwide .kexp { display: block; margin-top: 3px; font-size: 13px; color: var(--muted); line-height: 1.45; }
+/* Scorecard without the prior-day column (Mike, Oct 28) */
+:root:not(#z) .colhead, :root:not(#z) .row { grid-template-columns: minmax(170px, 1.5fr) 84px 196px 112px 104px 112px 128px 20px !important; }
+:root:not(#z) .score.nly .colhead, :root:not(#z) .score.nly .row { grid-template-columns: minmax(170px, 1.6fr) 84px 196px 112px 112px 128px 20px !important; }
+@media (max-width: 1250px) and (min-width: 761px) { :root:not(#z) .colhead, :root:not(#z) .row { grid-template-columns: minmax(130px, 1.3fr) 72px 170px 92px 88px 92px 112px 18px !important; } :root:not(#z) .score.nly .colhead, :root:not(#z) .score.nly .row { grid-template-columns: minmax(130px, 1.4fr) 72px 170px 92px 92px 112px 18px !important; } }
+@media (max-width: 760px) { :root:not(#z) .colhead, :root:not(#z) .row, :root:not(#z) .score.nly .row { grid-template-columns: 1fr auto !important; } }
+.dprior { display: inline-flex; align-items: baseline; gap: 6px; font-size: 13px; padding: 4px 10px; border-radius: 8px; background: var(--sunk); }
+.dprior .lbl { font-size: 12px; color: var(--muted); }
+/* No dotted underline on hover numbers inside scorecard rows (Mike, Oct 28) */
+:root:not(#z) .row .hint, :root:not(#z) .row .hint.verd { border-bottom: 0 !important; text-decoration: none !important; }
+/* Overview card fixes (Mike, Oct 28) */
+.key.hero.kwide .kleft .nrpanel { padding-top: 14px !important; padding-bottom: 14px !important; margin: 14px 0 16px !important; }
+.key.hero.kwide .kmore { align-self: flex-start; margin-top: 10px; font-size: 13px; }
+.tckey { margin-top: 10px !important; }
+:root:not(#z) .tchart .tcband { fill: color-mix(in srgb, var(--ctl) 10%, transparent); stroke: none; }
+.tchart .tcbl { stroke: color-mix(in srgb, var(--ctl) 45%, transparent); stroke-width: 1; stroke-dasharray: 3 3; }
+@keyframes cmpRipple { 0% { transform: scale(.85); opacity: .55; } 100% { transform: scale(1.7); opacity: 0; } }
+/* Sale days: one warm yellow everywhere (red is the code freeze) (Mike, Oct 28) */
+:root { --sale-tint: rgba(240, 180, 30, .13); --sale-strip: #e8b23a; --sale-edge: rgba(200, 145, 10, .45); }
+/* The range bar's dot pulses like the chart's dots */
+:root:not(#z) .nrh .nrdot::after { content: ""; position: absolute; inset: -1.5px; border-radius: 50%; background: inherit; animation: dotRipple 2.4s ease-out infinite; opacity: 0; z-index: -1; }
+@keyframes dotRipple { 0% { transform: scale(.85); opacity: .55; } 100% { transform: scale(1.9); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { :root:not(#z) .nrh .nrdot::after { animation: none; } }
+/* The range box: room inside, verdict first */
+:root:not(#z) .nrpanel { padding: 14px 16px 12px !important; }
+:root:not(#z) .nrpanel .nrp2 { display: block; margin-bottom: 6px; }
+:root:not(#z) .nrpanel .nrp1 { display: block; margin-bottom: 6px; }
+/* A fresher sessions green (Mike, Oct 28: "a more attractive green") */
+:root { --sess: #2fb57f !important; }
+/* Sale pill in the header, next to the logo (Mike, Oct 28) */
+.hsale { align-self: center; justify-self: start; margin-left: 14px; font-size: 13.5px; font-weight: 700; padding: 5px 12px; border-radius: 999px; background: color-mix(in srgb, var(--accent) 12%, var(--surface)); color: var(--accent); border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--surface)); white-space: nowrap; }
+.hsale.off { background: var(--sunk); color: var(--muted); border-color: var(--line); font-weight: 600; }
+/* More room between the ticker and the page headline, on every page (Mike, Oct 28) */
+:root:not(#z) .wrap { padding-top: 40px !important; }
+/* 90-day chart: room around the controls and legend (Mike, Oct 28) */
+:root:not(#z) .cvrchart .cchead { margin-bottom: 14px; gap: 14px; }
+:root:not(#z) .cvrchart .ccctl { gap: 12px; align-items: center; }
+:root:not(#z) .cvrchart .ckey { gap: 8px 22px; margin: 4px 0 16px; }
+:root:not(#z) .cvrchart .chart { padding-top: 6px; }
+/* Top chart, full version: room for the key above (Mike, Oct 28) */
+.tchart.tcfull .tckey { margin: 0 0 8px !important; }
+/* 90-day chart: inner padding so CVR, Sessions per day and the dates don't touch the card edges (Mike, Oct 28) */
+:root:not(#z) .cvrchart .chart { padding: 18px 22px 14px !important; box-sizing: border-box; }
+.bfwrap { display: flex; align-items: center; gap: 8px; }
+.bfwrap .bftitle { font-size: 12px; font-weight: 600; color: var(--muted); }
+.nrtip .tipsub { display: block; margin-top: 3px; font-size: 12.5px; color: var(--muted); }
+.tckey .tk-sess { border-radius: 2px; width: 12px; height: 8px; background: var(--sess); opacity: .45; }
+/* Sale pill in Articore indigo and coral (Mike, Oct 28) */
+:root:not(#z) .hsale { display: inline-flex; align-items: center; gap: 0; padding: 0; overflow: hidden; border-radius: 999px; background: #1c174d; color: #fff; border: 0; font-size: 13px; font-weight: 600; box-shadow: 0 2px 10px rgba(28, 23, 77, .18); }
+:root:not(#z) .hsale .hsk { align-self: stretch; display: inline-flex; align-items: center; padding: 0 11px; background: #f0586c; color: #fff; font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+:root:not(#z) .hsale .hsv { padding: 6px 10px 6px 12px; font-weight: 700; }
+:root:not(#z) .hsale .hss { color: #f0586c; margin-right: 6px; font-weight: 800; }
+:root:not(#z) .hsale .hsd { display: inline-flex; align-items: center; gap: 8px; padding: 6px 13px 6px 10px; border-left: 1px solid rgba(255, 255, 255, .18); color: rgba(255, 255, 255, .85); font-weight: 500; }
+:root:not(#z) .hsale .hsdots { display: inline-flex; gap: 3px; }
+:root:not(#z) .hsale .hsdots i { width: 6px; height: 6px; border-radius: 50%; background: rgba(255, 255, 255, .25); }
+:root:not(#z) .hsale .hsdots i.on { background: #f0586c; }
+:root:not(#z) .hsale .hsep { width: 1px; align-self: stretch; background: rgba(255, 255, 255, .25); }
+:root:not(#z) .hsale.off { background: var(--sunk); color: var(--muted); box-shadow: none; border: 1px solid var(--line); padding: 5px 12px; }
+/* Scorecard columns rebalanced (Mike, Oct 28): narrower name, room for the day's value, a tighter comparable-days column, space before sessions, sessions wide enough for one line */
+:root:not(#z) .colhead, :root:not(#z) .row { grid-template-columns: minmax(140px, 1fr) 112px 176px 136px 104px 200px 150px 20px !important; gap: 0 26px !important; }
+:root:not(#z) .score.nly .colhead, :root:not(#z) .score.nly .row { grid-template-columns: minmax(140px, 1fr) 112px 176px 136px 200px 150px 20px !important; }
+@media (max-width: 1250px) and (min-width: 761px) { :root:not(#z) .colhead, :root:not(#z) .row { grid-template-columns: minmax(120px, 1fr) 96px 160px 110px 88px 170px 120px 18px !important; gap: 0 16px !important; } :root:not(#z) .score.nly .colhead, :root:not(#z) .score.nly .row { grid-template-columns: minmax(120px, 1fr) 96px 160px 110px 170px 120px 18px !important; } }
+:root:not(#z) .row .ss .cap, :root:not(#z) .row .ss .surge { white-space: nowrap; }
+/* Back to the soft pulse: a filled blue halo breathing around the dot (Mike, Oct 28: the ripple was aggressive) */
+:root:not(#z) .cmpglow { fill: color-mix(in srgb, var(--ctl) 24%, transparent); stroke: none !important; opacity: 1; transform-box: fill-box; transform-origin: center; animation: cmpPulse 3s ease-in-out infinite !important; }
+:root:not(#z) .cmpglow.g2 { display: none; }
+@keyframes cmpPulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.35); opacity: .55; } }
+:root:not(#z) .nrh .nrdot::after { inset: -4px; opacity: .3; animation: dotPulse 3s ease-in-out infinite; }
+@keyframes dotPulse { 0%, 100% { transform: scale(1); opacity: .3; } 50% { transform: scale(1.4); opacity: .12; } }
+/* Sale pill in the page's own pill style: a line around a dimmed inside, theme-aware, in Articore's indigo and coral tokens (Mike, Oct 28) */
+:root:not(#z) .hsale { background: color-mix(in srgb, var(--art) 7%, var(--surface)); color: var(--art); border: 1px solid color-mix(in srgb, var(--art) 30%, var(--surface)); box-shadow: none; }
+:root:not(#z) .hsale .hsk { background: color-mix(in srgb, var(--art-2, #f0586c) 16%, transparent); color: var(--art-2, #d8445a); border-right: 1px solid color-mix(in srgb, var(--art-2, #f0586c) 35%, transparent); }
+:root:not(#z) .hsale .hss { color: var(--art-2, #d8445a); }
+:root:not(#z) .hsale .hsd { color: color-mix(in srgb, var(--art) 75%, var(--surface)); border-left: 1px solid color-mix(in srgb, var(--art) 20%, var(--surface)); }
+:root:not(#z) .hsale .hsdots i { background: color-mix(in srgb, var(--art) 18%, var(--surface)); }
+:root:not(#z) .hsale .hsdots i.on { background: var(--art-2, #f0586c); }
+:root:not(#z) .hsale .hsep { background: color-mix(in srgb, var(--art) 20%, var(--surface)); }
+:root:not(#z):not(#y).th-dark .hsale, :root:not(#z):not(#y).th-noir .hsale, :root:not(#z):not(#y).th-spooky .hsale, :root:not(#z):not(#y).matrix .hsale { --art: #b9b3f7; --art-2: #f47a8a; }
+/* Dots: solid blue circle with a soft pulsing halo, no white ring (Mike, Oct 28) */
+.tchart .hint.tdot { fill: transparent; }
+.tchart .hint.tdot:hover { fill: color-mix(in srgb, var(--ctl) 8%, transparent); }
+/* More room inside the range box (Mike, Oct 28) */
+:root:not(#z) .key.hero.kwide .kleft .nrpanel, :root:not(#z) .nrpanel { padding: 18px 22px 16px !important; }
+/* Sale pill, third pass: more Articore indigo, theme-aware (Mike, Oct 28) */
+:root { --sale-ink: #1c174d; --sale-on: #ffffff; --sale-coral: #f0586c; }
+:root:not(#z):not(#y).th-dark, :root:not(#z):not(#y).th-noir, :root:not(#z):not(#y).th-spooky, :root:not(#z):not(#y).matrix { --sale-ink: #b9b3f7; --sale-on: #141126; --sale-coral: #f47a8a; }
+:root:not(#z):not(#y) .hsale { display: inline-flex; align-items: stretch; padding: 0; overflow: hidden; border-radius: 999px; font-size: 13px; font-weight: 600; background: color-mix(in srgb, var(--sale-ink) 8%, var(--surface)); color: var(--sale-ink); border: 1.5px solid var(--sale-ink); box-shadow: none; }
+:root:not(#z):not(#y) .hsale .hsk { display: inline-flex; align-items: center; padding: 0 12px; background: var(--sale-ink); color: var(--sale-on); font-size: 11px; font-weight: 800; letter-spacing: .09em; text-transform: uppercase; border: 0; }
+:root:not(#z):not(#y) .hsale .hsk::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--sale-coral); margin-right: 7px; }
+:root:not(#z):not(#y) .hsale .hsv { display: inline-flex; align-items: center; gap: 8px; padding: 5px 12px; font-weight: 800; color: var(--sale-ink); }
+:root:not(#z):not(#y) .hsale .hsdate { font-weight: 500; font-size: 12px; color: color-mix(in srgb, var(--sale-ink) 60%, var(--surface)); }
+:root:not(#z):not(#y) .hsale .hsd { display: inline-flex; align-items: center; gap: 7px; padding: 5px 13px 5px 11px; border-left: 1px solid color-mix(in srgb, var(--sale-ink) 25%, var(--surface)); color: var(--sale-ink); font-weight: 600; }
+:root:not(#z):not(#y) .hsale .hsdots i { width: 6px; height: 6px; border-radius: 50%; background: color-mix(in srgb, var(--sale-ink) 18%, var(--surface)); }
+:root:not(#z):not(#y) .hsale .hsdots i.on { background: var(--sale-coral); }
+:root:not(#z):not(#y) .hsale.off { padding: 5px 13px; gap: 8px; align-items: center; border: 1px solid var(--line); background: var(--sunk); color: var(--muted); font-weight: 600; }
+/* Range box: generous inside padding (Mike, Oct 28: "still not enough internal padding") */
+:root:not(#z):not(#y) .key.hero.kwide .kleft .nrpanel, :root:not(#z):not(#y) .nrpanel { padding: 26px 32px 22px !important; border-radius: 14px; }
+:root:not(#z):not(#y) .nrpanel .nrp2 { margin-bottom: 12px !important; }
+:root:not(#z):not(#y) .nrpanel .nrp1 { margin-bottom: 12px !important; }
+/* Range box, redesigned (Mike, Oct 28) */
+.nrbox { margin: 14px 0 18px; padding: 22px 26px 18px; border-radius: 14px; background: color-mix(in srgb, var(--ctl) 7%, var(--surface)); }
+.nrbox.nrhi { background: var(--good-bg); } .nrbox.nrlo { background: var(--bad-bg); }
+.nrbox .nrtop { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
+.nrbox .nrchg { font-size: 15px; color: var(--muted); }
+.nrbox .nrchg b { font-size: 24px; font-weight: 800; margin-right: 6px; letter-spacing: -.01em; }
+.nrbox .nrchg b.tin { color: var(--ctl); } .nrbox .nrchg b.thi { color: var(--good); } .nrbox .nrchg b.tlo { color: var(--bad); }
+.nrbox .nrbadge { font-size: 12.5px; font-weight: 700; padding: 4px 11px; border-radius: 999px; border: 1px solid; }
+.nrbox .nrbadge.bin { color: var(--ctl); border-color: color-mix(in srgb, var(--ctl) 40%, transparent); background: color-mix(in srgb, var(--ctl) 8%, var(--surface)); }
+.nrbox .nrbadge.bhi { color: var(--good); border-color: color-mix(in srgb, var(--good) 40%, transparent); background: color-mix(in srgb, var(--good) 8%, var(--surface)); }
+.nrbox .nrbadge.blo { color: var(--bad); border-color: color-mix(in srgb, var(--bad) 40%, transparent); background: color-mix(in srgb, var(--bad) 8%, var(--surface)); }
+.nrbox .nbtrack { position: relative; height: 26px; border-radius: 13px; background: color-mix(in srgb, var(--ink) 6%, var(--surface)); }
+.nrbox .nbband { position: absolute; left: 25%; right: 25%; top: 0; bottom: 0; border-radius: 13px; background: color-mix(in srgb, var(--ctl) 20%, var(--surface)); border: 1px solid color-mix(in srgb, var(--ctl) 40%, transparent); display: flex; align-items: center; justify-content: center; }
+.nrbox .nbbl { font-size: 11px; font-weight: 700; letter-spacing: .02em; color: color-mix(in srgb, var(--ctl) 85%, var(--ink)); }
+.nrbox .nbzero { position: absolute; left: 50%; top: 4px; bottom: 4px; width: 1.5px; background: color-mix(in srgb, var(--ctl) 55%, transparent); }
+.nrbox .nbpt { position: absolute; top: 50%; width: 16px; height: 16px; margin: -8px 0 0 -8px; border-radius: 50%; background: var(--ctl); box-shadow: 0 0 0 3px var(--surface); }
+.nrbox .nbpt.thi { background: var(--good); } .nrbox .nbpt.tlo { background: var(--bad); }
+.nrbox .nbpt::after { content: ""; position: absolute; inset: -5px; border-radius: 50%; background: inherit; opacity: .25; animation: dotPulse 3s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .nrbox .nbpt::after { animation: none; } }
+.nrbox .nbticks { position: relative; height: 18px; margin-top: 6px; font-size: 11.5px; color: var(--muted); }
+.nrbox .nbticks span { position: absolute; transform: translateX(-50%); }
+/* Sale pill, a notch quieter (Mike, Oct 28: "slightly less attention drawing") */
+:root:not(#z):not(#y) .hsale { border-width: 1px; border-color: color-mix(in srgb, var(--sale-ink) 45%, var(--surface)); background: color-mix(in srgb, var(--sale-ink) 5%, var(--surface)); font-size: 12.5px; }
+:root:not(#z):not(#y) .hsale .hsk { background: color-mix(in srgb, var(--sale-ink) 88%, var(--surface)); font-size: 10.5px; padding: 0 10px; }
+:root:not(#z):not(#y) .hsale .hsk::before { width: 5px; height: 5px; margin-right: 6px; }
+:root:not(#z):not(#y) .hsale .hsv { font-weight: 700; padding: 4px 11px; }
+:root:not(#z):not(#y) .hsale .hsd { font-weight: 500; padding: 4px 12px 4px 10px; }
+:root:not(#z):not(#y) .hsale .hsdots { gap: 2.5px; }
+:root:not(#z):not(#y) .hsale .hsdots i { width: 5px; height: 5px; }
+:root:not(#z):not(#y) .hsale .hsdots i.on { background: color-mix(in srgb, var(--sale-coral) 85%, var(--surface)); }
+#hsale { align-self: center; margin-left: 14px; }
+#hsale .hsale { margin: 0; }
+.vsalew.vsale2 { margin: 0 0 12px; }
+/* Sale pill above the headline: Articore indigo, not the site color, so a sale never reads as bad on Redbubble's red (Mike, Oct 28) */
+:root:not(#z):not(#y) .vsalew .vsale:not(.off) { background: color-mix(in srgb, var(--sale-ink) 7%, var(--surface)) !important; color: var(--sale-ink) !important; border: 1px solid color-mix(in srgb, var(--sale-ink) 32%, var(--surface)) !important; }
+/* Range bar, evolved for the elevated range box (Mike, Oct 28: same visual as everywhere else, just bigger and with a bit more to it). Same parts: track, band, zero tick, dot, edge labels. */
+:root:not(#z):not(#y) .nrpanel .nrh { height: 30px; margin-top: 6px; }
+:root:not(#z):not(#y) .nrpanel .nrtrack { top: 14px; height: 2px; border-radius: 1px; background: color-mix(in srgb, var(--ctl) 18%, var(--line-2)); }
+:root:not(#z):not(#y) .nrpanel .nrband { top: 3px; height: 24px; border-radius: 12px; background: linear-gradient(90deg, color-mix(in srgb, var(--ctl) 10%, transparent), color-mix(in srgb, var(--ctl) 24%, transparent) 50%, color-mix(in srgb, var(--ctl) 10%, transparent)); box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--ctl) 50%, transparent), 0 1px 6px color-mix(in srgb, var(--ctl) 14%, transparent); }
+:root:not(#z):not(#y) .nrpanel .nrzero { top: -1px; height: 32px; width: 2px; margin-left: -1px; border-radius: 1px; background: color-mix(in srgb, var(--ctl) 60%, transparent); }
+:root:not(#z):not(#y) .nrpanel .nrdot { top: 0.5px; width: 24px; height: 24px; margin-left: -14.5px; border: 2.5px solid var(--surface); box-shadow: 0 2px 8px rgb(0 0 0 / 22%); z-index: 1; }
+:root:not(#z):not(#y) .nrpanel .nrdot::after { inset: -7px; } /* dot (29px with its ring) is slightly wider than the 24px band (Mike, Oct 28) */
+:root:not(#z):not(#y) .nrpanel .nrhl { height: 18px; margin-top: 6px; font: 700 12.5px var(--body); }
+/* Sale tag at the top of the comparable-days hover, same indigo as the sale pill (Mike, Oct 28) */
+.tiptag { display: inline-flex; align-self: flex-start; width: fit-content; margin: 6px 0 2px; padding: 3px 10px; border-radius: 999px; font: 600 12px var(--body); background: color-mix(in srgb, var(--sale-ink) 7%, var(--surface)); color: var(--sale-ink); border: 1px solid color-mix(in srgb, var(--sale-ink) 32%, var(--surface)); }
+.tiptag.off { background: var(--sunk); color: var(--muted); border-color: var(--line); }
+.nrtip .tiptag + .tipv { margin-top: 6px; }
+/* Overview comparison bars (Mike, Oct 28) */
+.cbars .cbv { font: 600 11.5px var(--body); fill: var(--muted); }
+.cbars .cbt { font-weight: 800; fill: var(--ink); }
+.cbars .cbv.cbt { font-size: 13px; }
+.cbars .cbavg { stroke: var(--ctl); stroke-width: 1.5; stroke-dasharray: 1 3.5; stroke-linecap: round; }
+.cbars .cbsep { stroke: var(--line-2); stroke-width: 1; stroke-dasharray: 3 3; }
+.tckey .tk-cbar { display: inline-block; width: 10px; height: 10px; border-radius: 2px; background: color-mix(in srgb, var(--ctl) 55%, var(--surface)); }
+.tckey .tk-avg { display: inline-block; width: 16px; height: 0; border-top: 2px dotted var(--ctl); vertical-align: middle; }
+/* 90-day chart: Sources inside the chart box, bottom left (Mike, Oct 28). The box styling moves from .chart to its wrapper. */
+:root:not(#z):not(#y) .cvrchart .ccbox { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px 22px 16px; }
+:root:not(#z):not(#y) .cvrchart .ccbox .chart { border: 0 !important; border-radius: 0; padding: 0 !important; background: none; }
+:root:not(#z):not(#y) .cvrchart .ccbox .csrc { margin-top: 10px; padding-left: 2px; }
+/* Sale pill: violet, a little stronger than the quiet indigo (Mike, Oct 28). Not red, green or yellow, so it never reads as good or bad. */
+:root { --promo-ink: #5b21b6; --promo-bg: #ede4fd; --promo-line: #b9a1ef; }
+:root:not(#z):not(#y).th-dark, :root:not(#z):not(#y).th-noir, :root:not(#z):not(#y).th-spooky, :root:not(#z):not(#y).matrix { --promo-ink: #d4c2ff; --promo-bg: #2c2147; --promo-line: #6a55a8; }
+:root:not(#z):not(#y) .vsalew .vsale:not(.off), .tiptag:not(.off) { background: var(--promo-bg) !important; color: var(--promo-ink) !important; border: 1.5px solid var(--promo-line) !important; font-weight: 700; }
+.segbtn { display: block; margin-top: 8px; padding: 0; border: 0; background: none; font: 600 13px var(--body); color: var(--ctl); cursor: pointer; text-align: left; } .segbtn:hover { text-decoration: underline; }
+.ghead .gacts { display: flex; align-items: flex-start; gap: 18px; flex-wrap: wrap; justify-content: flex-end; }
+.ghead .gsrc { text-align: right; } .ghead .gsrc .tipsrcbox { text-align: left; max-width: 520px; margin-top: 6px; font-size: 12.5px; }
+.ghead .gsrc .srcbtn { padding: 0; border: 0; background: none; color: var(--ctl); font: 600 12.5px var(--body); cursor: pointer; }
+/* A/B tests: one column per exec question (Sam, standup Oct 30) */
+:root:not(#z):not(#y) .abcols, :root:not(#z):not(#y) .abrow { grid-template-columns: minmax(240px, 1.28fr) 92px 150px 142px 142px minmax(170px, 1fr) 18px; gap: 0 14px; }
+.abm { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; border-bottom: 0 !important; }
+.abm.na { color: var(--faint); }
+.abv { font: 700 15.5px var(--body); color: var(--ink); white-space: nowrap; }
+.abv.b { color: var(--good); } .abv.w { color: var(--bad); } .abv.ns { color: var(--muted); font-weight: 600; }
+.abgoal { font-style: normal; font-size: 12px; margin-right: 3px; }
+.abs { font: 600 11px var(--body); color: var(--faint); white-space: nowrap; }
+.abs.sig { color: var(--good); }
+.abday { display: flex; flex-direction: column; gap: 1px; } .abday b { font-size: 14px; } .abday small { font-size: 11.5px; color: var(--muted); }
+.abcall { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; min-width: 0; }
+.abcall small { font-size: 12px; color: var(--muted); line-height: 1.35; }
+.abv2 { font: 600 12px var(--body); padding: 2px 9px; border-radius: 99px; background: var(--sunk); color: var(--muted); white-space: nowrap; }
+.abv2.v-lean, .abv2.v-ship { background: var(--good-bg); color: var(--good); }
+.abv2.v-mixed { background: color-mix(in srgb, var(--ctl) 12%, var(--surface)); color: var(--ctl); }
+.abkey { margin: 2px 0 8px; font-size: 13px; color: var(--muted); }
+.abkey .abv { font-size: 13px; }
+.abans { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px 20px; padding: 14px 16px; margin-bottom: 14px; border-radius: 10px; background: var(--sunk); }
+.abans > div { display: flex; flex-direction: column; gap: 2px; } .abans .lbl { font-size: 12px; color: var(--muted); } .abans b { font-size: 14px; }
+.abvr { margin-bottom: 14px; overflow-x: auto; } .abvr table { border-collapse: collapse; font-size: 13.5px; } .abvr th, .abvr td { padding: 5px 14px 5px 0; text-align: left; white-space: nowrap; }
+.abvr th { font-size: 12px; color: var(--muted); font-weight: 600; } .abvr td.b { color: var(--good); font-weight: 700; } .abvr td.w { color: var(--bad); font-weight: 700; } .abvr td.ns, .abvr td.na { color: var(--muted); }
+@media (min-width: 761px) and (max-width: 1240px) { :root:not(#z):not(#y) .abcols, :root:not(#z):not(#y) .abrow { grid-template-columns: minmax(160px, 1fr) 62px 104px 96px 96px minmax(120px, .9fr) 14px; gap: 0 10px; } .abv { font-size: 14px; } }
+@media (max-width: 760px) { :root:not(#z):not(#y) .abrow { grid-template-columns: repeat(2, 1fr); gap: 10px 12px; } .abrow .tname, .abrow .abcall { grid-column: 1 / -1; } .abrow .chev { display: none; } }
+:root:not(#z):not(#y) .hint.abm { display: inline-flex !important; flex-direction: column; align-items: flex-start; gap: 2px; border-bottom: 0 !important; text-decoration: none !important; justify-self: start; }
+:root:not(#z):not(#y) .hint.abm .abs { display: block; }
+
+.abvd { margin: 8px 0 0; padding: 0; list-style: none; display: grid; gap: 3px; font-size: 13px; color: var(--muted); } .abvd b { color: var(--ink); }
+
+/* Stat sig column, calmer name cell, hypothesis-first opened view (design agency, Oct 30) */
+.abst { font: 700 12.5px var(--body); padding: 2px 10px; border-radius: 99px; background: var(--sunk); color: var(--muted); white-space: nowrap; }
+.abst.yes { background: var(--good-bg); color: var(--good); }
+.abst.nb, .abst.early { background: transparent; box-shadow: inset 0 0 0 1px var(--line); }
+.abrow .tmeta { margin-top: 3px; gap: 2px 8px; flex-wrap: nowrap; }
+.abrow .tmeta .tloc { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.abrow .abs { white-space: normal; line-height: 1.3; }
+.abhyp { margin-bottom: 14px; } .abhyp p { margin: 2px 0 0; } .abflag { margin-top: 8px !important; font-size: 13.5px; color: var(--muted); }
+.abfoot { display: flex; align-items: center; gap: 14px; margin-top: 12px; }
+.abvr td small { display: block; font-size: 11px; font-weight: 500; color: var(--muted); }
+.abvr th { white-space: normal; max-width: 150px; }
+
+/* Key numbers, and a compact opened view with clear boxes (design agency, Oct 30) */
+.abv.big { font-size: 17px; font-weight: 800; }
+.rowwrap .detail.abd { padding: 12px 16px 14px !important; gap: 10px !important; display: flex; flex-direction: column; background: var(--sunk); border-top: 1px solid var(--line); }
+.abd .abhyp, .abd .abvr { margin: 0; background: var(--surface); border-radius: 10px; box-shadow: inset 0 0 0 1px var(--line); }
+.abd .abhyp { padding: 10px 14px; } .abd .abhyp .ph, .abd .abvr .ph { margin: 0 0 3px; font-size: 13px; } .abd .abhyp p { margin: 0; font-size: 14px; }
+.abd .abvr { padding: 10px 0 2px; overflow-x: auto; } .abd .abvr .ph { padding: 0 14px; }
+.abd .abvr table { width: 100%; border-collapse: collapse; margin-top: 4px; }
+.abd .abvr th, .abd .abvr td { padding: 7px 14px; border-top: 1px solid var(--line); vertical-align: top; }
+.abd .abvr th { background: var(--sunk); font-size: 12px; color: var(--muted); font-weight: 600; } .abd .abvr td:first-child { font-weight: 600; }
+.abd .abvd { padding: 8px 14px 10px; margin: 0; border-top: 1px solid var(--line); }
+.abd .abfoot { margin: 0; }
+
+/* One opened card, device header with the comparison on the right, Bot Squad cards (design agency, Oct 30) */
+.rowwrap .detail.abd { padding: 4px 14px 14px !important; background: transparent !important; border-top: 0 !important; display: block !important; }
+.abcard { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px 8px; }
+.abtop { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 10px; }
+.abhy { flex: 1; margin: 0; padding: 9px 14px; border-radius: 9px; background: var(--sunk); font-size: 14px; line-height: 1.45; }
+.ablinks { display: flex; align-items: center; gap: 12px; white-space: nowrap; padding-top: 8px; }
+.abflag { margin: 0 0 8px; font-size: 13px; color: var(--muted); }
+.abt { width: 100%; border-collapse: collapse; font-size: 14px; }
+.abt th { text-align: left; font-size: 11.5px; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); font-weight: 700; padding: 6px 12px 6px 0; }
+.abt td { padding: 9px 12px 9px 0; border-top: 1px solid var(--line); vertical-align: top; }
+.abt td small { display: block; margin-top: 2px; font-size: 12px; font-weight: 400; color: var(--muted); max-width: 46ch; }
+.abt td b.b { color: var(--good); } .abt td b.w { color: var(--bad); } .abt td.na { color: var(--faint); }
+.abcall { display: inline-flex; }
+.devtop { display: flex; gap: 24px; align-items: flex-start; } .devtop .devl { flex: 1; min-width: 0; } .devtop .sibs { flex: 0 0 340px; margin: 0; }
+@media (max-width: 900px) { .devtop { flex-direction: column; } .devtop .sibs { flex-basis: auto; width: 100%; } }
+.botlinks { display: flex; gap: 16px; flex-wrap: wrap; }
+.bothead { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.say4 .botcard2 { display: block; min-width: 0; text-align: left; } .botsay .botcard2 .scard { height: 100%; cursor: default; }
+.botsay .botpts { margin: 8px 14px 14px; padding-left: 18px; font-size: 13.5px; color: var(--ink-2); display: grid; gap: 4px; }
+.abt th, .abt td { text-align: left !important; }
+.abt td:first-child { min-width: 140px; }
+
+/* Two tiles in the opened test, table padding, calmer nav (design agency, Oct 30) */
+.abgrid { display: grid; grid-template-columns: minmax(220px, 1fr) 3fr; gap: 16px; align-items: start; }
+@media (max-width: 900px) { .abgrid { grid-template-columns: 1fr; } }
+.abwhat { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px 20px; display: flex; flex-direction: column; gap: 10px; align-items: flex-start; }
+.abwl { font: 700 13px var(--body); }
+.abwhat p { margin: 0; font-size: 14px; line-height: 1.5; } .abwhat .abflag { color: var(--muted); font-size: 13px; }
+.abcard { padding: 8px 0 6px; }
+.abt th, .abt td { padding-left: 14px; padding-right: 14px; }
+.abt th:first-child, .abt td:first-child { padding-left: 20px; } .abt th:last-child, .abt td:last-child { padding-right: 20px; }
+.abt td { padding-top: 12px; padding-bottom: 12px; } .abt th { padding-top: 10px; padding-bottom: 8px; }
+.navbusy .tk-track, .navbusy .cdtop, .navbusy .cdt2.sec b, .navbusy .tkdot { animation-play-state: paused !important; }
+.tk-view { contain: paint; } .tk-track { will-change: transform; }
+
+.abv.big.lite { font-weight: 500; }
+
+/* Recently shipped and Coming soon as tables (design agency, Oct 30) */
+:root:not(#z):not(#y) .ertc, :root:not(#z):not(#y) .erow { grid-template-columns: minmax(240px, 1.15fr) 96px 150px minmax(240px, 2fr) 18px; gap: 0 14px; }
+:root:not(#z):not(#y) .stc, :root:not(#z):not(#y) .strow { grid-template-columns: minmax(240px, 1.28fr) 140px 210px minmax(240px, 2fr) 18px; gap: 0 14px; }
+a.trow.erow { color: inherit; text-decoration: none; }
+.erlt { font-size: 13.5px; color: var(--ink-2); line-height: 1.4; min-width: 0; }
+.erow .chev, .strow .chev { transform: none !important; }
+@media (min-width: 761px) and (max-width: 1240px) { :root:not(#z):not(#y) .ertc, :root:not(#z):not(#y) .erow { grid-template-columns: minmax(160px, 1fr) 80px 120px minmax(150px, 1.4fr) 14px; gap: 0 10px; } :root:not(#z):not(#y) .stc, :root:not(#z):not(#y) .strow { grid-template-columns: minmax(160px, 1fr) 100px 140px minmax(150px, 1.4fr) 14px; gap: 0 10px; } }
+@media (max-width: 760px) { :root:not(#z):not(#y) .erow, :root:not(#z):not(#y) .strow { grid-template-columns: 1fr; gap: 6px; } .erow .chev, .strow .chev { display: none; } }
+
+/* Opened test as an overlay (design agency, Oct 30) */
+.abwhat2 { background: var(--sunk); border-radius: 12px; padding: 18px 20px; margin: 14px 0 8px; }
+.abwhat2 .ph { margin: 0 0 6px; font-size: 13px; } .abwhat2 p { margin: 0; font-size: 14.5px; line-height: 1.5; } .abwhat2 .abflag { margin-top: 10px; font-size: 13px; color: var(--muted); }
+.mbox .abt { margin-top: 8px; } .mbox .abt th:first-child, .mbox .abt td:first-child { padding-left: 4px; } .mbox .abt td:last-child, .mbox .abt th:last-child { padding-right: 4px; }
+.abt .chn { font-weight: 500; } .abt .chn.main { font-weight: 800; } .abt .chn.b { color: var(--good); } .abt .chn.w { color: var(--bad); }
+.abfoot2 { margin-top: 14px; } .mbox .srcbtn { border-left: 0 !important; padding-left: 0 !important; margin-left: 0 !important; }
+.hlink[data-jt] { cursor: pointer; }
+
+a.trow.abrow { color: inherit; text-decoration: none; }
+
+.abfilter { display: flex; align-items: center; gap: 10px; margin: 18px 0 6px; } .abfilter .lbl { font: 600 12px var(--body); color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+
+/* Sortable headers, pills, overlay alignment, no row chevrons, the switch on the heading row (design agency, Oct 31) */
+.abh { cursor: pointer; user-select: none; display: inline-flex; align-items: center; gap: 5px; } .abh:hover { color: var(--ink); } .abh .sa { font-style: normal; font-size: 12px; }
+.tmeta .rtag { margin: 0; } .tmeta .rtag.sitepill { padding: 2px 9px; }
+.mtags .abv2 { display: inline-flex; align-items: center; margin: 4px 5px 0 0; padding: 1px 10px; line-height: 1.55; }
+div.abrow .chev, div.strow .chev, div.erow .chev { visibility: hidden; }
+.abst.tbd { background: transparent; box-shadow: inset 0 0 0 1px var(--line); }
+.mbox .abt { table-layout: fixed; width: 100%; } .mbox .abt th:first-child { width: 36%; }
+.group.trun .ghead { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 14px; } .group.trun .abfilter { margin: 0 0 0 auto; }
+.mbox .abt th { white-space: normal; line-height: 1.25; overflow-wrap: break-word; vertical-align: bottom; }
+/* Date picker sits beside the Bot filter in the top row, level with the sale tag, so nothing is pushed down (design agency, Oct 31) */
+:root :has(> .dtop) > .dtop { flex-direction: row-reverse !important; align-items: center !important; gap: 10px !important; }
+:root :has(> .dtop) > .dtop .bfwrap { margin: 0; }
+@media (max-width: 1100px) { :root :has(> .dtop) > .dtop { flex-direction: column !important; align-items: flex-end !important; gap: 6px !important; } }
+
+/* Calendar first, then the sale tag, in one row; the Bot filter stays at the right (design agency, Oct 31) */
+.vsalew.vsale2 { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+.vsalew.vsale2 .dchipw { margin: 0; } .daypop { left: 0 !important; right: auto !important; }
+:root :has(> .dtop) > .dtop { flex-direction: column !important; align-items: flex-end !important; gap: 0 !important; }
+
+/* Stat sig as plain words, site pills with their dot and a click-to-filter (design agency, Oct 31) */
+.abst, .abst.yes, .abst.early, .abst.nb, .abst.tbd, .abst.na { background: none !important; box-shadow: none !important; border-radius: 0; padding: 0 !important; font: 600 13.5px var(--body); color: var(--ink-2); }
+.abst.yes { color: var(--good); } .abst.early, .abst.nb, .abst.tbd { color: var(--muted); }
+.rtag i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; flex: none; }
+.sitepill[data-absite] { cursor: pointer; } .sitepill[data-absite]:hover { background: color-mix(in srgb, var(--ctl) 14%, var(--sunk)); color: var(--ink); }
+
+/* Momentum beside each category's share, the lesser number (Mike, Oct 31) */
+.catleg li { grid-template-columns: 12px 1fr auto 46px !important; }
+.catleg .catx { font-style: normal; font-weight: 500; font-size: 13px; color: var(--muted); text-align: right; } .catleg .catx.up { color: var(--good); }
+
+/* Roadmap overlay: Description beside Who's on it, sources collapsed (Product Managers, Oct 30) */
+.mrow2 { display: grid; grid-template-columns: 1.5fr 1fr; gap: 12px; align-items: start; margin: 0 0 12px; } .mrow2 .pbox { margin: 0; }
+@media (max-width: 760px) { .mrow2 { grid-template-columns: 1fr; } }
+details.pbox.prov > summary { cursor: pointer; list-style: none; } details.pbox.prov > summary::-webkit-details-marker { display: none; } details.pbox.prov > summary .ph { display: inline; margin: 0; } details.pbox.prov > summary::after { content: ' ▸'; color: var(--muted); } details.pbox.prov[open] > summary::after { content: ' ▾'; }
+
+/* A missing number says TBD and why, instead of a dash (Mike, Oct 30) */
+.abtbd { display: inline-flex; flex-direction: column; gap: 2px; } .abtbd b { font: 600 13.5px var(--body); color: var(--muted); } .abtbd small { font-size: 11.5px; color: var(--faint); }
+
+/* Roadmap overlay stepper: done and current steps are the good green; the current one pulses like the status chips (Mike, Oct 30) */
+.mstep li.d::before, .mstep li.c::before { background: var(--good); }
+.mstep li.d .dot { background: var(--good); border-color: var(--good); }
+.mstep li.c .dot { background: var(--good); border-color: var(--good); color: var(--good); box-shadow: 0 0 0 0 color-mix(in srgb, var(--good) 65%, transparent); animation: stpulse 1.8s ease-out infinite; }
+.mstep li.c .dot > * { color: #fff; }
+.mstep li.c.bad::before { background: var(--bad); } .mstep li.c.bad .dot { background: var(--bad); border-color: var(--bad); color: var(--bad); animation: none; box-shadow: 0 0 0 5px var(--bad-bg); }
+/* About this data: no bump on hover (Mike, Oct 30) */
+#aboutbtn:hover, .util #aboutbtn:hover { transform: none !important; }
+/* Sources link keeps room from the card's bottom edge (Mike, Oct 30) */
+.hintbox .tipsrcw { padding-bottom: 6px; } .mbox .tipsrcw { padding-bottom: 8px; } .hintbox .tipsrcw .srcbtn, .mbox .tipsrcw .srcbtn { padding-left: 2px !important; }
+
+/* ===== Mobile pass (Mike, Oct 30): everything below is phone-only, so desktop is untouched ===== */
+@media (max-width: 760px) {
+  .rmtools .rmend { order: 9; margin-left: 0; padding-left: 0; border-left: 0; width: 100%; flex-wrap: wrap; }
+  .rmtools .rmend .vtog { margin-left: auto; }
+  .gkeys, .cap.gkeys { white-space: normal; flex-wrap: wrap; max-width: 100%; }
+}
+@media (max-width: 760px) { .vtog button[data-rmview="gantt"] { display: none; } .vtog { display: none; } }
+
+/* Test overlay table: real room at the edges, no wrapped headers, hoverable metric headers (Mike, Oct 30) */
+:root:not(#z):not(#y) .mbox .abt.tpv { table-layout: auto; } .abt.tpv th { white-space: nowrap; } .abt.tpv td { white-space: nowrap; }
+.abt.tpv th:first-child, .abt.tpv td:first-child { padding-left: 28px; min-width: 170px; } .abt.tpv th:last-child, .abt.tpv td:last-child { padding-right: 28px; }
+.abt.tpv .thhint { cursor: pointer; } .abt.tpv .thi { color: var(--ctl); font-weight: 700; margin-left: 2px; text-transform: none; }
+.abt.tpv .thhint:hover { color: var(--ink); }
+@media (max-width: 760px) {
+  .bar-meta { flex-wrap: wrap; gap: 6px 10px; }
+  .mbox .abt.tpv { display: block; overflow-x: auto; }
+  .abt.tpv th:first-child, .abt.tpv td:first-child { padding-left: 14px; min-width: 120px; } .abt.tpv th:last-child, .abt.tpv td:last-child { padding-right: 14px; }
+}
+@media (max-width: 760px) {
+  .bar-meta { overflow: visible; } .bar-meta .util { flex-wrap: wrap; width: 100%; min-width: 0; gap: 6px 10px; }
+  .bar-meta .util .rfl { overflow: visible; white-space: normal; flex: 1 1 100%; }
+  .cvrchart .csrc { padding-bottom: 12px; }
+}
+.cvrchart .csrc { padding-bottom: 12px; }
+@media (max-width: 760px) {
+  .abfilter { flex-wrap: wrap; gap: 6px 10px; } .abfilter .lbl { white-space: nowrap; } .abfilter .segs { max-width: 100%; overflow-x: auto; }
+  .group.trun .abfilter { margin: 6px 0 0; width: 100%; }
+}
+.xbar { margin: 0 0.28em; text-decoration: overline; text-decoration-thickness: 1.2px; text-underline-offset: 0; }
+
+/* Nov and Dec on TeePublic: compare with comparable days or the same weekday last year (Mike, Nov 2) */
+.basistog { margin-left: auto; display: inline-flex; align-self: center; gap: 2px; padding: 3px; border: 1px solid var(--line); border-radius: 10px; background: var(--sunk); box-shadow: 0 1px 2px rgba(20, 20, 50, .06); }
+.basistog button { font: inherit; font-size: 13.5px; font-weight: 500; padding: 5px 14px; background: transparent; color: var(--muted); border: 0; border-radius: 7px; cursor: pointer; }
+.basistog button:hover { color: var(--ink); }
+.basistog button[aria-pressed="true"] { background: var(--surface); color: var(--ink); font-weight: 600; box-shadow: 0 1px 3px rgba(20, 20, 50, .18), 0 0 0 1px var(--line); }
+@media (max-width: 760px) { .basistog { margin-left: 0; width: 100%; } .basistog button { flex: 1; } }

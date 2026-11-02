@@ -14,7 +14,8 @@ Mike pushes straight to `master`: there is no pull request or approval step.
 | `data/orders-slack-standups.js` | `ORD`, revenue, standup notes | Amplitude order_completed, Slack | |
 | `data/experiments.js` | `EXPS` | Amplitude Experiment | |
 
-Always edit the existing file and keep its shape: open the current dataset, change values, keep every field name. Do not rename fields or change the file structure.
+For data, edit the existing file and keep its shape: change values, keep every field name, do not rename fields or change the file structure.
+`app.js` reads these datasets by name, so renaming or restructuring a dataset can break the page, even when `npm run check` passes.
 
 ## Dates to update on every refresh
 - `COMING.asOf`, `D.asOf`, `PROD.asOf` and the pull date in each file's header comment.
@@ -24,28 +25,47 @@ Always edit the existing file and keep its shape: open the current dataset, chan
 - Shareable only: no people-performance, compensation, HR or budget items.
 - Every roadmap item in `COMING` should have a matching entry in `SRCS` with at least one origin link. `npm run check` lists the ones that do not.
 - Keep the source of every claim (Jira key, Slack thread link, sheet row) so it can be traced.
+- **The Active Work tab decides what is on the roadmap** (Product Managers, Oct 30). Slack and Jira add the latest update to a project that is already on the sheet; they never create a project, and a project that is only in a Slack thread does not go on the roadmap.
+- **Titles are verbatim from the sheet** (tidied for spaces only), and the **Team column on the sheet decides the team**. Do not rephrase a title or infer a team.
+- **Goals come from the sheet only.** Dashery has not broken its goal into OKRs, so Dashery projects show no goal.
+- **A result appears only after the Product Manager has posted it.** A test going live is not a result; do not put it on Recent impact.
+- **TeePublic tests come from the Split dashboard** (teepublic.com/manage/split, sign in through the browser pane): only tests launched in the last 30 days that have completed conversions. The date beside the experiment name is the launch date.
 
-## One-time setup (Mike)
-1. Install GitHub Desktop and sign in with your GitHub account (it must have Write access to this repo).
-2. In GitHub Desktop: File, Clone repository, pick this repo. Remember where the folder is.
-3. Open that folder in Claude (Claude Code in the desktop app, or whichever Claude app Jay has set up for you), with your usual connectors on (Slack, Granola, Jira, the Google sheet, Amplitude), so your own access does the gathering.
 
-## Each refresh
+## Tips to keep token use low
+- Start a fresh Claude session for each refresh, and only give it what changed since last time.
+- The data files are large (`sources.js` alone is about 160 KB). Ask for targeted edits, never whole-file rewrites.
+- For a UI change, name the part of the page (for example "the scorecard header") so Claude can grep for it.
+
+## Automatic refreshes
+Scheduled tasks refresh `data/` at 8:30 AM, 2:30 PM and 4:30 PM ET every day, plus the Tuesday before each Executive Roadmap Review (5:31 PM). Each run checks every source, runs `npm run check`, and **commits to `master` locally. It never pushes.** You get a notification; open GitHub Desktop and click **Push origin**. A run stops without committing if you have uncommitted changes in this folder (it will not touch your work), and the computer has to be awake and the Claude app open for a run to happen. If GitHub Desktop shows nothing to push, the run did not commit: look at the Refresh log in `work/projects/cvr-pacer.md` in the AI Mike folder.
+
+## Each refresh (by hand)
 1. In GitHub Desktop, click Fetch origin, then Pull if it offers one, so you start from the latest version.
 2. Paste the prompt below into Claude with the folder open.
 3. When Claude is done, read its summary. It should say which files changed and the check result.
 4. In GitHub Desktop you will see the changed files. Type a short message (for example "Refresh Nov 4"), click Commit to master, then Push origin. The site updates in about a minute.
-5. Open the site and look at it. If you pushed a bad update, see "If something looks wrong".
+5. Open the site and look at it. You will be asked to sign in with Okta first. If you pushed a bad update, see "If something looks wrong".
 
 ## Prompt for Claude (paste with the repo folder open)
-> Read REFRESH.md. Update the data files in `data/` from the sources I give you, keeping every field name and structure exactly as it is now. Only change files inside `data/`: do not touch any other file. Update the as-of dates and header comments. Keep to the shareable-only rule. Then run `npm run check`, fix any FAIL, and tell me in plain language what changed, which items still have no source link, and whether the check passed. Do not commit or push if anything fails, fix everything before push command.
+> Read REFRESH.md. I may ask for data updates, UI changes, or both.
+> - Data: edit the files in `data/`, keeping every field name and structure exactly as it is now. Update the as-of dates and header comments. Keep to the shareable-only rule.
+> - UI: you may edit `app.js`, `styles.css` and `index.html`. Make small targeted edits, keep the existing code style, and tell me which files you touched.
+> - Never touch the files listed under "Do not edit" in REFRESH.md.
+> - Save tokens: do not read or print whole files. Use grep, or a short node snippet, to look at only the part you need, and change things with targeted edits rather than rewriting a file.
+> Then run `npm run check`, fix any FAIL, and tell me in plain language what changed, which items still have no source link, and whether the check passed. Do not commit or push if anything fails.
 
 If Node is not installed on your computer, `npm run check` will not run. Tell Claude to skip it: GitHub runs the same check after you push and emails you if it fails.
 
-## Rules for the content
-- Shareable only: no people-performance, compensation, HR or budget items.
-- Every roadmap item in `COMING` should have a matching entry in `SRCS` with at least one origin link. `npm run check` lists the ones that do not.
-- Keep the source of every claim (Jira key, Slack thread link, sheet row) so it can be traced.
+## Branch rules (read before committing)
+- Always work on `master`. Before any commit, run `git branch --show-current` and confirm it prints `master`. If it doesn't, stop and tell the user.
+- Run `git pull origin master` before making changes, so you start from the latest version.
+- Never check out, commit to, merge, or push to the `okta-auth` branch.
+- Never force-push, and never rewrite history.
+## Do not edit
+- `middleware.js`, `lib/auth.js`, anything under `api/auth/` (Okta sign-in, managed separately).
+- `runtime-shim.js`, `api/docs.js`, `schema.sql`, `migrations/` and `vercel.json` (shared features and database).
+- Everything else, including `app.js`, `styles.css` and `data/`, is fine to change.
 
 ## If something looks wrong
 - **GitHub emailed you "Check dashboard data failed":** the last update has a problem. Ask Claude to read the failed check and fix it, then commit and push again. The site may be showing the broken version until you do.

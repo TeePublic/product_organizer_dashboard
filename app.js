@@ -1,3 +1,4 @@
+/* CVR Pacer v6. Everything is computed in the page from the snapshots in D (overall, payments), L (slices), R (revenue), AP (Apple Pay entry), SLACK and TOPS. */
 const DAY = 86400000;
 const WD = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 const WDL = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
@@ -22,6 +23,7 @@ const int = v => Math.round(v).toLocaleString('en-US');
 const usd = v => '$' + Math.round(v).toLocaleString('en-US');
 const MINUS = '−';
 const sgn = (x, d = 1) => (x < 0 ? MINUS : '+') + Math.abs(x * 100).toFixed(d) + '%';
+const xbar = s => s.replace(/x\u0304/g, '<span class="xbar">x</span>');
 const upDown = x => (x < 0 ? 'down ' : 'up ') + Math.abs(x * 100).toFixed(Math.abs(x) < 0.1 ? 1 : 0) + '%';
 const sum = a => a.reduce((p, c) => p + c, 0);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -30,7 +32,7 @@ const range = (a, b) => short(a) + ' to ' + short(b);
 
 /* Sale calendars from #promotions, as logged in the brain's sale-calendar file. */
 const SALES = {
-  tp: [['2026-07-23','2026-07-26'],['2026-08-05','2026-08-09'],['2026-08-19','2026-08-23'],['2026-08-27','2026-08-30'],['2026-09-03','2026-09-07'],['2026-09-15','2026-09-20'],['2026-09-25','2026-09-27'],['2026-09-30','2026-10-04'],['2026-10-13','2026-10-18'],['2026-10-21','2026-10-25']],
+  tp: [['2026-07-23','2026-07-26'],['2026-08-05','2026-08-09'],['2026-08-19','2026-08-23'],['2026-08-27','2026-08-30'],['2026-09-03','2026-09-07'],['2026-09-15','2026-09-20'],['2026-09-25','2026-09-27'],['2026-09-30','2026-10-04'],['2026-10-13','2026-10-18'],['2026-10-21','2026-10-25'],['2026-11-01','2026-12-19']],
   rb: [['2026-08-10','2026-08-17'],['2026-09-06','2026-09-13'],['2026-09-23','2026-09-28'],['2026-10-04','2026-10-11'],['2026-10-21','2026-10-26'],['2026-11-02','2026-12-20']]
 };
 /* TP Sep 30 to Oct 4: $16.50 Classic Tee price test, plus a bot spike Oct 2 and 3. Shown, but never used as a comparison or baseline day. */
@@ -57,10 +59,16 @@ function saleInfo(ranges, d) {
   return { sale: false, label: 'No sale' };
 }
 const infoNow = (b, d) => saleInfo(SALES[b], d);
+// The day before a sale and the day after a sale are their own kinds of day: they only compare with each other, and ordinary
+// no-sale days leave them out (standup, Oct 28: a day-before-sale Oct 20 was pulling a day-after-sale baseline up).
+const edgeOf = (b, x) => { const i = infoNow(b, x); if (i.sale) return null; if (i.after) return 'after'; return SALES[b].some(r => addDays(r[0], -1) === x) ? 'before' : 'plain'; };
+const sameKind = (b, d, x) => { const e = edgeOf(b, d), f = edgeOf(b, x); return e === 'plain' ? f === 'plain' && dow(x) === dow(d) : f === e; };
+const EDGEN = { after: 'day after a sale', before: 'day before a sale' };
+const noSaleKind = (b, d, n) => { const e = edgeOf(b, d); if (EDGEN[e]) return n === 1 ? EDGEN[e] : EDGEN[e].replace('day', 'days'); return baseDays(b, d).topped ? 'no-sale days' : WDL[dow(d)] + (n === 1 ? '' : 's') + ' with no sale'; };
 const infoLY = d => saleInfo(LYR, d);
 
 const BR = {
-  tp: { name: 'TeePublic', abbr: 'TP', other: 'rb', color: 'var(--tp)', strip: 'var(--strip-tp)', band: 'var(--band-tp)' },
+  tp: { name: 'TeePublic', abbr: 'TP', other: 'rb', color: 'var(--tp)', strip: 'var(--strip-tp)', band: 'var(--band-tp)' }, // sale days in the site's color on every chart (Mike, Oct 28: back from yellow)
   rb: { name: 'Redbubble', abbr: 'RB', other: 'tp', color: 'var(--rb)', strip: 'var(--strip-rb)', band: 'var(--band-rb)' }
 };
 const SER = {};
@@ -128,6 +136,8 @@ function defOf(m) {
 }
 
 const state = { rmGantt: true, gGroup: 'stage', tsort: { k: 'eta', dir: 1 }, mvAll: false, sphase: 'pre', prog: 'all', obj: 'all', stage: 'all', fteam: 'all', phase: 'pre', su: 'next', days: { tp: D.asOf, rb: D.asOf }, cust: { tp: null, rb: null }, cmpEdit: false, defOn: new Set(), view: 'daily', tab: 'tp', day: D.asOf, thr: {}, open: new Set(), sessOff: new Set(), full: new Set(), payChart: false, cmp: null, cmpMode: 'overlay' };
+// Phones open the roadmap as a list: the timeline needs width (Mike, Oct 30). Desktop keeps the timeline.
+if (window.matchMedia && matchMedia('(max-width: 760px)').matches) state.rmGantt = false;
 Object.keys(SECS).forEach(k => { state.thr[k] = { g: 3, r: 5 }; });
 try { const t = JSON.parse(localStorage.getItem('cvrpacer.thr6') || 'null'); if (t) Object.keys(SECS).forEach(k => { if (t[k]) state.thr[k] = t[k]; }); } catch (e) { /* storage unavailable */ }
 const saveThr = () => { try { localStorage.setItem('cvrpacer.thr6', JSON.stringify(state.thr)); } catch (e) { /* ignore */ } };
@@ -136,7 +146,7 @@ const settling = d => d >= addDays(D.asOf, -1);
 /* ---------- hints: underlined words that explain themselves on hover or tap ---------- */
 let HINTS = [];
 // Hints are inline spans (not buttons) so long phrases can wrap mid-sentence like ordinary text.
-const hint = (text, cls, html) => { HINTS.push(html); return '<span role="button" tabindex="0" class="hint ' + (cls || '') + '" data-hint="' + (HINTS.length - 1) + '">' + text + '</span>'; };
+const hint = (text, cls, html) => { HINTS.push(cw(html)); return '<span role="button" tabindex="0" class="hint ' + (cls || '') + '" data-hint="' + (HINTS.length - 1) + '">' + cw(text) + '</span>'; };
 let pinned = null;
 const POPS = {
   get bot() { return BOTF[state.botf || 'max'].tip; }
@@ -144,6 +154,9 @@ const POPS = {
 // Keep any countdown in the hover ticking.
 const tickCD = () => { document.querySelectorAll('.cdlive').forEach(c => { let ms = Math.max(0, +c.dataset.to - Date.now()); const d = Math.floor(ms / 864e5); ms -= d * 864e5; const h = Math.floor(ms / 36e5); ms -= h * 36e5; const m = Math.floor(ms / 6e4); ms -= m * 6e4; const s2 = Math.floor(ms / 1e3); const tile = (v, u, cls) => '<span class="cdt2' + (cls || '') + '"><b>' + v + '</b><i>' + u + '</i></span>'; c.innerHTML = tile(d, 'd') + tile(String(h).padStart(2, '0'), 'h') + tile(String(m).padStart(2, '0'), 'm') + tile(String(s2).padStart(2, '0'), 's', ' sec'); }); document.querySelectorAll('#hintbox .cdclock').forEach(c => { let ms = Math.max(0, +c.dataset.to - Date.now()); const u = [[86400000, 'days'], [3600000, 'hrs'], [60000, 'min'], [1000, 'sec']].map(([d, l]) => { const v = Math.floor(ms / d); ms -= v * d; return '<span class="cdu"><b>' + String(v).padStart(2, '0') + '</b><i>' + l + '</i></span>'; }); c.innerHTML = u.join(''); }); };
 setInterval(tickCD, 1000);
+// Big targets (cards) anchor their tip to the pointer, like a small word does, instead of dropping it below the whole card.
+const PTR = { x: 0, y: 0 };
+['pointerover', 'pointermove'].forEach(t => document.addEventListener(t, ev => { PTR.x = ev.clientX; PTR.y = ev.clientY; }, { passive: true, capture: true }));
 function showHint(el) {
   const box = $('#hintbox'), html = el.dataset.pop ? POPS[el.dataset.pop] : HINTS[+el.dataset.hint]; if (!html) return;
   box.innerHTML = html; box.hidden = false; if (html.indexOf('cdclock') >= 0) tickCD();
@@ -151,6 +164,7 @@ function showHint(el) {
   const r = el.getBoundingClientRect(), bw = box.offsetWidth, bh = box.offsetHeight;
   let left = Math.min(Math.max(8, r.left + r.width / 2 - bw / 2), window.innerWidth - bw - 8);
   let top = r.bottom + 8; if (top + bh > window.innerHeight - 8) top = Math.max(8, r.top - bh - 8);
+  if (r.height > 110 && PTR.y >= r.top && PTR.y <= r.bottom) { left = Math.min(Math.max(8, PTR.x - bw / 2), window.innerWidth - bw - 8); top = PTR.y + 14; if (top + bh > window.innerHeight - 8) top = Math.max(8, PTR.y - bh - 14); }
   // .hup opens above (over the header if needed), so it doesn't cover the headline under it (Mike, Oct 26).
   if (el.classList.contains('hup')) { top = Math.max(8, r.top - bh - 8); }
   box.style.left = left + 'px'; box.style.top = top + 'px';
@@ -160,7 +174,7 @@ function hideHint() { const box = $('#hintbox'); if (box) box.hidden = true; pin
 /* ---------- comparisons: a week ago (one day), last month's average (or a custom range), last year (one day) ---------- */
 function compCands(b, d, kind) {
   const st = infoNow(b, d), hol = isHoliday(d);
-  const offs = kind === 'yoy' ? (hol ? [365, 364, 366, 357, 371, 350, 378] : [364, 357, 371, 350, 378, 343, 385]) : [7, 14, 21];
+  const offs = kind === 'yoy' ? [364, 357, 371, 350, 378, 343, 385] : [7, 14, 21];
   return offs.map(off => {
     const cd = addDays(d, -off); let ok = true, reason = '', ci;
     if (kind === 'yoy') {
@@ -183,6 +197,12 @@ const POSL = { first: 'day 1', last: 'final day', last2: 'second-to-last day', l
 const tierOf = (b, d) => { const o = offerOn(b, d); return o ? ((o[2].match(/(\d+)%/) || [])[1] || null) : null; };
 const sameTier = (b, d, cd) => { const a = tierOf(b, d), c = tierOf(b, cd); return !a || !c || a === c; };
 function compDate(b, d, kind) {
+  if (kind === 'yoy' && isHoliday(d)) {
+    // Nov 1 to Dec 31 (Mike, Nov 2): the exact same weekday 364 days back (Mon Nov 2 vs Mon Nov 3, 2025), so Thanksgiving, Black Friday and Cyber Monday line up.
+    // Sale status is not required to match; the other months keep the rules below.
+    const cd = addDays(d, -364); if (lyIndex(cd) < 0) return null; const ci = infoLY(cd);
+    return { off: 364, date: cd, dates: [cd], n: 1, from: cd, to: cd, ok: true, exact: true, pos: ci.pos, label: ci.label, lab: 'same weekday last year' };
+  }
   const st = infoNow(b, d), pk = posKey(st);
   if (pk && kind === 'wow') {
     // Same position and same discount tier first; only if none exists in 9 weeks, the same position at another tier.
@@ -227,13 +247,20 @@ function monthAvg(b, d) {
   return dates.length >= 3 ? { sale: st.sale, dates, from: dates[dates.length - 1], to: dates[0], n: dates.length, skipped, lab: "last month's non-sale average" } : null;
 }
 const COMPC = {};
+/* Nov and Dec on TeePublic (Mike, Nov 2): a toggle swaps "comparable days" for the same weekday last year (Redbubble has no last year, so no toggle). */
+const basisOn = (b, d) => b === 'tp' && state.basis !== 'cmp' && isHoliday(d) && lyIndex(addDays(d, -364)) >= 0;
+const wsh = z => WD[dow(z)] + ' ' + short(z);
+const lyBody = d => { const cd = addDays(d, -364); return wsh(cd) + ', ' + cd.slice(0, 4) + ' lines up with ' + wsh(d) + ', ' + d.slice(0, 4) + '. In November and December we match the day of the week, not the date, so Thanksgiving, Black Friday and Cyber Monday land on each other.'; };
+const lyExact = d => '<b>Same weekday, last year</b><br>' + lyBody(d);
+const cw = h => (typeof h === 'string' && state.view === 'daily' && state.tab === 'tp' && basisOn('tp', state.day)) ? h.replace(/the comparable days/g, 'the same day last year').replace(/Comparable days/g, 'Same day last year').replace(/comparable days/g, 'the same day last year') : h;
 function compsDefault(b, d) {
-  const k = b + d; if (COMPC[k]) return COMPC[k];
+  const k = b + d + (basisOn(b, d) ? '|ly' : ''); if (COMPC[k]) return COMPC[k];
   const pd = addDays(d, -1), bd = baseDays(b, d);
-  return (COMPC[k] = { yoy: b === 'tp' ? compDate(b, d, 'yoy') : null, wow: compDate(b, d, 'wow'), mom: monthAvg(b, d),
+  return (COMPC[k] = basisSwap(b, d, { yoy: b === 'tp' ? compDate(b, d, 'yoy') : null, wow: compDate(b, d, 'wow'), mom: monthAvg(b, d),
     pd: SER[b].idx[pd] !== undefined ? { date: pd, dates: [pd], lab: 'prior day' } : null,
-    bs: bd.length ? { dates: bd, n: bd.length, tierMix: bd.tierMix, near: bd.near, from: bd[0], to: bd[bd.length - 1], lab: 'comparable days' } : null });
+    bs: bd.length ? { dates: bd, n: bd.length, tierMix: bd.tierMix, near: bd.near, from: bd[0], to: bd[bd.length - 1], lab: 'comparable days' } : null }));
 }
+const basisSwap = (b, d, c) => { if (basisOn(b, d) && c.yoy && c.yoy.exact) c.bs = { dates: [c.yoy.date], n: 1, from: c.yoy.date, to: c.yoy.date, ly: true, lab: 'same day last year' }; return c; };
 function compsFor(b, d) {
   const c = compsDefault(b, d), cu = state.cust[b];
   if (!cu || d !== state.days[b]) return c;
@@ -243,7 +270,7 @@ function compsFor(b, d) {
 // An average's days: a plain range only when every day in it is used; a handful of scattered days (like two sale day 1s) are listed by date.
 const listed = c => !c.custom && c.dates && c.dates.length <= 4 && (parse(c.to) - parse(c.from)) / DAY + 1 !== c.dates.length;
 const spanOf = c => { if (!listed(c)) return range(c.from, c.to); const ds = c.dates.slice().sort().map(short); return ds.length === 1 ? ds[0] : ds.slice(0, -1).join(', ') + ' and ' + ds[ds.length - 1]; };
-const cmpLabel = (cmp, kind) => !cmp ? '' : kind === 'pd' ? dmy(cmp.date) : kind === 'bs' ? 'avg of ' + cmp.n + ' matching days' : kind === 'yoy' && cmp.dates ? 'avg of ' + cmp.n + ' day' + (cmp.n === 1 ? '' : 's') + (cmp.mlab ? ' in ' + cmp.mlab : ' around ' + short(cmp.around || addDays(state.day, -364)) + ', 2025') : kind === 'yoy' ? dmy(cmp.date, true) : kind === 'wow' ? dmy(cmp.date) : 'avg of ' + spanOf(cmp) + (listed(cmp) ? '' : ' (' + cmp.n + ' days)');
+const cmpLabel = (cmp, kind) => !cmp ? '' : kind === 'pd' ? dmy(cmp.date) : kind === 'bs' ? 'avg of ' + cmp.n + ' matching days' : kind === 'yoy' && cmp.exact ? dmy(cmp.date, true) : kind === 'yoy' && cmp.dates ? 'avg of ' + cmp.n + ' day' + (cmp.n === 1 ? '' : 's') + (cmp.mlab ? ' in ' + cmp.mlab : ' around ' + short(cmp.around || addDays(state.day, -364)) + ', 2025') : kind === 'yoy' ? dmy(cmp.date, true) : kind === 'wow' ? dmy(cmp.date) : 'avg of ' + spanOf(cmp) + (listed(cmp) ? '' : ' (' + cmp.n + ' days)');
 const cmpShort = (cmp, kind) => !cmp ? '' : kind === 'mom' ? spanOf(cmp) : cmpLabel(cmp, kind);
 const lead = (b, d) => (b === 'tp' && isHoliday(d)) ? 'yoy' : 'wow';
 const KIND = {
@@ -262,7 +289,7 @@ const cv = (c, k) => k === 'yoy' ? c.ly : k === 'wow' ? c.wowV : k === 'pd' ? c.
 
 /* ---------- metrics ---------- */
 function metricList(b) {
-  const o = { key: 'overall', label: 'CVR', v: D[b].cvr, ly: b === 'tp' ? D.tpLY.cvr : null, sess: D[b].sess, fmt: 'cvr', sec: 'overall', b, axis: 'CVR' };
+  const o = { key: 'overall', label: 'CVR', v: D[b].cvr, ly: b === 'tp' ? D.tpLY.cvr : null, lysess: b === 'tp' ? D.tpLY.sess : null, sess: D[b].sess, fmt: 'cvr', sec: 'overall', b, axis: 'CVR' };
   const sessM = { key: 'sessions', label: 'Sessions', v: D[b].sess, ly: b === 'tp' ? D.tpLY.sess : null, fmt: 'int', sec: 'overall', isSess: true, b, axis: 'Sessions per day' };
   const revM = { key: 'revenue', label: 'Revenue', v: R[b], ly: b === 'tp' ? R.tpLY : null, fmt: 'usd', sec: 'overall', isRev: true, b, axis: 'Revenue per day' };
   const metrics = { overall: [o, sessM, revM], device: [], funnel: [], channel: [], geo: [], product: [] };
@@ -287,13 +314,13 @@ const metricsFor = b => MCACHE[b] || (MCACHE[b] = metricList(b));
 // Where the CVR page's numbers come from, with links out (Allison, Oct 28: "I need reassurance that it is confirmed correct").
 const AMPD = { strong: 'lm29400h', max: '5ec1pe2j' }, AMPY = { tp: 'usaj36an', rb: 'zvsdv2k8' };
 // Every named source is a link (Mike, Oct 28: "All sources should always be linkable").
-const SLK = (id, name) => '<a href="https://grid-articore.enterprise.slack.com/archives/' + id + '" target="_blank" rel="noopener">#' + name + ' ↗</a>';
-const LNK = (u, t) => '<a href="' + u + '" target="_blank" rel="noopener">' + t + ' ↗</a>';
+const SLK = (id, name) => '<a href="https://grid-articore.enterprise.slack.com/archives/' + id + '" target="_blank" rel="noopener">#' + name + ' ↗</a>';
+const LNK = (u, t) => '<a href="' + u + '" target="_blank" rel="noopener">' + t + ' ↗</a>';
 const JIRA = LNK('https://articore.atlassian.net/jira/software/c/projects/DEAP/issues', 'Jira (DEAP)'), AMPX = LNK('https://app.amplitude.com/experiment/tpub', 'Amplitude Experiment'), SIGMA = LNK('https://app.sigmacomputing.com/teepublic/workbook/GA4-Search-Experiments-7wRanD8z9Oa0ZcLIk3FW7T', 'Sigma "[GA4] Search Experiments"');
 const METRICS = [['C0ASAJUSD6D', 'Customer'], ['C0ARR26TXHS', 'PLC'], ['C0B3HBAA691', 'Data Engineering'], ['C0AUA7R32VC', 'Dashery'], ['C0AR87G1755', 'Search'], ['C0ASTL7LK6C', 'Artist'], ['C0AS67UT41M', 'Core']].map(x => '<a href="https://grid-articore.enterprise.slack.com/archives/' + x[0] + '" target="_blank" rel="noopener">' + x[1] + '</a>').join(', ');
 // The other pages' hovers: where that page's facts come from (Mike, Oct 28: "There should always be a source link").
 function pageSrcHtml(html) {
-  const sheet = '<a href="https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU" target="_blank" rel="noopener">roadmap sheet ↗</a>', v = state.view, L = [];
+  const sheet = '<a href="https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU" target="_blank" rel="noopener">roadmap sheet ↗</a>', v = state.view, L = [];
   if (v === 'soon') {
     L.push('🗂️ <b>Projects, owners and goals:</b> the ' + sheet + ', with newer news overriding it');
     L.push('🎙️ <b>Official updates:</b> the fortnightly Executive Roadmap Review');
@@ -323,9 +350,24 @@ function pageSrcHtml(html) {
   return '<div class="tipsrcw"><button type="button" class="srcbtn tipsrc" data-tipsrc="1">ⓘ ' + (L.length === 1 ? 'Source' : 'Sources') + '</button><div class="tipsrcbox" hidden><ul class="hul nrul">' + L.map(x => '<li>' + x + '</li>').join('') + '</ul></div></div>';
 }
 // The sources behind a CVR-page hover, by what the card talks about. The label is singular or plural to match.
+// Each scorecard section links to its own Amplitude charts, per site and bot filter (Allison, Oct 28: "so it's easy to get to the dataset").
+const SECAMP = {
+  max: { tp: { overall: [['CVR', 'sij6sjzl']], channel: [['CVR by channel', 'bkyp384a']], device: [['CVR by device', 'idhqxu31']], funnel: [['Add to cart rate', 'bov1b5rq'], ['Funnel completion rate', 'sydsccj1'], ['Checkout completion rate', '00ez5hda']] },
+         rb: { overall: [['CVR', 'eotq1vlp']], channel: [['CVR by channel', 'a3ptpewu']], device: [['CVR by device', 'zgfkixsf']], funnel: [['Add to cart rate', 'dcciy910'], ['Funnel completion rate', '37yoz8p3'], ['Checkout completion rate', '7h271vlc']] } },
+  strong: { tp: { overall: [['CVR', 't50lzd6f']], channel: [['CVR by channel', 'qhto4t7e']], device: [['CVR by device', '6u97stef']], geo: [['CVR, USA', 'd45gja14']], funnel: [['Add to cart rate', 'jbpkevmk'], ['Funnel completion rate', '4pmgjkdy'], ['Checkout completion rate', 'r72vauky']] },
+            rb: { overall: [['CVR', 'hv3jdftd']], channel: [['CVR by channel', 'bjjgl1uu']], device: [['CVR by device', 'ucllwnls']], funnel: [['Add to cart rate', 'ir369hds'], ['Funnel completion rate', 'o6krg9lp'], ['Checkout completion rate', 'nhhy4cjn']] } }
+};
+function secSrc(b, sec) {
+  const bf = state.botf === 'strong' ? 'strong' : 'max', ch = ((SECAMP[bf] || {})[b] || {})[sec] || [], L = [];
+  const ac = (id, t) => '<a href="https://app.amplitude.com/analytics/tpub/chart/' + id + '" target="_blank" rel="noopener">' + esc(t) + ' ↗</a>';
+  if (ch.length) L.push('📊 <b>Amplitude charts (' + BOTF[bf].l + ' bot filter):</b> ' + ch.map(x => ac(x[1], x[0])).join(' · '));
+  if (sec === 'product') L.push('📊 <b>Amplitude, pulled each morning:</b> people who viewed a product page of each type, then ordered that type within 24 hours, divided by those viewers (Maximum bot filter).');
+  L.push('🗂️ <b>Dashboard:</b> <a href="https://app.amplitude.com/analytics/tpub/dashboard/' + AMPD[bf] + '" target="_blank" rel="noopener">CVR Pacer, ' + BOTF[bf].l + ' bot filter ↗</a>' + (sec === 'geo' && bf === 'max' ? '. Maximum counts a few countries as one audience, so regions come from the same charts split by country.' : ''));
+  return '<div class="tipsrcw gsrc"><button type="button" class="srcbtn tipsrc" data-tipsrc="1">ⓘ Sources</button><div class="tipsrcbox" hidden><ul class="hul nrul">' + L.map(x => '<li>' + x + '</li>').join('') + '</ul></div></div>';
+}
 function tipSrcHtml(html) {
   if (state.view !== 'daily') return pageSrcHtml(html);
-  const b = state.tab, bf = state.botf === 'strong' ? 'strong' : 'max', a = (id, t) => '<a href="https://app.amplitude.com/analytics/tpub/dashboard/' + id + '" target="_blank" rel="noopener">' + t + ' ↗</a>', L = [];
+  const b = state.tab, bf = state.botf === 'strong' ? 'strong' : 'max', a = (id, t) => '<a href="https://app.amplitude.com/analytics/tpub/dashboard/' + id + '" target="_blank" rel="noopener">' + t + ' ↗</a>', L = [];
   L.push('📊 <b>The numbers:</b> ' + a(AMPD[bf], 'Amplitude, CVR Pacer dashboard (' + BOTF[bf].l + ' bot filter)') + '. CVR is people who viewed a page and ordered within a day, divided by people who viewed a page.');
   L.push('🔁 <b>Cross-check:</b> ' + a(AMPY[b], BR[b].name + ' Yesterday\'s Performance') + '. Its filters differ, so numbers can be a little different.');
   if (/last year|vs last year|2025/i.test(html)) L.push('📅 <b>Last year:</b> the same ' + a(AMPD[bf], 'Amplitude charts') + ', run for the same weekday 364 days back.');
@@ -364,15 +406,16 @@ function counterpart(m) {
 const isNum = m => m.fmt === 'int' || m.fmt === 'usd';
 const fmtVal = (m, v) => v == null ? '' : m.fmt === 'int' ? int(v) : m.fmt === 'usd' ? usd(v) : m.fmt === 'rate1' ? pct(v, 1) : pct(v, 2);
 function cellsFor(m, d, comps) {
-  const I = SER.tp.idx, i = I[d], val = m.v[i], rel = (a, c) => (c ? (a - c) / c : null);
-  const avgOf = (arr, ds) => { const xs = ds.map(x => arr[I[x]]).filter(v => v != null); return xs.length ? sum(xs) / xs.length : null; };
+  const I = SER.tp.idx, i = I[d], val = m.v[i], rel = (a, c) => (a != null && c ? (a - c) / c : null); /* a missing day is no data, never −100% (Mike, Oct 28) */
+  const lyAt = (arr, x) => arr === m.v ? (m.ly ? m.ly[lyIndex(x)] : null) : arr === m.sess ? (m.lysess ? m.lysess[lyIndex(x)] : null) : null;
+  const avgOf = (arr, ds) => { const xs = ds.map(x => I[x] !== undefined ? arr[I[x]] : lyAt(arr, x)).filter(v => v != null); return xs.length ? sum(xs) / xs.length : null; };
   const yk = comps.yoy ? lyIndex(comps.yoy.date) : -1, lyAvg = ds => { const xs = ds.map(x => m.ly[lyIndex(x)]).filter(v => v != null); return xs.length ? sum(xs) / xs.length : null; };
   const ly = !m.ly || !comps.yoy ? null : comps.yoy.dates ? lyAvg(comps.yoy.dates) : yk >= 0 ? m.ly[yk] : null;
   const wowV = comps.wow ? m.v[I[comps.wow.date]] : null, momV = comps.mom ? avgOf(m.v, comps.mom.dates) : null;
   const o = { val, ly, yoy: ly != null ? rel(val, ly) : null, wowV, wow: wowV != null ? rel(val, wowV) : null, momV, mom: momV != null ? rel(val, momV) : null, custom: !!(comps.mom && comps.mom.custom) };
-  const pdV = comps.pd ? avgOf(m.v, comps.pd.dates) : null, bsV = comps.bs ? avgOf(m.v, comps.bs.dates) : null;
+  const bsLY = !!(comps.bs && comps.bs.ly), pdV = comps.pd ? avgOf(m.v, comps.pd.dates) : null, bsV = comps.bs ? (bsLY ? (m.ly ? lyAvg(comps.bs.dates) : null) : avgOf(m.v, comps.bs.dates)) : null;
   Object.assign(o, { pdV, pd: pdV != null ? rel(val, pdV) : null, bsV, bs: bsV != null ? rel(val, bsV) : null });
-  if (m.sess) { o.sessPd = comps.pd ? rel(m.sess[i], avgOf(m.sess, comps.pd.dates)) : null; o.sessBs = comps.bs ? rel(m.sess[i], avgOf(m.sess, comps.bs.dates)) : null; }
+  if (m.sess) { o.sessPd = comps.pd ? rel(m.sess[i], avgOf(m.sess, comps.pd.dates)) : null; o.sessBs = comps.bs ? (bsLY ? (m.lysess ? rel(m.sess[i], sum(comps.bs.dates.map(x => m.lysess[lyIndex(x)] || 0)) / comps.bs.dates.length) : null) : rel(m.sess[i], avgOf(m.sess, comps.bs.dates))) : null; }
   if (m.sess) { o.sess = m.sess[i]; o.sessWow = comps.wow ? rel(o.sess, m.sess[I[comps.wow.date]]) : null; o.sessMom = comps.mom ? rel(o.sess, avgOf(m.sess, comps.mom.dates)) : null; }
   return o;
 }
@@ -431,8 +474,8 @@ function nrTip(m, x, bsV, val, ds) {
   const r = nrOf(m, x), w = Math.round(r.w * 100), nb = normBand(m), tc = tcls(r, x);
   const how = 'the <b>typical gap</b> between ' + esc(lcx(m.label)) + ' and its comparable days across <b>' + nb.n + ' ordinary days since ' + short(BASE_START) + '</b>' + (nb.skipped ? ' (' + nb.skipped + ' day' + (nb.skipped === 1 ? '' : 's') + ' with incidents, bot spikes or the price test left out)' : '') + (r.w >= nb.hi && nb.sd > nb.hi ? ', <b>capped at ' + w + '%</b> so a few odd days don\'t widen it' : r.w <= nb.lo && nb.sd < nb.lo ? ', with a <b>' + w + '% floor</b> so small wobbles don\'t count' : '') + '.';
   // Design agency, Oct 28: verdict first, then what day this is and exactly what it's compared with, then a chart with axes. The method is a footnote.
-  return '<div class="nrtip"><b class="tiph">' + esc(tipName(m)) + ' vs comparable days</b><span class="tipv">' + (r.st === 'in' ? '✅' : r.st === 'hi' ? '🚀' : '🔻') + ' <b>' + sgn(x, 0) + '</b>: <b class="t' + tc + '">' + (r.st === 'in' ? 'a normal day' : r.st === 'hi' ? 'above its normal range' : 'below its normal range') + '</b></span><span class="tipnr nr' + r.st + '">' + nrBarH(x, r.w) + '</span>' +
-    '<ul class="hul nrul"><li>📏 <b>Normal swing:</b> ±' + w + '% either way' + (r.st === 'in' ? ', so nothing to chase' : ', so this is worth a look') + '</li>' + cmpLines(m.b, ds, bsV, m) + '</ul>' +
+  return '<div class="nrtip"><b class="tiph">' + esc(tipName(m)) + ' vs comparable days</b>' + dayTag(m.b) + '<span class="tipv">' + (r.st === 'in' ? '✅' : r.st === 'hi' ? '🚀' : '🔻') + ' <b>' + sgn(x, 0) + '</b>: <b class="t' + tc + '">' + (r.st === 'in' ? 'a normal day' : r.st === 'hi' ? 'above its normal range' : 'below its normal range') + '</b></span><span class="tipnr nr' + r.st + '">' + nrBarH(x, r.w) + '</span>' +
+    '<ul class="hul nrul">' + cmpLines(m.b, ds, bsV, m) + '</ul>' +
     tipChart(m, ds, bsV, tc === 'lo' ? 'bad' : tc === 'hi' ? 'good' : null, { band: r.w }) + '<span class="nrhow">How the range is set: ' + how + '</span></div>';
 }
 // A jump of 30%+ on last year is more than shoppers explain; it's last year's less-filtered bot traffic (Mike, Oct 27).
@@ -637,7 +680,7 @@ function mvTabs(m, on) {
 const movedFor1 = m => MOVED.concat(typeof LIFTS !== 'undefined' ? LIFTS : []).find(x => x.m === m || (x.m.key === m.key && x.m.b === m.b)) || { m, c: cellsFor(m, state.day, compsFor(m.b, state.day)) };
 // What kind of day this is, in the words the header pill uses (Mike, Oct 28: "Day 5 of 5, 40% off sale" should be clear in the pop-up).
 const dayKind = (b, d) => { const st = infoNow(b, d); return st.sale ? (tierOf(b, d) ? 'Up to ' + tierOf(b, d) + '% off sale' : 'Sale') + ' · day ' + st.pos + ' of ' + st.len : 'No sale · regular prices'; };
-const cmpKind = (b, d, n) => { const st = infoNow(b, d), pk = st.sale ? posKey(st) : null; return pk && POSN[pk] ? 'the ' + POSN[pk] + ' of ' + n + ' earlier sale' + (n === 1 ? '' : 's') : n + ' earlier ' + (st.sale ? 'sale' : 'non-sale') + ' day' + (n === 1 ? '' : 's'); };
+const cmpKind = (b, d, n) => { const st = infoNow(b, d), pk = st.sale ? posKey(st) : null; return pk && POSN[pk] ? 'the ' + POSN[pk] + ' of ' + n + ' earlier sale' + (n === 1 ? '' : 's') : n + ' earlier ' + (st.sale ? 'sale day' + (n === 1 ? '' : 's') : noSaleKind(b, d, n)); };
 function movedModal(f) {
   const { m, c } = f, d = state.day, comps = compsFor(m.b, d), other = BR[BR[m.b].other].name, x = crossRead(m, d), jm = f.jm;
   const head = f.mix ? esc(m.label) + ' traffic ' + sgn(c.sessMom, 0) + ', CVR ' + sgn(c.mom, 0) : esc(m.label) + (m.sec === 'funnel' ? ' ' : ' CVR ') + sgn(c.mom, 0) + ' vs comparable days';
@@ -765,12 +808,12 @@ function cmpTip(b, d, kind, mk) {
   return h + (state.tipOther ? '<div class="kcoth">' + cmpTip1(BR[b].other, d, kind, mk, true).replace(CAP, '').replace(/var\(--accent\)/g, BR[BR[b].other].color) + '</div>' : '') + CAP;
 }
 function cmpTip1(b, d, kind, mk, bare) {
-  const M = metricsFor(b), m = M.overall[{ cvr: 0, sess: 1, rev: 2 }[mk]], I = SER.tp.idx, c = compsDefault(b, d), ly = kind === 'yoy';
+  const M = metricsFor(b), m = M.overall[{ cvr: 0, sess: 1, rev: 2 }[mk]], I = SER.tp.idx, c = compsDefault(b, d), ly = kind === 'yoy' || (kind === 'bs' && !!(c.bs && c.bs.ly));
   const fmt = mk === 'cvr' ? (x => pct(x)) : mk === 'sess' ? int : usd, nm = { cvr: 'CVR', sess: 'Sessions', rev: 'Revenue' }[mk];
   let ds = [], ttl = '';
   if (kind === 'hero') { for (let k = 13; k >= 1; k--) { const x = addDays(d, -k); if (I[x] !== undefined) ds.push(x); } ttl = 'the last two weeks'; }
   else if (kind === 'pd') { ds = c.pd ? c.pd.dates : []; ttl = 'vs prior day'; }
-  else if (kind === 'bs') { ds = baseDays(b, d); ttl = 'vs comparable days'; }
+  else if (kind === 'bs') { ds = c.bs && c.bs.ly ? c.bs.dates : baseDays(b, d); ttl = 'vs comparable days'; }
   else { ds = c.yoy && c.yoy.dates ? c.yoy.dates : []; ttl = 'vs last year'; }
   const v = x => ly ? (m.ly ? m.ly[lyIndex(x)] : null) : m.v[I[x]];
   const pts = ds.map(x => [x, v(x)]).filter(p => p[1] != null), today = m.v[I[d]];
@@ -800,7 +843,7 @@ function cmpTip1(b, d, kind, mk, bare) {
   const svg = '<svg width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '" style="display:block;margin:8px 0" aria-hidden="true">' + bars + al + tb + '</svg>';
   const dl = today / avg - 1;
   return '<b>' + BR[b].name + ' ' + nm + ' ' + ttl + '</b>' + sw + svg + '<div class="kct"><b>' + fmt(today) + '</b> on ' + short(d) + ' vs <b>' + fmt(avg) + '</b> ' + (pts.length === 1 ? 'on ' + dlab(pts[0][0]) : 'average of ' + pts.length + ' days (dashed line)') + ': <b style="color:var(--' + (dl < 0 ? 'bad' : 'good') + ')">' + sgn(dl, 1) + '</b></div>' +
-    (pts.length <= 6 ? '<div class="cap">' + pts.map(p => dlab(p[0]) + ' ' + fmt(p[1]) + (!ly && infoNow(b, p[0]).sale ? ' (sale)' : '')).join(' · ') + '</div>' : '<div class="cap">Darker bars are sale days.</div>') + '<div class="cap">Click the number to keep this open.</div>';
+    (pts.length <= 6 ? '<div class="cap">' + pts.map(p => dlab(p[0]) + ' ' + fmt(p[1]) + (!ly && infoNow(b, p[0]).sale ? ' (sale)' : '')).join(' · ') + '</div>' : '<div class="cap">Darker bars are sale days.</div>') + '<div class="cap">Click the number to keep this open.</div>' + (ly && isHoliday(d) ? '<div class="cap">📅 ' + lyExact(d) + '</div>' : '');
 }
 function kpiTip(b, d, m) {
   const I = SER.tp.idx, ds = []; for (let k = 27; k >= 0; k--) { const x = addDays(d, -k); if (I[x] !== undefined && m.v[I[x]] != null) ds.push(x); }
@@ -827,13 +870,16 @@ function peerLink(f) {
   return hint(txt, 'verd seglink" data-jumpsec="' + f.m.sec, tip);
 }
 function segTip2(f, tot) {
-  const m = f.m, d = state.day, c = cellsFor(m, d, compsFor(m.b, d)), r = nrOf(m, c.bs), x = crossRead(m, d), w = r ? Math.round(r.w * 100) : 0;
-  const peers = f.rest != null ? '<li>👥 <b>' + esc(ucf(f.peers)) + ':</b> ' + sgn(f.rest, 0) + ', so it is ' + Math.round(Math.abs(f.gap) * 100) + ' points ' + (f.gap > 0 ? 'ahead' : 'behind') + '</li>' : '';
-  const other = x && (x.rel === 'shared' || x.rel === 'only') ? '<li>' + (x.rel === 'shared' ? '🔁 <b>' + BR[x.o.b].name + ' too:</b> seeing the same move' : '📍 <b>Only on ' + BR[m.b].name + ':</b> ' + BR[x.o.b].name + ' isn\'t seeing it') + '</li>' : '';
-  return '<div class="nrtip segtip"><b class="tiph">' + esc(tipName(m)) + ' vs comparable days</b><span class="tipv">' + (r ? (r.st === 'in' ? '✅' : r.st === 'hi' ? '🚀' : '🔻') + ' ' : '') + '<b>' + sgn(c.bs, 0) + '</b>' + (r ? ': <b class="t' + tcls(r, c.bs) + '">' + (r.st === 'in' ? 'a normal day' : r.st === 'hi' ? 'above its normal range' : 'below its normal range') + '</b>' : '') + '</span>' + (r ? '<span class="tipnr nr' + r.st + '">' + nrBarH(c.bs, r.w) + '</span>' : '') +
-    '<ul class="hul nrul">' + (r ? '<li>📏 <b>Normal swing:</b> ±' + w + '% either way</li>' : '') + peers + other +
-    (c.sess != null && !m.isSess ? '<li>👣 <b>Sessions:</b> ' + int(c.sess) + (c.sessBs != null ? ' (' + sgn(c.sessBs, 0) + ' vs comparable days)' : '') + '</li>' : '') + cmpLines(m.b, (compsFor(m.b, d).bs || {}).dates, c.bsV, m) + '</ul>' +
-    tipChart(m, (compsFor(m.b, d).bs || {}).dates, c.bsV, r ? (tcls(r, c.bs) === 'lo' ? 'bad' : tcls(r, c.bs) === 'hi' ? 'good' : null) : null, { band: r ? r.w : 0 }) + '<span class="segmore">Click for the full read →</span></div>';
+  // Cut down for a glance (Mike, Oct 28: "this overlay is way too intense"): title, which days it's compared with, the verdict and range bar,
+  // its peers, then one chart with sessions in it. How the days are picked lives in the Sources and the full view, not here.
+  const m = f.m, d = state.day, c = cellsFor(m, d, compsFor(m.b, d)), r = nrOf(m, c.bs), bd = (compsFor(m.b, d).bs || {}).dates || [];
+  const st = infoNow(m.b, d), pk = st.sale ? posKey(st) : null, kind = st.sale ? (pk && POSN[pk] ? POSN[pk] + 's' : 'sale days') : noSaleKind(m.b, d, 2);
+  const peers = f.rest != null ? '<li>👥 <b>' + esc(ucf(f.peers)) + ':</b> ' + sgn(f.rest, 0) + ' on average</li>' : ''; // no "N points behind": the two numbers say it (Mike, Oct 28)
+  return '<div class="nrtip segtip"><b class="tiph">' + esc(tipName(m)) + ' vs comparable days</b>' +
+    (bd.length ? '<span class="tipsub">Most recent comparable days: ' + bd.slice(-3).map(z => short(z)).join(', ') + ' (' + kind + ')</span>' : '') +
+    '<span class="tipv">' + (r ? (r.st === 'in' ? '✅' : r.st === 'hi' ? '🚀' : '🔻') + ' ' : '') + '<b>' + sgn(c.bs, 0) + '</b>' + (r ? ': <b class="t' + tcls(r, c.bs) + '">' + (r.st === 'in' ? 'a normal day' : r.st === 'hi' ? 'above its normal range' : 'below its normal range') + '</b>' : '') + '</span>' + (r ? '<span class="tipnr nr' + r.st + '">' + nrBarH(c.bs, r.w) + '</span>' : '') +
+    (peers ? '<ul class="hul nrul">' + peers + '</ul>' : '') +
+    tipChart(m, bd, c.bsV, r ? (tcls(r, c.bs) === 'lo' ? 'bad' : tcls(r, c.bs) === 'hi' ? 'good' : null) : null, { band: r ? r.w : 0, full: true, sess: !m.isSess && m.sess, h: 140 }) + '<button type="button" class="segmore segbtn" data-segkey="' + esc(m.key) + '">Click for more details →</button></div>'; // a working link inside the hover (Mike, Oct 28: it did nothing)
 }
 function segTip(f, tot) {
   const up = f.c.mom >= 0, cls = up ? 'b' : 'w', sh = f.m.sec === 'funnel' ? 'Every order passes this step' : Math.round(Math.min(1, (f.c.sess || 0) / (tot || 1)) * 100) + '% of sessions';
@@ -863,19 +909,20 @@ function standupLine(b, d) {
 // Days no standup covered still get a subhead, built from the data: what kind of day it was and what stood out.
 // "Potential drivers vs comparable days:" with the comparable days on hover, so nobody has to ask what the pills compare to.
 function drvLbl() {
+  return ''; // no label: both CVR pages show just the pills (Mike, Nov 2)
   const b = state.tab, d = state.day, bd = (compsFor(b, d).bs || {}).dates || [], st = infoNow(b, d);
   return '<span class="mvlbl">' + hint('Key drivers', 'soft kvh', '<b>Each pill: ' + short(d) + ' vs its comparable days</b><ul class="hul nrul"><li>📏 <b>Baseline:</b> the average of ' + bd.length + ' day' + (bd.length === 1 ? '' : 's') + ' like ' + short(d) + '</li><li>🎯 <b>Like it:</b> ' + (st.sale ? 'the same point in a sale' : 'the same weekday, no sale') + '</li><li>📅 <b>The days:</b> ' + bd.map(x => short(x)).join(', ') + '</li><li>↔️ <b>Right side:</b> the rest of that group (other regions, other channels) on the same basis</li></ul>' + (bd.length < 3 ? '<span class="cap">Only ' + bd.length + ' matching day' + (bd.length === 1 ? '' : 's') + ', so treat big gaps with care.</span>' : '')) + ':</span>';
 }
 function autoLead(b, d) {
   const st = infoNow(b, d), tr = tierOf(b, d), comps = compsFor(b, d), ov = cellsFor(metricsFor(b).overall[0], d, comps), out = [];
-  out.push(st.sale ? 'Day ' + st.pos + ' of a ' + st.len + '-day ' + (tr ? 'up to ' + tr + '% off ' : '') + 'sale' : 'A regular-price ' + WDL[dow(d)]);
-  if (ov.sessBs != null && Math.abs(ov.sessBs) >= 0.1) out[0] += ', with traffic ' + sgn(ov.sessBs, 0) + ' vs comparable days';
+  // The sale tag above the headline already says what kind of day it is, so the subtitle doesn't repeat it (design agency, Oct 28).
+  if (ov.sessBs != null && Math.abs(ov.sessBs) >= 0.1) out.push('Traffic ' + sgn(ov.sessBs, 0) + ' vs comparable days');
   const f = MOVED[0], l = LIFTS[0];
   if (f && f.mix) out.push(f.m.label + ' brought a traffic spike (' + sgn(f.c.sessMom, 0) + ') that converted below usual');
   // Every number names what it's compared with (standup, Oct 27: "what's the baseline?" took the room a minute).
   /* the top driver's numbers are already in the headline; don't say them twice */
-  if (l && l.peers) out.push(l.m.label + ' CVR was ' + sgn(l.c.mom, 0) + ' vs its comparable days, while ' + l.peers + ' were ' + sgn(l.rest, 0) + onAvg(l.peers));
-  return '<p class="sulead" title="No standup notes for this day, so this line comes from the data">' + esc(out.join('. ')) + '.</p>';
+  // No driver numbers here: the pills carry them (Mike, Oct 28).
+  return out.length ? '<p class="sulead" title="No standup notes for this day, so this line comes from the data">' + esc(out.join('. ')) + '.</p>' : '';
 }
 // Segment names inside a sentence: funnel steps and devices are ordinary words, so they're lowercase mid-sentence ("USA and add to cart rate lifted it"); channels and regions keep their capitals.
 const inSent = (label, mid) => { const common = /\brate$/i.test(label) || /^(Desktop|Mobile|Tablet|App)$/i.test(label); return mid && common ? label.charAt(0).toLowerCase() + label.slice(1) : label.charAt(0).toUpperCase() + label.slice(1); };
@@ -898,13 +945,16 @@ function verdictHtml(b) {
   if (c.custom && c.mom != null) parts.push('<b>' + sgn(c.mom, 0) + ' vs your custom range</b>');
   // The headline grades the day on comparable days and last year (Mike, Oct 23). The prior day is context; it only leads when nothing else is available.
   let pdPart = null;
-  if (!(c.custom && c.mom != null) && p1.mom != null) pdPart = (hint(sgn(p1.mom, 0) + ' vs the prior day', 'verd n2', pct(p1.momV) + ' on ' + dmy(addDays(d, -1)) + '.' + (ctx ? ' <b>' + ctxLabel(b, d, p1.mom) + '</b> ' + ctx : '')));
+  if (!(c.custom && c.mom != null) && p1.mom != null) pdPart = '<span class="verd n2">' + sgn(p1.mom, 0) + ' vs the prior day</span>';
   // Colored by the normal range: inside is blue and says so; only outside it is green or red (Mike, Oct 27).
   const NR = B.c.mom != null ? nrOf(m, B.c.mom) : null;
   const calm = NR && NR.st === 'in';
-  if (B.c.mom != null) { const x = B.c.mom, tc0 = tcls(NR, x), cls = tc0 === 'lo' ? 'w' : tc0 === 'hi' ? 'b' : 'n2'; parts.push(hint(sgn(x, 0) + ' vs comparable days' + (NR.st === 'in' ? ' (within its normal range)' : ''), 'verd ' + cls, nrTip(m, x, B.c.momV, c.val, B.bd))); }
+  if (B.c.mom != null) { const x = B.c.mom, tc0 = tcls(NR, x), cls = tc0 === 'lo' ? 'w' : tc0 === 'hi' ? 'b' : 'n2'; parts.push('<span class="verd ' + cls + '">' + sgn(x, 0) + ' vs comparable days' + (NR.st === 'in' ? ' (within its normal range)' : '') + '</span>'); }
   // Up 30%+ on last year reads as last year's bots, so it stays out of the headline (Mike, Oct 27); the YoY card says "Likely bots".
-  if (b === 'tp' && c.yoy != null && !yoyBot(c.yoy)) { const j = judge(m, 'yoy', c.yoy, infoNow(b, d).sale); if (j.cls === 'bad') bad++; else if (j.cls === 'good') good++; const y = comps.yoy, ys = y && y.dates ? y.dates.map(x => short(x)).join(', ') + ', 2025' : y ? dmy(y.date, true) : ''; parts.push(hint(sgn(c.yoy, 0) + ' vs ' + kname('yoy', comps), 'verd ' + (c.yoy < 0 ? 'w' : c.yoy > 0 ? 'b' : 'n2'), '<b>' + sgn(c.yoy, 0) + ' vs ' + kname('yoy', comps) + '</b> (' + pct(c.ly) + ' → ' + pct(c.val) + ')<br>' + (y && y.dates ? 'Days averaged: ' : 'Day: ') + ys + '.')); }
+  if (b === 'tp' && !basisOn(b, d) && c.yoy != null && !yoyBot(c.yoy)) { const j = judge(m, 'yoy', c.yoy, infoNow(b, d).sale); if (j.cls === 'bad') bad++; else if (j.cls === 'good') good++; const y = comps.yoy, ys = y && y.dates ? y.dates.map(x => short(x)).join(', ') + ', 2025' : y ? dmy(y.date, true) : ''; parts.push('<span class="verd ' + (c.yoy < 0 ? 'w' : c.yoy > 0 ? 'b' : 'n2') + '">' + sgn(c.yoy, 0) + ' YoY</span>'); }
+  // YoY always ends the H1 (Mike, Oct 28). 30%+ is last year's bots, so it shows with 🤖, ungraded, and explains itself on hover.
+  if (b === 'tp' && basisOn(b, d) && c.yoy != null && yoyBot(c.yoy)) parts.push(hint('🤖 likely bots', 'verd n2', YOYBOT_TIP + '<br>' + pct(c.ly) + ' → ' + pct(c.val) + '.'));
+  else if (b === 'tp' && !basisOn(b, d) && c.yoy != null && yoyBot(c.yoy)) parts.push(hint(sgn(c.yoy, 0) + ' YoY 🤖', 'verd n2', YOYBOT_TIP + '<br>' + pct(c.ly) + ' → ' + pct(c.val) + '.'));
   // Comparable days always sets the tone; last year only when there's no baseline. Last year's bot traffic was worse and less filtered,
   // so a big YoY gap doesn't overrule it (Mike, Oct 26: tried letting a 4x-bigger YoY lead, then undid it).
   const yb = b === 'tp' ? c.yoy : null;
@@ -947,12 +997,30 @@ function verdictHtml(b) {
 function cmpControls(b, d) {
   const def = compsDefault(b, d).mom, cu = state.cust[b], st = infoNow(b, d);
   const why = def && def.pk ? 'This uses the ' + def.n + ' earlier ' + POSN[def.pk] + 's in the ' + ((parse(d) - parse(def.from)) / DAY > 35 ? 'nine' : 'five') + ' weeks before ' + short(d) + ' (' + spanOf(def) + '). Sale days are only averaged with the same point in other sales.' : def ? 'Last month\'s average uses the ' + def.n + ' ' + (st.sale ? 'sale' : 'non-sale') + ' days in the 4 weeks before ' + short(d) + ' (' + spanOf(def) + '). Same sale status, so a sale day is never averaged against normal days.' : 'Too few matching days in the 4 weeks before for a fair average.';
-  let h = '<div class="cmpbar"><span>Comparing with <b>' + (cu ? 'your range</b> (' + range(cu.from, cu.to) + ')' : 'the prior day</b> (' + dmy(addDays(d, -1)) + ')') + ', <b>comparable days</b>' + (b === 'tp' ? ' and <b>last year</b>' : '') + '.</span>' +
+  let h = '<div class="cmpbar"><span>Comparing with <b>' + (cu ? 'your range</b> (' + range(cu.from, cu.to) + ')' : 'the prior day</b> (' + dmy(addDays(d, -1)) + ')') + (basisOn(b, d) ? ' and <b>last year\'s same weekday</b>' : ', <b>comparable days</b>' + (b === 'tp' ? ' and <b>last year</b>' : '')) + '.</span>' +
     (cu ? '<button class="linkbtn" id="cmpreset">Back to the prior day</button>' : '') + '</div>';
   if (state.cmpEdit) h += '<div class="cmpedit"><label>Average of <input type="date" class="pick" id="cfrom" min="' + SER[b].dates[0] + '" max="' + D.asOf + '" value="' + (cu ? cu.from : def ? def.from : addDays(d, -28)) + '"></label><label>to <input type="date" class="pick" id="cto" min="' + SER[b].dates[0] + '" max="' + D.asOf + '" value="' + (cu ? cu.to : def ? def.to : addDays(d, -1)) + '"></label><button class="btn pri" id="cmpapply">Compare</button><p class="cap">' + why + ' Pick one day or a range to compare ' + short(d) + ' against instead. Custom ranges use every day in the range and are not graded red or green.</p></div>';
   return h;
 }
+// Always at least 2 comparison days (Mike, Oct 30). When too few same-kind days exist, top up with the most recent day of the same kind
+// from the same part of the week (Mon to Thu, Friday, or the weekend), then older ones, so one odd day never sets the baseline alone.
+const wkGrp = x => { const w = dow(x); return w >= 1 && w <= 4 ? 'wk' : w === 5 ? 'fri' : 'we'; }, WKGN = { wk: 'midweek day', fri: 'Friday', we: 'weekend day' };
+const BDC = {};
+// When the rule had to stretch to reach 2 days, say so plainly (Mike, Oct 30: "just note that").
+const stretchNote = (b, d, bd) => { if (!bd || !bd.topped) return ''; const st = infoNow(b, d), e = st.sale ? null : edgeOf(b, d);
+  return ' ⚠️ Rule stretched: ' + (st.sale ? 'too few recent sales at this point, so an older one was added.' : e !== 'plain' ? 'too few recent ' + EDGEN[e].replace('day', 'days') + ', so an older one was added.' : 'too few recent ' + WDL[dow(d)] + 's with no sale, so the nearest ' + WKGN[wkGrp(d)] + ' was added (' + bd.filter(x => dow(x) !== dow(d)).map(x => short(x) + ', a ' + WDL[dow(x)]).join('; ') + ').'); };
 function baseDays(b, d) {
+  if (basisOn(b, d)) { const o = [addDays(d, -364)]; o.ly = true; return o; } // Nov and Dec on the year-over-year basis: last year's same weekday is the one comparison day
+  const key = b + '|' + d + '|' + BASE_START; if (key in BDC) return BDC[key];
+  const out = baseDays0(b, d); if (out.length >= 2) return (BDC[key] = out);
+  const st = infoNow(b, d), pk = posKey(st), e = st.sale ? null : edgeOf(b, d), S = SER[b];
+  const loose = x => { if (x === d || isContam(b, x) || out.indexOf(x) >= 0) return false; const i = infoNow(b, x); if (st.sale) return i.sale && posKey(i) === pk; if (i.sale) return false; return e === 'plain' ? edgeOf(b, x) === 'plain' && wkGrp(x) === wkGrp(d) : edgeOf(b, x) === e; };
+  const add = []; for (let x = addDays(d, -1); x >= S.dates[0] && out.length + add.length < 2; x = addDays(x, -1)) if (loose(x)) add.push(x);
+  if (!add.length) return (BDC[key] = out);
+  const res = out.concat(add).sort(); res.tierMix = out.tierMix; res.near = out.near; res.topped = true;
+  return (BDC[key] = res);
+}
+function baseDays0(b, d) {
   const st = infoNow(b, d), pk = posKey(st), wd = new Date(d + 'T12:00:00Z').getUTCDay();
   // Same discount tier first; if no such day exists, the same position at any tier, flagged.
   for (const strict of [true, false]) {
@@ -960,13 +1028,13 @@ function baseDays(b, d) {
     for (let x = BASE_START; x < d; x = addDays(x, 1)) {
       if (isContam(b, x)) continue;
       const i = infoNow(b, x);
-      if (st.sale ? posKey(i) === pk && (!strict || sameTier(b, d, x)) : !i.sale && new Date(x + 'T12:00:00Z').getUTCDay() === wd) out.push(x);
+      if (st.sale ? posKey(i) === pk && (!strict || sameTier(b, d, x)) : !i.sale && sameKind(b, d, x)) out.push(x);
     }
     if (out.length) { out.tierMix = !strict; return out; }
   }
   // Nothing since BASE_START (a day before the baseline starts, e.g. Sep 12 under Maximum): use the nearest matching days instead,
   // up to 4, looking back first and then forward, so the column is never empty (Mike, Oct 26).
-  const S = SER[b], ok = (x, strict) => { if (x === d || isContam(b, x)) return false; const i = infoNow(b, x); return st.sale ? posKey(i) === pk && (!strict || sameTier(b, d, x)) : !i.sale && new Date(x + 'T12:00:00Z').getUTCDay() === wd; };
+  const S = SER[b], ok = (x, strict) => { if (x === d || isContam(b, x)) return false; const i = infoNow(b, x); return st.sale ? posKey(i) === pk && (!strict || sameTier(b, d, x)) : !i.sale && sameKind(b, d, x); };
   for (const strict of [true, false]) {
     let out = [];
     for (let x = addDays(d, -1); x >= S.dates[0] && out.length < 4; x = addDays(x, -1)) if (ok(x, strict)) out.unshift(x);
@@ -1025,16 +1093,19 @@ function topHtml(b) {
   // Under the number: the change vs comparable days and where it sits in the normal range (Mike, Oct 27).
   // A small panel, not a tag (Mike, Oct 27): the change on top, the range bar, then the verdict, tinted by where the day sits.
   const hb = baseOf(b, d, m), hw = hr ? Math.round(hr.w * 100) : 0, htc = tcls(hr, bx);
-  const nrRow = hr ? '<span class="nrpanel nr' + hr.st + '">' + hint('<span class="nrp1"><b class="t' + htc + '">' + sgn(bx, 0) + '</b> vs comparable days</span>' + nrBarH(bx, hr.w) +
-    '<span class="nrp2">' + (hr.st === 'in' ? '<b>Within normal range:</b> a normal day lands within ±' + hw + '% of comparable days' : hr.st === 'hi' ? '<b>Above normal range:</b> more than ' + hw + '% over comparable days' : '<b>Below normal range:</b> more than ' + hw + '% under comparable days') + '</span>', 'nrph', nrTip(m, bx, hb.c.momV, c.val, hb.bd)) + '</span>' : '';
+  // The range box as before, without its hover (Mike, Oct 28: the chart beside it already does that; the redesign was reverted).
+  // Name the days it's compared with (Mike, Oct 28): "compared with the 3 most recent second-to-last sale days".
+  const cst = infoNow(b, d), cpk = cst.sale ? posKey(cst) : null, cn = (hb.bd || []).length;
+  const lyb = basisOn(b, d), ckind = lyb ? 'last year\'s ' + WDL[dow(addDays(d, -364))] + ', ' + short(addDays(d, -364)) : !cn ? 'comparable days' : 'the ' + (cn > 1 ? cn + ' ' : '') + 'most recent ' + (cst.sale ? (cpk && POSN[cpk] ? POSN[cpk] : 'sale day') + (cn > 1 ? 's' : '') : noSaleKind(b, d, cn));
+  const nrRow = hr ? '<span class="nrpanel nr' + hr.st + '"><span class="nrp2">' + (hr.st === 'in' ? '<b>Within normal range:</b> compared with ' + ckind + ', and within the normal ±' + hw + '% swing' : hr.st === 'hi' ? '<b>Above normal range:</b> compared with ' + ckind + ', more than the normal ±' + hw + '% swing' : '<b>Below normal range:</b> compared with ' + ckind + ', more than the normal ±' + hw + '% swing') + '</span><span class="nrp1"><b class="t' + htc + '">' + sgn(bx, 0) + '</b> vs comparable days</span>' + nrBarH(bx, hr.w) + '</span>' : '';
   let keys = '<div class="key hero' + (hr ? (htc === 'hi' ? ' kup' : htc === 'lo' ? ' kdn' : ' kin') : lt == null || yoyBot(lt) ? '' : lt > 0 ? ' kup' : lt < 0 ? ' kdn' : '') + '"><span class="lbl">Conversion rate <span class="lbld">' + label(d) + ' · ' + lcx(st.label) + '</span></span><span class="big">' + hint(pct(c.val), 'kbig', cmpTip(b, d, 'hero', 'cvr')) + '</span>' + nrRow + '@@SR@@' + aovRow(b, d) + '</div>';
   const comp = k => {
     if (k === 'yoy' && b === 'rb') return '<div class="key"><span class="lbl">vs last year</span><span class="big na-big">Not yet</span><span class="sub">RBO data in Amplitude starts July 2026.</span></div>';
     const cmp = comps[k], x = c[k], v = cv(c, k);
-    const lbl = k === 'mom' && c.custom ? 'vs your range' : k === 'yoy' ? hint('vs last year', 'soft', '<b>' + esc(ucf(kname('yoy', comps))) + '</b><br>' + (cmp && cmp.dates ? 'The average of ' + cmp.n + ' matching days: ' + cmp.dates.map(x => short(x)).join(', ') + ', 2025.' : 'The same weekday last year.')) : kcol(k, comps);
+    const lbl = k === 'mom' && c.custom ? 'vs your range' : k === 'yoy' ? hint('vs last year', 'soft', '<b>' + esc(ucf(kname('yoy', comps))) + '</b><br>' + (cmp && cmp.exact ? lyBody(state.day) : cmp && cmp.dates ? 'The average of ' + cmp.n + ' matching days: ' + cmp.dates.map(x => short(x)).join(', ') + ', 2025.' : 'The same weekday last year.')) : kcol(k, comps);
     const yj = k === 'yoy' && x != null ? judge(m, 'yoy', x, st.sale) : null;
     return '<div class="key' + (yj && yj.mat ? ' g' + yj.mat : '') + '"><span class="lbl">' + lbl + '</span><span class="big">' + (x == null ? '<span class="na-big">n/a</span>' : k === 'yoy' ? hint(sgn(x), 'kbig', cmpTip(b, d, 'yoy', 'cvr')) : sgn(x)) + '</span>' +
-      '<span class="sub kvs">' + (v == null ? naCell(m, d, k, comps) : (k === 'yoy' ? hint('vs ' + pct(v), 'kvh" data-why="yoy', '<b>vs ' + pct(v) + ': last year</b><ul class="hul nrul"><li>📏 <b>What it is:</b> ' + (cmp && cmp.dates ? 'the average of ' + cmp.n + ' matching days last year' : 'the same day last year') + '</li>' + (cmp && cmp.dates ? '<li>📅 <b>The days:</b> ' + cmp.dates.map(x => short(x)).join(', ') + '</li>' : '') + '</ul><span class="segmore">Click for details →</span>') + '<button hidden>' : 'vs ' + pct(v) + ' · <button class="linkbtn" data-why="' + k + '">') + (k === 'yoy' ? '' : k === 'wow' || (cmp && cmp.custom) ? cmpLabel(cmp, k) : 'What\'s this?') + '</button>' + (cmp && cmp.tierMix ? ' · <span class="na" title="No earlier matching day at the same discount, so this one is at a different discount">different discount</span>' : '')) + '</span>' +
+      '<span class="sub kvs">' + (v == null ? naCell(m, d, k, comps) : (k === 'yoy' ? hint('vs ' + pct(v), 'kvh" data-why="yoy', '<b>vs ' + pct(v) + ': last year</b><ul class="hul nrul"><li>📏 <b>What it is:</b> ' + (cmp && cmp.exact ? lyBody(state.day) : cmp && cmp.dates ? 'the average of ' + cmp.n + ' matching days last year' : 'the same day last year') + '</li>' + (cmp && cmp.dates && !cmp.exact ? '<li>📅 <b>The days:</b> ' + cmp.dates.map(x => short(x)).join(', ') + '</li>' : '') + '</ul><span class="segmore">Click for details →</span>') + '<button hidden>' : 'vs ' + pct(v) + ' · <button class="linkbtn" data-why="' + k + '">') + (k === 'yoy' ? '' : k === 'wow' || (cmp && cmp.custom) ? cmpLabel(cmp, k) : 'What\'s this?') + '</button>' + (cmp && cmp.tierMix ? ' · <span class="na" title="No earlier matching day at the same discount, so this one is at a different discount">different discount</span>' : '')) + '</span>' +
       // Maximum's audience shrank sharply from Sep 22, and last year's visitors scored differently, so its YoY is a loose read (Mike, Oct 26).
       (k === 'yoy' && yoyBot(x) ? '<span class="sub ymax">' + hint('<span class="ybot">🤖 Likely bots</span>', 'soft ybh2', YOYBOT_TIP) + '</span>' : k === 'yoy' && state.botf === 'max' && x != null ? '<span class="sub ymax">' + hint('Read loosely under Maximum', 'soft', YOYMAX) + '</span>' : '') +
       line('Sessions', cs[k === 'yoy' ? 'yoy' : k], cs.val, cv(cs, k), int) + line('Revenue', cr[k], cr.val, cv(cr, k), usd) + '</div>';
@@ -1067,11 +1138,11 @@ function topHtml(b) {
   // Overview card (Allison and Mike, Oct 28: the sentence, the first card and the baseline card said the same thing three times).
   // One wide card: the rate, its range bar, the other site vs its own baseline, sessions and revenue vs comparable days, and the comparison chart on the right.
   // Prior day leaves the top (context only; it's in the scorecard). Last year stays as the one side card.
-  keys = keys.replace('@@SR@@', line('Sessions', cs2.mom, cs2.val, cs2.momV, int) + line('Revenue', cr2.mom, cr2.val, cr2.momV, usd));
-  keys = kadd(keys, kon ? orow(obc.mom, obc.val, obc.momV, nrOf(om, obc.mom), 'comparable days').replace('<span class="kow">was</span>', '<span class="kow">CVR was</span> <b>' + pct(oc.val) + '</b>,') : '');
-  const kop = keys.indexOf('>') + 1, kch = tipChart(m, bd, c2.momV, htc === 'lo' ? 'bad' : htc === 'hi' ? 'good' : null, { band: hr ? hr.w : 0, h: 200, w: 560, dots: true });
-  keys = keys.slice(0, kop).replace('class="key hero', 'class="key hero kwide') + '<div class="kleft">' + keys.slice(kop, -6) + '</div>' + (kch ? '<div class="kright"><span class="lbl">Against its comparison days</span><span class="kexp">' + (bd.length ? 'Compared with ' + esc(cmpKind(b, d, bd.length)) + ' (' + bd.map(z => short(z)).join(', ') + '). The band is the normal range around their average.' : 'No comparable days yet.') + '</span>' + kch + '</div>' : '') + '</div>' +
-    (c.custom ? kadd(comp('mom'), orow(op.mom, op.val, op.momV, null, 'range')) : '') + (b === 'rb' ? '' : kadd(comp('yoy'), '<span class="krow kother">' + onm + ' <span class="na">no last-year data yet</span></span>')); // no last-year card on Redbubble until its data exists (Mike, Oct 28)
+  keys = keys.replace('@@SR@@', plain('Sessions', int(cs.val)) + line('Revenue', cr2.mom, cr2.val, cr2.momV, usd)); // sessions plain here (Mike, Oct 28)
+  keys = kadd(keys, kon ? orow(obc.mom, obc.val, obc.momV, nrOf(om, obc.mom), 'comparable\u200b days').replace('<span class="kow">was</span>', '<span class="kow">CVR was</span> <b>' + pct(oc.val) + '</b>,') : '');
+  const kop = keys.indexOf('>') + 1, kch = cmpBars(m, bd, c2.momV, htc === 'lo' ? 'bad' : htc === 'hi' ? 'good' : null, hr ? hr.w : 0) || tipChart(m, bd, c2.momV, htc === 'lo' ? 'bad' : htc === 'hi' ? 'good' : null, { band: hr ? hr.w : 0, h: 200, w: 560, dots: true });
+  keys = keys.slice(0, kop).replace('class="key hero', 'class="key hero kwide') + '<div class="kleft">' + keys.slice(kop, -6) + '</div>' + (kch ? '<div class="kright"><span class="lbl">Against its comparison days</span><span class="kexp">' + (bd.length ? (bd.ly ? 'For November to December, we compare year over year on the same day of the week.' : 'Compared with ' + esc(cmpKind(b, d, bd.length)) + ' (' + bd.map(z => short(z)).join(', ') + '). The band is the normal range around their average.' + stretchNote(b, d, bd)) : 'No comparable days yet.') + '</span>' + kch + '</div>' : '') + '</div>' +
+    (c.custom ? kadd(comp('mom'), orow(op.mom, op.val, op.momV, null, 'range')) : '') + ''; // no last-year tile on either site: the RB layout reads better, and YoY lives in the H1 and the scorecard (Mike, Oct 28)
   // The day controls live in a small chip at the top right; click it for the full panel (pick a day, edit comparisons, sale calendar).
   const saleTxt = st.sale && tierOf(b, d) ? 'Up to ' + tierOf(b, d) + '% off sale · day ' + st.pos + ' of ' + st.len : st.label;
   const panel = '<div class="dayline"><span class="daynav"><button class="navbtn" id="prev" aria-label="Previous day" ' + (atStart ? 'disabled' : '') + '>‹</button><span class="daytitle">' + label(d) + '</span><button class="navbtn" id="next" aria-label="Next day" ' + (atEnd ? 'disabled' : '') + '>›</button></span>' +
@@ -1083,11 +1154,11 @@ function topHtml(b) {
   // Each option explains itself on hover; the label is plain (Mike, Oct 26).
   // Bot filter: a quiet menu top right, above the date, so it doesn't sit between the sale and the headline (Mike, Oct 28).
   const bfk = state.botf === 'strong' ? 'strong' : 'max';
-  const bot = !hasMax() ? '' : '<details class="bfdd"><summary><svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><path d="M8 1.6 3 3.6v4c0 3 2.1 5.3 5 6.4 2.9-1.1 5-3.4 5-6.4v-4z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>Bot filter: <b>' + BOTF[bfk].l + '</b><span class="bfcar" aria-hidden="true">▾</span></summary><div class="bfmenu">' +
-    ['max', 'strong'].map(k => '<button type="button" class="bfitem" data-botf="' + k + '" aria-pressed="' + (bfk === k) + '"><b>' + BOTF[k].l + (k === 'max' ? ' <span class="bfdef">default</span>' : '') + '</b><span>' + BOTF_TIP[k](b).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().replace(/^\S+( \(default\))?\s*:\s*/, '').replace(/\bUS\b/g, 'USA') + '</span></button>').join('') + '</div></details>';
+  const bot = !hasMax() ? '' : '<div class="bfwrap"><span class="bftitle">Bot filter</span><details class="bfdd"><summary><svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><path d="M8 1.6 3 3.6v4c0 3 2.1 5.3 5 6.4 2.9-1.1 5-3.4 5-6.4v-4z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg><b>' + BOTF[bfk].l + '</b><span class="bfcar" aria-hidden="true">▾</span></summary><div class="bfmenu">' +
+    ['max', 'strong'].map(k => '<button type="button" class="bfitem" data-botf="' + k + '" aria-pressed="' + (bfk === k) + '"><b>' + BOTF[k].l + (k === 'max' ? ' <span class="bfdef">default</span>' : '') + '</b><span>' + BOTF_TIP[k](b).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().replace(/^\S+( \(default\))?\s*:\s*/, '').replace(/\bUS\b/g, 'USA').replace(/^Bot score/, 'Cloudflare bot score') + '</span></button>').join('') + '</div></details></div>'; // "Bot filter" as the title, the shield and the choice as the dropdown (Mike, Oct 28)
   const chip = '<div class="dchipw"><button type="button" class="dchip' + (atEnd ? '' : ' past') + '" data-dayopen="1" aria-expanded="' + !!state.dayOpen + '"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><rect x="2" y="3" width="12" height="11" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M2 6.5h12M5.5 1.8v2.6M10.5 1.8v2.6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><b>' + label(d) + '</b><span class="dcar" aria-hidden="true"><svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><path d="M10.6 2.6a1.6 1.6 0 0 1 2.3 2.3L5.7 12.1 2.5 13l.9-3.2z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="m9.4 3.8 2.3 2.3" stroke="currentColor" stroke-width="1.5"/></svg></span></button><div class="daypop"' + (state.dayOpen ? '' : ' hidden') + '>' + panel + '</div></div>';
-  return '<section aria-label="Day under review"><div class="dtop">' + bot + chip + '</div>' +
-    '<div class="vsalew">' + (st.sale ? '<span class="vsale">🏷️ ' + saleTxt + '</span>' : '<span class="vsale off">No sale · regular prices</span>') /* bigger when on sale, neutral when not (Allison, Oct 28) */ + '</div>' + '<p class="verdict">' + (verdictHtml(b), VLEAD) + '</p>' + movedHtml() + '<div class="keys kov' + (c.custom ? ' kcus' : '') + (b === 'rb' && !c.custom ? ' ksolo' : '') + '">' + keys + '</div>' + '</section>';
+  return '<section aria-label="Day under review"><div class="dtop">' + bot + '</div>' +
+    '<div class="vsalew vsale2">' + chip + (st.sale ? '<span class="vsale">🏷️ ' + saleTxt + '</span>' : '<span class="vsale off">No sale · regular prices</span>') + '</div>' /* above the headline on the CVR tabs, in the earlier brand-tinted design (Mike, Oct 28) */ + '<p class="verdict">' + (verdictHtml(b), VLEAD) + '</p>' + standupLine(b, d) /* the subhead is back (Mike, Oct 28) */ + movedHtml() + '<div class="keys kov' + (c.custom ? ' kcus' : '') + (!c.custom ? ' ksolo' : '') /* full width on both sites now the last-year tile is gone (Mike, Oct 28) */ + '">' + keys + '</div>' + '</section>';
 }
 // Small month calendar inside the day pop-over: sale days shaded by discount, so picking a day shows what kind of day it was.
 function popCal(b, d) {
@@ -1109,8 +1180,8 @@ const OFFERS = {
     ['2026-09-03', '2026-09-07', 'Up to 40% off', 'Sep 5 and 6 may have been 35%'], ['2026-09-15', '2026-09-17', 'Up to 40% off', '$6 off Extra Soft Tees'], ['2026-09-18', '2026-09-19', 'Up to 35% off', '$10 off Hoodies'], ['2026-09-20', '2026-09-20', 'Up to 40% off', '$8 off Vintage Tees'],
     ['2026-09-25', '2026-09-27', 'Up to 40% off', '$16 Tees, $8 off Crewnecks'], ['2026-09-30', '2026-10-01', 'Up to 40% off', '$8 off Vintage Tees'], ['2026-10-02', '2026-10-03', 'Up to 35% off', '$8 off Streetwear Tees'], ['2026-10-04', '2026-10-04', 'Up to 40% off', '$5 off Mugs'],
     ['2026-10-13', '2026-10-14', 'Up to 40% off', '$8 off Baseball Tees'], ['2026-10-15', '2026-10-16', 'Up to 35% off', '$10 off Kids Hoodies'], ['2026-10-17', '2026-10-18', 'Up to 40% off', '$6 off Extra Soft Tees'],
-    ['2026-10-21', '2026-10-21', 'Up to 40% off', '$10 off Hoodies'], ['2026-10-22', '2026-10-23', 'Up to 35% off', '$8 off Hats'], ['2026-10-24', '2026-10-25', 'Up to 40% off', '$10 off Hoodies']],
-  rb: [['2026-09-23', '2026-09-28', 'Up to 40% off', ''], ['2026-10-04', '2026-10-11', 'Up to 40% off', 'Plus 25% off 1 to 3 stickers (test)'], ['2026-10-21', '2026-10-26', 'Up to 40% off', ''], ['2026-11-02', '2026-11-21', 'Up to 50% off', 'Planned; dates being confirmed in #promotions'], ['2026-11-22', '2026-12-01', 'Up to 60% off', 'Planned: Black Friday and Cyber Monday'], ['2026-12-02', '2026-12-02', 'Up to 50% off', 'Planned; Dec 2 tier still being confirmed'], ['2026-12-03', '2026-12-20', 'Up to 55% off', 'Planned']]
+    ['2026-10-21', '2026-10-21', 'Up to 40% off', '$10 off Hoodies'], ['2026-10-22', '2026-10-23', 'Up to 35% off', '$8 off Hats'], ['2026-10-24', '2026-10-25', 'Up to 40% off', '$10 off Hoodies'], ['2026-11-01', '2026-11-03', 'Up to 40% off', '$16 Tees, $8 off Crewnecks'], ['2026-11-04', '2026-11-05', 'Up to 35% off', '$16 Tees, $8 off Hats'], ['2026-11-06', '2026-11-07', 'Up to 40% off', '$16 Tees, $8 off Vintage Tees'], ['2026-11-08', '2026-11-09', 'Up to 35% off', '$16 Tees, $6 off Mugs'], ['2026-11-10', '2026-11-12', 'Up to 40% off', '$16 Tees, $6 off Extra Soft Tees'], ['2026-11-13', '2026-11-14', 'Up to 35% off', '$16 Tees, $6 off Crossbody Bags'], ['2026-11-15', '2026-11-16', 'Up to 40% off', '$16 Tees, $10 off Hoodies'], ['2026-11-17', '2026-11-19', 'Up to 35% off', '$16 Tees, $7 off Kids Tees'], ['2026-11-20', '2026-11-21', 'Up to 40% off', '$16 Tees, $7 off Socks'], ['2026-11-22', '2026-11-23', 'Up to 35% off', '$16 Tees, $7 off Phone Cases'], ['2026-11-24', '2026-11-26', 'Up to 40% off', 'Cyber: $15 Tees, $6 off Mugs'], ['2026-11-27', '2026-11-30', 'Up to 40% off', 'Cyber: $15 Tees'], ['2026-12-01', '2026-12-19', 'Holiday sale', 'Planned: December offers to be posted next week']],
+  rb: [['2026-09-23', '2026-09-28', 'Up to 40% off', ''], ['2026-10-04', '2026-10-11', 'Up to 40% off', 'Plus 25% off 1 to 3 stickers (test)'], ['2026-10-21', '2026-10-26', 'Up to 40% off', ''], ['2026-11-02', '2026-11-08', 'Up to 50% off', '30% off Tees'], ['2026-11-09', '2026-11-15', 'Up to 50% off', '30% off Posters'], ['2026-11-16', '2026-11-21', 'Up to 50% off', '30% off select Phone Cases'], ['2026-11-22', '2026-12-01', 'Up to 60% off', 'Cyber: 35% off Tees, plus flash deals'], ['2026-12-02', '2026-12-02', 'Up to 50% off', 'Planned; Dec 2 tier still being confirmed'], ['2026-12-03', '2026-12-20', 'Up to 55% off', 'Planned']]
 };
 const offerOn = (b, d) => (OFFERS[b] || []).find(o => d >= o[0] && d <= o[1]);
 function saleCalModal() {
@@ -1171,8 +1242,15 @@ function rankMoved() {
   const tot = rankTot(), wt = f => Math.max(0, -(f.jm ? f.jm.dlt : f.c.mom || 0)) * (f.m.sec === 'funnel' ? 1 : Math.min(1, (f.c.sess || 0) / tot));
   return MOVED.slice(0, 8).map((f, i) => ({ f, i, w: wt(f) })).sort((a, z) => z.w - a.w);
 }
-function movedHtml() {
-  let h = movedHtml0(); const all0 = h.match(/<button class="mv[^"]*"[\s\S]*?<\/button>/g) || [];
+function basisTog() {
+  const b = state.tab, d = state.day; if (b !== 'tp' || !isHoliday(d) || lyIndex(addDays(d, -364)) < 0) return '';
+  const on = basisOn(b, d), bt = (k, t, tip) => '<button type="button" data-basis="' + k + '" aria-pressed="' + (on === (k === 'yoy')) + '" title="' + esc(tip) + '">' + t + '</button>';
+  return '<span class="basistog" role="group" aria-label="Compare with">' + bt('cmp', 'Recent comparison days', 'Recent days like this one: the same weekday, or the same point in a sale') + bt('yoy', 'YOY', 'Year over year: ' + lyBody(d)) + '</span>';
+}
+function movedHtml() { const h = movedHtmlB(), tg = basisTog(); return tg ? h.replace(/<\/div><\/div>$/, tg + '</div></div>') : h; }
+function movedHtmlB() {
+  let h = movedHtml0(); if (state.view === 'daily') return h; // flagged pills come back ready: 3 plus "View N more" (Mike, Oct 28)
+  const all0 = h.match(/<button class="mv[^"]*"[\s\S]*?<\/button>/g) || [];
   const rank = p => { const i = VNAMES.findIndex(n => p.indexOf('<b>' + esc(n) + '</b>') >= 0); return i < 0 ? 99 : i; };
   const all = all0.slice().sort((a, z) => rank(a) - rank(z));
   if (all.length) { const first = h.indexOf(all0[0]); all0.forEach(p => { h = h.replace(p, ''); }); h = h.slice(0, first) + all.join('') + h.slice(first); }
@@ -1181,11 +1259,23 @@ function movedHtml() {
   let out = h; hide.forEach(b => { out = out.replace(b, ''); });
   return out.replace(/<\/div><\/div>$/, '<button type="button" class="linkbtn mvmore" data-mvmore="1">' + (state.mvAll ? 'Show fewer' : '+' + (all.length - 2) + ' more') + '</button></div></div>');
 }
+// The top pills are exactly the rows flagged in the right nav (below their normal range), worst first (Mike, Oct 28).
+let FLAGGED = [];
+function flaggedFor(b, d) {
+  const comps = compsFor(b, d), sale = infoNow(b, d).sale, M = metricsFor(b), out = [];
+  Object.keys(SECS).forEach(sec => (M[sec] || []).forEach(m => {
+    if (m === M.overall[0]) return;
+    const c0 = cellsFor(m, d, comps); if (c0.bs == null || c0.custom || nrOf(m, c0.bs).st !== 'lo') return;
+    const x = sibsOf(m, d);
+    out.push({ m, c: Object.assign({}, c0, { mom: c0.bs, momV: c0.bsV, sessMom: c0.sessBs }), rest: x ? x.restMom : null, gap: x ? x.gap : null, peers: x ? (x.rest.length === 1 ? x.rest[0].m.label : 'other ' + x.n[1]) : null, mix: false, jm: judge(m, 'bs', c0.bs, sale) });
+  }));
+  return out.sort((a, z) => a.c.bs - z.c.bs);
+}
 function movedHtml0() {
   const ovb = cellsFor(metricsFor(state.tab).overall[0], state.day, compsFor(state.tab, state.day)).bs, up = ovb != null && ovb >= 0.02;
   const totS = cellsFor(metricsFor(state.tab).overall[0], state.day, compsFor(state.tab, state.day)).sess;
   // Pills are the day's callouts now (Allison and Mike, Oct 28): name, what it did, then its peers; hover for the read, click for the full view.
-  const lpill = (f, i) => '<button class="mv up" data-lift="' + i + '" data-hint="' + (HINTS.push(segTip2(f, totS)) - 1) + '"><span class="mvl"><span aria-hidden="true">' + em(f.m.label) + '</span><b>' + esc(f.m.label) + '</b><span class="mvv">did best</span><span class="d">' + sgn(f.c.mom, 0) + '</span></span>' + (f.rest != null ? '<span class="mvr roll"><span class="rf sib on" data-jumpsec="' + f.m.sec + '" role="link" title="Jump to ' + esc(SECS[f.m.sec] || f.m.sec) + '">' + esc(ucf(f.peers)) + ' ' + sgn(f.rest, 0) + '</span></span>' : '') + '</button>';
+  const lpill = (f, i) => '<button class="mv up" data-lift="' + i + '" data-hint="' + (HINTS.push(segTip2(f, totS)) - 1) + '"><span class="mvl"><span aria-hidden="true">' + em(f.m.label) + '</span><b>' + esc(f.m.label) + '</b><span class="mvv">did best</span><span class="d">' + sgn(f.c.mom, 0) + '</span></span>' + (f.rest != null ? '<span class="mvr roll"><span class="rf sib on" data-jumpsec="' + f.m.sec + '" role="link" aria-label="Jump to ' + esc(SECS[f.m.sec] || f.m.sec) + '">' + esc(ucf(f.peers)) + ' ' + sgn(f.rest, 0) + '</span></span>' : '') + '</button>';
   const liftTier = up && LIFTS.length ? LIFTS.map(lpill).join('') : '';
   if (up) MVUP = liftTier;
   const how = t => hint('How drivers are picked ⓘ', 'soft mvhowh', '<b>What counts as a driver</b><br>' + t + '<br><br><b>Colors:</b> red pills are the biggest drags on total CVR, yellow ones are smaller, green ones lifted it.');
@@ -1210,15 +1300,20 @@ function movedHtml0() {
   const pill = (f, i) => {
     const a = ALERTS.get(f.m.key), x = sibsOf(f.m, state.day), facts = [], ov = cellsFor(metricsFor(f.m.b).overall[0], state.day, compsFor(f.m.b, state.day));
     if (f.m.sec === 'funnel' && ov.bs != null) facts.push(['sib', 'CVR ' + sgn(ov.bs, 0)]);
-    if (x) facts.push(['sib', (x.rest.length === 1 ? x.rest[0].m.label : 'Other ' + x.n[1]) + ' ' + sgn(x.rest.length === 1 ? x.rest[0].mom : x.restMom, 0), f.m.sec]); // no "on average" in the pills, it crowds them (Mike, Oct 28)
+    if (x) facts.push(['sib', (x.rest.length === 1 ? x.rest[0].m.label + ' ' : 'Other ' + x.n[1] + ' x\u0304 ') + sgn(x.rest.length === 1 ? x.rest[0].mom : x.restMom, 0), f.m.sec]); // no "on average" in the pills, it crowds them (Mike, Oct 28)
     if (f.c.sessMom != null && f.m.sec !== 'funnel') facts.push(['traffic', 'Traffic ' + sgn(f.c.sessMom, 0)]);
     if (facts.length < 2 && f.c.pd != null) facts.push(['sib', 'vs prior day ' + sgn(f.c.pd, 0)]);
-    const flag = f.mix ? '<span class="mvr spike">Traffic spike ' + sgn(f.c.sessMom, 0) + '</span>' : a ? '<span class="mvr">Unusual</span>' : '';
+    const flag = f.mix ? '<span class="mvr spike">Traffic spike ' + sgn(f.c.sessMom, 0) + '</span>' : '';
     const tip = esc(f.m.label) + ' ' + sgn(f.c.mom, 0) + ' vs comparable days · ' + share(f) + (facts.length ? ' · ' + facts.map(z => esc(z[1])).join(' · ') : '');
-    return '<button class="mv" data-moved="' + i + '" data-hint="' + (HINTS.push(segTip2(f, tot)) - 1) + '" aria-label="' + tip + '"><span class="mvl"><span aria-hidden="true">' + em(f.m.label) + '</span><b>' + esc(f.m.label) + '</b><span class="mvv">' + (f.mix ? 'traffic spike' : f.c.mom < 0 ? 'fell' : 'rose') + '</span><span class="d">' + (f.mix ? sgn(f.c.mom, 0) : Math.round(Math.abs(f.c.mom) * 100) + '%') + '</span></span>' +
-      (facts.length ? '<span class="mvr roll' + (facts.length > 1 ? ' multi' : '') + '">' + facts.map((z, k) => '<span class="rf ' + z[0] + (k ? '' : ' on') + '"' + (z[2] ? ' data-jumpsec="' + z[2] + '" role="link" title="Jump to ' + esc(SECS[z[2]] || z[2]) + '"' : '') + '>' + esc(z[1]) + '</span>').join('') + '</span>' : '') + flag + '</button>';
+    return '<button class="mv" data-moved="' + i + '"" aria-label="' + tip + '"><span class="mvl"><span aria-hidden="true">' + em(f.m.label) + '</span><b>' + esc(f.m.label) + '</b>' + (f.mix ? '<span class="mvv">traffic spike</span>' : '') + '<span class="d">' + sgn(f.c.mom, 0) /* just the number, no "fell"/"rose"; negatives carry a minus (Mike, Oct 28) */ + '</span></span>' +
+      (facts.length ? '<span class="mvr roll' + (facts.length > 1 ? ' multi' : '') + '">' + facts.map((z, k) => '<span class="rf ' + z[0] + (k ? '' : ' on') + '"' + (z[2] ? ' data-jumpsec="' + z[2] + '" role="link" aria-label="Jump to ' + esc(SECS[z[2]] || z[2]) + '"' : '') + '>' + xbar(esc(z[1])) + '</span>').join('') + '</span>' : '') + flag + '</button>';
   };
   const tier = (cls, list) => list.map(r => pill(r.f, r.i).replace('<button class="mv"', '<button class="mv ' + cls + '"')).join('');
+  if (state.view === 'daily') {
+    FLAGGED = flaggedFor(state.tab, state.day);
+    const fp = FLAGGED.slice(0, state.flAll ? 99 : 2).map((f, i) => pill(f, i).replace('data-moved=', 'data-fl=').replace(/ data-hint="\d+"/, '').replace('<button class="mv"', '<button class="mv big"')).join('');
+    return '<div class="moved inhead"><div class="mvlist">' + (FLAGGED.length ? fp + (FLAGGED.length > 2 ? '<button type="button" class="linkbtn mvmore" data-flmore="1">' + (state.flAll ? 'Show fewer' : 'View ' + (FLAGGED.length - 2) + ' more') + '</button>' : '') : '<span class="cap">✅ Nothing is below its normal range today.</span>') + '</div></div>';
+  }
   if (up) return '<div class="moved inhead"><div class="mvlist">' + drvLbl() + '' + liftAll + tier('big', big.concat(rest)) + '</div>' + '</div>';
   return '<div class="moved inhead"><div class="mvlist">' + drvLbl() + '' + tier('big', big) + tier('small', rest) + liftAll + '</div>' + '</div>';
 }
@@ -1264,7 +1359,7 @@ function rtHtml(date) {
   RT.date = date;
   const can = RT.db && RT.me;
   return '<div class="rt rttop"><div class="rthead"><b>➕ Add a topic for ' + label(nextWeekday(date)) + '</b></div>' +
-    (can ? '<form class="rtform" id="rtform"><input id="rtname" maxlength="40" required placeholder="Your name" aria-label="Your name"><input id="rtin" maxlength="200" required placeholder="What do you want to talk about?" aria-label="Topic"><button class="btn pri sm" type="submit">Add topic</button></form>' : '<p class="cap">Pick your name (bottom right) to add a topic.</p>') +
+    (can ? '<form class="rtform" id="rtform"><input id="rtname" maxlength="40" required placeholder="Your name" aria-label="Your name"><input id="rtin" maxlength="200" required placeholder="What do you want to talk about?" aria-label="Topic"><button class="btn pri sm" type="submit">Add topic</button></form>' : '') +
     '<div id="rtbody">' + rtInner(date) + '</div></div>';
 }
 function prefillName() { const nm = document.getElementById('rtname'); if (nm && !nm.value) { try { nm.value = localStorage.getItem('pod.name') || ''; } catch (e) { /* ignore */ } } }
@@ -1375,8 +1470,24 @@ function sayModal(i) {
 /* ---------- page headlines (Mike, Oct 27): each work page opens like the CVR page, a verdict sentence and one supporting line,
    every number hovering to a short list and every name hovering to its card and clicking through ---------- */
 // Plain-English names for projects inside a sentence (Mike, Oct 27: "feed fixes, incl. new iPhone case" was confusing). The refresh adds `say` to new projects.
-const SAYN = {"New iPhone cases in the feed": "adding new iPhone cases to the feed", "Cart and cart-tray cross-sell": "adding cross-sell to the cart and cart tray", "Cart tray vs cart page test": "testing the cart tray against the cart page", "T-shirt style pills on product pages": "showing T-shirt styles as pills on product pages", "Thank-you page upsell, 6 slots": "a six-slot upsell on the thank-you page", "Checkout email opt-in and hashing": "email opt-in at checkout", "Retire 8 low-value Redbubble products": "retiring 8 low-value Redbubble products", "Takedown (DMCA) tool": "a takedown tool for artists", "Fix sale prices in Google Shopping": "fixing sale prices in Google Shopping", "Creator behavior data in Amplitude": "creator behavior data in Amplitude", "Delivery-issue resolution queue": "a queue for delivery issues", "Trucker hat fulfillment": "trucker hat fulfillment", "Trucker hats on Redbubble": "trucker hats on Redbubble", "Standardized wall art sizes": "standard wall art sizes", "Simon AI profile attributes": "Simon AI profile attributes", "Search cluster migration": "moving search to its new cluster", "Sticker quick-add with quantity on search": "sticker quick-add on search", "Sticker cross-sell on add to cart": "a sticker cross-sell on add to cart", "Feed images at 1260px": "sharper feed images", "Apple Pay buy-now on product pages": "Apple Pay buy-now on product pages", "Premium tee upsell in cart": "a premium tee upsell in the cart", "Greeting cards and postcards in the feeds": "greeting cards and postcards on TeePublic", "Learn to Rank rerun": "rerunning Learn to Rank", "Show the lowest-priced T-shirt style first in Redbubble search": "showing the cheapest T-shirt style first in Redbubble search"};
+const SAYN = {"New iPhone cases in the feed": "adding new iPhone cases to the feed", "Cart and cart-tray cross-sell": "adding cross-sell to the cart and cart tray", "Cart tray vs cart page test": "testing the cart tray against the cart page", "T-shirt style pills on product pages": "showing T-shirt styles as pills on product pages", "Thank-you page upsell, 6 slots": "a six-slot upsell on the thank-you page", "Checkout email opt-in and hashing": "email opt-in at checkout", "Retire 8 low-value Redbubble products": "retiring 8 low-value Redbubble products", "Takedown (DMCA) tool": "a takedown tool for artists", "Fix sale prices in Google Shopping": "fixing sale prices in Google Shopping", "Creator behavior data in Amplitude": "creator behavior data in Amplitude", "Delivery-issue resolution queue": "a queue for delivery issues", "Trucker hat fulfillment": "trucker hat fulfillment", "Trucker hats on Redbubble": "trucker hats on Redbubble", "Standardized wall art sizes": "standard wall art sizes", "Simon AI profile attributes": "Simon AI profile attributes", "Search cluster migration": "moving search to its new cluster", "Sticker quick-add with quantity on search": "sticker quick-add on search", "Sticker cross-sell on add to cart": "a sticker cross-sell on add to cart", "Feed images at 1260px": "sharper feed images", "Apple Pay buy-now on product pages": "Apple Pay buy-now on product pages", "Premium tee upsell in cart": "a premium tee upsell in the cart", "Greeting cards and postcards in the feeds": "greeting cards and postcards on TeePublic", "Learn to Rank rerun": "rerunning Learn to Rank", "Show the lowest-priced T-shirt style first in Redbubble search": "showing the cheapest T-shirt style first in Redbubble search", "Selling blanks on TeePublic": "selling blank apparel on TeePublic", "Recently viewed on Redbubble search and product pages": "a recently viewed row on Redbubble search and product pages", "More prominent Redbubble search bar": "a more prominent Redbubble search bar", "TeePublic GRIN webhook tracking": "tracking creator affiliate sales from GRIN on TeePublic", "Redbubble search tracking": "tracking searches on Redbubble", "One data layer across Redbubble and TeePublic": "one shared tracking data layer for Redbubble and TeePublic", "Redbubble GA4 purchase tracking fix": "fixing Redbubble purchase tracking in GA4", "Tracking on search and remaining pages": "tracking on search and the remaining pages", "Automated tracking QA": "automated checks on site tracking", "Redbubble app analytics": "analytics for the Redbubble app", "One consent platform across all brands": "one consent platform across all brands", "Communication preference management": "letting shoppers manage their email and message preferences", "Artist tracking and audiences": "tracking artist activity and building artist audiences"};
 const sayOf = it => it.say || SAYN[it.t] || midCase(it.t);
+// Titles stay verbatim from the Active Work tab (Product Managers, Oct 30): an item with a sheet title shows it, and every record keyed by the old title is aliased.
+// The Team column on the sheet is the authority for the team. Dashery has not broken its goal into OKRs, so its projects show no goal.
+(function verbatimTitles() {
+  if (typeof COMING === 'undefined') return;
+  const clean = x => { const v = String(x).replace(/\s+/g, ' ').trim().replace(/\.$/, '').replace(/ — /g, ': '); return v.charAt(0).toUpperCase() + v.slice(1); };
+  const has = (o, k) => Object.prototype.hasOwnProperty.call(o, k);
+  const maps = [typeof SRCS !== 'undefined' && SRCS, typeof LATEST !== 'undefined' && LATEST, typeof DATES !== 'undefined' && DATES, typeof PEOPLE !== 'undefined' && PEOPLE, typeof BURN !== 'undefined' && BURN, SAYN, typeof COMING_PREV !== 'undefined' && COMING_PREV.items].filter(Boolean);
+  const moves = [];
+  COMING.teams.forEach(T => T.items.forEach(it => {
+    if (it.sheet) { const v = clean(it.sheet), old = it.t; if (v !== old) { it.t0 = old; it.t = v; maps.forEach(o => { if (has(o, old) && !has(o, v)) o[v] = o[old]; }); } }
+    if (it.sheetTeam && it.sheetTeam !== T.key) moves.push([T, it]);
+  }));
+  moves.forEach(([T, it]) => { let D = COMING.teams.find(x => x.key === it.sheetTeam); if (!D) { D = { key: it.sheetTeam, name: 'Infrastructure', icon: '🏗️', tagline: 'Platform and tooling consolidation across the sites.', items: [] }; COMING.teams.push(D); } T.items.splice(T.items.indexOf(it), 1); D.items.push(it); });
+  const dz = COMING.teams.find(x => x.key === 'dashery');
+  if (dz) dz.items.forEach(it => { it.obj = ''; const R = typeof SRCS !== 'undefined' && SRCS[it.t]; if (R && R.obj) delete R.obj; });
+})();
 // Numbered lists show the top 3, then "Show more" (Mike, Oct 27: the full list of 13 was too big).
 const hlist = (title, items, ol) => '<b>' + title + '</b><' + (ol ? 'ol class="hol"' : 'ul class="hul nrul"') + '>' + items.map((x, i) => ol && i >= 3 ? x.replace('<li>', '<li class="hx">') : x).join('') + '</' + (ol ? 'ol' : 'ul') + '>' + (ol && items.length > 3 ? '<button type="button" class="linkbtn hmore" data-hmore="1">Show ' + (items.length - 3) + ' more</button>' : '');
 // Names inside a sentence keep the sentence's case: "feed fixes", "cart and cart-tray cross-sell"; proper nouns stay capitalized.
@@ -1409,7 +1520,7 @@ function rmHeadline() {
   const DT = it => (typeof DATES !== 'undefined' && DATES[it.t]) || {}, dueOf = it => etaDate(it.eta) || (DT(it).due ? parse(DT(it).due) : null);
   const all = preList().map(it => Object.assign({}, it)), open = all.filter(it => !(stepIx(it.s) === 6 && !stuck(it.s)));
   const wk = open.filter(it => { const e = dueOf(it); return e && e >= today && e <= wkEnd + DAY - 1; }).sort((a, b) => impVal(b) - impVal(a));
-  const late = open.filter(it => { const e = dueOf(it); return e && e < today; }).sort((a, b) => impVal(b) - impVal(a));
+  const late = open.filter(it => { const e = dueOf(it); return e && e < today && (today - e) / DAY <= 60; }).sort((a, b) => impVal(b) - impVal(a));
   const disc = open.filter(it => (STAGE(it) === 'next' || DT(it).notStarted) && late.indexOf(it) < 0 && wk.indexOf(it) < 0).sort((a, b) => impVal(b) - impVal(a));
   const later = open.filter(it => { const e = dueOf(it); return e && e > wkEnd && e <= FREEZE; });
   const nm = (it, cls) => hint(esc(sayOf(it)), 'verd ' + (cls || 'b') + ' hlink" data-lbm2="' + it.ref, gTip(it, dueOf(it), false, null, DT(it).start ? parse(DT(it).start) : null));
@@ -1417,20 +1528,19 @@ function rmHeadline() {
   // Hover rows as a small table: the project (and its site underneath) on the left, the date on the right (Mike, Oct 27: easier to read).
   const li = (it, extra) => '<li><button type="button" class="hlli" data-lbm2="' + it.ref + '"><span class="hln"><b>' + esc(it.t) + '</b><span class="hls">' + esc(SITEN[it.site] || '') + ' · ' + esc(TEAMS(it.team)) + '</span></span><span class="hld">' + (extra || '') + '</span></button></li>';
   const num = (n, word, title, items, cls) => hint(n + ' ' + word, 'verd ' + (cls || 'n2'), hlist(title, items, true));
-  const h1 = wk.length ? 'We\'re launching ' + num(wk.length, wk.length === 1 ? 'project' : 'projects', 'Launching by ' + md(wkEnd) + ' (click one to open it)', wk.map(it => li(it, esc(rng(it.eta))))) + ' this week, including ' + andJoin(wk.slice(0, 2).map(nm)) + '.'
+  const h1 = wk.length ? 'We\'re launching ' + num(wk.length, wk.length === 1 ? 'project' : 'projects', 'Launching by ' + md(wkEnd) + ' (click one to open it)', wk.map(it => li(it, esc(rng(it.eta))))) + ' this week' + (wk.length > 1 ? ', including ' + nm(wk[0]) + (wk[1] ? ' and ' + nm(wk[1]) : '') : wk.length === 1 ? ': ' + nm(wk[0]) : '') + '.'
     : 'Nothing launches this week' + (later.length ? '; next up is ' + nm(later.sort((a, b) => dueOf(a) - dueOf(b))[0]) + '.' : '.');
   const sub = [];
   // Short sentences, one fact each (Mike reads a run-on as noise).
-  if (later.length) sub.push('We have ' + num(later.length, 'more', 'Launching before the Nov 20 freeze (click one to open it)', later.map(it => li(it, esc(rng(it.eta))))) + ' to launch before the Nov 20 code freeze.');
+  if (later.length && !late.length) sub.push('We have ' + num(later.length, 'more', 'Launching before the Nov 20 freeze (click one to open it)', later.map(it => li(it, esc(rng(it.eta))))) + ' to launch before the Nov 20 code freeze.');
   // The one to watch: the project furthest past its launch date, in red (Mike, Oct 27: the second line needs substance).
-  if (late.length) { const w = late.slice().sort((a, b) => dueOf(a) - dueOf(b))[0], dd = Math.max(1, Math.round((today - dueOf(w)) / DAY)); sub.push('Keep an eye on ' + nm(w, 'w') + ' (' + dd + ' day' + (dd === 1 ? '' : 's') + ' past its launch date).'); }
-  if (disc.length) sub.push('Next, we\'re kicking off ' + nm(disc[0]) + '.');
+  if (late.length) { const w = late.slice().sort((a, b) => dueOf(a) - dueOf(b))[0], dd = Math.max(1, Math.round((today - dueOf(w)) / DAY)); sub.push('Keep an eye on ' + nm(w, 'w') + ' (' + dd + ' day' + (dd === 1 ? '' : 's') + ' late).'); }
   const days = Math.max(0, Math.round((FREEZE - parse(D.asOf)) / DAY));
   const nw = new Date(), td = Date.UTC(nw.getFullYear(), nw.getMonth(), nw.getDate()), wkStart = td - ((new Date(td).getUTCDay() + 6) % 7) * DAY;
-  return ctxTags(['📦 ' + open.length + ' pre-peak projects', '🗓️ Exec roadmap review: ' + nextReview()]) + '<p class="verdict">' + h1 + '</p>' + (sub.length ? '<p class="sulead">' + sub.map(ucf).join(' ') + '</p>' : '');
+  return '<p class="verdict">' + h1 + '</p>' + (sub.length ? '<p class="sulead">' + sub.map(ucf).join(' ') + '</p>' : '');
 }
 function abHeadline() {
-  const live = EXPS.live || [], done = EXPS.done || [], soon = EXPS.soon || [], imp = t => siteImp(t.cvr.rel, t.reach);
+  const live = (EXPS.live || []).filter(t => abSiteOk(testSite(t))), done = EXPS.done || [], soon = EXPS.soon || [], imp = t => siteImp(t.cvr.rel, t.reach);
   // Each running test hovers to a card: where it runs, day N, whole-site and in-test effect, a confidence bar to 95%, the primary metric.
   const card = t => { const c = t.p != null ? conf(t) : null, w = c == null ? 0 : Math.min(100, c);
     return '<div class="gtipc"><b class="gtt">' + testE(t.name) + ' ' + esc(t.name) + '</b><span class="cap">' + esc(t.where || '') + '</span><div class="gkv">' +
@@ -1442,33 +1552,47 @@ function abHeadline() {
   const tn = t => hint(esc(midCase(t.name)), 'verd n2 hlink" data-jt="' + esc(t.id), card(t));
   const li = (t, x) => '<li>' + testE(t.name) + ' <b>' + esc(t.name) + '</b>' + (x ? ': ' + x : '') + '</li>';
   const words = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'];
-  const h1 = live.length ? 'There ' + (live.length === 1 ? 'is one test' : 'are ' + (words[live.length] || live.length) + ' tests') + ' running: ' + andJoin(live.map(tn)) + (() => { const br = [...new Set(live.map(t => testSite(t)).filter(Boolean))]; return br.length === 1 && br[0] !== 'Both' && live.length > 1 ? ', all on ' + esc(SITEN(br[0])) : ''; })() + '.' : 'No tests are running right now.';
-  // Never say a test is or isn't "near a call": calls can come early (Mike, Oct 27).
-  const sub = [], call = live.filter(t => t.p != null && conf(t) >= 95), lead = live.slice().sort((a, b) => imp(b) - imp(a))[0];
-  sub.push(call.length ? esc(call[0].name) + ' has a clear result.' : lead ? (s0 => s0.charAt(0).toUpperCase() + s0.slice(1))(esc(midCase(lead.name))) + ' leads so far, at ' + sgn(imp(lead), 1) + ' whole-site CVR.' : '');
-  if (done.length) { const sh = done.filter(t => t.status === 'shipped'); sub.push('We decided ' + hint(done.length + ' tests', 'verd n2', hlist('Decided in the last three weeks', done.map(t => li(t, t.status === 'shipped' ? 'shipped' : 'kept control')))) + ' in the last three weeks' + (sh.length ? ', shipping ' + andJoin(sh.map(t => esc(midCase(t.name)))) : '') + '.'); }
-  if (soon.length) sub.push('We have ' + hint(soon.length + ' more', 'verd n2', hlist('Coming soon', soon.map(x => '<li>' + x.e + ' <b>' + esc(x.name) + '</b>: ' + esc(x.when) + '</li>'))) + ' queued, starting with ' + esc(midCase(soon[0].name)) + '.');
-  return ctxTags([(n => n.rb && n.tp ? '🧪 Redbubble ' + n.rb + ' · TeePublic ' + n.tp : n.rb || n.tp ? '🧪 All on ' + (n.rb ? 'Redbubble' : 'TeePublic') + ' right now' : '')({ rb: live.filter(t => testSite(t) === 'RB').length, tp: live.filter(t => testSite(t) === 'TP').length }), live.length ? '⏳ Longest running: day ' + Math.max(...live.map(testDays)) : '' /* no claims about how tests are called (Mike, Oct 27) */]) + '<p class="verdict vtests">' + h1 + '</p>' + '<p class="sulead">' + sub.filter(Boolean).join(' ') + '</p>';
+  const rpvOf = t => ((abRd(t).m || {}).rpv || {}).v, asOfD = parse(EXPS_AS_OF);
+  const tps = (typeof TPEXPS !== 'undefined' && abSiteOk('TP') ? TPEXPS.items : []).map((x, i) => Object.assign({ tp: true, ix: i }, x)), all2 = live.concat(tps);
+  const recent = all2.filter(t => (asOfD - parse(t.start)) / DAY <= 2).sort((p, q) => parse(q.start) - parse(p.start))[0];
+  const next24 = (EXPS.soon || []).find(x => x.start && (parse(x.start) - asOfD) / DAY >= 0 && (parse(x.start) - asOfD) / DAY <= 1);
+  const pool = live.filter(t => abRd(t).verdict[0] !== 'paused' && rpvOf(t) != null && t !== recent).sort((p, q) => rpvOf(q) - rpvOf(p));
+  const promising = pool[0], latest = all2.slice().sort((p, q) => parse(q.start) - parse(p.start))[0];
+  const L = t => t.tp ? '<span class="verd n2 hlink" role="link" tabindex="0" data-tpx="' + t.ix + '">' + esc(t.name) + '</span>' : t.id ? '<span class="verd n2 hlink" role="link" tabindex="0" data-jt="' + esc(t.id) + '">' + esc(t.name) + '</span>' : esc(t.name);
+  const first = recent ? L(recent) + ' launched ' + short(recent.start) : promising ? L(promising) + ' is the most promising, at ' + sgn(rpvOf(promising), 1) + ' revenue per user' : all2.length ? L(latest) + ' started ' + short(latest.start) : '';
+  const second = next24 ? esc(next24.name) + ' launches ' + short(next24.start) : recent ? (promising ? L(promising) + ' leads at ' + sgn(rpvOf(promising), 1) + ' revenue per user' : '') : (promising && latest && latest !== promising ? L(latest) + ' started ' + short(latest.start) : '');
+  const up = soon.filter(x => abSiteOk(x.site)).slice(0, 2).map(x => esc(x.name)), won = done.filter(t => abSiteOk(testSite(t)) && t.status === 'shipped' && t.cvr && t.cvr.rel > 0).sort((p, q) => parse(q.end) - parse(p.end))[0];
+  const subs = [up.length ? 'Up next: ' + up.join(' and ') + '.' : '', won ? 'Recently shipped: ' + L(won) + ' (' + sgn(won.cvr.rel, 1) + ' CVR).' : ''].filter(Boolean);
+  return '<p class="verdict vtests">' + (first ? first + (second ? ', and ' + second : '') + '.' : 'No tests are running right now.') + '</p>' + (subs.length ? '<p class="sulead">' + subs.join(' ') + '</p>' : '');
 }
 function trHeadline() {
   const L = (typeof SLACK !== 'undefined' ? SLACK : []).slice(0, 2), tn = (s, k) => hint(esc(/^(TeePublic|Redbubble|Dashery|Google|Amazon|Apple|USA|Black|Meta)\b/.test(s.title) || !k ? s.title : s.title.charAt(0).toLowerCase() + s.title.slice(1)), 'verd n2 hlink" data-say="' + SLACK.indexOf(s), '<b>' + esc(s.title) + '</b><br>' + esc(s.tldr || sents(s.body)[0] || '') + '<span class="segmore">Click for the full read →</span>');
   const csAll = typeof CS !== 'undefined' && CS.tp && CS.rb ? ['rb', 'tp'].flatMap(b => (CS[b].topics || []).map(t => Object.assign({ b }, t))) : [];
   const csTop = csAll.sort((a, z) => (a.level === 'high' ? 0 : 1) - (z.level === 'high' ? 0 : 1))[0];
-  const h1 = (L.length ? 'Top of mind: ' + L.map((s, k) => tn(s, k > 0)).join(', and ') + '. ' : '') + (csTop ? 'Customer service is seeing ' + hint(esc(csTop.t.charAt(0).toLowerCase() + csTop.t.slice(1)), 'verd ' + (csTop.level === 'high' ? 'w' : 'n2'), '<b>' + esc(csTop.t) + '</b><br>' + esc(csTop.note || '')) + ' on ' + BR[csTop.b].name + '.' : 'Customer service sees nothing unusual.');
-  const hot = ((typeof TRENDS !== 'undefined' && TRENDS.tags) || []).filter(t => t[2] >= 2).sort((a, z) => z[2] - a[2]).slice(0, 2), lbl = t => t[0].split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ').replace(/^Wutang/, 'Wu-Tang');
-  const sub = hot.length ? andJoin(hot.map(t => hint(esc(lbl(t)), 'verd b', '<b>' + esc(lbl(t)) + '</b><div class="gkv"><span class="gk">Orders, 24 hours</span><span class="gv">' + t[1] + '</span><span class="gk">vs its usual share</span><span class="gv">' + t[2].toFixed(1) + '×</span></div>') + ' designs are selling ' + t[2].toFixed(1) + '× usual')) + ' on TeePublic.' : '';
+  const botFirst = L.length && /bot-squad/.test(L[0].channel || ''), h1 = L.length ? (botFirst ? 'Bot Squad update: ' : '') + tn(L[0], botFirst) + '.' : 'Nothing unusual in Slack lately.';
+  const hot = ((typeof TRENDS !== 'undefined' && TRENDS.tags) || []).filter(t => t[2] >= 2).sort((a, z) => z[2] - a[2]).slice(0, 1), lbl = t => t[0].split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ').replace(/^Wutang/, 'Wu-Tang');
+  const sub = hot.length ? andJoin(hot.map(t => hint(esc(lbl(t)), 'verd b', '<b>' + esc(lbl(t)) + '</b><div class="gkv"><span class="gk">Orders, 24 hours</span><span class="gv">' + t[1] + '</span><span class="gk">vs its usual share</span><span class="gv">' + t[2].toFixed(1) + '×</span></div>') + ' designs are selling ' + t[2].toFixed(1) + '× usual')) + '.' : '';
   // Tags, design agency Oct 27: what the selling data covers (as a kind of day, not a date), where the talk comes from, and the customer service read. Nothing the sentence already says.
   const dayKind = ((TOPS.window || '').match(/\((?:full day, )?([^)]*)\)/) || [])[1] || '', csN = csAll.filter(t => t.level === 'high').length;
   const trTags = ctxTags([dayKind ? '🛍️ Top sellers from the ' + esc(dayKind) : '🛍️ Top sellers from the latest full day', '💬 Slack, the last 48 hours', csN ? '🎧 Customer service: ' + csN + ' issue' + (csN === 1 ? '' : 's') + ' flagged' : '🎧 Customer service: all clear']);
-  return trTags + '<p class="verdict">' + h1 + '</p>' + (sub ? '<p class="sulead">' + ucf(sub) + '</p>' : '');
+  return '<p class="verdict">' + h1 + '</p>' + (sub ? '<p class="sulead">' + ucf(sub) + '</p>' : '');
 }
 // Earlier tests as cards (Mike, Oct 27), Amplitude Experiment and Search (Sigma) tests together, newest first.
-function earlierHtml() {
-  const cut = addDays(EXPS_AS_OF, -21), sx = (typeof SEXP !== 'undefined' ? SEXP.items : []).filter(x => x.end < cut);
-  const A = EXPS.older.map((o, i) => ({ end: o.end, html: '<article class="ecard" role="button" tabindex="0" data-told="' + i + '"><span class="tse" aria-hidden="true">' + testE(o.name) + '</span><div><b>' + esc(o.name) + '</b><span class="epill ' + (o.status === 'shipped' ? 'good' : '') + '">' + (o.status === 'shipped' ? 'Shipped' : 'Kept control') + '</span><p>' + esc(o.note) + '</p><span class="cap">Redbubble · ended ' + short(o.end) + '</span></div></article>' }));
-  const B = sx.map(x => ({ end: x.end, html: hint('<span class="tse" aria-hidden="true">' + x.e + '</span><div><b>' + esc(x.name) + '</b><span class="epill">' + (x.verdict === 'win' ? 'Clear winner' : x.verdict === 'loss' ? 'Clear loser' : 'Inconclusive') + '</span><p>' + esc(x.metric) + ': ' + x.vars.map(v => esc(v[0].replace('Variant ', '')) + ' ' + sgn(v[1], 1)).join(', ') + ', none stat sig.</p><span class="cap">' + esc(x.site) + ' search · ended ' + short(x.end) + ' · <a href="' + SEXP.url + '" target="_blank" rel="noopener">Sigma ↗</a></span></div>', 'ecard', '<b>' + esc(x.name) + '</b><br>' + esc(x.what) + '<ul class="hul nrul"><li>🤷 <b>Inconclusive</b> means no variant reached stat sig, not that nothing changed.</li><li>🔎 All search types combined.</li></ul>') }));
-  const all = A.concat(B).sort((a, z) => a.end < z.end ? 1 : -1);
-  return all.length ? '<div class="group"><div class="ghead"><h3>Earlier</h3><span class="sfacts">' + all.length + ' tests</span></div><div class="egrid">' + all.map(x => x.html).join('') + '</div></div>' : '';
+// Recently shipped and Coming soon share the main table's look (Mike, Oct 30): same header, rows and name cell.
+const erSite = s => /tee/i.test(s || '') ? 'TP' : /both/i.test(s || '') ? 'Both' : 'RB';
+const sitePill = code => '<span class="rtag sitepill"' + (code === 'RB' || code === 'TP' ? ' data-absite="' + code + '" role="button" tabindex="0"' : '') + '>' + siteDot(code) + '</span>';
+const erName = (name, team, site) => '<span class="tname tnico"><span class="ge gico g-CVR" aria-hidden="true">' + projIco({ t: name, obj: 'CVR' }) + '</span><b>' + esc(name) + '</b><span class="cap tmeta">' + sitePill(erSite(site)) + '</span></span>';
+function shippedHtml() {
+  const cut = addDays(EXPS_AS_OF, -60), sx = (typeof SEXP !== 'undefined' ? SEXP.items : []);
+  const dash = '<span class="abtbd"><b>TBD</b><small>not recorded</small></span>', tbd = '<span class="abst tbd">TBD</span>', dayC = d => '<span class="abday"><b>' + short(d) + '</b><small>ended</small></span>';
+  const D1 = (abSiteOk('RB') ? EXPS.done || [] : []).map(t => ({ end: t.end, html: testRow(t) }));
+  const A = (abSiteOk('RB') ? EXPS.older : []).map((o, i) => ({ end: o.end, html: '<div class="rowwrap"><div class="trow abrow" role="button" tabindex="0" data-told="' + i + '">' + erName(o.name, 'customer', 'Redbubble') + dayC(o.end) + tbd + dash + dash + '<span class="abcall"><span class="abv2 ' + (o.status === 'shipped' ? 'v-ship' : '') + '">' + (o.status === 'shipped' ? 'Shipped' : 'Kept control') + '</span></span><span class="chev" aria-hidden="true">›</span></div></div>' }));
+  const B = sx.filter(x => abSiteOk(x.site)).map(x => ({ end: x.end, html: '<div class="rowwrap"><a class="trow abrow erow2" href="' + esc(SEXP.url) + '" target="_blank" rel="noopener">' + erName(x.name, 'search', x.site) + dayC(x.end) + tbd + dash + dash + '<span class="abcall"><span class="abv2 ' + (x.verdict === 'win' ? 'v-ship' : '') + '">' + (x.verdict === 'win' ? 'Clear winner' : x.verdict === 'loss' ? 'Clear loser' : 'Inconclusive') + '</span></span><span class="chev" aria-hidden="true">↗</span></a></div>' }));
+  const all = D1.concat(A, B).filter(x => x.end >= cut).sort((p, q) => p.end < q.end ? 1 : -1);
+  return all.length ? '<div class="group"><div class="ghead"><h3>Recently shipped</h3><span class="sfacts">' + all.length + ' tests</span></div>' + ABHEAD + '<div class="rows">' + all.map(x => x.html).join('') + '</div></div>' : '';
+}
+function soonHtml() {
+  return '<div class="group"><div class="ghead"><h3>Coming soon</h3><span class="sfacts">' + EXPS.soon.filter(x => abSiteOk(x.site)).length + ' queued</span></div><div class="tcols stc"><span>Test</span><span>Where</span><span>When</span><span>What it tests</span><span></span></div><div class="rows">' + EXPS.soon.map((x, i) => !abSiteOk(x.site) ? '' : '<div class="rowwrap"><div class="trow strow" role="button" tabindex="0" data-tsoon="' + i + '">' + erName(x.name, x.team || 'customer', x.site) + '<span class="erlt">' + esc(x.where) + '</span><span class="erlt">' + esc(x.when) + '</span><span class="erlt">' + esc(x.what) + '</span><span class="chev" aria-hidden="true">›</span></div></div>').join('') + '</div></div>';
 }
 function searchTestsHtml() {
   if (typeof SEXP === 'undefined' || !SEXP.items.length) return '';
@@ -1479,7 +1603,7 @@ function searchTestsHtml() {
       '<p class="stw">' + esc(x.what) + '</p><p class="stv">' + verd[0] + ' <b>' + verd[1] + '</b></p>' +
       '<div class="stm"><span class="lbl">' + esc(x.metric) + ' vs control (' + pct(x.base, 1) + ')</span><ul>' + x.vars.map(row).join('') + '</ul></div>' +
       (x.second || []).map(s2 => '<div class="stm sec"><span class="lbl">' + esc(s2[0]) + '</span><ul>' + s2[1].map(row).join('') + '</ul></div>').join('') + '</article>'; };
-  return '<div class="group"><div class="ghead"><h3>Search tests</h3><span class="sfacts">' + hint('From Sigma · how to read these', 'sfact', RULES) + ' · <a href="' + SEXP.url + '" target="_blank" rel="noopener">Open in Sigma ↗</a></span></div><div class="stgrid">' + SEXP.items.map(card).join('') + '</div></div>';
+  return '<div class="group"><div class="ghead"><h3>Search tests</h3><span class="sfacts">' + hint('From Sigma · how to read these', 'sfact', RULES) + ' · <a href="' + SEXP.url + '" target="_blank" rel="noopener">Open in Sigma ↗</a></span></div><div class="stgrid">' + SEXP.items.map(card).join('') + '</div></div>';
 }
 function sayList(list, max) {
   const tone = { bad: 'bad', warn: 'warn', good: 'good' };
@@ -1494,6 +1618,35 @@ function sayList(list, max) {
 // Hover-card chart (Mike, Oct 28: "that little downward trend line doesn't mean much without an x- and y-axis"): the last six weeks
 // (stretched back to reach the comparison days), min and max labeled on the left, first and last dates below, the comparison days
 // as blue dots, their average as a dotted line, and the day being read as the colored dot.
+// Overview chart as a comparison, not a line (Mike, Oct 28): one bar per comparable day, their average, the normal band around it,
+// and the day itself as the last bar in its grade color. Different shape from the 90-day chart, so it reads as a verdict, not a trend.
+function cmpBars(m, bd, bv, tone, bw) {
+  const S = SER[m.b], vv = z => S.idx[z] != null ? m.v[S.idx[z]] : (m.ly ? m.ly[lyIndex(z)] : null), isLY = z => S.idx[z] == null, days = (bd || []).filter(z => vv(z) != null), si = S.idx[state.day];
+  if (!days.length || bv == null || si == null || m.v[si] == null) return '';
+  const W = 560, H = 200, L = 44, R = 12, T = 14, B = 34, today = m.v[si], band = bw ? [bv * (1 - bw), bv * (1 + bw)] : null;
+  const top = Math.max(today, ...days.map(z => vv(z)), band ? band[1] : bv) * 1.12;
+  const step = niceStep(top, isNum(m) ? [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000, 100000, 200000, 500000, 1000000] : [0.001, 0.0025, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2], 4), mx = Math.ceil(top / step) * step;
+  const y = v => T + (H - T - B) * (1 - v / mx), n = days.length + 1, gap = 0.9, slot = (W - L - R) / (n + gap), bwid = Math.min(54, slot * 0.56);
+  const cx = k => L + slot * (k + 0.5) + (k === n - 1 ? slot * gap : 0), col = tone === 'bad' ? 'var(--bad)' : tone === 'good' ? 'var(--good)' : 'var(--ctl)';
+  const fmtY = v => isNum(m) ? compact(v, m.fmt === 'usd') : (v * 100).toFixed(step < 0.01 ? 1 : 0) + '%';
+  const bar = (x, v, fill, cls) => { const yt = y(v), yb = H - B, r = Math.min(5, (yb - yt) / 2), x0 = x - bwid / 2, x1 = x + bwid / 2;
+    return '<path class="' + cls + '" d="M' + x0.toFixed(1) + ' ' + yb + 'V' + (yt + r).toFixed(1) + 'Q' + x0.toFixed(1) + ' ' + yt.toFixed(1) + ' ' + (x0 + r).toFixed(1) + ' ' + yt.toFixed(1) + 'H' + (x1 - r).toFixed(1) + 'Q' + x1.toFixed(1) + ' ' + yt.toFixed(1) + ' ' + x1.toFixed(1) + ' ' + (yt + r).toFixed(1) + 'V' + yb + 'Z" style="fill:' + fill + '"/>'; };
+  let g = '';
+  for (let v = 0, k = 0; v <= mx + 1e-9 && k < 12; v += step, k++) g += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + y(v).toFixed(1) + '" y2="' + y(v).toFixed(1) + '" class="tcg"/><text x="' + (L - 6) + '" y="' + (y(v) + 4).toFixed(1) + '" text-anchor="end" class="tct">' + fmtY(v) + '</text>';
+  if (band) { const yt = y(band[1]), yb = y(band[0]); g += '<rect x="' + L + '" y="' + yt.toFixed(1) + '" width="' + (W - L - R) + '" height="' + (yb - yt).toFixed(1) + '" class="tcband"/><line x1="' + L + '" x2="' + (W - R) + '" y1="' + yt.toFixed(1) + '" y2="' + yt.toFixed(1) + '" class="tcbl"/><line x1="' + L + '" x2="' + (W - R) + '" y1="' + yb.toFixed(1) + '" y2="' + yb.toFixed(1) + '" class="tcbl"/>'; }
+  const sep = (cx(n - 2) + cx(n - 1)) / 2;
+  g += '<line x1="' + sep.toFixed(1) + '" x2="' + sep.toFixed(1) + '" y1="' + T + '" y2="' + (H - B + 4) + '" class="cbsep"/>';
+  days.forEach((z, k) => { const v = vv(z); g += bar(cx(k), v, 'color-mix(in srgb, var(--ctl) 55%, var(--surface))', 'cbbar') + '<text x="' + cx(k).toFixed(1) + '" y="' + (y(v) - 6).toFixed(1) + '" text-anchor="middle" class="cbv">' + fmtVal(m, v) + '</text><text x="' + cx(k).toFixed(1) + '" y="' + (H - B + 16) + '" text-anchor="middle" class="tct">' + (isLY(z) ? wsh(z) : short(z)) + '</text>' + (isLY(z) ? '<text x="' + cx(k).toFixed(1) + '" y="' + (H - B + 29) + '" text-anchor="middle" class="tct">' + z.slice(0, 4) + '</text>' : ''); });
+  const tx = cx(n - 1);
+  g += bar(tx, today, col, 'cbbar today') + '<text x="' + tx.toFixed(1) + '" y="' + (y(today) - 6).toFixed(1) + '" text-anchor="middle" class="cbv cbt" style="fill:' + col + '">' + fmtVal(m, today) + '</text><text x="' + tx.toFixed(1) + '" y="' + (H - B + 16) + '" text-anchor="middle" class="tct cbt">' + (days.length && isLY(days[0]) ? wsh(state.day) : short(state.day)) + '</text><text x="' + tx.toFixed(1) + '" y="' + (H - B + 29) + '" text-anchor="middle" class="tct">' + sgn(today / bv - 1, 0) + '</text>';
+  g += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + y(bv).toFixed(1) + '" y2="' + y(bv).toFixed(1) + '" class="cbavg"/>';
+  // Each bar hovers: its date, what kind of day, its number.
+  const hit = (x, z, v, tag) => hint('', 'tdot', '<b>' + (isLY(z) ? wsh(z) + ', ' + z.slice(0, 4) : label(z)) + '</b><br>' + (isLY(z) ? '' : esc(dayKind(m.b, z)) + '<br>') + esc(tipName(m)) + ': <b>' + fmtVal(m, v) + '</b><br><span class="cap">' + tag + '</span>').replace('<span ', '<rect x="' + (x - slot / 2).toFixed(1) + '" y="' + T + '" width="' + slot.toFixed(1) + '" height="' + (H - B - T + 20) + '" ').replace('></span>', '/>');
+  days.forEach((z, k) => { g += hit(cx(k), z, vv(z), isLY(z) ? '📅 ' + lyExact(state.day) : '🎯 A comparison day for ' + short(state.day)); });
+  g += hit(tx, state.day, today, '📍 The day you\'re reading: ' + sgn(today / bv - 1, 0) + ' vs the average (' + fmtVal(m, bv) + ')');
+  const key = '<span class="tckey"><span><i class="tk-cbar"></i>' + (days.length && isLY(days[0]) ? 'Same weekday last year' : 'Comparison days') + '</span><span><i class="tk-day" style="background:' + col + '"></i>' + short(state.day) + '</span><span><i class="tk-avg"></i>Average ' + fmtVal(m, bv) + '</span>' + (band ? '<span><i class="tk-band"></i>Normal range</span>' : '') + '</span>';
+  return '<span class="tchart tcfull cbars">' + key + '<svg viewBox="0 0 ' + W + ' ' + H + '" width="' + W + '" height="' + H + '" aria-hidden="true">' + g + '</svg></span>';
+}
 function tipChart(m, bd, bv, tone, opt) {
   opt = opt || {};
   const S = SER[m.b], si = S.idx[state.day]; if (si == null) return '';
@@ -1501,27 +1654,40 @@ function tipChart(m, bd, bv, tone, opt) {
   const idx = []; for (let i = i0; i <= si; i++) if (m.v[i] != null) idx.push(i);
   if (idx.length < 3) return '';
   const band = opt.band && bv != null ? [bv * (1 - opt.band), bv * (1 + opt.band)] : null;
-  const vals = idx.map(i => m.v[i]).concat(bv != null ? [bv] : [], band || []), mn = Math.min(...vals), mx = Math.max(...vals);
-  const W = opt.w || 280, H = opt.h || 96, L = 40, R = 8, T = 8, B = 20, x = i => L + (W - L - R) * (i - i0) / (si - i0), y = v => T + (H - T - B) * (1 - (v - mn) / ((mx - mn) || 1));
+  const vals = idx.map(i => m.v[i]).concat(bv != null ? [bv] : [], band || []), mn0 = Math.min(...vals), mx0 = Math.max(...vals);
+  // The page chart gets real y gridlines, like the 90-day chart (Mike, Oct 28); hover charts keep min and max.
+  const FULL = opt.dots || opt.full, ystep = FULL ? niceStep((mx0 - mn0) || mx0 || 1, isNum(m) ? [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000, 100000, 200000, 500000, 1000000, 2000000] : [0.001, 0.0025, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2], 4) : 0, mn = FULL ? Math.max(0, Math.floor(mn0 / ystep) * ystep) : mn0, mx = FULL ? Math.ceil(mx0 / ystep) * ystep : mx0;
+  const W = opt.w || 280, H = opt.h || 96, L = 40, R = 8, T = FULL ? 10 : 8, B = FULL ? 34 : 20, x = i => L + (W - L - R) * (i - i0) / (si - i0), y = v => T + (H - T - B) * (1 - (v - mn) / ((mx - mn) || 1));
   const col = tone === 'bad' ? 'var(--bad)' : tone === 'good' ? 'var(--good)' : 'var(--ctl)';
-  let g = '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + y(mx).toFixed(1) + '" y2="' + y(mx).toFixed(1) + '" class="tcg"/><line x1="' + L + '" x2="' + (W - R) + '" y1="' + y(mn).toFixed(1) + '" y2="' + y(mn).toFixed(1) + '" class="tcg"/>' +
+  let g = '';
+  if (FULL) { for (let v = mn, k = 0; v <= mx + 1e-9 && k < 12; v += ystep, k++) g += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + y(v).toFixed(1) + '" y2="' + y(v).toFixed(1) + '" class="tcg"/><text x="' + (L - 6) + '" y="' + (y(v) + 4).toFixed(1) + '" text-anchor="end" class="tct">' + (isNum(m) ? compact(v, m.fmt === 'usd') : (v * 100).toFixed(ystep < 0.01 ? 1 : 0) + '%') + '</text>';
+    for (let i = si; i >= i0; i -= 14) g += '<text x="' + x(i).toFixed(1) + '" y="' + (H - 4) + '" text-anchor="' + (i === si ? 'end' : 'middle') + '" class="tct">' + short(S.dates[i]) + '</text>';
+    for (let i = i0; i <= si; i++) if (infoNow(m.b, S.dates[i]).sale) g += '<rect x="' + (x(i) - (W - L - R) / (si - i0) / 2 + 0.5).toFixed(1) + '" y="' + (H - B + 5) + '" width="' + Math.max(1, (W - L - R) / (si - i0) - 1).toFixed(1) + '" height="4" rx="1" style="fill:' + BR[m.b].strip + '"/>'; }
+  else g = '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + y(mx).toFixed(1) + '" y2="' + y(mx).toFixed(1) + '" class="tcg"/><line x1="' + L + '" x2="' + (W - R) + '" y1="' + y(mn).toFixed(1) + '" y2="' + y(mn).toFixed(1) + '" class="tcg"/>' +
     '<text x="' + (L - 6) + '" y="' + (y(mx) + 4).toFixed(1) + '" text-anchor="end" class="tct">' + fmtVal(m, mx) + '</text><text x="' + (L - 6) + '" y="' + (y(mn) + 4).toFixed(1) + '" text-anchor="end" class="tct">' + fmtVal(m, mn) + '</text>' +
     '<text x="' + L + '" y="' + (H - 4) + '" class="tct">' + short(S.dates[i0]) + '</text><text x="' + (W - R) + '" y="' + (H - 4) + '" text-anchor="end" class="tct">' + short(state.day) + '</text>';
-  for (let i = i0; i <= si; i++) if (infoNow(m.b, S.dates[i]).sale) g += '<rect x="' + (x(i) - (W - L - R) / (si - i0) / 2).toFixed(1) + '" y="' + T + '" width="' + ((W - L - R) / (si - i0)).toFixed(1) + '" height="' + (H - T - B) + '" class="tcs"/>';
+  for (let i = i0; i <= si; i++) if (infoNow(m.b, S.dates[i]).sale) g += '<rect x="' + (x(i) - (W - L - R) / (si - i0) / 2).toFixed(1) + '" y="' + T + '" width="' + ((W - L - R) / (si - i0)).toFixed(1) + '" height="' + (H - T - B) + '" class="tcs" style="fill:' + BR[m.b].band + '"/>';
   // The normal range drawn as a band around the comparison average: the same blue band as the range bar, over time (Mike, Oct 28).
-  if (band) g += '<rect x="' + L + '" y="' + y(band[1]).toFixed(1) + '" width="' + (W - L - R) + '" height="' + (y(band[0]) - y(band[1])).toFixed(1) + '" rx="3" class="tcband"/>';
+  if (band) { const yt = y(band[1]).toFixed(1), yb = y(band[0]).toFixed(1); g += '<rect x="' + L + '" y="' + yt + '" width="' + (W - L - R) + '" height="' + (yb - yt).toFixed(1) + '" class="tcband"/><line x1="' + L + '" x2="' + (W - R) + '" y1="' + yt + '" y2="' + yt + '" class="tcbl"/><line x1="' + L + '" x2="' + (W - R) + '" y1="' + yb + '" y2="' + yb + '" class="tcbl"/>'; } // a stripe edge to edge, so it reads as a vertical range only (Mike, Oct 28)
+  if (opt.sess && m.sess) { const sv = idx.map(i => m.sess[i] || 0), smx = Math.max(...sv) * 1.1 || 1, ys = v => (H - B) - (H - B - T) * v / smx; g += '<path d="M' + x(idx[0]).toFixed(1) + ' ' + (H - B) + idx.map(i => 'L' + x(i).toFixed(1) + ' ' + ys(m.sess[i] || 0).toFixed(1)).join('') + 'L' + x(idx[idx.length - 1]).toFixed(1) + ' ' + (H - B) + 'Z" style="fill:var(--sess);opacity:.16"/>'; }
   g += '<polyline points="' + idx.map(i => x(i).toFixed(1) + ',' + y(m.v[i]).toFixed(1)).join(' ') + '" style="fill:none;stroke:var(--ink-2, var(--muted));stroke-width:1.5;stroke-linejoin:round"/>';
   if (bv != null && bi.length) g += '<line x1="' + x(Math.min(...bi)).toFixed(1) + '" x2="' + x(si).toFixed(1) + '" y1="' + y(bv).toFixed(1) + '" y2="' + y(bv).toFixed(1) + '" style="stroke:var(--ctl);stroke-width:1.5;stroke-dasharray:1 3;stroke-linecap:round"/>';
   // Each dot explains itself on hover: the date, what kind of day it was, its number (Mike, Oct 28).
   const dtip = (i, lab) => { if (!opt.dots) return ''; const dd = S.dates[i]; return hint('', 'tdot', '<b>' + label(dd) + '</b><br>' + esc(dayKind(m.b, dd)) + '<br>' + esc(tipName(m)) + ': <b>' + fmtVal(m, m.v[i]) + '</b>' + (lab ? '<br><span class="cap">' + lab + '</span>' : '')); };
-  bi.forEach(i => { const cx = x(i).toFixed(1), cy = y(m.v[i]).toFixed(1); g += '<circle cx="' + cx + '" cy="' + cy + '" r="5" class="cmpglow"/><circle cx="' + cx + '" cy="' + cy + '" r="5" class="cmpglow g2"/><circle cx="' + cx + '" cy="' + cy + '" r="3.8" style="fill:var(--ctl);stroke:var(--surface);stroke-width:1.5"/>' + dtip(i, '🎯 A comparison day for ' + short(state.day)).replace('<span ', '<circle cx="' + cx + '" cy="' + cy + '" r="9" ').replace('></span>', '/>'); });
-  g += '<circle cx="' + x(si).toFixed(1) + '" cy="' + y(m.v[si]).toFixed(1) + '" r="4.5" style="fill:' + col + ';stroke:var(--surface);stroke-width:2"/>' + dtip(si, '📍 The day you\'re reading').replace('<span ', '<circle cx="' + x(si).toFixed(1) + '" cy="' + y(m.v[si]).toFixed(1) + '" r="9" ').replace('></span>', '/>');
-  return '<span class="tchart"><svg viewBox="0 0 ' + W + ' ' + H + '" width="' + W + '" height="' + H + '" aria-hidden="true">' + g + '</svg><span class="tckey"><b class="tcspan">Last ' + (si - i0 + 1) + ' days</b><span><i class="tk-day" style="background:' + col + '"></i>' + short(state.day) + '</span>' + (bi.length ? '<span><i class="tk-cmp"></i>Comparison days</span>' : '') + (band ? '<span><i class="tk-band"></i>Normal range</span>' : '') + '<span><i class="tk-sale"></i>Sale days</span></span></span>';
+  // Back to the original look (Mike, Oct 28): solid blue circles with a soft blue halo breathing around them; no white ring. The day's own dot does the same in its color.
+  bi.forEach(i => { const cx = x(i).toFixed(1), cy = y(m.v[i]).toFixed(1); g += '<circle cx="' + cx + '" cy="' + cy + '" r="8" class="cmpglow"/><circle cx="' + cx + '" cy="' + cy + '" r="4.2" style="fill:var(--ctl)"/>'; });
+  g += '<circle cx="' + x(si).toFixed(1) + '" cy="' + y(m.v[si]).toFixed(1) + '" r="8" class="cmpglow today" style="fill:color-mix(in srgb, ' + col + ' 26%, transparent)"/><circle cx="' + x(si).toFixed(1) + '" cy="' + y(m.v[si]).toFixed(1) + '" r="4.5" style="fill:' + col + '"/>';
+  // Every day hovers on the page chart (Mike, Oct 28): its date, what kind of day, its CVR, and whether it's a comparison day.
+  if (opt.dots) { const cw = (W - L - R) / Math.max(1, si - i0); idx.forEach(i => { const dd = S.dates[i], tag = i === si ? '📍 The day you\'re reading' + (bv != null ? ': ' + sgn(m.v[i] / bv - 1, 0) + ' vs the comparison average (' + fmtVal(m, bv) + ')' : '') : bi.indexOf(i) >= 0 ? '🎯 A comparison day for ' + short(state.day) : ''; g += hint('', 'tdot', '<b>' + label(dd) + '</b><br>' + esc(dayKind(m.b, dd)) + '<br>' + esc(tipName(m)) + ': <b>' + fmtVal(m, m.v[i]) + '</b>' + (tag ? '<br><span class="cap">' + tag + '</span>' : '')).replace('<span ', '<rect x="' + (x(i) - cw / 2).toFixed(1) + '" y="' + T + '" width="' + cw.toFixed(1) + '" height="' + (H - B - T) + '" ').replace('></span>', '/>'); }); }
+  const svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" width="' + W + '" height="' + H + '" aria-hidden="true">' + g + '</svg>', key = '<span class="tckey"><b class="tcspan">Last ' + (si - i0 + 1) + ' days</b><span><i class="tk-day" style="background:' + col + '"></i>' + short(state.day) + '</span>' + (bi.length ? '<span><i class="tk-cmp"></i>Comparison days</span>' : '') + (band ? '<span><i class="tk-band"></i>Normal range</span>' : '') + (opt.sess ? '<span><i class="tk-sess"></i>Sessions</span>' : '') + '<span><i class="tk-sale" style="background:' + BR[m.b].band + ';box-shadow:inset 0 -3px 0 ' + BR[m.b].strip + '"></i>Sale days</span></span>';
+  return '<span class="tchart' + (FULL ? ' tcfull' : '') + '">' + (FULL ? key + svg : svg + key) + '</span>'; // the page chart has its key above, like the 90-day chart (Mike, Oct 28)
 }
 // The day and its comparison set, as two short lines for hover cards (Mike, Oct 28: include the dates the baseline uses).
-const cmpLines = (b, bd, bv, m) => '<li>🏷️ <b>' + short(state.day) + ':</b> ' + esc(dayKind(b, state.day)) + '</li>' + (bd && bd.length ? '<li>🎯 <b>Compared with:</b> ' + esc(cmpKind(b, state.day, bd.length)) + ' (' + bd.map(z => short(z)).join(', ') + ')' + (bv != null && m ? ', avg <b>' + fmtVal(m, bv) + '</b>' : '') + '</li>' + cmpHow(b) : '');
+// The day's sale status is a tag at the top of the hover now (dayTag), not a line here (Mike, Oct 28).
+const dayTag = b => '<span class="tiptag' + (infoNow(b, state.day).sale ? '' : ' off') + '">🏷️ ' + short(state.day) + ': ' + esc(dayKind(b, state.day)) + '</span>';
+const cmpLines = (b, bd, bv, m) => (bd && bd.length ? '<li>🎯 <b>Compared with:</b> ' + esc(cmpKind(b, state.day, bd.length)) + ' (' + bd.map(z => short(z)).join(', ') + ')' + (bv != null && m ? ', avg <b>' + fmtVal(m, bv) + '</b>' : '') + '</li>' + cmpHow(b) : '');
 // How comparable days are picked, in plain words (Allison, Oct 28: "how is the baseline determined? what is the source? what are the data ranges?").
-const cmpHow = b => { const st = infoNow(b, state.day); return '<li>🧭 <b>How they\'re picked:</b> every ' + (st.sale ? 'sale day at the same point in a sale (first day, final day and so on), at the same discount when possible,' : WDL[dow(state.day)] + ' with no sale') + ' since ' + short(BASE_START) + ', when the clean data starts. Days with incidents, bot spikes or the price test are left out. Their ' + 'numbers are averaged. Data: Amplitude (see Sources).</li>'; };
+const cmpHow = b => { const st = infoNow(b, state.day); return '<li>🧭 <b>How they\'re picked:</b> ' + (st.sale ? 'the same point in a sale, at the same discount when possible' : (EDGEN[edgeOf(b, state.day)] ? 'other ' + EDGEN[edgeOf(b, state.day)].replace('day', 'days') : 'the same weekday with no sale')) + ', since ' + short(BASE_START) + '. Odd days left out.</li>'; }; /* about a third of the old length (Mike, Oct 28) */
 function spark(m, j) {
   const S = SER[m.b], n = S.dates.length, end = S.idx[D.asOf], vals = m.v.slice(0, end + 1), w = 110, h = 28, p = 3;
   const mn = Math.min(...vals), mx = Math.max(...vals), x = i => p + (w - 2 * p) * i / (vals.length - 1), y = v => p + (h - 2 * p) * (1 - (v - mn) / ((mx - mn) || 1));
@@ -1542,7 +1708,7 @@ function rowHtml(m) {
   const ss = m.isSess || m.isRev || c.sess == null ? '<div class="ss"></div>' : '<div class="ss"><span class="mlabel">Sessions</span><span class="n">' + int(c.sess) + '</span>' + '<span class="' + (surge ? 'surge' : 'cap') + '">' + (c.sessBs == null ? '' : sgn(c.sessBs, 0) + ' vs comparable days') + '</span></div>';
   const nrb = c.bs != null && !c.custom && nrOf(m, c.bs).st === 'lo'; // red only: green rows made too much color (Mike, Oct 28)
   let h = '<div class="rowwrap"><div class="row' + (nrb ? ' nrbad' : '') + '" role="button" tabindex="0" aria-expanded="' + open + '" data-row="' + esc(m.key) + '"><span class="name"><span class="e">' + em(m.label) + '</span>' + esc(m.label) + alertBadge(m.key) + '</span><span class="v">' + fmtVal(m, c.val) + '</span>' + chg('bs') + '<span class="spark">' + spark(m, c.custom || c.bs == null ? null : { mat: nrOf(m, c.bs).st === 'lo' ? 'bad' : nrOf(m, c.bs).st === 'hi' ? 'good' : null }) /* the line's color is the row's own grade, vs comparable days (Allison and Mike, Oct 28); it used to grade a hidden vs-last-month comparison */ + '</span>' +
-    KINDS(m.b).filter(k => k !== 'bs').map(chg).join('') + ss + '<span class="rbc">' + rtag + '</span><span class="chev" aria-hidden="true">▾</span></div>';
+    KINDS(m.b).filter(k => k !== 'bs' && k !== 'pd').map(chg).join('') /* prior day lives in the expanded row (Mike, Oct 28) */ + ss + '<span class="rbc">' + rtag + '</span><span class="chev" aria-hidden="true">▾</span></div>';
   if (open) h += '<div class="detail">' + detailHtml(m) + '</div>';
   return h + '</div>';
 }
@@ -1570,7 +1736,7 @@ const bIcon = e => e.bot === false ? (e.emoji || '📈') : '🤖';
 const botOn = (e, d) => d >= e.date && d <= (e.end || e.date);
 function botHtml(m) {
   const ev = botFor(m).slice().sort((a, z) => z.date < a.date ? -1 : 1); if (!ev.length) return '';
-  const row = e => '<li><span class="bnd">' + short(e.date) + (e.end ? '–' + short(e.end) : '') + '</span><div><b>' + (e.emoji || bIcon(e)) + ' ' + esc(e.short || e.title) + ':</b> ' + esc(e.sum || e.note) + (e.link ? ' <a href="' + esc(e.link) + '" target="_blank" rel="noopener">Slack ↗</a>' : '') + '</div></li>';
+  const row = e => '<li><span class="bnd">' + short(e.date) + (e.end ? '–' + short(e.end) : '') + '</span><div><b>' + (e.emoji || bIcon(e)) + ' ' + esc(e.short || e.title) + ':</b> ' + esc(e.sum || e.note) + (e.link ? ' <a href="' + esc(e.link) + '" target="_blank" rel="noopener">Slack ↗</a>' : '') + '</div></li>';
   const top = ev.slice(0, 3), more = ev.slice(3);
   return '<div class="botnotes bwlist"><span class="lbl">🤖 Bot traffic notes from the Bot Squad</span><p class="bnsub">Dated markers on the chart above. These events move sessions and CVR without any change in shopper behavior.</p><ul>' + top.map(row).join('') + '</ul>' +
     (more.length ? '<details><summary>' + more.length + ' earlier note' + (more.length > 1 ? 's' : '') + '</summary><ul>' + more.map(row).join('') + '</ul></details>' : '') + '</div>';
@@ -1581,6 +1747,8 @@ function detailRange(m) {
   const r = nrOf(m, c.bs); if (!r) return '';
   return '<span class="nrpanel nr' + r.st + ' dnr">' + hint('<span class="nrp1"><b>' + sgn(c.bs, 0) + '</b> vs comparable days, ' + (r.st === 'in' ? 'within' : r.st === 'hi' ? 'above' : 'below') + ' normal range</span>' + nrBarH(c.bs, r.w), 'nrph', nrTip(m, c.bs, c.bsV, c.val, comps.bs.dates)) + '</span>';
 }
+// Expanded row: the prior day, as context (it left the row, Mike, Oct 28). The comparable-days read is already on the row, so it isn't repeated here.
+function detailPrior(m) { const d = state.day, c = cellsFor(m, d, compsFor(m.b, d)); return c.pd == null ? '' : '<span class="dprior"><span class="lbl">vs prior day, ' + short(addDays(d, -1)) + '</span> <b>' + sgn(c.pd, 1) + '</b> <span class="cap">' + fmtVal(m, c.pdV) + ' → ' + fmtVal(m, c.val) + ', context only</span></span>'; }
 function detailHtml(m) {
   const sessOn = !state.sessOff.has(m.key), ob = BR[BR[m.b].other].name;
   const leg = '<div class="legend"><span><i class="sw" style="background:' + BR[m.b].color + '"></i>' + esc(m.axis) + '</span>' + (m.ly ? '<span><i class="sw dash"></i>Same weekday last year</span>' : '') + (sessOn ? '<span><i class="sw blk" style="background:var(--sess);opacity:.5"></i>Sessions per day</span>' : '') + '<span><i class="sw blk" style="background:' + BR[m.b].band + ';outline:1px solid ' + BR[m.b].strip + '"></i>Sale days</span></div>';
@@ -1588,10 +1756,10 @@ function detailHtml(m) {
   const GN = { all: 'All', US: 'USA', GB: 'UK', AU: 'Australia', CA: 'Canada', DE: 'Germany', FR: 'France', NZ: 'New Zealand' }, pg = (state.pgeo || {})[m.key] || 'all';
   const geoTog = m.pgeo && Object.keys(m.pgeo).length ? '<div class="segs pgeo" role="group" aria-label="Country">' + ['all'].concat(Object.keys(m.pgeo)).map(g => '<button type="button" data-pgeo="' + esc(m.key + '|' + g) + '" aria-pressed="' + (pg === g) + '">' + (GN[g] || g) + '</button>').join('') + '</div>' : '';
   const gs = pg !== 'all' && m.pgeo && m.pgeo[pg] ? (m.pgeo[pg].s || []).filter(x => x != null).slice(-14).sort((x, y) => x - y) : [], thin = gs.length && gs[Math.floor(gs.length / 2)] < 100;
-  return '<div class="dhead"><div class="dtitle"><h4>' + em(m.label) + ' ' + esc(m.label) + ' <span>' + BR[m.b].name + (pg !== 'all' ? ', ' + (GN[pg] || pg) : '') + ', last 90 days</span></h4><p class="dsub">' + esc(defOf(m)) + (thin ? ' <b>Under 100 product-page viewers a day here, so daily swings are mostly noise.</b>' : '') + '</p></div><div class="dbtns">' + geoTog +
+  return '<div class="devtop"><div class="devl"><div class="dhead"><div class="dtitle"><h4>' + em(m.label) + ' ' + esc(m.label) + ' <span>' + BR[m.b].name + (pg !== 'all' ? ', ' + (GN[pg] || pg) : '') + ', last 90 days</span></h4><p class="dsub">' + esc(defOf(m)) + (thin ? ' <b>Under 100 product-page viewers a day here, so daily swings are mostly noise.</b>' : '') + '</p></div><div class="dbtns">' + geoTog +
     (m.sess && !m.isSess ? '<button type="button" class="swtog" role="switch" data-sesstog="' + esc(m.key) + '" aria-checked="' + sessOn + '"><span class="trk"><span class="knb"></span></span>Sessions</button>' : '') +
-    '<button type="button" class="actbtn" data-cmp="' + esc(m.key) + '" data-from="' + m.b + '">👀 Compare with ' + ob + '</button>' + detailRange(m) + '</div></div>' + leg +
-    '<div class="chart" data-chart="' + esc(m.key) + '"></div>' + botHtml(m) + sibHtml(m) + baselineLine(m) + '<div class="tbox">' + metricTable(m) + '</div>';
+    '<button type="button" class="actbtn" data-cmp="' + esc(m.key) + '" data-from="' + m.b + '">👀 Compare with ' + ob + '</button>' + detailPrior(m) + '</div></div></div>' + sibHtml(m) + '</div>' + leg +
+    '<div class="chart" data-chart="' + esc(m.key) + '"></div>' + '<div class="tbox">' + metricTable(m) + '</div>';
 }
 /* table cells are only red or green: better or worse than usual */
 const cellCls = j => j ? j.cls : '';
@@ -1637,7 +1805,7 @@ function groupHtml(b, sec) {
   if (!metricsFor(b)[sec] || !metricsFor(b)[sec].length) return '';
   const full = state.full.has(sec);
   const hl = highlight(b, sec);
-  return '<div class="group" id="g-' + sec + '"><div class="ghead"><div class="gt"><h3>' + SEC_EMOJI[sec] + ' ' + SECS[sec] + '</h3>' + (hl ? '<p class="gsub">' + hl + '</p>' : '') + '</div><button class="linkbtn" data-full="' + sec + '">' + (full ? 'Hide the full data table' : 'View full data table') + '</button></div>' +
+  return '<div class="group" id="g-' + sec + '"><div class="ghead"><div class="gt"><h3>' + SEC_EMOJI[sec] + ' ' + SECS[sec] + '</h3>' + (hl ? '<p class="gsub">' + hl + '</p>' : '') + '</div><div class="gacts">' + secSrc(b, sec) + '<button class="linkbtn" data-full="' + sec + '">' + (full ? 'Hide the full data table' : 'View full data table') + '</button></div></div>' +
     '<div class="rows">' + metricsFor(b)[sec].map(rowHtml).join('') + '</div>' + (full ? wideTable(b, sec) : '') + '</div>';
 }
 
@@ -1738,12 +1906,12 @@ function sellingHtml() {
   let a = 0, g = '';
   sl.forEach((x, j) => { const sh = x[1] / CATPIE.total, s2 = sh * 6.2832; g += '<path class="slice hint" tabindex="0" data-hint="' + (HINTS.push('<b>' + esc(x[0]) + '</b><br>' + pct(sh, 1) + ' of categorized items ordered (' + int(x[1]) + ')') - 1) + '" d="' + arc(90, 90, 48, 80, a, a + s2) + '" style="fill:' + CATC[j] + ';stroke:var(--surface);stroke-width:2"/>'; a += s2; });
   const pie = '<div class="catpie"><svg class="donut" viewBox="0 0 180 180" width="250" height="250" role="img" aria-label="Share of orders by category">' + g + '<text x="90" y="88" text-anchor="middle" style="font:700 15px var(--display);fill:var(--ink)">' + int(CATPIE.total) + '</text><text x="90" y="104" text-anchor="middle" style="font:500 11px var(--body);fill:var(--muted)">items</text></svg><ul class="catleg">' +
-    sl.map((x, j) => '<li><i style="background:' + CATC[j] + '"></i><span>' + esc(x[0]) + '</span><b>' + pct(x[1] / CATPIE.total, 0) + '</b></li>').join('') + '</ul></div>';
+    sl.map((x, j) => '<li><i style="background:' + CATC[j] + '"></i><span>' + esc(x[0]) + '</span><b>' + pct(x[1] / CATPIE.total, 0) + '</b>' + (() => { const m = x[2] != null ? x[2] : (j === sl.length - 1 && typeof CATPIE.restX === 'number' ? CATPIE.restX : null); return m == null ? '<em class="catx"></em>' : '<em class="catx' + (m >= 1.15 ? ' up' : '') + '">' + m.toFixed(1) + '×</em>'; })() + '</li>').join('') + '</ul></div>';
   const all = TRENDS.tags.concat(TRENDS.cats).map(r => ({ n: r[0].replace(/-/g, ' '), c: r[1], x: r[2] }));
   const hot = all.filter(r => r.x >= 1.15).sort((a, z) => z.x - a.x).slice(0, 4), cold = all.filter(r => r.x <= 0.8).sort((a, z) => a.x - z.x).slice(0, 3), mx = Math.max(...hot.map(r => r.x), 2);
   const mover = (r, up) => '<li><a href="https://www.teepublic.com/t-shirts?query=' + encodeURIComponent(r.n) + '" target="_blank" rel="noopener">' + esc(r.n) + '</a><span class="mvbar"><i class="' + (up ? 'up' : 'down') + '" style="width:' + (up ? (r.x / mx * 100) : (r.x * 100)).toFixed(0) + '%"></i></span><b class="' + (up ? 'b' : 'dimx') + '">' + r.x.toFixed(1) + '×</b></li>';
   const movers = '<div class="movers"><h4>🔥 Heating up</h4><ol>' + hot.map(r => mover(r, true)).join('') + '</ol><h4>🧊 Cooling off</h4><ol>' + cold.map(r => mover(r, false)).join('') + '</ol><p class="cap">× = share of the last 24 hours\' orders compared with its share over the 7 days before. 1.0× is normal.</p></div>';
-  const call = typeof SELLCALL !== 'undefined' ? '<div class="sellcall"><span class="sbig" aria-hidden="true">' + SELLCALL.e + '</span><div><b>' + esc(SELLCALL.title) + '</b><p>' + esc(SELLCALL.body) + '</p><p class="ask">👉 ' + esc(SELLCALL.ask) + ' <a href="' + esc(SELLCALL.src) + '" target="_blank" rel="noopener">Source ↗</a></p></div></div>' : '';
+  const call = typeof SELLCALL !== 'undefined' ? '<div class="sellcall"><span class="sbig" aria-hidden="true">' + SELLCALL.e + '</span><div><b>' + esc(SELLCALL.title) + '</b><p>' + esc(SELLCALL.body) + '</p><p class="ask">👉 ' + esc(SELLCALL.ask) + ' <a href="' + esc(SELLCALL.src) + '" target="_blank" rel="noopener">Source ↗</a></p></div></div>' : '';
   return '<div class="selling">' + pie + movers + '</div>';
 }
 const TOPIC = [[/brewers/i, 'Brewers World Series'], [/rays/i, 'World Series'], [/eagles/i, 'Philadelphia Eagles'], [/twenty one pilots/i, 'Twenty One Pilots'], [/kentucky|football/i, 'College football'], [/oozma|kappa/i, 'Monsters University'], [/usps|postal/i, 'US Postal Service']];
@@ -1759,12 +1927,12 @@ function topsHtml() {
   return '<div class="topgrid">' + TOPS.items.map((t, i) => '<a class="top" href="https://www.teepublic.com/t-shirt/' + TOP_IDS[i] + '" target="_blank" rel="noopener"><span class="rank">' + (i + 1) + '</span><img src="' + t.img + '" alt="' + esc(t.title) + '" loading="lazy"><b title="' + esc(t.title) + '">' + esc(t.title) + '</b>' + (topicOf(t.title) ? '<span class="ttag' + (hotTopic(topicOf(t.title)) ? ' hot' : '') + '" title="Topic this design rides on' + (hotTopic(topicOf(t.title)) ? ', heating up right now' : '') + '">' + (hotTopic(topicOf(t.title)) ? '🔥 ' : '#') + esc(topicOf(t.title)) + '</span>' : '') + '<span class="cap">' + int(t.orders) + ' orders</span></a>').join('') + '</div>';
 }
 function trendingHtml() {
-  const call = typeof SELLCALL !== 'undefined' ? '<section class="callcard2"><h3>' + SELLCALL.e + ' ' + esc(SELLCALL.title) + '</h3><p>' + esc(SELLCALL.body) + '</p><p class="ask">💰 ' + esc(SELLCALL.ask) + '</p><a class="ref ext" href="' + esc(SELLCALL.src) + '" target="_blank" rel="noopener">Series preview ↗</a></section>' : '';
+  const call = typeof SELLCALL !== 'undefined' ? '<section class="callcard2"><h3>' + SELLCALL.e + ' ' + esc(SELLCALL.title) + '</h3><p>' + esc(SELLCALL.body) + '</p><p class="ask">💰 ' + esc(SELLCALL.ask) + '</p><a class="ref ext" href="' + esc(SELLCALL.src) + '" target="_blank" rel="noopener">Series preview ↗</a></section>' : '';
   return '<section class="sview"><div class="vhead vhl">' + trHeadline() + '</div>' +
     // Topics go straight under the title (Mike, Oct 22): four cards, then a one-time "Show N more".
     (() => { const L = SLACK, more = L.length - 4; return '<section class="bare tsay"><div class="ghead"><div class="gt"><h3>💬 What people are saying</h3><p class="gsub">The last 48 hours.</p></div></div>' + (L.length ? '' : '<p class="cap">Quiet: nothing new in the last 48 hours.</p>') + sayList(state.sayAll ? L : L.slice(0, 4), state.sayAll ? L.length : 4) + (more > 0 && !state.sayAll ? '<button type="button" class="linkbtn saymore" data-saymore="1">Show ' + more + ' more</button>' : '') + '</section>'; })() +
     // Bot Squad updates moved here from the CVR pages, under What people are saying, both sites (Mike, Oct 27).
-    '<section class="botsec" id="g-bots"><div class="bothead"><h2>🤖 Bot Squad updates</h2></div>' + ['rb', 'tp'].map(b => '<div class="botsite"><div class="botsh"><span class="botsn">' + siteDot(b === 'rb' ? 'RB' : 'TP') + '</span>' + (botNotesFor(b).length ? '<button type="button" class="linkbtn bmore" data-botwatch="' + b + '">All ' + BR[b].name + ' bot notes →</button>' : '') + '</div>' + botRow(b) + '</div>').join('') + '</section>' +
+    '<section class="botsec" id="g-bots"><div class="bothead"><h2>🤖 Bot Squad updates</h2><span class="botlinks">' + ['rb', 'tp'].map(b => botNotesFor(b).length ? '<button type="button" class="linkbtn bmore" data-botwatch="' + b + '">All ' + BR[b].name + ' bot notes →</button>' : '').join('') + '</span></div><div class="say4 botsay">' + ['rb', 'tp'].map(b => botRow(b, true)).join('') + '</div></section>' +
     // Customer service lives here once, for both sites (Mike, Oct 24), instead of on each CVR page.
     (typeof CS !== 'undefined' && CS.tp && CS.rb ? '<section class="bare tcs"><div class="ghead"><div class="gt"><h3>🎧 What customer service is seeing</h3><p class="gsub">Repeat customer complaints from the customer service channels, ' + esc(String(CS.window || '').replace(/^Customer service channels,\s*/i, '')) + '.</p></div></div>' + csHtml() + '</section>' : '') +
     '<div class="sellrow">' + panel('🏷️', 'What is selling', 'Share of TeePublic orders by category in the last 24 hours, and the topics moving fastest.', sellingHtml(), 'p-sell') +
@@ -1776,14 +1944,14 @@ function trendingHtml() {
 function scoreHtml(b) {
   const hasLY = b === 'tp', ob = BR[BR[b].other].name, d = state.day, comps = compsFor(b, d);
   // Column headers explain themselves on hover; no "What's this?" (Mike, Oct 27). Prior day keeps its date.
-  const CHT = { bs: '<b>vs comparable days</b><br>The day vs the average of matching days since ' + short(BASE_START) + ' (same weekday, or the same point in a sale at the same discount).<ul class="hul"><li>📏 <b>Band:</b> the metric\'s normal fluctuation</li><li>📍 <b>Dot:</b> this day</li><li>🎨 <b>Color:</b> red below the range; rows below it are tinted red</li></ul>', pd: '<b>vs prior day</b><br>Always the day before. Context, never graded.', yoy: '<b>vs last year</b><br>The same kind of day last year. Up 30%+ is likely bots.' };
-  const ch = k => '<span class="ch"><button type="button" class="chbtn" data-why="' + k + '">' + (k === 'pd' ? '<span class="chh">' + kcol(k, comps) + '</span>' /* prior day needs no explanation (Mike, Oct 27) */ : hint(k === 'mom' && comps.mom && comps.mom.custom ? 'vs your range' : kcol(k, comps), 'soft chh', CHT[k] || '')) + (k === 'pd' && comps[k] ? '<small>' + cmpShort(comps[k], k) + '</small>' : !comps[k] ? '<small>no match</small>' : '') + '</button></span>';
-  return '<section class="score' + (hasLY ? '' : ' nly') + '"><h2 class="title">📊 Scorecard</h2><div class="colhead"><span>Metric</span><span>' + short(d) + '</span>' + ch('bs') + '<span>Last 90 days</span>' + KINDS(b).filter(k => k !== 'bs').map(ch).join('') + '<span>Sessions</span><span>Seen on ' + ob + '?</span><span></span></div>' +
+  const CHT = { bs: '<b>vs comparable days</b><br>The day vs the average of matching days since ' + short(BASE_START) + ' (same weekday, or the same point in a sale at the same discount).<ul class="hul"><li>📏 <b>Band:</b> the metric\'s normal fluctuation</li><li>📍 <b>Dot:</b> this day</li><li>🎨 <b>Color:</b> red below the range; rows below it are tinted red</li></ul>', pd: '<b>vs prior day</b><br>Always the day before. Context, never graded.', yoy: '<b class="tiph nosrc">vs LY: last year</b><span class="tipv">Each metric vs ' + esc(kname('yoy', comps)) + '.</span><ul class="hul nrul"><li>📅 <b>Which days:</b> ' + (comps.yoy && comps.yoy.dates ? comps.yoy.dates.map(x => short(x)).join(', ') + ', 2025' : 'the same weekday, 364 days back') + '</li><li>🤖 <b>Up 30% or more:</b> likely last year\'s bot traffic, not shoppers</li></ul>' };
+  const ch = k => '<span class="ch"><button type="button" class="chbtn" data-why="' + k + '">' + (k === 'pd' ? '<span class="chh">' + kcol(k, comps) + '</span>' /* prior day needs no explanation (Mike, Oct 27) */ : hint(k === 'mom' && comps.mom && comps.mom.custom ? 'vs your range' : k === 'yoy' ? 'vs LY' /* short header, detail on hover (Mike, Oct 28) */ : kcol(k, comps), 'soft chh', CHT[k] || '')) + (k === 'pd' && comps[k] ? '<small>' + cmpShort(comps[k], k) + '</small>' : !comps[k] ? '<small>no match</small>' : '') + '</button></span>';
+  return '<section class="score' + (hasLY ? '' : ' nly') + '"><h2 class="title">📊 Scorecard</h2><div class="colhead"><span>Metric</span><span>' + short(d) + '</span>' + ch('bs') + '<span>Last 90 days</span>' + KINDS(b).filter(k => k !== 'bs' && k !== 'pd').map(ch).join('') + '<span>Sessions</span><span>Seen on ' + ob + '?</span><span></span></div>' +
     Object.keys(SECS).map(sec => groupHtml(b, sec)).join('') + '</section>';
 }
 
 /* ---------- A/B tests: its own page, because it is a weekly decision review, not the daily pulse ---------- */
-const EXPS_AS_OF = '2026-10-26';
+const EXPS_AS_OF = '2026-11-02';
 const testDays = t => Math.round((parse(EXPS_AS_OF) - parse(t.start)) / DAY) + 1;
 const siteImp = (rel, reach) => rel * reach;
 // Where a test's whole-site number comes from, for every hover that shows one.
@@ -1796,7 +1964,7 @@ const fmtM = (x, v) => x.f === 'usd' ? '$' + v.toFixed(2) : pct(v, v < 0.01 ? 3 
 const conf = t => Math.max(0, Math.min(99, Math.floor((1 - t.p) * 100)));
 // Confidence in plain words: how sure we are the difference is real. Direction comes from the primary metric.
 const sigWord = t => { const c = conf(t), up = (t.primary ? t.primary.rel : t.cvr.rel) >= 0; if (c >= 95) return up ? 'Clear winner' : 'Clear loser'; if (c >= 80) return 'Likely ' + (up ? 'up' : 'down'); if (c >= 50) return 'Leaning ' + (up ? 'up' : 'down'); return t.status === 'running' ? 'Too early to tell' : 'No clear difference'; };
-const sigChip = t => t.p == null ? '' : '<span class="sig ' + (conf(t) >= 95 ? 'yes' : conf(t) >= 80 ? 'mid' : 'no') + '" title="How sure we are the difference is real, not noise: ' + conf(t) + '%. We call a winner at 95%. Under 50% the results so far look like noise.">' + '<span class="cbar"><i style="width:' + Math.max(3, Math.round(conf(t) / 95 * 100)) + '%"></i></span>' + sigWord(t) + (conf(t) >= 50 ? ' · ' + conf(t) + '% sure' : '') + '</span>';
+const sigChip = t => t.p == null ? '' : '<span class="sig ' + (conf(t) >= 95 ? 'yes' : conf(t) >= 80 ? 'mid' : 'no') + '" title="How sure we are the difference is real, not noise: ' + conf(t) + '%. We call a winner at 95%. Under 50% the results so far look like noise.">' + '<span class="cbar"><i style="width:' + Math.max(3, Math.round(conf(t) / 95 * 100)) + '%"></i></span>' + sigWord(t) + (conf(t) >= 50 ? ' · ' + conf(t) + '% confidence' : '') + '</span>';
 const TESTE = [[/return to cart/i, '🔙'], [/topics/i, '🧭'], [/countdown/i, '⏳'], [/swatch/i, '🎨'], [/trust badge/i, '🛡️'], [/flat-lay/i, '👕'], [/image first/i, '📸'], [/express/i, '⚡'], [/price/i, '🏷️'], [/shipping/i, '📦']];
 // Tests get the same line icons as Roadmap projects (Mike, Oct 27); the goal is read from the primary metric.
 const testObj = t => /revenue|order value|aov|items per/i.test((t.primary && t.primary.name) || '') ? 'AOV' : 'CVR';
@@ -1815,40 +1983,64 @@ function ttc(t) {
   const more = Math.round(days * Math.pow(1.96 / z, 2) - days);
   return more > 90 ? 'Months from 95% at this effect size' : '~' + Math.max(1, more) + ' more day' + (more === 1 ? '' : 's') + ' to 95%, if it holds';
 }
+// A/B table built around the exec questions (Sam, standup Oct 30): revenue per visitor, CVR, add to cart, AOV and engagement side by side,
+// each marked proven or not, plus how long it has run, the call, what's next and who decides. Color only when a result is proven (Mike, Oct 30).
+const ABK = [['rpv', 'Revenue per user', 'What each user in the test group spends on average.'], ['cvr', 'CVR', 'Share of visitors in the test who order. Some tests measure a narrower step (product page, cart or checkout); the hover names it.'], ['atc', 'Add to cart', 'Share of visitors in the test who add something to their cart.'], ['aov', 'AOV', 'Average order value: revenue ÷ orders. Not Amplitude\'s per-visitor "AOV".'], ['eng', 'Engagement', 'Only for tests built to change how people browse, like the nav.']];
+const ABO = ['rpv', 'cvr'];
+const abRd = t => (EXPS.reads || {})[t.id] || { goal: t.kind === 'aov' ? 'rpv' : 'cvr', verdict: t.status === 'shipped' ? ['ship', 'Shipped'] : t.status === 'running' ? ['early', 'Running'] : ['none', 'Kept control'], next: t.call || '', m: { cvr: { v: t.cvr.rel, s: t.p != null && t.p < 0.05 ? 'sig' : 'ns', a: t.cvr.a, b: t.cvr.b, name: 'Sitewide CVR' }, rpv: rpuOf(t) ? { v: rpuOf(t).rel, s: 'nb', a: rpuOf(t).a, b: rpuOf(t).b, f: 'usd' } : null } };
+const abVal = (x, v) => x.f === 'usd' ? '$' + (v >= 10 ? v.toFixed(2) : v.toFixed(v < 1 ? 3 : 2)) : pct(v, v < 0.01 ? 3 : v < 0.1 ? 2 : 1);
+const abSure = x => x.s === 'sig' ? '✓ Significant' : x.s === 'nb' ? 'No error bar' : x.s === 'early' ? 'Too early' : x.c ? x.c + '% confidence' : 'Could be noise';
+const abSureL = x => x.s === 'sig' ? '<b class="b">Statistically significant:</b> at least 95% confidence of a true difference, not noise.' : x.s === 'nb' ? '<b>No error bar:</b> Amplitude can\'t calculate how sure it is for this metric, so read it as a direction only.' : x.s === 'early' ? '<b>Too early:</b> too few days of data to trust yet.' : x.c ? '<b>' + x.c + '% confidence</b> this is a true difference. We call it at 95%.' : '<b>Not significant yet:</b> this could still be random noise.';
+function abCell(t, k) {
+  const r = abRd(t), x = (r.m || {})[k], goal = r.goal === k;
+  if (!x) return '<span class="abtbd"><b>TBD</b><small>not measured</small></span>';
+  const cls = x.s === 'sig' ? (x.v >= 0 ? 'b' : 'w') : 'ns', nm = x.name || (k === 'cvr' ? 'Sitewide CVR' : ABK.find(z => z[0] === k)[1]), scope = (!x.name || /sitewide/i.test(x.name)) ? 'sitewide' : x.name.toLowerCase().replace(/ cvr$/, '');
+  const tip = '<b class="tiph nosrc">' + esc(nm) + (goal ? ' · 🎯 what the test is built to move' : '') + '</b><span class="tipv"><b>' + sgn(x.v, 1) + '</b> for the test group</span><ul class="hul nrul"><li>📊 <b>Control → test:</b> ' + abVal(x, x.a) + ' → ' + abVal(x, x.b) + '</li><li>🧪 ' + abSureL(x) + '</li>' + (x.note ? '<li>📝 ' + esc(x.note) + '</li>' : '') + '</ul>';
+  return hint('<span class="abv ' + cls + '">' + (goal ? '<i class="abgoal" aria-label="Goal metric">🎯</i>' : '') + sgn(x.v, 1) + '</span>' + (k === 'cvr' ? '<small class="abs ' + x.s + '">' + (x.s === 'sig' ? '✓ ' : '') + esc(scope) + '</small>' : x.s === 'sig' || (x.c && x.c >= 80) ? '<small class="abs ' + x.s + '">' + abSure(x) + '</small>' : ''), 'abm', tip);
+}
+const abSig = t => { const r = abRd(t), g = (r.m || {})[r.goal], nm = (g && g.name) || ABK.find(z => z[0] === r.goal)[1];
+  const o = !g ? ['na', '–', '', ''] : g.s === 'sig' ? ['yes', 'Yes', '95%+ confidence', 'At least 95% confidence of a true difference.'] : g.s === 'early' ? ['early', 'Too early', 'few days of data', 'Not enough days to say anything yet.'] : g.s === 'nb' ? ['nb', 'Can\'t tell', 'no error bar', 'Amplitude gives no error bar for this metric.'] : g.c ? ['not', 'Not yet', g.c + '% confidence', 'Needs 95% before we call it.'] : ['not', 'Not yet', 'could be noise', 'Under 95% confidence, so it could still be noise.'];
+  return '<span class="abst ' + o[0] + '">' + o[1] + '</span>';
+};
+const abImp = t => { const v = siteImp(t.cvr.rel, t.reach); return hint('<span class="abv big lite ' + (v >= 0 ? 'b' : 'w') + '">' + sp(v, 1) + '</span><small class="abs">' + Math.round(t.reach * 100) + '% reach</small>', 'abm', '<span class="nosrc">In the test group: ' + pct(t.cvr.a, t.cvr.a < 0.1 ? 2 : 1) + ' → ' + pct(t.cvr.b, t.cvr.b < 0.1 ? 2 : 1) + ' CVR (' + sgn(t.cvr.rel, 1) + ').</span>'); };
+const abRpu = t => { const x = (abRd(t).m || {}).rpv; if (!x) return '<span class="abtbd"><b>TBD</b><small>not measured</small></span>'; return hint('<span class="abv big ' + (x.v >= 0 ? 'b' : 'w') + '">' + sgn(x.v, 1) + '</span><small class="abs">in test group</small>', 'abm', '<span class="nosrc">' + abVal(x, x.a) + ' → ' + abVal(x, x.b) + ' per user.</span>'); };
+const abDay = t => t.status === 'running' ? '<span class="abday"><b>Day ' + testDays(t) + '</b><small>since ' + short(t.start) + '</small></span>' : '<span class="abday"><b>' + (Math.round((parse(t.end) - parse(t.start)) / DAY) + 1) + ' days</b><small>ended ' + short(t.end) + '</small></span>';
+const abCall = t => { const r = abRd(t), pill = '<span class="abv2 v-' + r.verdict[0] + '">' + esc(r.verdict[1]) + '</span>'; return r.next && t.status === 'running' ? hint(pill, 'abcall', '<span class="nosrc">' + esc(r.next) + '</span>') : '<span class="abcall">' + pill + '</span>'; };
+const abHeadSort = () => {
+  const S = state.abSort || { k: 'days', dir: 1 }, c = (k, inner) => '<span class="abh" role="button" tabindex="0" data-absort="' + k + '">' + inner + (S.k === k ? '<i class="sa" aria-hidden="true">' + (S.dir > 0 ? '↑' : '↓') + '</i>' : '') + '</span>';
+  return '<div class="tcols abcols">' + c('test', 'Test') + c('days', 'Running') + c('sig', 'Stat sig') + c('cvr', hint('Sitewide CVR impact', 'soft', '<span class="nosrc"><b>Sitewide CVR impact</b><br>The test group\'s CVR change, scaled by the share of orders it reaches: what it would do to the whole site.</span>')) + c('rpu', hint('Revenue per user', 'soft', '<span class="nosrc"><b>Revenue per user</b><br>Revenue per user in the test group vs control.</span>')) + c('call', 'The call') + '<span></span></div>';
+};
+const ABHEAD = '<div class="tcols abcols"><span>Test</span><span>Running</span>' + hint('Stat sig', 'soft', '<span class="nosrc"><b>Stat sig</b><br>Is there 95% confidence the main metric moved, not noise?</span>') + hint('Sitewide CVR impact', 'soft', '<span class="nosrc"><b>Sitewide CVR impact</b><br>The test group\'s CVR change, scaled by the share of orders it reaches: what it would do to the whole site.</span>') + hint('Revenue per user', 'soft', '<span class="nosrc"><b>Revenue per user</b><br>Revenue per user in the test group vs control.</span>') + '<span>The call</span><span></span></div>';
+function testDetailModal(id) {
+  const t = [].concat(EXPS.live, EXPS.done).find(x => String(x.id) === String(id)); if (!t) return;
+  const R = abRd(t), days = t.status === 'running' ? testDays(t) : Math.round((parse(t.end) - parse(t.start)) / DAY) + 1;
+  const cols = ABK.filter(k => (R.m || {})[k[0]] && k[0] !== 'rpv').concat(ABK.filter(k => (R.m || {})[k[0]] && k[0] === 'rpv')), lab = k => R.m[k[0]].name || k[1];
+  const ch = (v, main) => '<span class="chn ' + (v >= 0 ? 'b' : 'w') + (main ? ' main' : '') + '">' + sgn(v, 1) + '</span>';
+  const sureOf = x => x.s === 'sig' ? '<span class="abst yes">Yes</span>' : x.s === 'early' ? '<span class="abst early">Too early</span>' : x.s === 'nb' ? '<span class="abst nb">Can\'t tell</span>' : '<span class="abst">' + (x.c ? 'Not yet · ' + x.c + '%' : 'Not yet') + '</span>';
+  const tbl = R.vrows
+    ? '<table class="abt"><thead><tr><th>Version</th>' + cols.map(k => '<th>' + esc(lab(k)) + '</th>').join('') + '</tr></thead><tbody>' + [['Overall', Object.fromEntries(cols.map(k => [k[0], R.m[k[0]].v])), 'All versions combined']].concat(R.vrows.map(v => [v[0], v[1], (R.vdef || {})[v[0]] || ''])).map(v => '<tr><td><b>' + esc(v[0]) + '</b>' + (v[2] ? '<small>' + esc(v[2]) + '</small>' : '') + '</td>' + cols.map(k => { const x = v[1][k[0]]; return x == null ? '<td class="na">–</td>' : '<td>' + ch(x, k[0] === 'rpv') + '</td>'; }).join('') + '</tr>').join('') + '</tbody></table>'
+    : '<table class="abt"><thead><tr><th>Metric</th><th>Control</th><th>Test</th><th>Change</th><th>Stat sig</th></tr></thead><tbody>' + cols.map(k => { const x = R.m[k[0]]; return '<tr><td>' + esc(lab(k)) + '</td><td>' + abVal(x, x.a) + '</td><td>' + abVal(x, x.b) + '</td><td>' + ch(x.v, k[0] === 'rpv') + '</td><td>' + sureOf(x) + '</td></tr>'; }).join('') + '</tbody></table>';
+  const pill = '<span class="abv2 v-' + R.verdict[0] + '">' + esc(R.verdict[1]) + '</span>';
+  openModal('<div class="mhead"><h3 id="mtitle">' + esc(t.name) + '</h3></div><div class="mtags"><span class="rtag">' + siteDot(testSite(t)) + '</span><span class="rtag">' + esc(t.where) + '</span><span class="rtag">' + (t.status === 'running' ? 'Day ' + days + ', since ' + short(t.start) : days + ' days, ended ' + short(t.end)) + '</span>' + pill + '</div>' +
+    '<div class="abwhat2"><h4 class="ph">🧪 What we are testing</h4><p>' + esc(t.hyp) + '</p>' + (R.flag ? '<p class="abflag">⚠️ ' + esc(R.flag) + '</p>' : '') + '</div>' + tbl + '<div class="abfoot2">' + srcBtn('test:' + t.id) + '</div>');
+}
 function testRow(t) {
   const site = siteImp(t.cvr.rel, t.reach), open = state.open.has('x' + t.id), r = Math.round(t.reach * 100);
   const st = t.status === 'running' ? 'Running' : t.status === 'shipped' ? 'Shipped' : 'Kept control';
   const more = (ttc(t).match(/~(\d+) more day/) || [])[1], dates = t.status === 'running' ? short(t.start) + ' → ' + (more ? '~' + short(addDays(EXPS_AS_OF, +more)) : 'open') + '<small>Day ' + testDays(t) + (more ? ' · result in ~' + more + ' days' : '') + '</small>' : short(t.start) + ' → ' + short(t.end) + '<small>' + (Math.round((parse(t.end) - parse(t.start)) / DAY) + 1) + ' days</small>';
   const fv = t.primary.name.indexOf('per') > -1 ? v => v.toFixed(3) : v => pct(v, v < 0.01 ? 3 : v < 0.05 ? 2 : 1);
-  let h = '<div class="rowwrap"><div class="trow" role="button" tabindex="0" aria-expanded="' + open + '" data-xrow="' + t.id + '"><span class="tname tnico"><span class="ge gico g-' + esc(testObj(t)) + '" aria-hidden="true">' + projIco({ t: t.name, obj: testObj(t) }) + '</span><b>' + esc(t.name) + srcBtn('test:' + t.id) + '</b><span class="cap tmeta">' + teamTag(testTeam(t)) + pmChip(t.name, testTeam(t)) + siteDot(testSite(t)) + ' · ' + esc(t.where) + '</span></span>' +
-    '<span class="tdates">' + dates + '</span><span class="tstw"><span class="tst ' + t.status + '">' + st + '</span>' + sigChip(t) + (ttc(t) ? '<span class="cap ttc">' + ttc(t) + '</span>' : '') + '</span><span class="tlift"><span class="tpm">' + esc(t.primary.name) + '</span><b>' + sp(t.primary.rel, 1) + '</b></span>' +
-    hint('<span class="mlabel">Whole site </span>' + sp(site) + (rpuOf(t) ? '<small>revenue ' + sp(siteImp(rpuOf(t).rel, t.reach)) + '</small>' : '') + '<small class="treach2">' + r + '% reach</small>', 'timp ' + (site < 0 ? 'w' : 'b') /* always bold green or red (Mike, Oct 27) */, impTip(t)) + '<span class="chev" aria-hidden="true">▾</span></div>';
-  if (open) {
-    const pv = t.p == null ? null : t.p, sigTxt = pv == null ? '' : pv < 0.05 ? '<b class="b">Significant.</b> Less than a 5% chance this difference is noise.' : '<b>Not significant yet.</b> The gap is small enough that it could be noise (p ' + pv.toFixed(2) + '; we want below 0.05).';
-    const mx = Math.max(t.cvr.a, t.cvr.b) * 1.15, bar = (lab, v, cls) => '<div class="vb"><span>' + lab + '</span><span class="vbt"><i class="' + cls + '" style="width:' + (v / mx * 100).toFixed(1) + '%"></i></span><b>' + pct(v, v < 0.01 ? 3 : 2) + '</b></div>';
-    const days = t.status === 'running' ? testDays(t) : Math.round((parse(t.end) - parse(t.start)) / DAY) + 1;
-    const ws = siteImp(t.cvr.rel, t.reach), rp = rpuOf(t), sigLine = pv == null ? '' : conf(t) >= 95 ? '✅ <b>' + conf(t) + '% confidence.</b> Clears the 95% bar, so we can call it.' : conf(t) >= 80 ? '⏳ <b>' + conf(t) + '% confidence.</b> Leaning real, but short of the 95% bar we use to call a winner.' : '⏳ <b>' + conf(t) + '% confidence.</b> No reliable sign of a difference yet; we call a winner at 95%.';
-    h += '<div class="detail tdet2">' +
-      '<div class="tmet">' +
-        '<div class="tm site"><span class="tml">Whole-site ' + (t.kind === 'aov' ? 'AOV' : 'CVR') + ' impact</span><b class="' + (ws < 0 ? 'w' : 'b') + '">' + sp(ws) + ' ' + (t.kind === 'aov' ? 'AOV' : 'CVR') + '</b><span class="tms">' + (rp ? 'Revenue per user ' + sp(siteImp(rp.rel, t.reach)) + ' · ' : '') + 'test lift × ' + Math.round(t.reach * 100) + '% of orders it touches</span></div>' +
-        '<div class="tm pri"><span class="tml">' + esc(t.primary.name) + '</span><b>' + sp(t.primary.rel) + '</b><span class="tms">' + fv(t.primary.a) + ' control → ' + fv(t.primary.b) + ' test</span></div>' +
-        (t.sec || []).map(x => '<div class="tm sec"><span class="tml">' + esc(x.name) + '</span><b>' + sp(x.rel) + '</b><span class="tms">' + fmtM(x, x.a) + ' → ' + fmtM(x, x.b) + (x.note ? ' · no error bar' : '') + '</span></div>').join('') +
-      '</div>' +
-      '<p class="tsig">' + sigLine + '</p>' +
-      '<div class="tdg2"><div><h4 class="ph">🧪 What we are testing</h4><p>' + esc(t.hyp) + '</p><p class="cap">' + esc(t.where) + ' · ' + days + ' days so far · owners ' + esc(t.owners) + '</p></div>' +
-      '<div><h4 class="ph">📣 The call</h4><p>' + esc(t.call) + '</p>' + (t.variants ? '<ul class="tvl">' + t.variants.map(v => '<li><span>' + esc(v[0]) + '</span><b class="' + (v[1] < 0 ? 'w' : 'b') + '">' + sp(v[1]) + '</b></li>').join('') + '</ul>' : '') + '<a class="srclink" href="' + t.url + '" target="_blank" rel="noopener">Open in Amplitude ↗</a></div></div></div>';
-    h += testProv(t);
-  }
+  let h = '<div class="rowwrap"><div class="trow abrow" role="button" tabindex="0" aria-expanded="' + open + '" data-xrow="' + t.id + '"><span class="tname tnico"><span class="ge gico g-' + esc(testObj(t)) + '" aria-hidden="true">' + projIco({ t: t.name, obj: testObj(t) }) + '</span><b>' + esc(t.name) + '</b><span class="cap tmeta">' + sitePill(testSite(t)) + '<span class="tloc">' + esc(t.where) + '</span></span></span>' +
+    abDay(t) + abSig(t) + abImp(t) + abRpu(t) + abCall(t) + '<span class="chev" aria-hidden="true">▾</span></div>';
   return h + '</div>';
 }
 // One takeaway sentence for the tab: the running test that matters most, what is close to a call, and what was decided lately.
 function testsLead() {
   const imp = t => siteImp(t.cvr.rel, t.reach);
-  const nm = t => hint(esc(t.name), 'verd ' + (t.status === 'running' ? 'n2' : imp(t) < 0 ? 'w' : 'b'), '<b>' + esc(t.name) + '</b><br>' + esc(t.primary.name) + ' ' + sp(t.primary.rel, 1) + ' · whole-site ' + sp(imp(t)) + '<br>' + (t.p == null ? 'No read yet' : esc(sigWord(t)) + ' · ' + conf(t) + '% sure') + '<br><span class="cap">' + esc(t.where || '') + '</span>');
+  const nm = t => hint(esc(t.name), 'verd ' + (t.status === 'running' ? 'n2' : imp(t) < 0 ? 'w' : 'b'), '<b>' + esc(t.name) + '</b><br>' + esc(t.primary.name) + ' ' + sp(t.primary.rel, 1) + ' · whole-site ' + sp(imp(t)) + '<br>' + (t.p == null ? 'No read yet' : esc(sigWord(t)) + ' · ' + conf(t) + '% confidence') + '<br><span class="cap">' + esc(t.where || '') + '</span>');
   const lc = w => w.charAt(0).toLowerCase() + w.slice(1);
   const live = EXPS.live.slice().sort((a, z) => Math.abs(imp(z)) * (conf(z) || 1) - Math.abs(imp(a)) * (conf(a) || 1)), out = [];
   const headT = live[0] ? '<p class="verdict rmverd">A/B tests: ' + nm(live[0]) + ' is the one to watch.</p>' : '';
-  if (live[0]) { const t = live[0]; out.push('It is at ' + '<span class="' + (imp(t) < 0 ? 'bad' : 'good') + '">' + sp(imp(t)) + ' whole-site CVR</span>, ' + (t.p == null ? 'no read yet' : lc(sigWord(t)) + (conf(t) >= 50 ? ' (' + conf(t) + '% sure)' : '')) + (ttc(t) ? ', ' + lc(ttc(t)) : '')); }
+  if (live[0]) { const t = live[0]; out.push('It is at ' + '<span class="' + (imp(t) < 0 ? 'bad' : 'good') + '">' + sp(imp(t)) + ' whole-site CVR</span>, ' + (t.p == null ? 'no read yet' : lc(sigWord(t)) + (conf(t) >= 50 ? ' (' + conf(t) + '% confidence)' : '')) + (ttc(t) ? ', ' + lc(ttc(t)) : '')); }
   const close = live.slice(1).filter(t => conf(t) >= 80)[0];
   if (close) out.push(nm(close) + ' is close to a call at ' + conf(close) + '%');
   const sh = EXPS.done.filter(t => t.status === 'shipped'), kc = EXPS.done.length - sh.length;
@@ -1879,16 +2071,45 @@ function testModal(kind, i) {
   return openModal('<div class="mhead"><h3 id="mtitle">' + testE(o.name) + ' ' + esc(o.name) + '</h3></div><div class="mtags"><span class="rtag">Redbubble</span></div>' +
     '<div class="mfacts">' + fact('Ended', short(o.end)) + fact('Decision', o.status === 'shipped' ? 'Shipped' : 'Kept control') + fact('Impact', o.status === 'shipped' ? 'Positive' : 'No measurable impact') + '</div>' +
     '<div class="pbox"><h4 class="ph">📝 What happened</h4>' + (wu && wu[1] ? '<p>' + esc(wu[1]) + '</p>' : '') + '<p>' + esc(o.note) + '</p></div>' +
-    '<div class="pbox"><h4 class="ph">🔗 Links</h4><p><a href="' + esc(o.url) + '" target="_blank" rel="noopener">Open the test in Amplitude Experiment ↗</a></p>' + (wu && /^https?:/.test(wu[0]) ? '<p><a href="' + esc(wu[0]) + '" target="_blank" rel="noopener">Read the write-up in Confluence ↗</a></p>' : '') + '</div>');
+    '<div class="pbox"><h4 class="ph">🔗 Links</h4><p><a href="' + esc(o.url) + '" target="_blank" rel="noopener">Open the test in Amplitude Experiment ↗</a></p>' + (wu && /^https?:/.test(wu[0]) ? '<p><a href="' + esc(wu[0]) + '" target="_blank" rel="noopener">Read the write-up in Confluence ↗</a></p>' : '') + '</div>');
+}
+const abSiteOk = s => { const f = state.abSite || 'both'; if (f === 'both') return true; const c = /dashery|^da$/i.test(s || '') ? 'DA' : /tee|^tp$/i.test(s || '') ? 'TP' : /both/i.test(s || '') ? 'B' : 'RB'; return f === 'DA' ? c === 'DA' : (c === 'B' || c === f); };
+const tpDays = x => Math.round((parse(EXPS_AS_OF) - parse(x.start)) / DAY) + 1;
+function tpRow(x, i) {
+  const best = x.variants.reduce((m, v) => Math.max(m, v.conf || 0), 0), dash = '<span class="abtbd"><b>TBD</b><small>' + (x.statsig ? 'see test' : 'not in Split') + '</small></span>';
+  const chip = best >= 95 ? '<span class="abst yes">Yes</span>' : '<span class="abst">' + (best >= 80 ? 'Not yet · ' + best + '%' : 'Not yet') + '</span>';
+  const tip = best >= 95 ? 'At least 95% confidence of a true difference.' : best >= 80 ? 'The best version has ' + best + '% confidence. It needs 95%.' : 'No version is close to 95% yet.';
+  return '<div class="rowwrap"><div class="trow abrow" role="button" tabindex="0" data-tpx="' + i + '"><span class="tname tnico"><span class="ge gico g-CVR" aria-hidden="true">' + projIco({ t: x.name, obj: 'CVR' }) + '</span><b>' + esc(x.name) + '</b><span class="cap tmeta">' + sitePill('TP') + '<span class="tloc">' + esc(x.where) + '</span></span></span><span class="abday"><b>Day ' + tpDays(x) + '</b><small>since ' + short(x.start) + '</small></span>' + chip + dash + dash + '<span class="abcall"><span class="abv2 v-' + x.call[0] + '">' + esc(x.call[1]) + '</span></span><span class="chev" aria-hidden="true">▾</span></div></div>';
+}
+function statsigModal(x) {
+  const g = x.statsig, d = v => '<span class="chn n">' + sgn(v, 1) + '</span>', row = m => '<tr><td>' + esc(m.name) + '</td><td>' + d(m.a) + ' <span class="cap">±' + (m.aw * 100).toFixed(1) + '%</span></td><td>' + d(m.b) + ' <span class="cap">±' + (m.bw * 100).toFixed(1) + '%</span></td></tr>';
+  const tbl = '<table class="abt tpv"><thead><tr><th>Metric vs control</th><th>Version A</th><th>Version B</th></tr></thead><tbody>' + g.metrics.map(row).join('') + '</tbody></table>';
+  openModal('<span class="tipsrc" hidden></span><div class="mhead"><h3 id="mtitle">' + esc(x.name) + '</h3></div><div class="mtags"><span class="rtag">' + siteDot('TP') + '</span><span class="rtag">' + esc(x.where) + '</span><span class="rtag">Day ' + tpDays(x) + ', since ' + short(x.start) + '</span><span class="abv2 v-' + x.call[0] + '">' + esc(x.call[1]) + '</span></div>' +
+    '<div class="abwhat2"><h4 class="ph">🧪 About this test</h4><p>One test with three groups: ' + esc(g.split) + '. ' + g.exposures + ' shoppers so far. Read from Statsig on ' + short(TPEXPS.asOf) + ', covering ' + short(x.start) + ' to ' + short(g.through) + '.</p></div>' + tbl +
+    '<div class="abwhat2"><h4 class="ph">📏 How to read it</h4><p>Each number is the change vs control, with its margin of error at ' + g.ci + '% confidence. When the margin is bigger than the change, we can\'t tell it from zero yet. Today that is true of every metric.</p></div>' +
+    '<div class="abfoot2"><a class="srclink" href="' + esc(g.url) + '" target="_blank" rel="noopener">Open in Statsig\u00a0↗</a> <a class="srclink" href="' + esc(g.portal) + '" target="_blank" rel="noopener">Beam partner portal\u00a0↗</a></div>');
+}
+function tpDetailModal(i) {
+  const x = typeof TPEXPS !== 'undefined' ? TPEXPS.items[i] : null; if (!x) return;
+  if (x.statsig) return statsigModal(x);
+  const rows = [{ n: 'Control', p: x.control.p, c: x.control.conv, rel: null }].concat(x.variants.map(v => ({ n: v.n, p: v.p, c: v.conv, rel: v.rel, conf: v.conf })));
+  const mtip = 'This is still measured in an old Ruby gem, so we can\'t say which metric it is. Ask Jon or Mike. We\'ll pull these tests into Amplitude soon.', mh = t => hint(t + ' <span class="thi" aria-hidden="true">ⓘ</span>', 'thhint', mtip);
+  const tbl = '<table class="abt tpv"><thead><tr><th>Version</th><th>Participants</th><th>' + mh('Metric') + '</th><th>' + mh('Metric change') + '</th><th>Confidence</th></tr></thead><tbody>' + rows.map(r => '<tr><td>' + esc(r.n) + '</td><td>' + int(r.p) + '</td><td>' + pct(r.c, r.c < 0.1 ? 2 : 1) + '</td><td>' + (r.rel == null ? '–' : '<span class="chn ' + (r.rel >= 0 ? 'b' : 'w') + '">' + sgn(r.rel, 1) + '</span>') + '</td><td>' + (r.rel == null ? '–' : r.conf ? r.conf + '% confidence' : 'Not enough yet') + '</td></tr>').join('') + '</tbody></table>';
+  openModal('<span class="tipsrc" hidden></span><div class="mhead"><h3 id="mtitle">' + esc(x.name) + '</h3></div><div class="mtags"><span class="rtag">' + siteDot('TP') + '</span><span class="rtag">' + esc(x.where) + '</span><span class="rtag">Day ' + tpDays(x) + ', since ' + short(x.start) + '</span><span class="abv2 v-' + x.call[0] + '">' + esc(x.call[1]) + '</span></div><div class="abwhat2"><h4 class="ph">🧪 About this test</h4><p>Read from the Split dashboard on ' + short(TPEXPS.asOf) + '. Split reports each test\'s own conversion goal, so these rates are not comparable across tests and none of them is sitewide CVR.</p></div>' + tbl + '<div class="abfoot2"><a class="srclink" href="' + esc(TPEXPS.url) + '" target="_blank" rel="noopener">Open in Split\u00a0↗</a></div>');
 }
 function testsHtml() {
-  const all = [].concat(EXPS.live, EXPS.done), best = all.reduce((a, t) => Math.max(a, siteImp(t.cvr.rel, t.reach)), 0);
-  const head = '<div class="tcols"><span>Test</span><span>Dates</span><span>Status and confidence</span><span>Primary metric</span><span>' + hint('Whole-site impact ⓘ', 'soft', METHOD + '<br><b>Reach</b> (under each number): the share of orders from people who see the change.') + '</span><span></span></div>';
+  const f = state.abSite || 'both';
+  const sigVal = t => { const r = abRd(t), g = (r.m || {})[r.goal]; return !g ? 0 : g.s === 'sig' ? 100 : g.c ? g.c : g.s === 'nb' ? -1 : g.s === 'early' ? -2 : 0; };
+  const rb = (EXPS.live || []).filter(t => abSiteOk(testSite(t))).map(t => ({ start: t.start, html: testRow(t), n: testDays(t), name: t.name, sig: sigVal(t), cvr: siteImp(t.cvr.rel, t.reach), rpu: ((abRd(t).m || {}).rpv || {}).v, call: abRd(t).verdict[1] }));
+  const tp = typeof TPEXPS !== 'undefined' && abSiteOk('TP') ? TPEXPS.items.map((x, i) => ({ start: x.start, html: tpRow(x, i), n: tpDays(x), name: x.name, sig: x.variants.reduce((m, v) => Math.max(m, v.conf || 0), 0), cvr: null, rpu: null, call: x.call[1] })) : [];
+  const S = state.abSort || { k: 'days', dir: 1 }, key = { test: 'name', days: 'n', sig: 'sig', cvr: 'cvr', rpu: 'rpu', call: 'call' }[S.k] || 'n';
+  const rows = rb.concat(tp).sort((p, q) => { const x = p[key], y = q[key]; if (x == null && y == null) return 0; if (x == null) return 1; if (y == null) return -1; return (typeof x === 'string' ? x.localeCompare(y) : x - y) * S.dir; });
+  const facts = rows.length ? '<span class="sfacts"><span>' + rows.length + ' running</span><span aria-hidden="true">·</span><span>longest: day ' + Math.max(...rows.map(r => r.n)) + '</span></span>' : '';
+  const seg = '<div class="abfilter"><span class="lbl">Filter by</span><div class="segs" role="group" aria-label="Site">' + [['both', 'RBO + TPO'], ['RB', 'RBO'], ['TP', 'TPO'], ['DA', 'Dashery']].map(o => '<button type="button" data-absite="' + o[0] + '" aria-pressed="' + (f === o[0]) + '">' + o[1] + '</button>').join('') + '</div></div>';
   return '<section class="sview"><div class="vhead vhl">' + abHeadline() + '</div>' +
-    '<div class="group trun"><div class="ghead"><h3>Running</h3>' + abFacts(EXPS.live, true) + '</div>' + head + '<div class="rows">' + EXPS.live.map(testRow).join('') + '</div></div>' +
-    '<div class="group"><div class="ghead"><h3>Decided in the last three weeks</h3>' + abFacts(EXPS.done, false) + '</div>' + head + '<div class="rows">' + EXPS.done.map(testRow).join('') + '</div></div>' +
-    (EXPS.soon ? '<div class="group"><div class="ghead"><h3>Coming soon</h3><span class="sfacts">' + EXPS.soon.length + ' queued</span></div><div class="tsoon">' + EXPS.soon.map((x, i) => '<div class="tsc" role="button" tabindex="0" data-tsoon="' + i + '"><span class="tse" aria-hidden="true">' + x.e + '</span><div><b>' + esc(x.name) + '</b><p>' + esc(x.what) + '</p><span class="cap">' + esc(x.where) + ' · ' + esc(x.site) + ' · ' + esc(x.when) + '</span>' + refsHtml(x.refs) + '</div></div>').join('') + '</div></div>' : '') +
-    earlierHtml() + '</section>';
+    '<div class="group trun"><div class="ghead"><h3>Running</h3>' + facts + seg + '</div>' + abHeadSort() + '<div class="rows">' + (rows.length ? rows.map(r => r.html).join('') : '<p class="cap">No tests running here right now.</p>') + '</div></div>' +
+    shippedHtml() +
+    (EXPS.soon && EXPS.soon.some(x => abSiteOk(x.site)) ? soonHtml() : '') + '</section>';
 }
 
 /* ---------- Coming soon: what each product team is working on, what's next, and what moved ---------- */
@@ -1989,7 +2210,7 @@ const UPD = {
   'Search cluster migration': 'Traffic is off the old cluster and in a bake period; decommissioning slipped a week. About 11 new index tickets opened Oct 21 are still in backlog with the Nov 7 deadline close.',
   'Learn to Rank rerun': 'Model work is nearly done in Jira; the production rerun is next.',
   'Thank-you page upsell, 6 slots': 'Code is ready (PR up Oct 20); shipping this week.',
-  'Beam conversion test': 'Live in Statsig until about Nov 18; trending positively so far, but still very early (Oct 23).',
+  'Beam conversion test': 'Live in Statsig until about Nov 18. As of Nov 1 no metric has moved beyond its margin of error (Version A revenue +1.7% ±3.3%).',
   'Cart and cart-tray cross-sell': 'Live on TeePublic; Redbubble version (stickers, cart page only) is in final QA for Oct 27 to 28. Before launch: tracking for carousel adds and an API caching question. Runs as an A/B on cart-to-checkout CVR.',
   'Delivery-issue resolution queue': 'Code is up for review for the self-service flow and the agent queue (Oct 20 to 21); email templates are ready.',
   'Trucker hat fulfillment': 'Prices aren\'t final, but that doesn\'t block the fulfillment launch (it can start at baseball-cap prices). Packaging is settled.',
@@ -2002,7 +2223,7 @@ const UPD = {
 };
 // Fresher notes from the project channels and Jira replace the hand-written ones (Mike, Oct 27).
 if (typeof LATEST !== 'undefined') Object.keys(LATEST).forEach(t => { UPD[t] = LATEST[t].text; });
-const siteDot = x => !x ? '<span class="faint">–</span>' : x === 'Both' ? '<i style="background:var(--tp)"></i><i style="background:var(--rb)"></i>Both' : x === 'Dashery' ? '<i style="background:var(--ds)"></i>Dashery' : '<i style="background:var(--' + (x === 'TP' ? 'tp' : 'rb') + ')"></i>' + SITEN(x);
+const siteDot = x => !x ? '<span class="faint">–</span>' : x === 'Both' ? '<i style="background:var(--tp)"></i><i style="background:var(--rb)"></i>RBO + TPO' : x === 'Dashery' ? '<i style="background:var(--ds)"></i>Dashery' : '<i style="background:var(--' + (x === 'TP' ? 'tp' : 'rb') + ')"></i>' + SITEN(x);
 const PHASES = ['Discovery', 'Sizing', 'Building', 'Testing', 'Launching', 'Live'];
 const phaseIx = st => { const x = (st || '').toLowerCase(); return /discovery/.test(x) ? 0 : /scop|siz|plan|next sprint|ready for dev/.test(x) ? 1 : /qa|review/.test(x) ? 3 : /launch|ready to ship/.test(x) ? 4 : /^live$|launched/.test(x) ? 5 : 2; };
 const phaseBar = st => { const k = phaseIx(st), bad = STC(st) === 'blocked'; return '<span class="phb' + (bad ? ' bad' : '') + '" title="' + PHASES.map((p, i) => (i === k ? '▸ ' : '') + p).join(' · ') + '"><span class="phs">' + PHASES.map((p, i) => '<i class="' + (i <= k ? 'on' : '') + '"></i>').join('') + '</span><span class="phl">' + esc(st) + '</span></span>'; };
@@ -2073,7 +2294,7 @@ const PBN = { early: '🌱 Early: discovery or sizing', building: '🛠️ Build
 const PSTAGE = s => { const x = (s || '').toLowerCase(); return /discovery/.test(x) ? '🌱 In discovery' : /scop|siz/.test(x) ? '📐 Being sized' : /plan|next sprint|ready for dev/.test(x) ? '🗓️ Not started' : /qa|review/.test(x) ? '🧪 Testing' : /dev|flight/.test(x) ? '🛠️ Building' : /launch|ready to ship/.test(x) ? '🚀 Ready to ship' : /live/.test(x) ? '✅ Live' : /block|delay|paus/.test(x) ? '⛔ Stuck' : '–'; };
 const teamOk = it => state.fteam === 'all' || it.team === state.fteam || PARENT(it.team) === state.fteam || (state.fteam.endsWith(':core') && it.team === state.fteam.split(':')[0]);
 // Search matches the project name, description, team, objective, status and site.
-const qOk = it => { const q = (state.q || '').trim().toLowerCase(); if (!q) return true; const hay = [it.t, it.d, TEAMS(it.team), it.obj, it.s, it.site, it.eta].join(' ').toLowerCase(); return q.split(/\s+/).every(w => hay.indexOf(w) >= 0); };
+const qOk = it => { const q = (state.q || '').trim().toLowerCase(); if (!q) return true; const hay = [it.t, it.sheet, it.d, TEAMS(it.team), it.obj, it.s, it.site, it.eta].join(' ') /* the sheet's own title is searchable too (Wendy, Oct 28) */.toLowerCase(); return q.split(/\s+/).every(w => hay.indexOf(w) >= 0); };
 const keep2 = it => qOk(it) && (!state.chg || (state.chg === 'risk' ? atRisk(it) : chgOf(it).some(c => c.k === state.chg))) && (state.obj === 'all' || it.obj === state.obj) && teamOk(it) && (state.prog === 'all' || state.phase === 'post' || PB(it) === state.prog);
 const lbItem2 = ref => { const [k, i] = ref.split('|'); if (k === 'dashery') return Object.assign({ team: 'dashery' }, COMING.teams.find(t => t.key === 'dashery').items[+i]); if (k === 'post') return Object.assign({ s: 'Post-peak', eta: COMING.post[+i].when }, COMING.post[+i]); if (k === 'wins') return COMING.wins[+i]; return Object.assign({ team: k }, COMING.teams.find(t => t.key === k).items[+i]); };
 const TEAMS = k => { const t = COMING.teams.find(x => x.key === k); if (!t) return k; const p = t.parent && COMING.teams.find(x => x.key === t.parent); return p ? p.icon + ' ' + p.name + ' › ' + t.icon + ' ' + t.name : t.icon + ' ' + t.name; };
@@ -2163,13 +2384,13 @@ function burnChart(it) {
     '<svg class="burnsvg" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Work remaining over time">' + g + '</svg>' +
     '<div class="burnkey"><span><i class="bk rem"></i>Work left</span>' + (B.scope && B.scope.length ? '<span><i class="bk scope"></i>Total scope</span>' : '') + (eta ? '<span><i class="bk ideal"></i>Pace needed from today</span>' : '') + '</div>' +
     '<p class="burnsum"><b>' + Math.round(rem * 10) / 10 + ' of ' + Math.round((B.total || top) * 10) / 10 + ' ' + u + ' left</b>' + (B.lastDone ? ' · last done ' + esc(short(B.lastDone)) : '') + (need != null && rem > 0 ? ' · needs about ' + (Math.round(need * 10) / 10) + ' ' + u + ' a week to land ' + esc(rng(it.eta)) : rem === 0 ? ' · all Jira work done' : '') + '.</p>' +
-    (S ? '<div class="sprintread"><span class="lbl">Sprint read · ' + esc(TEAMS(teamKey(it.team))) + (S.date ? ' · ' + esc(short(S.date)) : '') + '</span><p>' + (note ? '<b>' + esc(note) + '</b> ' : '') + esc(S.summary || '') + (S.completed != null && S.committed != null ? ' (' + S.completed + ' of ' + S.committed + ' committed done' + (S.carryover ? ', ' + S.carryover + ' carried over' : '') + ')' : '') + '</p>' + (S.link ? '<a class="ref ext" href="' + esc(S.link) + '" target="_blank" rel="noopener">Sprint metrics post ↗</a>' : '') + '</div>' : '') + '</div>';
+    (S ? '<div class="sprintread"><span class="lbl">Sprint read · ' + esc(TEAMS(teamKey(it.team))) + (S.date ? ' · ' + esc(short(S.date)) : '') + '</span><p>' + (note ? '<b>' + esc(note) + '</b> ' : '') + esc(S.summary || '') + (S.completed != null && S.committed != null ? ' (' + S.completed + ' of ' + S.committed + ' committed done' + (S.carryover ? ', ' + S.carryover + ' carried over' : '') + ')' : '') + '</p>' + (S.link ? '<a class="ref ext" href="' + esc(S.link) + '" target="_blank" rel="noopener">Sprint metrics post ↗</a>' : '') + '</div>' : '') + '</div>';
 }
 // Latest update, always shown: newest note from the project's channel, the sprint metrics channels or Jira, dated and linked (Mike, Oct 27).
 function latestBox(it, L, upd) {
   const fd = d => { const x = new Date(d + 'T12:00:00Z'); return WD[x.getUTCDay()] + ' ' + MON[x.getUTCMonth()] + ' ' + x.getUTCDate(); };
   const over = [it.sheetS ? 'status ' + esc(it.sheetS) + ' → ' + esc(it.s) : '', it.sheetEta ? 'launch ' + esc(it.sheetEta) + ' → ' + esc(it.eta) : ''].filter(Boolean);
-  const body = L ? '<p>' + esc(L.text) + '</p><p class="cap">' + fd(L.date) + ' · ' + (L.url ? '<a href="' + esc(L.url) + '" target="_blank" rel="noopener">' + esc(L.src) + ' ↗</a>' : esc(L.src)) + (over.length ? ' · Newer than the roadmap sheet, so it updates the ' + over.join(' and ') : '') + '</p>'
+  const body = L ? '<p>' + esc(L.text) + '</p><p class="cap">' + fd(L.date) + ' · ' + (L.url ? '<a href="' + esc(L.url) + '" target="_blank" rel="noopener">' + esc(L.src) + ' ↗</a>' : esc(L.src)) + (over.length ? ' · Newer than the roadmap sheet, so it updates the ' + over.join(' and ') : '') + '</p>'
     : upd ? '<p>' + esc(upd) + '</p><p class="cap">From standups and Jira comments, Oct 22</p>' : '<p class="cap">Nothing new in its project channel, the sprint metrics channels or Jira since the roadmap sheet was synced (' + esc(COMING.asOf) + ').</p>';
   return '<div class="pbox upd"><h4 class="ph">🔔 Latest update</h4>' + body + '</div>';
 }
@@ -2184,7 +2405,7 @@ function lbModal2(ref) {
     fact('Estimated impact', imp ? esc(imp) : ce ? '<span class="ceval">' + ce.short + '</span>' : /^(Ops|Data|Compliance)$/.test(it.obj || '') ? 'No direct revenue' : 'Not sized yet', imp ? 'From ' + esc(it.impSrc || 'the roadmap sheet') : ce ? 'Claude\'s estimate. ' + esc(ce.how) : '') +
     fact('Status', stuck(it.s) ? esc(it.s) : STEPS[k], (cP && cP.k === 'phase' ? 'Was ' + esc(lcx(cP.txt.split(' → ')[0].replace(/^\S+ /, ''))) + '. ' : '') + (stuck(it.s) ? 'Was ' + lcx(STEPS[k]) : k < 6 ? 'Next: ' + STEPS[k + 1] : ''), cP ? 'chg' : stuck(it.s) ? 'bad' : k === 6 ? 'good' : '') + '</div>';
   const steps = '<ol class="mstep" aria-label="Progress">' + STEPS.map((p, i) => '<li class="' + (i < k ? 'd' : i === k ? 'c' + (stuck(it.s) ? ' bad' : '') : '') + '">' + (i === k && stuck(it.s) && k !== 6 ? hint('!', 'dot dhint', '<b>' + esc(c.l) + ' at ' + esc(lcx(p)) + '</b><br>' + c.why.map(esc).join('<br>')) : '<span class="dot" aria-hidden="true">' + (i < k || (i === k && k === 6) ? '✓' : '') + '</span>') + '<span class="lb">' + p + '</span></li>').join('') + '</ol>';
-  const tags = '<div class="mtags">' + (it.site ? '<span class="rtag">' + siteDot(it.site) + '</span>' : '') + teamTag(it.team) + (it.obj ? '<span class="rtag">' + OBJE[it.obj] + ' ' + OBJN(it.obj) + '</span>' : '') + (it.inj ? '<span class="rtag inj">Injected' + (it.for ? ': displaced ' + esc(it.for) : '') + '</span>' : '') + chg.map(x => chgTag(it, x, prev)).join('') + '</div>';
+  const tags = '<div class="mtags">' + (it.site ? '<span class="rtag">' + siteDot(it.site) + '</span>' : '') + (it.inj ? '<span class="rtag inj">Injected' + (it.for ? ': displaced ' + esc(it.for) : '') + '</span>' : '') + chg.map(x => chgTag(it, x, prev)).join('') + '</div>';
   const conf = '<div class="pbox mconf ' + c.k + '"><h4 class="ph">' + (c.k === 'bad' ? '🔴' : c.k === 'warn' ? '🟡' : c.k === 'live' ? '🟢' : '⚪') + ' Launch confidence: ' + c.l + '</h4>' + (c.why.filter(w => !LT || w !== LT.text).map(w => '<p>' + esc(w) + '</p>').join('') || '<p>Based on the latest update below.</p>') + '</div>';
   const who = [['Product Manager', P.pm], ['Tech lead', P.lead], ['Engineers', (P.eng || []).join(', ')], ['Looped in', (P.looped || []).join(', ')], ['Exec sponsor', P.sponsor]].filter(x => x[1]);
   const people = '<div class="pbox"><h4 class="ph">👥 Who\'s on it</h4>' + (who.length ? '<dl class="mwho">' + who.map(x => '<dt>' + x[0] + '</dt><dd>' + esc(x[1]) + '</dd>').join('') + '</dl>' : '<p class="cap">Not listed in Jira or the roadmap sheet yet.</p>') + '</div>';
@@ -2192,21 +2413,19 @@ function lbModal2(ref) {
   const bc = burnChart(it);
   openModal('<div class="mhead"><h3 id="mtitle">' + it.e + ' ' + esc(it.t) + '</h3></div>' + tags +
     // What the project is comes first and says so (Mike, Oct 26), then the three facts.
-    (it.d ? '<div class="pbox mdesc"><h4 class="ph">📝 Description</h4><p>' + esc(it.d) + '</p></div>' : '') + facts + steps + bc +
-    (c.k !== 'ok' || upd ? conf : '') + latestBox(it, LT, upd) +
-    people +
+    '<div class="mrow2">' + (it.d ? '<div class="pbox mdesc"><h4 class="ph">📝 Description</h4><p>' + esc(it.d) + '</p></div>' : '') + people + '</div>' + facts + steps + bc +
     (g.p != null && !bc ? '<details class="pbox mjira"><summary><h4 class="ph">📈 Progress in Jira: ' + g.p + '%</h4></summary><div class="pbar big"><i style="width:' + g.p + '%"></i></div><p class="cap">' + esc(g.long) + '</p>' + burnHtml(it) + '</details>' : '') +
-    provHtml(it, LT, P) +
+    (ph => ph.indexOf('<div class="pbox prov"><h4 class="ph">🔎 Where this comes from</h4>') === 0 && /<\/div>$/.test(ph) ? '<details class="pbox prov"><summary><h4 class="ph">🔎 Where this comes from</h4></summary>' + ph.slice('<div class="pbox prov"><h4 class="ph">🔎 Where this comes from</h4>'.length, -6) + '</details>' : ph)(provHtml(it, LT, P)) +
     linksHtml((it.refs || []).concat(docs).concat(it.link ? [{ jira: it.link.split('/').pop() }] : []), it));
 }
 // Where every fact in the pop-up came from (Mike, Oct 28: after the first exec roadmap review, teams asked "why is Claude saying X?").
 // A source recorded by the refresh (src/sources.json) wins; otherwise the default says where that field is read from.
 const SHEET_URL = 'https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU';
 // Same "Where this comes from" box for tests and recent impact (Mike, Oct 28). rows: [label, value, source html].
-const provLnk = (txt, url) => url ? '<a href="' + esc(url) + '" target="_blank" rel="noopener">' + esc(txt) + ' ↗</a>' : esc(txt);
+const provLnk = (txt, url) => url ? '<a href="' + esc(url) + '" target="_blank" rel="noopener">' + esc(txt) + ' ↗</a>' : esc(txt);
 const provBox = rows => '<div class="pbox prov"><h4 class="ph">🔎 Where this comes from</h4><dl class="provl">' + rows.filter(Boolean).map(r => '<dt>' + r[0] + '</dt><dd>' + (r[1] ? '<b>' + r[1] + '</b> · ' : '') + '<span class="cap">' + r[2] + '</span></dd>').join('') + '</dl></div>';
 function testProv(t) {
-  const R = (typeof SRCS !== 'undefined' && SRCS[t.name]) || {}, pick = (k, d) => R[k] ? provLnk(R[k].from, R[k].url) : d, amp = provLnk('Amplitude Experiment', t.url), tm = testTeam(t), tk = COMING.teams.find(x => x.key === tm) || {}, pm = pmOf(t.name, tm), site = testSite(t);
+  const R = (typeof SRCS !== 'undefined' && SRCS[t.name]) || {}, pick = (k, d) => R[k] ? provLnk(R[k].from || R[k].where || 'Source', R[k].url) : d, amp = provLnk('Amplitude Experiment', t.url), tm = testTeam(t), tk = COMING.teams.find(x => x.key === tm) || {}, pm = pmOf(t.name, tm), site = testSite(t);
   return provBox([
     ['🧪 The test', esc(t.name), pick('origin', 'Running or decided in ' + amp + (t.id ? ' (experiment ' + esc(t.id) + ')' : '') + ', read ' + esc(short(EXPS_AS_OF)))],
     ['👥 Team', esc(tk.name || TEAMS(tm) || '–'), pick('team', 'Worked out from the test\'s owners in ' + amp + ', matched to the team they work on')],
@@ -2220,7 +2439,7 @@ function testProv(t) {
   ]);
 }
 function impProv(it) {
-  const R = (typeof SRCS !== 'undefined' && SRCS[it.t]) || {}, pick = (k, d) => R[k] ? provLnk(R[k].from, R[k].url) : d, tk = COMING.teams.find(x => x.key === it.team) || {}, pm = pmOf(it.t, it.team), rv = revEst(it);
+  const R = (typeof SRCS !== 'undefined' && SRCS[it.t]) || {}, pick = (k, d) => R[k] ? provLnk(R[k].from || R[k].where || 'Source', R[k].url) : d, tk = COMING.teams.find(x => x.key === it.team) || {}, pm = pmOf(it.t, it.team), rv = revEst(it);
   return provBox([
     ['📋 Why it\'s here', '', pick('origin', 'Shipped or decided in the last 30 days, from release announcements in #released, Jira releases and the roadmap\'s wins list')],
     ['👥 Team', esc(tk.name || TEAMS(it.team) || '–'), pick('team', 'The team that owns it on the roadmap sheet or in Jira')],
@@ -2303,7 +2522,7 @@ function soonSummary() {
 // Write-ups: readouts with results get the gold link; specs and design docs are ordinary links.
 const WU = { 'Remove shipping options from cart': ['https://articore.atlassian.net/wiki/spaces/EC1/pages/5056036893/RB+A+B+Cart+Shipping+Options+Test+-+Post-Project+Analysis', 'Cart-to-order CVR up 2.0% (48.3% to 49.2%) and cart-to-checkout up 19%. Shipped to 100% Sep 8.'] };
 const SPECS = { 'Dashery cart sticker upsell': ['https://articore.atlassian.net/wiki/spaces/EDTP/pages/5076320263/2609+Cart+Upsell+TDD', 'Technical design'], 'Exact US sales tax at Redbubble checkout': ['https://articore.atlassian.net/wiki/spaces/PL/pages/5112266767/PLC-5977+Tax+Amount+Based+on+Full+Address', 'Design doc'], 'Sign in with Google': ['https://articore.atlassian.net/wiki/spaces/EC1/pages/4959797251/C26TP+Product+Spec+Google+Sign-In+for+TeePublic', 'Product spec'], 'Marketing opt-in on Express Pay': ['https://articore.atlassian.net/wiki/spaces/EC1/pages/5047943343/RB2609+Product+Spec+Marketing+Opt-In+for+Express+Payment+Purchasers', 'Product spec'] };
-const wuLink = it => WU[it.t] ? '<a class="wugold" href="' + WU[it.t][0] + '" target="_blank" rel="noopener">🏅 Read the write-up ↗</a>' : '';
+const wuLink = it => WU[it.t] ? '<a class="wugold" href="' + WU[it.t][0] + '" target="_blank" rel="noopener">🏅 Read the write-up ↗</a>' : '';
 const IMPSH = { 'Bug fix: men\'s tee images back in the Shopping feed': ['Fixed', 'bug fix'], 'Sign in with Google': ['Live', 'feature shipped'], 'Marketing opt-in on Express Pay': ['Working', 'feature shipped'], 'Flat-lay T-shirt thumbnails in search': ['+1.0% CVR', 'whole-site'], 'Product image first on all apparel': ['+1.2% CVR', 'in the test'], 'Dashery cart sticker upsell': ['17% → 30%', 'sticker attach'], 'Exact US sales tax at Redbubble checkout': ['82%', 'of US orders covered'], 'Remove shipping options from cart': ['+2.0% CVR', 'cart to order'] };
 // Annual revenue impact. Every figure here is Claude's estimate: lift × share of revenue it touches × that site's run rate.
 const REVEST = {
@@ -2335,7 +2554,7 @@ function flagModal(t) {
     (can ? '<form class="flagf" data-flagf="' + esc(it.t) + '"><div class="flagv" role="radiogroup" aria-label="Your read"><label><input type="radio" name="fv" value="off"' + (mine.v !== 'good' ? ' checked' : '') + '> ⚑ Looks inaccurate</label><label><input type="radio" name="fv" value="good"' + (mine.v === 'good' ? ' checked' : '') + '> 👍 This was helpful</label></div>' +
       '<label class="flagn"><span class="lbl">Why? What would make it right?</span><textarea name="note" rows="3" maxlength="600" placeholder="e.g. the lift only applies to Redbubble apparel, not the whole site">' + esc(mine.note || '') + '</textarea></label>' +
       '<div class="flagact"><button type="submit" class="btn pri">' + (mine.v ? 'Update' : 'Send') + '</button>' + (mine.v ? '<button type="button" class="linkbtn" data-flagdel="' + esc(it.t) + '">Remove my flag</button>' : '') + '<span class="cap">' + (n.off || n.good ? n.off + ' flagged inaccurate · ' + n.good + ' marked helpful so far' : 'Mike reviews these and updates the numbers.') + '</span></div></form>'
-      : '<p class="cap">Pick your name (bottom right) to flag an estimate.</p>'));
+      : ''));
 }
 async function flagSave(t, v, note) {
   const it = impactList().find(x => x.t === t); if (!it || !RT.db || !RT.me) return;
@@ -2345,7 +2564,7 @@ async function flagSave(t, v, note) {
 function impModal(i) {
   const it = impactList()[i], o = OUTN[it.out];
   openModal('<div class="mhead"><h3 id="mtitle">' + it.e + ' ' + esc(it.t) + '</h3></div><div class="pmeta"><div><span class="lbl">Result</span><b>' + o[0] + ' ' + o[1] + '</b></div><div><span class="lbl">Shipped or decided</span><b>' + esc(it.when) + '</b></div><div><span class="lbl">Team</span>' + esc(TEAMS(it.team)) + '</div>' + (it.site ? '<div><span class="lbl">Site</span>' + esc(SITEN(it.site)) + '</div>' : '') + '</div>' +
-    (revEst(it) ? '<div class="pbox"><h4 class="ph">💵 Projected annual revenue</h4><p><b>' + revEst(it).short + '</b></p><p class="cap">Claude\'s estimate. ' + esc(revEst(it).how) + '</p></div>' : '') + '<div class="pbox imp"><h4 class="ph">📊 What happened</h4><p><b>' + it.imp + '</b></p><p class="cap">Source: ' + esc(it.src || '') + '</p>' + wuLink(it) + (!WU[it.t] ? '<p class="cap">📝 No results write-up in Confluence yet.' + (SPECS[it.t] ? ' <a class="ref ext" href="' + SPECS[it.t][0] + '" target="_blank" rel="noopener">' + SPECS[it.t][1] + ' ↗</a>' : '') + '</p>' : '') + '</div>' +
+    (revEst(it) ? '<div class="pbox"><h4 class="ph">💵 Projected annual revenue</h4><p><b>' + revEst(it).short + '</b></p><p class="cap">Claude\'s estimate. ' + esc(revEst(it).how) + '</p></div>' : '') + '<div class="pbox imp"><h4 class="ph">📊 What happened</h4><p><b>' + it.imp + '</b></p><p class="cap">Source: ' + esc(it.src || '') + '</p>' + wuLink(it) + (!WU[it.t] ? '<p class="cap">📝 No results write-up in Confluence yet.' + (SPECS[it.t] ? ' <a class="ref ext" href="' + SPECS[it.t][0] + '" target="_blank" rel="noopener">' + SPECS[it.t][1] + ' ↗</a>' : '') + '</p>' : '') + '</div>' +
     '<div class="pbox"><h4 class="ph">💡 What it means</h4><p>' + (it.out === 'win' ? 'Keep it, and look for the next version of the same idea.' : it.out === 'loss' ? 'We kept the old version. The learning feeds the next test in this area.' : it.out === 'measuring' ? 'Too early to call. This updates when enough data is in.' : 'No measurable difference, so we kept the simpler option.') + '</p></div>' + impProv(it) + refsHtml(it.refs));
 }
 // Headline: the biggest win in one short line. Subhead: the next two, with their numbers.
@@ -2394,13 +2613,12 @@ function impactHtml() {
     '<span class="lbimp">' + (revEst(it) ? hint(revEst(it).short, 'ce', '<b>🤖 Claude\'s estimate, not the team\'s</b><br>' + esc(revEst(it).how)) + flagBtn(it) : '<span class="faint">–</span>') + '</span>' +
     '<span class="lbeta">' + esc(it.when) + (WU[it.t] ? ' <span class="goldb" title="Has a results write-up">🏅</span>' : '') + '</span><span class="chev" aria-hidden="true">›</span></div>'; }).join('');
   // A sentence instead of a title, with context tags above it, like every other page (Mike, Oct 27).
-  const lw = lead ? esc(midCase(ucf(lead.t.replace(/^Bug fix: /, '')))) + ' (' + res(lead) + (revEst(lead) ? ', ' + esc(revEst(lead).short) : '') + ')' : '';
-  const ihead = ctxTags(['📦 Shipped and decided, last 30 days', (v => v ? '💵 About +$' + (v >= 1e6 ? (v / 1e6).toFixed(1) + 'M' : Math.round(v / 1e3) + 'K') + ' a year from the last 30 days\' ' + win30.length + ' wins (Claude\'s estimate)' : '')(win30.reduce((a, w) => a + ((revEst(w) || {}).v || 0), 0))]) +
-    '<p class="verdict">' + (lead ? 'We shipped ' + win30.length + ' win' + (win30.length === 1 ? '' : 's') + ' in the last 30 days, led by ' + hint(lw, 'verd b', '<b>' + esc(lead.t) + '</b><br>' + esc(lead.imp ? String(lead.imp).replace(/<[^>]+>/g, '') : '')) + '.' : 'Nothing shipped in the last 30 days has a measured win yet.') + '</p>' +
-    '<p class="sulead">' + [cnt('measuring') ? cnt('measuring') + ' more ' + (cnt('measuring') === 1 ? 'is' : 'are') + ' still being measured' : '', cnt('flat') + cnt('loss') ? (cnt('flat') + cnt('loss')) + ' showed no change or missed' : ''].filter(Boolean).join(', and ').replace(/^./, c => c.toUpperCase()) + (cnt('measuring') + cnt('flat') + cnt('loss') ? '. ' : '') + 'Click any row for what happened and what it means.</p>';
+  const lw = lead ? esc(midCase(ucf(lead.t.replace(/^Bug fix: /, '')))) : '';
+  const ihead = '<p class="verdict">' + (lead ? 'We shipped ' + win30.length + ' win' + (win30.length === 1 ? '' : 's') + ' in the last 30 days, led by ' + hint(lw, 'verd b', '<b>' + esc(lead.t) + '</b><br>' + esc(lead.imp ? String(lead.imp).replace(/<[^>]+>/g, '') : '')) + '.' : 'Nothing shipped in the last 30 days has a measured win yet.') + '</p>' +
+    '<p class="sulead">' + [cnt('measuring') ? cnt('measuring') + ' more ' + (cnt('measuring') === 1 ? 'is' : 'are') + ' still being measured' : '', cnt('flat') + cnt('loss') ? (cnt('flat') + cnt('loss')) + ' showed no change or missed' : ''].filter(Boolean).join(', and ').replace(/^./, c => c.toUpperCase()) + (cnt('measuring') + cnt('flat') + cnt('loss') ? '.' : '') + '</p>';
   return '<section class="sview"><div class="vhead vhl">' + ihead + '</div>' +
     summary +
-    panel('📦', 'Shipped and decided', 'Wins first, then what is still being measured, then no change and misses. Click a row for what happened and what it means.', impFilters(L0) + '<div class="lbt"><div class="itbl">' + head + (rows || '<p class="cap" style="padding:16px">Nothing shipped matches these filters.</p>') + '</div></div>', 'p-imp') + '</section>';
+    panel('📦', 'Shipped and decided', 'Wins first, then still measuring, then no change or misses.', impFilters(L0) + '<div class="lbt"><div class="itbl">' + head + (rows || '<p class="cap" style="padding:16px">Nothing shipped matches these filters.</p>') + '</div></div>', 'p-imp') + '</section>';
 }
 function reorderBtn(L) {
   // Only people who can both edit this team's order and actually save to the shared database see the button.
@@ -2432,7 +2650,7 @@ function chgBar() {
 }
 // Team meetings: each product team's fortnightly 30-minute exec session, laid out in Jon's agenda order
 // (sprint priorities, new asks, experiments, up next), grouped by objective inside each section.
-const MEETS = [['customer', 'Customer'], ['plc', 'Purchase Lifecycle'], ['search', 'Search'], ['artist', 'Artist and Apps'], ['core', 'Core'], ['de', 'Data Engineering'], ['martech', 'MarTech'], ['dashery', 'Dashery']];
+const MEETS = [['customer', 'Customer'], ['plc', 'Purchase Lifecycle'], ['search', 'Search & Content'], ['artist', 'Artist and Apps'], ['core', 'Core'], ['de', 'Data Engineering'], ['martech', 'MarTech'], ['dashery', 'Dashery']];
 // Impact: people's estimates show as written; Claude's own estimates carry the robot so nobody mistakes them for the team's.
 const impCell = it => { const p = IMPS[it.t] || it.imp; return p ? hint(esc(p), 'rmimp', '<b>From ' + esc(it.impSrc ? (/^(roadmap sheet|the roadmap sheet)/i.test(it.impSrc) ? it.impSrc.replace(/^the /i, '') : it.impSrc) : 'Roadmap sheet estimate') + '</b>') : cest(it) ? hint(cest(it).short, 'rmimp ce', '<b>Claude\'s estimate, not the team\'s</b><br>Shown in purple so it is not mistaken for a team number.<br><br>' + esc(cest(it).how)) : ''; };
 const impVal = it => { const c = cest(it), s = String(IMPS[it.t] || it.imp || (c ? c.short : '')), m = s.match(/([\d.]+)\s*([KkMm])/); if (!m) return -1; const v = parseFloat(m[1]) * (/m/i.test(m[2]) ? 1e6 : 1e3); return /month/i.test(s) ? v * 12 : v; };
@@ -2497,6 +2715,17 @@ const GICO = { CVR: '<circle cx="8" cy="8" r="5.5"/><circle cx="8" cy="8" r="2.5
 // A specific icon for what each project is about (Mike, Oct 27: a trucker hat should be a hat, wall art a framed picture,
 // retiring products a sunset). First keyword match on the title wins; the goal icon is only the fallback.
 const PICO = [
+  // Cart icon for the cart sticker cross-sell test, ahead of the generic sticker icon (Oct 30).
+  [/sticker cross-sell/i, '<path d="M1.5 2.5h2l1.6 7.5h7l1.4-5.5H4.3"/><circle cx="6" cy="13" r="1"/><circle cx="11.5" cy="13" r="1"/>'],
+  // Clock with a back arrow for "Recently viewed" (Oct 29).
+  [/recently viewed/i, '<path d="M3 8a5 5 0 1 0 1.5-3.6"/><path d="M3 3v2.5h2.5"/><path d="M8 5.5V8l1.8 1.2"/>'],
+  // Star for reviews (Oct 29, Trustpilot product reviews win).
+  [/trustpilot|reviews?\b/i, '<path d="M8 2.2l1.8 3.7 4 .6-2.9 2.8.7 4L8 11.4l-3.6 1.9.7-4L2.2 6.5l4-.6z"/>'],
+  // Tote bag: body plus two handles (Oct 28, canvas totes and the cards/bags/mugs row).
+  [/tote|bags\b|bags,|mugs\b/i, '<path d="M3 5.5h10l-1 8H4z"/><path d="M5.8 5.5V4a2.2 2.2 0 0 1 4.4 0v1.5"/>'],
+  [/hosting|\becs\b|\beks\b/i, '<rect x="2" y="2.5" width="12" height="4.5" rx="1"/><rect x="2" y="9" width="12" height="4.5" rx="1"/><path d="M4.5 4.8h.01M4.5 11.3h.01"/>'],
+  // Globe for routing orders to local printers (Product localization 2.0).
+  [/locali[sz]ation/i, '<circle cx="8" cy="8" r="6"/><path d="M2 8h12M8 2c1.8 1.8 2.6 3.8 2.6 6s-.8 4.2-2.6 6c-1.8-1.8-2.6-3.8-2.6-6S6.2 3.8 8 2z"/>'],
   // A cap seen from the side: crown, panel seam, button, and a brim sticking out front (Mike, Oct 27: the old one read as a bell).
   [/trucker|hat\b|hats\b/i, '<path d="M1.8 10.8C1.8 7 4.2 4.6 7.4 4.6s5.6 2.4 5.6 5.6"/><path d="M1.8 10.8h9.4c1.7 0 3.1-.4 3.9-1.1-.6-.5-1.3-.7-2.1-.7"/><path d="M7.4 4.6V3.5"/><path d="M7.4 4.6c-1.4 1.6-2 3.7-2 6.2"/>'],
   [/wall art|poster|canvas|print size|framed/i, '<rect x="3" y="3.5" width="10" height="9" rx="1"/><path d="M3 10.5 6.3 7.5 9 10l1.8-1.6L13 10.5"/><circle cx="10.3" cy="6.3" r=".9"/><path d="M8 3.5 8 1.8"/>'],
@@ -2580,10 +2809,10 @@ function ganttHtml(list, all, keep) {
     const track = live ? '<span class="gdia" style="left:' + x(e) + '%"></span>' : e < today ? '<span class="gbar late" style="left:' + x(e) + '%;width:6px"></span><span class="glbl" style="left:calc(' + x(e) + '% + 10px)">Past due · was ' + esc(md(e)) + '</span>' : '<span class="gbar ' + c.k + (pj && pj.t > e + DAY ? ' stk' : '') + (sd && sd < start ? ' cut' : '') + '" style="left:' + x(st) + '%;width:' + Math.max(0.8, x(e) - x(st)) + '%">' + (e > today ? '<i class="gfut" style="left:' + (today > st ? Math.round((today - st) / (e - st) * 1000) / 10 : 0) + '%"></i>' : '') + '</span>' + (pj && pj.t > e + DAY ? '<span class="gproj" style="left:' + x(e) + '%;width:' + Math.max(0.6, x(pj.t) - x(e)) + '%"></span>' : '') + '<span class="glbl" style="left:calc(' + x(Math.max(e, pj ? pj.t : 0)) + '% + 8px)">' + esc(md(e)) + (pj && pj.t > e + 2 * DAY ? ' · projected ' + esc(md(pj.t)) : '') + '</span>';
     // Two-line names (project, then team and goal in full) and a richer hover (design agency, Oct 27).
     // Team and goal as small pills; click one to filter the page by it (Mike, Oct 27).
-    const tk = COMING.teams.find(t => t.key === it.team) || {}, meta = '<span class="gmeta">' + (it.flagged ? '<span class="gpill gflag" title="Highlighted yellow by the team in the roadmap sheet for the next exec roadmap review">🟨 Flagged by the team</span>' : '') /* the team's own change signal (Exec Roadmap Review, Oct 27) */ + (it.site ? '<button type="button" class="gpill gsite" data-ssel="' + esc(it.site) + '" title="Show only ' + esc(SITEN(it.site)) + '">' + siteDot(it.site) + '</button>' : '') /* site first, so TeePublic / Redbubble / both reads at a glance (Allison, Oct 28) */ + '<button type="button" class="gpill" data-tmsel="' + esc(it.team) + '" title="Show only ' + esc(tk.name || it.team) + '">' + (tk.icon || '') + ' ' + esc(tk.name || it.team) + '</button>' + (it.obj ? '<button type="button" class="gpill" data-gsel="' + esc(it.obj) + '" title="Show only ' + esc(OBJN(it.obj)) + '">' + (OBJE[it.obj] || '') + ' ' + esc(OBJN(it.obj)) + '</button>' : '') + '</span>' +
+    const tk = COMING.teams.find(t => t.key === it.team) || {}, meta = '<span class="gmeta">' + (it.flagged ? '<span class="gpill gflag" title="Highlighted yellow by the team in the roadmap sheet for the next exec roadmap review">🟨 Flagged by the team</span>' : '') /* the team's own change signal (Exec Roadmap Review, Oct 27) */ + (it.site ? '<button type="button" class="gpill gsite" data-ssel="' + esc(it.site) + '" title="Show only ' + esc(SITEN(it.site)) + '">' + siteDot(it.site) + '</button>' : '') /* site first, so TeePublic / Redbubble / both reads at a glance (Allison, Oct 28) */ + '</span>' +
       // Filtered to "Changed", each row says what changed (Mike, Oct 27); unfiltered rows stay quiet.
       ((state.views || []).indexOf('chg') >= 0 && typeof COMING_PREV !== 'undefined' && COMING_PREV ? (ch => { const t = ch.map(x => x.k === 'new' ? 'New since the ' + COMING_PREV.asOf.replace(/^the /, '').replace(/ roadmap review$/, ' review') : x.txt).join(' · '); return ch.length ? '<span class="gchg" title="' + esc(t) + '">' + esc(t) + '</span>' : ''; })(liveChg(it, COMING_PREV)) : '');
-    return '<div class="grow' + (meta.indexOf('gchg') >= 0 ? ' hasch' : '') + '" role="button" tabindex="0" data-lbm2="' + it.ref + '"><span class="gname"><span class="ge gico g-' + esc(it.obj || 'x') + '" aria-hidden="true">' + projIco(it) + '</span><span class="gnt"><b class="gtl"><span class="gtx">' + esc(it.t) + '</span>' + srcBtn('rm:' + it.ref) + '</b>' + meta + '</span></span><span class="gtrack">' + hint(track, 'gtip', gTip(it, e, live, pj, sd)) + '</span></div>'; };
+    return '<div class="grow' + (meta.indexOf('gchg') >= 0 ? ' hasch' : '') + '" role="button" tabindex="0" data-lbm2="' + it.ref + '"><span class="gname"><span class="ge gico g-' + esc(it.obj || 'x') + '" aria-hidden="true">' + projIco(it) + '</span><span class="gnt"><b class="gtl"><span class="gtx">' + esc(it.t) + '</span></b>' + meta + '</span></span><span class="gtrack">' + hint(track, 'gtip', gTip(it, e, live, pj, sd)) + '</span></div>'; };
   const S = state.tsort, SK = { t: d => d[0].t.toLowerCase(), eta: d => d[3], imp: d => -impVal(d[0]), c: d => CONFR[confOf(d[0]).k], s: d => stepIx(d[0].s) };
   // Sections (Mike, Oct 27): by stage by default, or by team or goal. Rows inside keep the chosen sort.
   const srt = rows => rows.slice().sort((a, b) => { if (rows.every(d => !d[2] && d[1] < today)) return a[1] - b[1]; if (!(S && SK[S.k])) return a[3] - b[3]; const p = SK[S.k](a), q = SK[S.k](b); return (p < q ? -1 : p > q ? 1 : 0) * S.dir || a[3] - b[3]; });
@@ -2692,8 +2921,8 @@ function comingHtml() {
   const status = it => { const k = phaseIx(it.s), why = UPD[it.t] || it.why || ''; return hint(phaseBar(it.s), 'stcell', '<b>' + esc(it.s || 'TBD') + '</b><br>' + PHASES.map((p, i) => i === k ? '<b>▸ ' + p + '</b>' : p).join(' → ') + (k < 5 && !stuck(it.s) ? '<br>Next: ' + PHASES[k + 1] : '') + (stuck(it.s) && why ? '<br><br><b>Why:</b> ' + esc(why) : '')); };
   // UX column: the project's Figma or design spec, when there is one (Mike, Oct 26: people like seeing the UX).
   const hasUX = () => typeof UXL !== 'undefined' && Object.keys(UXL).length > 0; // the column only shows once there are links
-  const uxCell = it => { const L = (typeof UXL !== 'undefined' && UXL[it.t]) || []; return L.length ? '<a class="uxl" href="' + esc(L[0].url) + '" target="_blank" rel="noopener" title="' + esc(L[0].l) + '">' + (/figma/i.test(L[0].url) ? 'Figma' : 'Design') + ' ↗</a>' : '<span class="faint">–</span>'; };
-  const row = it => { const tg = tagsOf(it); return '<div class="rmrow' + (prev && liveChg(it, prev).length ? ' chg' + (isRev(it, prev) ? ' rev' : '') : '') + '" role="button" tabindex="0" data-lbm2="' + it.ref + '"><span class="lbe" aria-hidden="true">' + it.e + '</span><span class="tmn"><b class="rmt">' + esc(it.t) + srcBtn('rm:' + it.ref) + '</b>' +
+  const uxCell = it => { const L = (typeof UXL !== 'undefined' && UXL[it.t]) || []; return L.length ? '<a class="uxl" href="' + esc(L[0].url) + '" target="_blank" rel="noopener" title="' + esc(L[0].l) + '">' + (/figma/i.test(L[0].url) ? 'Figma' : 'Design') + ' ↗</a>' : '<span class="faint">–</span>'; };
+  const row = it => { const tg = tagsOf(it); return '<div class="rmrow' + (prev && liveChg(it, prev).length ? ' chg' + (isRev(it, prev) ? ' rev' : '') : '') + '" role="button" tabindex="0" data-lbm2="' + it.ref + '"><span class="lbe" aria-hidden="true">' + it.e + '</span><span class="tmn"><b class="rmt">' + esc(it.t) + '</b>' +
     '<span class="lbd rmd">' + esc(it.d || '') + '</span>' + (tg ? '<span class="rmchg">' + tg + '</span>' : '') + '<span class="rmpills">' + labelPills(it) + '</span></span>' +
     '<span' + (prev && liveChg(it, prev).some(c => c.k === 'phase' || c.k === 'blocked') ? ' class="chgv' + (isRev(it, prev) ? ' rev' : '') + '"' : '') + '>' + status(it) + '</span><span class="lbeta' + (prev && liveChg(it, prev).some(c => c.k === 'date') ? ' chgv' + (isRev(it, prev) ? ' rev' : '') : '') + '">' + esc(rng(it.eta)) + '</span><span>' + (impCell(it) || '<span class="faint">' + (/^(Ops|Data|Compliance)$/.test(it.obj || '') ? 'No direct revenue' : 'Not sized') + '</span>') + '</span><span>' + confCell(it) + '</span>' + (hasUX() ? '<span class="rmux">' + uxCell(it) + '</span>' : '') + '</div>'; };
   const S = state.tsort, SORT = { t: it => it.t.toLowerCase(), s: it => stepIx(it.s), eta: it => etaDate(it.eta) || 9e15, imp: it => -impVal(it), c: it => CONFR[confOf(it).k] };
@@ -2816,14 +3045,16 @@ function bandRects(b, S, mg, iw, n, top, h) {
 function drawChart(host, spec) {
   if (!host) return;
   const m = spec.m, b = m.b, S = SER[b], n = S.dates.length, mini = !!spec.mini, showS = !!spec.sess && m.sess && !m.isSess;
-  const W = Math.max(280, Math.floor(host.clientWidth)), narrow = W < 560 || mini;
+  const hcs = getComputedStyle(host), W = Math.max(280, Math.floor(host.clientWidth - (parseFloat(hcs.paddingLeft) || 0) - (parseFloat(hcs.paddingRight) || 0))), narrow = W < 560 || mini;
   // Full-size charts always keep room for the right-hand sessions axis, so switching layers or metrics never resizes the plot (Mike, Oct 26).
-  const mg = { l: narrow ? 44 : 52, r: showS || !mini ? (narrow ? 44 : 56) : 14, t: mini ? 8 : 14, b: mini ? 34 : 54 }, ph = mini ? (spec.tall ? 170 : 130) : (narrow ? 210 : 260), H = mg.t + ph + mg.b, iw = W - mg.l - mg.r;
+  const mg = { l: narrow ? 44 : 52, r: showS || !mini ? (narrow ? 44 : 56) : 14, t: mini ? 8 : 34, b: mini ? 34 : 68 }, ph = mini ? (spec.tall ? 170 : 130) : (narrow ? 210 : 260), H = mg.t + ph + mg.b, iw = W - mg.l - mg.r;
   const x = i => mg.l + iw * (i + 0.5) / n;
   // Comparison line: same weekday last year by default; the CVR chart can switch it to the prior day or comparable days.
-  const cmpK = spec.cmp || 'yoy', CMPN = { yoy: 'Same weekday last year', mom: 'Same weekday 4 weeks earlier', pd: 'Prior day', bs: 'Comparable days' };
+  const cmpK = spec.cmp || 'yoy', CMPN = { yoy: 'Same weekday last year', mom: 'MoM', pd: 'Prior day', bs: 'Comparable days', sim: 'DoD' } /* DoD and MoM, no '4 weeks earlier' wording (Mike, Oct 28) */;
   const OM = spec.other ? metricsFor(BR[b].other).overall[spec.mi || 0] : null, MN = spec.mi ? 'sessions' : 'CVR';
-  const lyv = S.dates.map((d, i) => { if (cmpK === 'mom') return i >= 28 ? m.v[i - 28] : null; if (cmpK === 'pd') return i ? m.v[i - 1] : null; if (cmpK === 'bs') { const st = infoNow(b, d), pk = posKey(st), wd = dow(d), vs = []; for (let k = 1; k <= 56; k++) { const x = addDays(d, -k), j = S.idx[x]; if (j === undefined || isContam(b, x) || m.v[j] == null) continue; const xi = infoNow(b, x); if (st.sale ? posKey(xi) === pk && sameTier(b, d, x) : !xi.sale && dow(x) === wd) vs.push(m.v[j]); } return vs.length ? sum(vs) / vs.length : null; } if (!m.ly) return null; const k = lyIndex(addDays(d, -364)); return k >= 0 ? m.ly[k] : null; });
+  // Most recent similar day (Mike, Oct 28: instead of 4 weeks earlier): the latest earlier day of the same kind, i.e. the same point in a sale, or the same weekday with no sale.
+  const simD = [];
+  const lyv = S.dates.map((d, i) => { if (cmpK === 'sim') { const st = infoNow(b, d), pk = st.sale ? posKey(st) : null, wd = dow(d); for (let k = 1; k <= 120; k++) { const x = addDays(d, -k), j = S.idx[x]; if (j === undefined) break; if (isContam(b, x) || m.v[j] == null) continue; const xi = infoNow(b, x); if (st.sale ? xi.sale && posKey(xi) === pk : !xi.sale && sameKind(b, d, x)) { simD[i] = x; return m.v[j]; } } return null; } if (cmpK === 'mom') return i >= 28 ? m.v[i - 28] : null; if (cmpK === 'pd') return i ? m.v[i - 1] : null; if (cmpK === 'bs') { const st = infoNow(b, d), pk = posKey(st), wd = dow(d), vs = []; for (let k = 1; k <= 56; k++) { const x = addDays(d, -k), j = S.idx[x]; if (j === undefined || isContam(b, x) || m.v[j] == null) continue; const xi = infoNow(b, x); if (st.sale ? posKey(xi) === pk && sameTier(b, d, x) : !xi.sale && dow(x) === wd) vs.push(m.v[j]); } return vs.length ? sum(vs) / vs.length : null; } if (!m.ly) return null; const k = lyIndex(addDays(d, -364)); return k >= 0 ? m.ly[k] : null; });
   const all = m.v.concat(lyv.filter(v => v != null), OM ? OM.v.filter(v => v != null) : []), mn0 = Math.min(...all), mx0 = Math.max(...all);
   const steps = isNum(m) ? [500, 1000, 2000, 5000, 10000, 20000, 50000, 100000, 200000, 500000, 1000000, 2000000] : [0.0005, 0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2];
   const st = niceStep((mx0 - mn0) * 1.15 || mx0, steps, 5);
@@ -2846,7 +3077,7 @@ function drawChart(host, spec) {
     { let top = ''; m.sess.forEach((v, i) => { top += (i ? 'L' : 'M') + x(i).toFixed(1) + ' ' + y2(v).toFixed(1); }); g += '<path d="' + top + '" style="fill:none;stroke:var(--sess);stroke-width:1.2;opacity:.6"/>'; }
   }
   for (let i = 0; i < n; i++) { const d = S.dates[i], con = isContam(b, d); if (infoNow(b, d).sale || con) g += '<rect x="' + (mg.l + iw * i / n).toFixed(1) + '" y="' + (bottom + 5) + '" width="' + Math.max(1, iw / n - 0.6).toFixed(1) + '" height="5" rx="1" style="fill:' + (con ? 'var(--strip-x)' : BR[b].strip) + '"/>'; }
-  for (let i = n - 1; i >= 0; i -= (mini ? 28 : 14)) g += '<text x="' + x(i).toFixed(1) + '" y="' + (H - 4) + '" text-anchor="middle">' + short(S.dates[i]) + '</text>';
+  for (let i = n - 1; i >= 0; i -= (mini ? 28 : 14)) g += '<text x="' + x(i).toFixed(1) + '" y="' + (H - (mini ? 4 : 14)) + '" text-anchor="middle">' + short(S.dates[i]) + '</text>';
   const path = vals => { let d = '', pen = false; vals.forEach((v, i) => { if (v == null) { pen = false; return; } d += (pen ? 'L' : 'M') + x(i).toFixed(1) + ' ' + y1(v).toFixed(1); pen = true; }); return d; };
   if (lyv.some(v => v != null)) g += '<path d="' + path(lyv) + '" style="fill:none;stroke:' + (spec.cmp ? 'var(--muted)' : 'var(--faint)') + ';stroke-width:' + (spec.cmp ? '1.75' : '1.5') + ';' + 'stroke-dasharray:4 3' + ';stroke-linejoin:round"/>';
   if (OM) g += '<path d="' + path(OM.v) + '" style="fill:none;stroke:' + BR[BR[b].other].color + ';stroke-width:1.75;stroke-dasharray:5 3;stroke-linejoin:round;opacity:.9"/>';
@@ -2862,8 +3093,8 @@ function drawChart(host, spec) {
   // Key releases ride the same lane as Bot Squad notes, as blue diamonds (design agency, Oct 27): same place to look, different shape and color.
   const rels = mini ? [] : relFor(m.b);
   // Releases and Bot Squad notes sit in rows under the sale strip, next to the dates (Allison, Oct 28).
-  rels.forEach(r => { const i0 = S.idx[r.date]; if (i0 == null) return; const xc = mg.l + iw * (i0 + 0.5) / n, yc = bottom + 21; g += '<path class="relmk" d="M' + xc.toFixed(1) + ' ' + (yc - 4.5) + 'l4.5 4.5-4.5 4.5-4.5-4.5z"/>'; });
-  bots.forEach(e => { const i0 = S.idx[e.date] != null ? S.idx[e.date] : 0, i1 = e.end && S.idx[e.end] != null ? S.idx[e.end] : i0, xa = mg.l + iw * i0 / n, xb = mg.l + iw * (i1 + 1) / n; g += '<rect class="botmk" x="' + xa.toFixed(1) + '" y="' + (bottom + 29) + '" width="' + Math.max(4, xb - xa).toFixed(1) + '" height="4" rx="2"/>'; });
+  bots.forEach(e => { const i0 = S.idx[e.date] != null ? S.idx[e.date] : 0, i1 = e.end && S.idx[e.end] != null ? S.idx[e.end] : i0, xa = mg.l + iw * i0 / n, xb = mg.l + iw * (i1 + 1) / n; g += '<rect class="botmk" x="' + xa.toFixed(1) + '" y="' + (bottom + 19.5) + '" width="' + Math.max(4, xb - xa).toFixed(1) + '" height="4" rx="2"/>'; });
+  rels.forEach(r => { const i0 = S.idx[r.date]; if (i0 == null) return; const xc = mg.l + iw * (i0 + 0.5) / n, yc = bottom + 21.5; g += '<path class="relmk" d="M' + xc.toFixed(1) + ' ' + (yc - 4.5) + 'l4.5 4.5-4.5 4.5-4.5-4.5z"/>'; });
   // Baseline days: ringed on the line, with the baseline level as a dotted line from the first of them to today (Mike, Oct 28: "it looks like it's been going up").
   if (spec.base && spec.base.dates && spec.base.dates.length) { const bi = spec.base.dates.map(z => S.idx[z]).filter(i => i !== undefined && m.v[i] != null), si0 = S.idx[state.day];
     if (bi.length && spec.base.v != null && si0 !== undefined) { const yb = y1(spec.base.v).toFixed(1), x0 = x(Math.min(...bi)).toFixed(1), xe = x(si0).toFixed(1); g += '<line x1="' + x0 + '" x2="' + xe + '" y1="' + yb + '" y2="' + yb + '" style="stroke:var(--ctl);stroke-width:1.5;stroke-dasharray:1 3;stroke-linecap:round"/>'; }
@@ -2883,7 +3114,7 @@ function drawChart(host, spec) {
     let h = '<b>' + label(d) + '</b><div class="r2"><span>' + (isContam(b, d) ? 'Sale, price test, bot spike' : infoNow(b, d).label) + '</span><span></span></div><div class="r2"><span>' + esc(m.axis) + '</span><span>' + fmtVal(m, m.v[i]) + '</span></div>';
     if (spec.base && spec.base.dates && spec.base.dates.indexOf(d) >= 0) h += '<div class="tcmp">🎯 <b>Comparison day</b>' + (infoNow(b, d).sale && infoNow(b, state.day).sale && posKey(infoNow(b, d)) === posKey(infoNow(b, state.day)) && POSN[posKey(infoNow(b, d))] ? ': a ' + POSN[posKey(infoNow(b, d))] + ', like ' + short(state.day) : ' for ' + short(state.day)) + '</div>';
     else if (spec.base && d === state.day) h += '<div class="tcmp">📍 <b>The day you\'re reading</b></div>';
-    if (lyv[i] != null) h += '<div class="r2"><span>' + CMPN[cmpK] + '</span><span>' + fmtVal(m, lyv[i]) + ' (' + sgn(m.v[i] / lyv[i] - 1, 0) + ')</span></div>';
+    if (lyv[i] != null) h += '<div class="r2"><span>' + CMPN[cmpK] + (cmpK === 'sim' && simD[i] ? ' (' + short(simD[i]) + ')' : '') + '</span><span>' + fmtVal(m, lyv[i]) + ' (' + sgn(m.v[i] / lyv[i] - 1, 0) + ')</span></div>';
     if (OM && OM.v[i] != null) h += '<div class="r2"><span>' + BR[BR[b].other].name + ' ' + MN + '</span><span>' + fmtVal(m, OM.v[i]) + '</span></div>';
     if (m.sess && !m.isSess) h += '<div class="r2"><span>Sessions</span><span>' + int(m.sess[i]) + '</span></div>';
     rels.filter(r => r.date === d).forEach(r => { h += '<div class="trel">🚀 <b>Release: ' + esc(r.t) + '</b>' + (r.imp ? '<br>' + esc(r.imp) : '') + '</div>'; });
@@ -2939,7 +3170,7 @@ const smIco = t => { const k = /refresh/i.test(t) ? 'refresh' : /driver/i.test(t
 // Menu items: plain links with a small line icon each (Mike, Oct 22: icons back, regular weight).
 const srcMenu = cvr => srcMenu0(cvr).replace(/>(?:\p{Extended_Pictographic}|[↻↗])\uFE0F?\s*/gu, '>').replace(/\s*↗</g, '<').replace(/(<(?:a|button) role="menuitem"[^>]*>)([^<]+)</g, (m, open, txt) => open + smIco(txt) + '<span>' + txt + '</span><');
 function srcMenu0(cvr) {
-  const a = (u, l) => '<a role="menuitem" href="' + u + '" target="_blank" rel="noopener">' + l + ' ↗</a>', SHEET = 'https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit?gid=579410268#gid=579410268';
+  const a = (u, l) => '<a role="menuitem" href="' + u + '" target="_blank" rel="noopener">' + l + ' ↗</a>', SHEET = 'https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit?gid=579410268#gid=579410268';
   const how = '<button role="menuitem" data-act="refresh">↻ How this refreshes</button>';
   if (cvr) return a('https://app.amplitude.com/analytics/tpub/dashboard/lm29400h', '📊 CVR data in Amplitude') + how + '<button role="menuitem" data-act="drivers">📉 How drivers are picked</button><button role="menuitem" data-act="guide">📖 How to read this page</button>';
   const v = state.view;
@@ -2997,13 +3228,25 @@ function segPills() {
     p.style.transition = 'none'; put(from); void p.offsetWidth; p.style.transition = ''; put(to); SEGPOS[g.dataset.seg] = to;
   });
 }
+function pillTo(sel) {
+  const wrap = document.querySelector('.bar-in'), p = document.getElementById('navpill'); if (!wrap || !p || !p._bw || !sel) return;
+  const w = wrap.getBoundingClientRect(), r = sel.getBoundingClientRect();
+  p.style.setProperty('--c', getComputedStyle(sel).getPropertyValue('--c') || 'var(--accent)');
+  p.style.transform = 'translate(' + (r.left - w.left) + 'px,' + (r.top - w.top) + 'px) scale(' + (r.width / p._bw) + ',' + (r.height / p._bh) + ')';
+}
+function navRender(sel) {
+  const root = document.documentElement; try { pillTo(sel); } catch (e) {}
+  root.classList.add('navbusy');
+  requestAnimationFrame(() => requestAnimationFrame(() => { render(); setTimeout(() => root.classList.remove('navbusy'), 500); }));
+}
 function movePill() {
   const wrap = document.querySelector('.bar-in'), sel = document.querySelector('#tabs [aria-selected="true"]'); if (!wrap) return;
   let p = document.getElementById('navpill'), fresh = false; if (!p) { p = document.createElement('span'); p.id = 'navpill'; p.setAttribute('aria-hidden', 'true'); p.style.transition = 'none'; wrap.appendChild(p); fresh = true; }
   if (!sel) { p.style.opacity = '0'; return; }
   const w = wrap.getBoundingClientRect(), r = sel.getBoundingClientRect();
-  p.style.opacity = '1'; p.style.width = r.width + 'px'; p.style.height = r.height + 'px';
-  p.style.transform = 'translate(' + (r.left - w.left) + 'px,' + (r.top - w.top) + 'px)';
+  if (!p._bw) { p._bw = r.width; p._bh = r.height; p.style.width = r.width + 'px'; p.style.height = r.height + 'px'; p.style.transformOrigin = '0 0'; p.style.willChange = 'transform'; }
+  p.style.opacity = '1';
+  p.style.transform = 'translate(' + (r.left - w.left) + 'px,' + (r.top - w.top) + 'px) scale(' + (r.width / p._bw) + ',' + (r.height / p._bh) + ')';
   p.style.setProperty('--c', getComputedStyle(sel).getPropertyValue('--c') || 'var(--accent)');
   if (fresh) { void p.offsetWidth; p.style.transition = ''; }
 }
@@ -3020,7 +3263,7 @@ function drawOpenCharts() {
 // Full-width CVR chart under What moved: CVR, a switchable comparison line, and sessions behind it.
 // TeePublic: Prior day, MoM, YoY. Redbubble has no last year yet, so Prior day and MoM; a YoY pick shows MoM there (Mike, Oct 26).
 // No prior-day line: it's the same line moved one day, so it traces the solid line exactly (Allison and Mike, Oct 28). Default: last year on TeePublic, 4 weeks earlier on Redbubble.
-const ccmpOf = b => state.ccmp === 'mom' ? 'mom' : b === 'tp' ? 'yoy' : 'mom';
+const ccmpOf = b => state.ccmp === 'mom' ? 'mom' : state.ccmp === 'sim' || b !== 'tp' ? 'sim' : 'yoy';
 // Sources under the 90-day chart, bottom-left, expanding in place (Mike, Oct 28).
 function chartSrc(b) {
   const bf = state.botf === 'strong' ? 'strong' : 'max', L = [
@@ -3032,17 +3275,17 @@ function chartSrc(b) {
 }
 function cvrChartHtml(b) {
   // Prior day or YoY only: a recent-baseline line doesn't read on a 90-day chart (Mike, Oct 26). The other site's line starts off.
-  const k = ccmpOf(b), opts = (b === 'tp' ? [['yoy', 'Last year']] : []).concat([['mom', '4 weeks earlier']]), on = !state.ccOff, oth = !!state.ccOth, obn = BR[BR[b].other].name, isS = state.ccm === 'sess', mn = isS ? 'sessions' : 'CVR';
+  const k = ccmpOf(b), opts = (b === 'tp' ? [['yoy', 'Last year']] : []).concat([['sim', 'DoD'], ['mom', 'MoM']]), on = !state.ccOff, oth = !!state.ccOth, obn = BR[BR[b].other].name, isS = state.ccm === 'sess', mn = isS ? 'sessions' : 'CVR';
   // Each key mark is drawn the way it appears in the chart, so the match is obvious at a glance.
   const mk = inner => '<svg width="26" height="14" viewBox="0 0 26 14" aria-hidden="true">' + inner + '</svg>';
   const contam = SER[b].dates.some(d => isContam(b, d));
   const leg = '<div class="legend ckey">' +
     '<span>' + mk('<line x1="1" y1="7" x2="25" y2="7" style="stroke:' + BR[b].color + ';stroke-width:3;stroke-linecap:round"/>') + '<b>' + BR[b].name + ' ' + mn + '</b></span>' +
-    '<span>' + mk('<line x1="1" y1="7" x2="25" y2="7" style="stroke:' + 'var(--muted)' + ';stroke-width:2;stroke-dasharray:4 3"/>') + (k === 'yoy' ? 'Same weekday last year' : k === 'mom' ? 'Same weekday 4 weeks earlier' : 'Prior day') + '</span>' + (oth ? '<span>' + mk('<line x1="1" y1="7" x2="25" y2="7" style="stroke:' + BR[BR[b].other].color + ';stroke-width:2;stroke-dasharray:5 3"/>') + obn + ' ' + mn + '</span>' : '') +
+    '<span>' + mk('<line x1="1" y1="7" x2="25" y2="7" style="stroke:' + 'var(--muted)' + ';stroke-width:2;stroke-dasharray:4 3"/>') + (k === 'yoy' ? 'Same weekday last year' : k === 'sim' ? 'DoD' : k === 'mom' ? 'MoM' : 'Prior day') + '</span>' + (oth ? '<span>' + mk('<line x1="1" y1="7" x2="25" y2="7" style="stroke:' + BR[BR[b].other].color + ';stroke-width:2;stroke-dasharray:5 3"/>') + obn + ' ' + mn + '</span>' : '') +
     (on && !isS ? '<span>' + mk('<path d="M1 13 L7 7 L13 9 L19 4 L25 6 L25 13 Z" style="fill:var(--sess);opacity:.45"/>') + 'Sessions per day</span>' : '') +
     '<span>' + mk('<rect x="5" y="0" width="16" height="14" rx="2" style="fill:' + BR[b].band + ';stroke:' + BR[b].strip + '"/>') + 'Sale days</span>' +
     (contam ? '<span>' + mk('<rect x="5" y="0" width="16" height="14" rx="2" style="fill:var(--band-x);stroke:var(--faint)"/>') + 'Price test or bot spike</span>' : '') + (botFor(metricsFor(b).overall[0]).length ? '<span>' + mk('<rect x="2" y="5" width="22" height="4" rx="2" style="fill:var(--muted);opacity:.55"/>') + 'Bot Squad note</span>' : '') + (relFor(b).length ? '<span>' + mk('<path d="M13 2.5l4.5 4.5-4.5 4.5-4.5-4.5z" style="fill:var(--ctl)"/>') + 'Key release</span>' : '') + '</div>';
-  return '<section class="cvrchart"><div class="cchead"><h2>📈 ' + (isS ? 'Sessions' : 'CVR') + ', last 90 days</h2><div class="ccctl"><div class="seg" role="group" aria-label="Metric">' + [['cvr', 'CVR'], ['sess', 'Sessions']].map(o => '<button type="button" data-ccm="' + o[0] + '" aria-pressed="' + ((isS ? 'sess' : 'cvr') === o[0]) + '">' + o[1] + '</button>').join('') + '</div><div class="seg" role="group" aria-label="Compare with">' + opts.map(o => '<button type="button" data-ccmp="' + o[0] + '" aria-pressed="' + (k === o[0]) + '"' + '' + '>' + o[1] + '</button>').join('') + '</div><button type="button" class="swtog" role="switch" data-ccoth="1" aria-checked="' + oth + '" style="--c:' + BR[BR[b].other].color + '"><span class="trk"><span class="knb"></span></span>' + obn + '</button><button type="button" class="swtog" role="switch" data-ccsess="1" aria-checked="' + (on && !isS) + '"' + (isS ? ' disabled title="The chart already shows sessions"' : '') + '><span class="trk"><span class="knb"></span></span>Sessions</button></div></div>' + leg + '<div class="chart" id="cvrc"></div><p class="cap">' + (k === 'yoy' ? 'Last year starts Aug 31: bot-filtered data for 2025 begins Sep 1, 2025. ' + (state.botf === 'max' ? 'Under Maximum, read the last-year line loosely: this year\'s audience shrank sharply from Sep 22. ' : '') : '') + 'Hover for each day. Click a day to jump the page to it.</p>' + chartSrc(b) + '</section>';
+  return '<section class="cvrchart"><div class="cchead"><h2>📈 ' + (isS ? 'Sessions' : 'CVR') + ', last 90 days</h2><div class="ccctl"><div class="seg" role="group" aria-label="Metric">' + [['cvr', 'CVR'], ['sess', 'Sessions']].map(o => '<button type="button" data-ccm="' + o[0] + '" aria-pressed="' + ((isS ? 'sess' : 'cvr') === o[0]) + '">' + o[1] + '</button>').join('') + '</div><div class="seg" role="group" aria-label="Compare with">' + opts.map(o => '<button type="button" data-ccmp="' + o[0] + '" aria-pressed="' + (k === o[0]) + '"' + '' + '>' + o[1] + '</button>').join('') + '</div><button type="button" class="swtog" role="switch" data-ccoth="1" aria-checked="' + oth + '" style="--c:' + BR[BR[b].other].color + '"><span class="trk"><span class="knb"></span></span>' + obn + '</button><button type="button" class="swtog" role="switch" data-ccsess="1" aria-checked="' + (on && !isS) + '"' + (isS ? ' disabled title="The chart already shows sessions"' : '') + '><span class="trk"><span class="knb"></span></span>Sessions</button></div></div>' + leg + '<div class="ccbox"><div class="chart" id="cvrc"></div>' + chartSrc(b) + '</div><p class="cap">' + (k === 'mom' ? 'The 4-weeks-earlier line starts ' + short(SER[b].dates[28] || SER[b].dates[0]) + ': the first 4 weeks have nothing 4 weeks before them in this data. ' : '') + (k === 'sim' ? 'The dotted line is the most recent earlier day of the same kind: the same point in a sale, or the same weekday with no sale. Hover a day to see which. ' : '') + (k === 'yoy' ? 'Last year starts Aug 31: bot-filtered data for 2025 begins Sep 1, 2025. ' + (state.botf === 'max' ? 'Under Maximum, read the last-year line loosely: this year\'s audience shrank sharply from Sep 22. ' : '') : '') + 'Hover for each day. Click a day to jump the page to it.</p></section>'; /* Sources sit inside the chart box, bottom left (Mike, Oct 28) */
 }
 /* ---------- Bot watch: one line between the stat cards and the 90-day chart (Mike, Oct 26) ---------- */
 function botNotesFor(b) { return (typeof BOTN === 'undefined' ? [] : BOTN).filter(e => e.site === b || e.site === 'both').slice().sort((a, z) => z.date < a.date ? -1 : 1); }
@@ -3065,8 +3308,8 @@ const botSec = b => '<section class="botsec" id="g-bots"><div class="bothead"><h
 const botTipOf = (e, x) => { if (!e) return x ? '<b>' + esc(x.m.label) + '</b><br>' + esc(x.why) + '.' : '';
   const aff = [...new Set((e.metrics || []).map(k => k === 'overall' ? 'Overall CVR' : k.split('/').pop()))].slice(0, 5).join(', ');
   const kv = [['When', short(e.date) + (e.end ? ' to ' + short(e.end) : ' onward')], ['Site', e.site === 'both' ? 'Both sites' : SITEN(String(e.site || '').toUpperCase())], aff ? ['Affects', aff] : null].filter(Boolean);
-  return '<div class="gtipc"><b class="gtt">' + (e.emoji || '🤖') + ' ' + esc(e.short || e.title) + '</b><div class="gkv">' + kv.map(r => '<span class="gk">' + r[0] + '</span><span class="gv">' + esc(r[1]) + '</span>').join('') + '</div>' + (e.link ? '<a class="segmore" href="' + esc(e.link) + '" target="_blank" rel="noopener">Open the Bot Squad thread ↗</a>' : '') + '</div>'; };
-function botRow(b) {
+  return '<div class="gtipc"><b class="gtt">' + (e.emoji || '🤖') + ' ' + esc(e.short || e.title) + '</b><div class="gkv">' + kv.map(r => '<span class="gk">' + r[0] + '</span><span class="gv">' + esc(r[1]) + '</span>').join('') + '</div>' + (e.link ? '<a class="segmore" href="' + esc(e.link) + '" target="_blank" rel="noopener">Open the Bot Squad thread ↗</a>' : '') + '</div>'; };
+function botRow(b, flat) {
   // A short bot report in plain words (Mike, Oct 26): what looks skewed today, then what the Bot Squad found or changed this week.
   // Only the key words hover (each with a small tip); the full notes sit behind "More info".
   const d = state.day, set = BOTSET[b] || [], upto = d === D.asOf ? addDays(d, 2) : d, comps = compsFor(b, d);
@@ -3094,23 +3337,40 @@ function botRow(b) {
   if (!lines.length) lines.push({ e: '✅', t: 'All clear', pts: ['Nothing bot-related flagged this week.'], k: 'ok', tip: '<b>All clear</b><br>No Bot Squad findings for this site in the last week, and no segment looks skewed today.' });
   const more = botNotesFor(b).length ? ' <button type="button" class="linkbtn bmore" data-botwatch="' + b + '">More info →</button>' : '';
   // One or two sentences, not bullets (Mike, Oct 26).
+  const tn = l => l.k === 'now' ? 'bad' : l.k === 'ok' ? 'good' : 'warn';
+  const card = l => hint('<article class="scard ' + tn(l) + '"><div class="schd"><h4><span class="scic" aria-hidden="true">' + l.e + '</span><span>' + l.t + '</span></h4><span class="sctags"><span class="stat-chip ' + tn(l) + '">' + (l.k === 'now' ? 'Handling' : l.k === 'ok' ? 'All clear' : 'Update') + '</span><span class="scmeta">' + BR[b].name + '</span></span></div><ul class="botpts">' + l.pts.slice(0, 2).map(p => '<li>' + p + '</li>').join('') + '</ul></article>', 'botcard2' + (l.k ? ' ' + l.k : ''), l.tip || '');
+  if (flat) return lines.slice(0, 3).map(card).join('');
   return '<div class="botgrid">' + lines.slice(0, 3).map(l => hint((l.k === 'now' ? '<b class="botalert" aria-label="Needs attention">!</b>' : '') + '<span class="bote" aria-hidden="true">' + l.e + '</span><span class="botbody"><b class="bott">' + l.t + '</b><ul class="botpts">' + l.pts.map(p => '<li>' + p + '</li>').join('') + '</ul></span>', 'botcard' + (l.k ? ' ' + l.k : ''), l.tip || '')).join('') + '</div>';
 }
 function botWatchModal(b) {
   // Scannable at a glance: emoji + short title, one sentence, a quiet Slack link (Mike, Oct 26).
   const all = botNotesFor(b).filter(e => e.date <= addDays(D.asOf, 2));
-  const row = e => '<li><span class="bnd">' + short(e.date) + (e.end ? '–' + short(e.end) : '') + '</span><div><b>' + (e.emoji || bIcon(e)) + ' ' + esc(e.short || e.title) + ':</b> ' + esc(e.sum || e.note) + (e.link ? ' <a href="' + esc(e.link) + '" target="_blank" rel="noopener">Slack ↗</a>' : '') + '</div></li>';
+  const row = e => '<li><span class="bnd">' + short(e.date) + (e.end ? '–' + short(e.end) : '') + '</span><div><b>' + (e.emoji || bIcon(e)) + ' ' + esc(e.short || e.title) + ':</b> ' + esc(e.sum || e.note) + (e.link ? ' <a href="' + esc(e.link) + '" target="_blank" rel="noopener">Slack ↗</a>' : '') + '</div></li>';
   openModal('<div class="mhead"><h3 id="mtitle">🤖 Bot watch: ' + BR[b].name + '</h3></div><p class="cap">From the Bot Squad, newest first.</p><div class="botnotes bwlist"><ul>' + all.map(row).join('') + '</ul></div>');
 }
 function paint() {
   const b = state.tab;
   HINTS = []; hideHint();
   MOVED = movedFor(b, state.day); LIFTS = liftsFor(b, state.day); ALERTS = alertsFor(b, state.day);
-  $('#main').innerHTML = topHtml(b) + cvrChartHtml(b) + '<section>' + payHtml(b) + '</section>' + scoreHtml(b); // What people are saying lives on the Trending tab only (Mike, Oct 26)
+  $('#main').innerHTML = cw(topHtml(b) + cvrChartHtml(b) + '<section>' + payHtml(b) + '</section>' + scoreHtml(b)); // What people are saying lives on the Trending tab only (Mike, Oct 26)
   drawOpenCharts();
+}
+// The sale pill lives next to the logo on every page (Mike, Oct 28): the selected day's sale on the CVR pages, today's for both sites elsewhere.
+// The sale pill: the sale on the day the dashboard is reading, for both sites. On the CVR tabs it sits above the headline; elsewhere in the header (Mike, Oct 28).
+function salePill() {
+  const iso = state.day || D.asOf, sites = ['tp', 'rb'].map(b => ({ b, st: infoNow(b, iso), tr: tierOf(b, iso) })).filter(x => x.st.sale);
+  if (!sites.length) return '<span class="hsale off"><span class="hsdate">' + short(iso) + '</span>No sale</span>';
+  const offer = sites.every(x => x.tr === sites[0].tr) && sites[0].tr ? 'Up to ' + sites[0].tr + '% off' : sites.map(x => BR[x.b].abbr + (x.tr ? ' up to ' + x.tr + '%' : ' sale')).join(' · ');
+  const day = x => { const dots = Array.from({ length: Math.min(x.st.len, 10) }, (_, k) => '<i class="' + (k < x.st.pos ? 'on' : '') + '"></i>').join(''); return '<span class="hsd">' + (sites.length > 1 ? '<b>' + BR[x.b].abbr + '</b> ' : '') + 'Day ' + x.st.pos + ' of ' + x.st.len + '<span class="hsdots" aria-hidden="true">' + dots + '</span></span>'; };
+  return '<span class="hsale" title="The sale on ' + esc(label(iso)) + ', the day this dashboard is reading"><span class="hsk">Sale</span><span class="hsv">' + offer + '<span class="hsdate">' + short(iso) + '</span></span>' + sites.map(day).join('') + '</span>';
+}
+function saleHdr() {
+  let el = document.getElementById('hsale'); if (!el) { el = document.createElement('span'); el.id = 'hsale'; const br = document.getElementById('brand'); if (br) br.insertAdjacentElement('afterend', el); }
+  el.innerHTML = ''; el.hidden = true; // no header sale pill on any page: the CVR tabs show it above the H1 (Mike, Oct 30)
 }
 function render() {
   const b = state.tab;
+  try { saleHdr(); } catch (e) {}
   try { localStorage.setItem('pod.lastv', state.view === 'daily' ? b : state.view); history.replaceState(null, '', '#' + viewToken()); } catch (e) {}
   document.documentElement.dataset.brand = state.view !== 'daily' || b === 'ds' ? 'art' : b === 'rb' ? 'rb' : 'tp';
   document.documentElement.style.setProperty('--accent', state.view !== 'daily' ? 'var(--art)' : b === 'rb' ? 'var(--rb)' : b === 'ds' ? 'var(--ds)' : 'var(--tp)');
@@ -3161,6 +3421,7 @@ document.addEventListener('focusin', ev => { const h = ev.target.closest && ev.t
 document.addEventListener('focusout', ev => { const h = ev.target.closest && ev.target.closest('.hint, .mv[data-hint]'); if (h && !pinned) hideHint(); });
 document.addEventListener('click', ev => {
   const t = ev.target;
+  const so = t.closest('[data-absort]'); if (so) { const k = so.dataset.absort, S = state.abSort || { k: 'days', dir: 1 }; state.abSort = S.k === k ? { k, dir: -S.dir } : { k, dir: k === 'cvr' || k === 'rpu' || k === 'sig' ? -1 : 1 }; return renderKeep(); }
   const tsb = t.closest('[data-tipsrc]'); if (tsb) { ev.stopImmediatePropagation(); ev.preventDefault(); const w = tsb.closest('.tipsrcw'), bx = w && w.querySelector('.tipsrcbox'); if (bx) { bx.hidden = !bx.hidden; tsb.setAttribute('aria-expanded', String(!bx.hidden)); } pinned = pinned || $('#hintbox'); const hb = $('#hintbox'), r = hb.getBoundingClientRect(); if (r.bottom > innerHeight - 8) hb.style.top = Math.max(8, innerHeight - 8 - r.height) + 'px'; return; }
   const jsx = t.closest('[data-jumpsec]'); if (jsx) { if (typeof hideHint === 'function') hideHint(); const el = document.getElementById('g-' + jsx.dataset.jumpsec); if (el) { const bar = document.querySelector('.bar'); window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - (bar ? bar.offsetHeight : 60) - 80, behavior: 'smooth' }); } return; }
   const ddo = t.closest('[data-ddopen]'); if (ddo) { const m = document.querySelector('[data-ddmenu="' + ddo.dataset.ddopen + '"]'), was = m.hidden; document.querySelectorAll('.ddmenu').forEach(x => { x.hidden = true; }); m.hidden = !was; ddo.setAttribute('aria-expanded', String(was)); state.ddOpen = was ? ddo.dataset.ddopen : null; return; }
@@ -3195,6 +3456,7 @@ document.addEventListener('click', ev => {
     const ntr = $('#ticker .tk-track'); if (ntr) { ntr.style.animationDelay = tkd; const nka = ntr.getAnimations()[0]; if (nka && tkt != null) nka.currentTime = tkt; }
     return; }
   const bwo = t.closest('[data-botwatch]'); if (bwo) return botWatchModal(bwo.dataset.botwatch);
+  const bsw = t.closest('[data-basis]'); if (bsw) { state.basis = bsw.dataset.basis; [BASEC, NRC].forEach(o => Object.keys(o).forEach(k => delete o[k])); render(); return; }
   const kct = t.closest('[data-kctip]'); if (kct) { ev.stopPropagation(); const [kb, kd, kk, km, ko] = kct.dataset.kctip.split('|'), hb = document.getElementById('hintbox'); if (ko) { state.tipOther = !state.tipOther; try { localStorage.setItem('pod.tipo', state.tipOther ? '1' : ''); } catch (e) {} } if (hb) hb.innerHTML = cmpTip(kb, kd, kk, km); return; }
   const ht = t.closest('.hint');
   // A hover-able name that also links (segLink) jumps on click instead of pinning its tip (Mike, Oct 27).
@@ -3205,7 +3467,7 @@ document.addEventListener('click', ev => {
   else if (ht) { ev.stopPropagation(); if (pinned === ht) { hideHint(); } else { showHint(ht); pinned = ht; } return; }
   if (pinned && !t.closest('#hintbox')) hideHint();
   if (t.closest('.mclose') || t.id === 'modal') return closeModal();
-  const tab = t.closest('[data-tab]'); if (tab) { if (state.tab === 'tp' || state.tab === 'rb') state.days[state.tab] = state.day; state.tab = tab.dataset.tab; state.day = state.days[state.tab] || D.asOf; state.view = 'daily'; state.cmpEdit = false; state.open.clear(); state.full.clear(); state.payChart = false; window.scrollTo(0, 0); return render(); }
+  const tab = t.closest('[data-tab]'); if (tab) { if (state.tab === 'tp' || state.tab === 'rb') state.days[state.tab] = state.day; state.tab = tab.dataset.tab; state.day = state.days[state.tab] || D.asOf; state.view = 'daily'; state.cmpEdit = false; state.open.clear(); state.full.clear(); state.payChart = false; window.scrollTo(0, 0); return navRender(tab); }
   if (t.closest('#guide')) return guideModal();
   if (t.closest('#refresh')) return refreshModal();
   if (t.closest('#salecal')) { state.calSite = null; state.calDay = null; return saleCalModal(); }
@@ -3221,11 +3483,11 @@ document.addEventListener('click', ev => {
   const ccmm = t.closest('[data-ccm]'); if (ccmm) { state.ccm = ccmm.dataset.ccm; return renderKeep(); }
   if (t.closest('[data-ccsess]')) { state.ccOff = !state.ccOff; return renderKeep(); }
   const stg = t.closest('[data-sesstog]'); if (stg) { const k = stg.dataset.sesstog; state.sessOff.has(k) ? state.sessOff.delete(k) : state.sessOff.add(k); return renderKeep(); }
-  const vw = t.closest('[data-view]'); if (vw) { state.view = vw.dataset.view; window.scrollTo(0, 0); try { history.replaceState(null, '', '#' + (state.view === 'daily' ? state.tab : state.view)); } catch (e) { /* ignore */ } return render(); }
+  const vw = t.closest('[data-view]'); if (vw) { state.view = vw.dataset.view; window.scrollTo(0, 0); try { history.replaceState(null, '', '#' + (state.view === 'daily' ? state.tab : state.view)); } catch (e) { /* ignore */ } return navRender(vw); }
   const tk = t.closest('[data-tick]'); if (tk && TKSH && RT.db) { const [dt, k] = tk.dataset.tick.split(':'), cur = Object.assign({}, SHT[dt] || {}); cur['k' + k] = !cur['k' + k]; SHT[dt] = cur; renderKeep(); RT.db.collection('ticks').doc(dt).set(cur).catch(() => { TKSH = false; renderKeep(); }); return; }
   if (tk) { const k = tk.dataset.tick; TICKS.has(k) ? TICKS.delete(k) : TICKS.add(k); try { localStorage.setItem('pod.ticks', JSON.stringify([...TICKS])); } catch (e) { /* ignore */ } return renderKeep(); }
   const gt = t.closest('[data-goto]'); if (gt) { let [v, sel] = gt.dataset.goto.split('|'); if (v === 'standuplast') { v = 'standup'; state.su = 'last'; state.view = ''; } if (state.view !== v) { state.view = v; render(); } const el = document.querySelector(sel); if (el) { window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 110 }); el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 2600); } return; }
-  const jt = t.closest('[data-jt]'); if (jt) { const id = jt.dataset.jt; state.view = 'tests'; state.open.add('x' + id); render(); const el = document.querySelector('[data-xrow="' + CSS.escape(id) + '"]'); if (el) { window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 110 }); el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 2600); } return; }
+  const jt = t.closest('[data-jt]'); if (jt) { if (state.view !== 'tests') { state.view = 'tests'; render(); } return testDetailModal(jt.dataset.jt); }
   const bw = t.closest('[data-basewhy]'); if (bw) return baseModal(bw.dataset.basewhy);
   const js = t.closest('[data-js]'); if (js) { closeModal(); state.view = 'soon'; state.fteam = js.dataset.js; render(); window.scrollTo({ top: 0 }); const el = document.querySelector('.tmpick [aria-selected="true"]'); if (el) { el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 2600); } return; }
   const rd = t.closest('[data-rtdel]'); if (rd) { rtSave(myItems().filter(x => String(x.at) !== rd.dataset.rtdel)); return; }
@@ -3253,7 +3515,9 @@ document.addEventListener('click', ev => {
   if (t.closest('#aboutbtn')) { const m = $('#amenu'); m.hidden = !m.hidden; $('#aboutbtn').setAttribute('aria-expanded', String(!m.hidden)); return; }
   if (!t.closest('#amenu') && $('#amenu')) $('#amenu').hidden = true;
   const wt = t.closest('[data-watch]'); if (wt) { const [wb, wk] = wt.dataset.watch.split('|'); state.view = 'daily'; state.tab = wb; if (wk !== 'pay') state.open.add(wk); render(); const el = wk === 'pay' ? document.getElementById('g-pay') : document.querySelector('[data-row="' + CSS.escape(wk) + '"]'); if (el) { window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 110 }); el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 2600); } return; }
-  const xr = t.closest('[data-xrow]'); if (xr) { const k = 'x' + xr.dataset.xrow; state.open.has(k) ? state.open.delete(k) : state.open.add(k); return renderKeep(); }
+  const abs = t.closest('[data-absite]'); if (abs) { const v = abs.dataset.absite; state.abSite = abs.classList.contains('sitepill') && state.abSite === v ? 'both' : v; return renderKeep(); }
+  const tpx = t.closest('[data-tpx]'); if (tpx) return tpDetailModal(+tpx.dataset.tpx);
+  const xr = t.closest('[data-xrow]'); if (xr) return testDetailModal(xr.dataset.xrow);
   const why = t.closest('[data-why]'); if (why) { ev.stopPropagation(); return whyModal(why.dataset.why); }
   const mode = t.closest('[data-cmpmode]'); if (mode) { state.cmpMode = mode.dataset.cmpmode; const [cb, ck] = state.cmp.split('|'); const m = findMetric(cb, state.cmp.slice(cb.length + 1)); if (m) compareModal(m); return; }
   const pgb = t.closest('[data-pgeo]'); if (pgb) { const [k, g] = pgb.dataset.pgeo.split('|'); state.pgeo = state.pgeo || {}; state.pgeo[k] = g; return renderKeep(); }
@@ -3262,7 +3526,10 @@ document.addEventListener('click', ev => {
   const sud = t.closest('[data-suday]'); if (sud) { state.suDay = +sud.dataset.suday; return renderKeep(); }
   const tmb = t.closest('[data-tmteam]'); if (tmb) { state.fteam = tmb.dataset.tmteam; return renderKeep(); }
   const cg = t.closest('[data-chg]'); if (cg) { state.chg = state.chg === cg.dataset.chg ? '' : cg.dataset.chg; return renderKeep(); }
+  const sk = t.closest('[data-segkey]'); if (sk) { hideHint(); const k = sk.dataset.segkey, f = [].concat(FLAGGED || [], MOVED || [], LIFTS || []).find(x => x.m.key === k); if (f) movedModal(f); return; }
   const lf = t.closest('[data-lift]'); if (lf) { hideHint(); const f = LIFTS[+lf.dataset.lift]; if (f) movedModal(f); return; }
+  const fl = t.closest('[data-fl]'); if (fl) { hideHint(); const f = FLAGGED[+fl.dataset.fl]; if (f) { state.open.add(f.m.key); renderKeep(); const el = document.querySelector('[data-row="' + CSS.escape(f.m.key) + '"]'); if (el) { const bar = document.querySelector('.bar'); window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - (bar ? bar.offsetHeight : 60) - 90, behavior: 'smooth' }); } } return; }
+  const flm = t.closest('[data-flmore]'); if (flm) { state.flAll = !state.flAll; return renderKeep(); }
   const mv = t.closest('[data-moved]'); if (mv) { hideHint(); const f = MOVED[+mv.dataset.moved]; if (f) movedModal(f); return; }
   const go = t.closest('[data-goto]'); if (go) { const el = document.getElementById(go.dataset.goto); if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 90, behavior: 'smooth' }); return; }
   const show = t.closest('[data-show]'); if (show) { closeModal(); state.open.add(show.dataset.show); renderKeep(); const row = document.querySelector('[data-row="' + CSS.escape(show.dataset.show) + '"]'); if (row) window.scrollTo({ top: row.getBoundingClientRect().top + window.scrollY - 120, behavior: 'smooth' }); return; }
@@ -3285,7 +3552,7 @@ document.addEventListener('change', ev => {
 });
 document.addEventListener('keydown', ev => {
   if (ev.key === 'Escape') { if (pinned) return hideHint(); if (!$('#modal').hidden) return closeModal(); }
-  if ((ev.key === 'Enter' || ev.key === ' ') && ev.target.matches && ev.target.matches('[data-row], [data-xrow], [data-lb], [data-lbm], [data-tm], [data-lbm2], [data-imp], [data-say], .hint')) { ev.preventDefault(); ev.target.click(); }
+  if ((ev.key === 'Enter' || ev.key === ' ') && ev.target.matches && ev.target.matches('[data-absort], [data-row], [data-xrow], [data-lb], [data-lbm], [data-tm], [data-lbm2], [data-imp], [data-say], .hint')) { ev.preventDefault(); ev.target.click(); }
 });
 let rz = 0;
 window.addEventListener('resize', () => { cancelAnimationFrame(rz); rz = requestAnimationFrame(drawOpenCharts); });
@@ -3303,7 +3570,7 @@ window.addEventListener('scroll', () => {
 { const hb = document.createElement('div'); hb.id = 'hintbox'; hb.className = 'hintbox'; hb.hidden = true; hb.setAttribute('role', 'tooltip'); document.body.appendChild(hb); }
 // One footer for every page: what this is, when it refreshes, where the data comes from, who to ask.
 $('#foot').innerHTML = '<div class="fin"><div class="fbrand"><b>' + LOGO('pod', 22) + ' Product Org Dashboard</b>How the Articore product org is doing: CVR, what is shipping, what we are testing and what changed.<p class="fsmall">Built by Mike Carafa with Claude. Updates at 8:30 AM, 2:30 PM and 4:30 PM ET.</p></div>' +
-  '<div><h4>Feedback or ideas for this dashboard</h4><a href="https://grid-articore.enterprise.slack.com/team/U2XU2NP7T" target="_blank" rel="noopener">Ask Mike in Slack ↗</a></div></div>';
+  '<div><h4>Feedback or ideas for this dashboard</h4><a href="https://grid-articore.enterprise.slack.com/team/U2XU2NP7T" target="_blank" rel="noopener">Ask Mike in Slack ↗</a></div></div>';
 try { state.tipOther = localStorage.getItem('pod.tipo') === '1'; state.ccOth = localStorage.getItem('pod.ccoth2') === 'on'; } catch (e) {}
 // The viewer never updates the address bar, so a link's #tab sticks after clicking around. On a reload of the same link,
 // go back to the tab last viewed; a different (or new) link still opens its own tab (Mike, Oct 26).
@@ -3453,7 +3720,7 @@ if (state.openTok) { const [k, v] = state.openTok, M = metricsFor(state.tab); le
   const rail = document.createElement('nav'); rail.id = 'srail'; rail.setAttribute('aria-label', 'Sections on this page'); rail.hidden = true; document.body.appendChild(rail);
   let items = [], active = -1, ticking = false;
   const offset = () => (document.querySelector('.bar') ? document.querySelector('.bar').offsetHeight : 60) + 90;
-  const RAILI = [[/^past their/i, 'late'], [/^launching in/i, 'rocket'], [/^in progress, launching/i, 'build'], [/^just getting/i, 'sprout'], [/^launched$/i, 'done'], [/^running|in progress/i, 'run'], [/^decided|shipped/i, 'done'], [/^coming|not started/i, 'soon'], [/^earlier/i, 'past'], [/experiment/i, 'flask'], [/next half/i, 'cal'], [/people are saying/i, 'chat'], [/customer service/i, 'help'], [/what is selling/i, 'tag'], [/double down/i, 'bulb'], [/top designs/i, 'star'], [/shout-out/i, 'heart']];
+  const RAILI = [[/bot squad/i, 'bots'], [/^past their/i, 'late'], [/^launching in/i, 'rocket'], [/^in progress, launching/i, 'build'], [/^just getting/i, 'sprout'], [/^launched$/i, 'done'], [/^running|in progress/i, 'run'], [/^decided|shipped/i, 'done'], [/^coming|not started/i, 'soon'], [/^earlier/i, 'past'], [/experiment/i, 'flask'], [/next half/i, 'cal'], [/people are saying/i, 'chat'], [/customer service/i, 'help'], [/what is selling/i, 'tag'], [/double down/i, 'bulb'], [/top designs/i, 'star'], [/shout-out/i, 'heart']];
   function targets() {
     const out = [];
     // Other pages: Overview plus each top-level section heading (Mike, Oct 26: a rail on every page).
@@ -3461,7 +3728,7 @@ if (state.openTok) { const [k, v] = state.openTok, M = metricsFor(state.tab); le
       const top = document.querySelector('#main > section, #main > div'); if (top) out.push(['overview', 'Overview', top]);
       // Timeline: the rail lists its sections, whichever way it's grouped (Mike, Oct 27).
       const gg = [...document.querySelectorAll('.gantt .ggrp')];
-      if (gg.length) { gg.forEach(g => { const b = g.querySelector('.ggh2 b'); if (!b) return; const label = b.textContent.replace(/^[^\p{L}]+/u, '').trim(); const AB = { 'Customer': 'C', 'Purchase Lifecycle': 'PLC', 'Search': 'S&C', 'Artist and Apps': 'A&A', 'Core': 'CO', 'Data Engineering': 'DE', 'MarTech': 'MT', 'Dashery': 'D', 'CVR': 'CVR', 'AOV': 'AOV', 'Revenue': '$', 'Retention': 'RET', 'Traffic': 'TRF', 'Ops': 'OPS', 'Compliance': 'LAW', 'Data foundation': 'DAT', 'Other': '•' };
+      if (gg.length) { gg.forEach(g => { const b = g.querySelector('.ggh2 b'); if (!b) return; const label = b.textContent.replace(/^[^\p{L}]+/u, '').trim(); const AB = { 'Customer': 'C', 'Purchase Lifecycle': 'PLC', 'Search & Content': 'S&C', 'Search': 'S&C', 'Artist and Apps': 'A&A', 'Core': 'CO', 'Data Engineering': 'DE', 'MarTech': 'MT', 'Dashery': 'D', 'CVR': 'CVR', 'AOV': 'AOV', 'Revenue': '$', 'Retention': 'RET', 'Traffic': 'TRF', 'Ops': 'OPS', 'Compliance': 'LAW', 'Data foundation': 'DAT', 'Other': '•' };
         out.push([(RAILI.find(r => r[0].test(label)) || [0, 'L:' + (AB[label] || label.charAt(0))])[1], label, g]); }); return out.length > 1 ? out : []; }
       [...document.querySelectorAll('#main h2, #main .ghead h3')].filter(h => h.offsetParent && !h.closest('.modal')).forEach(h => {
         const t = h.cloneNode(true); t.querySelectorAll('small, .cap, .gcount, .pill, .lbd').forEach(x => x.remove());
@@ -3531,4 +3798,3 @@ if (state.openTok) { const [k, v] = state.openTok, M = metricsFor(state.tab); le
 })();
 // A clicked ticker item drops focus once its jump runs, so the ticker keeps moving (Mike, Oct 26).
 document.addEventListener('click', ev => { const tb = ev.target.closest && ev.target.closest('#ticker button'); if (tb) setTimeout(() => tb.blur(), 0); });
-
