@@ -1809,7 +1809,7 @@ function groupHtml(b, sec) {
   if (!metricsFor(b)[sec] || !metricsFor(b)[sec].length) return '';
   const full = state.full.has(sec);
   const hl = highlight(b, sec);
-  return '<div class="group" id="g-' + sec + '"><div class="ghead"><div class="gt"><h3>' + SEC_EMOJI[sec] + ' ' + SECS[sec] + '</h3>' + (hl ? '<p class="gsub">' + hl + '</p>' : '') + '</div><div class="gacts">' + secSrc(b, sec) + '<button class="linkbtn" data-full="' + sec + '">' + (full ? 'Hide the full data table' : 'View full data table') + '</button></div></div>' +
+  return '<div class="group" id="g-' + sec + '"><div class="ghead"><div class="gt"><h3>' + SEC_EMOJI[sec] + ' ' + SECS[sec] + '</h3>' + (hl ? '<p class="gsub">' + hl + '</p>' : '') + '</div><div class="gacts">' + (state.view === 'daily' ? basisTog() : '') + secSrc(b, sec) + '<button class="linkbtn" data-full="' + sec + '">' + (full ? 'Hide the full data table' : 'View full data table') + '</button></div></div>' +
     '<div class="rows">' + metricsFor(b)[sec].map(rowHtml).join('') + '</div>' + (full ? wideTable(b, sec) : '') + '</div>';
 }
 
