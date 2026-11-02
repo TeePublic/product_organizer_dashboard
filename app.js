@@ -30,10 +30,10 @@ const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;',
 const $ = s => document.querySelector(s);
 const range = (a, b) => short(a) + ' to ' + short(b);
 
-/* Sale calendars from #promotions, as logged in the brain's sale-calendar file. */
+/* Sale calendars from #promotions, as logged in the brain's sale-calendar file. Each November burst is its own sale with its own countdown timer (Mike, Nov 2), even when two run back to back. */
 const SALES = {
-  tp: [['2026-07-23','2026-07-26'],['2026-08-05','2026-08-09'],['2026-08-19','2026-08-23'],['2026-08-27','2026-08-30'],['2026-09-03','2026-09-07'],['2026-09-15','2026-09-20'],['2026-09-25','2026-09-27'],['2026-09-30','2026-10-04'],['2026-10-13','2026-10-18'],['2026-10-21','2026-10-25'],['2026-11-01','2026-12-19']],
-  rb: [['2026-08-10','2026-08-17'],['2026-09-06','2026-09-13'],['2026-09-23','2026-09-28'],['2026-10-04','2026-10-11'],['2026-10-21','2026-10-26'],['2026-11-02','2026-12-20']]
+  tp: [['2026-07-23','2026-07-26'],['2026-08-05','2026-08-09'],['2026-08-19','2026-08-23'],['2026-08-27','2026-08-30'],['2026-09-03','2026-09-07'],['2026-09-15','2026-09-20'],['2026-09-25','2026-09-27'],['2026-09-30','2026-10-04'],['2026-10-13','2026-10-18'],['2026-10-21','2026-10-25'],['2026-11-01','2026-11-03'],['2026-11-04','2026-11-05'],['2026-11-06','2026-11-07'],['2026-11-08','2026-11-09'],['2026-11-10','2026-11-12'],['2026-11-13','2026-11-14'],['2026-11-15','2026-11-16'],['2026-11-17','2026-11-19'],['2026-11-20','2026-11-21'],['2026-11-22','2026-11-23'],['2026-11-24','2026-11-30'],['2026-12-01','2026-12-19']],
+  rb: [['2026-08-10','2026-08-17'],['2026-09-06','2026-09-13'],['2026-09-23','2026-09-28'],['2026-10-04','2026-10-11'],['2026-10-21','2026-10-26'],['2026-11-02','2026-11-08'],['2026-11-09','2026-11-15'],['2026-11-16','2026-11-21'],['2026-11-22','2026-12-01'],['2026-12-02','2026-12-20']]
 };
 /* TP Sep 30 to Oct 4: $16.50 Classic Tee price test, plus a bot spike Oct 2 and 3. Shown, but never used as a comparison or baseline day. */
 const CONTAM = { tp: ['2026-09-30','2026-10-04'] };
@@ -53,7 +53,7 @@ const LYR = (() => {
 function saleInfo(ranges, d) {
   for (const [a, e] of ranges) if (d >= a && d <= e) {
     const pos = (parse(d) - parse(a)) / DAY + 1, len = (parse(e) - parse(a)) / DAY + 1;
-    return { sale: true, pos, len, label: 'Sale day ' + pos + ' of ' + len };
+    return { sale: true, pos, len, left: (len - pos + 1) * 24, label: 'Sale day ' + pos + ' of ' + len };
   }
   for (const [, e] of ranges) if (d === addDays(e, 1)) return { sale: false, after: true, label: 'Day after a sale' };
   return { sale: false, label: 'No sale' };
@@ -682,7 +682,7 @@ function mvTabs(m, on) {
 }
 const movedFor1 = m => MOVED.concat(typeof LIFTS !== 'undefined' ? LIFTS : []).find(x => x.m === m || (x.m.key === m.key && x.m.b === m.b)) || { m, c: cellsFor(m, state.day, compsFor(m.b, state.day)) };
 // What kind of day this is, in the words the header pill uses (Mike, Oct 28: "Day 5 of 5, 40% off sale" should be clear in the pop-up).
-const dayKind = (b, d) => { const st = infoNow(b, d); return st.sale ? (tierOf(b, d) ? 'Up to ' + tierOf(b, d) + '% off sale' : 'Sale') + ' · day ' + st.pos + ' of ' + st.len : 'No sale · regular prices'; };
+const dayKind = (b, d) => { const st = infoNow(b, d); return st.sale ? (tierOf(b, d) ? 'Up to ' + tierOf(b, d) + '% off sale' : 'Sale') + ' · day ' + st.pos + ' of ' + st.len + (st.left <= 72 ? ' · ' + st.left + ' hours left' : '') : 'No sale · regular prices'; };
 const cmpKind = (b, d, n) => { const st = infoNow(b, d), pk = st.sale ? posKey(st) : null; return pk && POSN[pk] ? 'the ' + POSN[pk] + ' of ' + n + ' earlier sale' + (n === 1 ? '' : 's') : n + ' earlier ' + (st.sale ? 'sale day' + (n === 1 ? '' : 's') : noSaleKind(b, d, n)); };
 function movedModal(f) {
   const { m, c } = f, d = state.day, comps = compsFor(m.b, d), other = BR[BR[m.b].other].name, x = crossRead(m, d), jm = f.jm;
@@ -1248,7 +1248,7 @@ function rankMoved() {
 function basisTog() {
   const b = state.tab, d = state.day; if (b !== 'tp' || !isHoliday(d) || lyIndex(addDays(d, -364)) < 0) return '';
   const on = basisOn(b, d), bt = (k, t, tip) => '<button type="button" data-basis="' + k + '" aria-pressed="' + (on === (k === 'yoy')) + '" title="' + esc(tip) + '">' + t + '</button>';
-  return '<span class="basistog" role="group" aria-label="Compare with">' + bt('cmp', 'Recent comparison days', 'Recent days like this one: the same weekday, or the same point in a sale') + bt('yoy', 'YOY', 'Year over year: ' + lyBody(d)) + '</span>';
+  return '<span class="basistog" role="group" aria-label="Compare with"><span class="btl">Compare with</span>' + bt('cmp', 'Recent comparison days', 'Recent days like this one: the same weekday, or the same point in a sale') + bt('yoy', 'YOY', 'Year over year: ' + lyBody(d)) + '</span>';
 }
 function movedHtml() { const h = movedHtmlB(), tg = basisTog(); return tg ? h.replace(/<\/div><\/div>$/, tg + '</div></div>') : h; }
 function movedHtmlB() {
@@ -1314,8 +1314,9 @@ function movedHtml0() {
   const tier = (cls, list) => list.map(r => pill(r.f, r.i).replace('<button class="mv"', '<button class="mv ' + cls + '"')).join('');
   if (state.view === 'daily') {
     FLAGGED = flaggedFor(state.tab, state.day);
-    const fp = FLAGGED.slice(0, state.flAll ? 99 : 2).map((f, i) => pill(f, i).replace('data-moved=', 'data-fl=').replace(/ data-hint="\d+"/, '').replace('<button class="mv"', '<button class="mv big"')).join('');
-    return '<div class="moved inhead"><div class="mvlist">' + (FLAGGED.length ? fp + (FLAGGED.length > 2 ? '<button type="button" class="linkbtn mvmore" data-flmore="1">' + (state.flAll ? 'Show fewer' : 'View ' + (FLAGGED.length - 2) + ' more') + '</button>' : '') : '<span class="cap">✅ Nothing is below its normal range today.</span>') + '</div></div>';
+    // Drags first (below their normal range), then what lifted the day; two show, the rest sit behind "View N more" (Mike, Nov 2).
+    const items = FLAGGED.map((f, i) => pill(f, i).replace('data-moved=', 'data-fl=').replace(/ data-hint="\d+"/, '').replace('<button class="mv"', '<button class="mv big"')).concat(LIFTS.map(lpill));
+    return '<div class="moved inhead"><div class="mvlist">' + (items.length ? items.slice(0, state.flAll ? 99 : 2).join('') + (items.length > 2 ? '<button type="button" class="linkbtn mvmore" data-flmore="1">' + (state.flAll ? 'Show fewer' : 'View ' + (items.length - 2) + ' more') + '</button>' : '') : '<span class="cap">✅ Nothing is below its normal range today.</span>') + '</div></div>';
   }
   if (up) return '<div class="moved inhead"><div class="mvlist">' + drvLbl() + '' + liftAll + tier('big', big.concat(rest)) + '</div>' + '</div>';
   return '<div class="moved inhead"><div class="mvlist">' + drvLbl() + '' + tier('big', big) + tier('small', rest) + liftAll + '</div>' + '</div>';
