@@ -1315,7 +1315,10 @@ function movedHtml0() {
   if (state.view === 'daily') {
     FLAGGED = flaggedFor(state.tab, state.day);
     // Drags first (below their normal range), then what lifted the day; two show, the rest sit behind "View N more" (Mike, Nov 2).
-    const items = FLAGGED.map((f, i) => pill(f, i).replace('data-moved=', 'data-fl=').replace(/ data-hint="\d+"/, '').replace('<button class="mv"', '<button class="mv big"')).concat(LIFTS.map(lpill));
+    // Each red pill says what its number is against: the day's value, the baseline value and the days averaged (Mike, Nov 2).
+    const flagTip = f => { const b = state.tab, d = state.day, c = cellsFor(f.m, d, compsFor(b, d)), bd = baseDays(b, d), e = infoNow(b, d).sale ? null : edgeOf(b, d), what = basisOn(b, d) ? lyPhrase(d) : e === 'before' || e === 'after' ? 'the day ' + e + ' each of the last ' + bd.length + ' sales' : cmpKind(b, d, bd.length);
+      return '<b>' + esc(f.m.label) + ' ' + sgn(f.c.mom, 0) + ' vs ' + (basisOn(b, d) ? lyPhrase(d) : 'comparable days') + '</b><ul class="hul nrul"><li>📍 <b>' + short(d) + ':</b> ' + fmtVal(f.m, c.val) + '</li><li>📏 <b>Compared with:</b> ' + fmtVal(f.m, c.bsV) + ', the average of ' + bd.map(x => short(x)).join(', ') + '</li><li>🎯 <b>Those days are:</b> ' + esc(what) + '</li></ul>'; };
+    const items = FLAGGED.map((f, i) => pill(f, i).replace('data-moved=', 'data-fl=').replace(/ data-hint="\d+"/, '').replace('<button class="mv"', '<button class="mv big" data-hint="' + (HINTS.push(flagTip(f)) - 1) + '"')).concat(LIFTS.map(lpill));
     return '<div class="moved inhead"><div class="mvlist">' + (items.length ? items.slice(0, state.flAll ? 99 : 2).join('') + (items.length > 2 ? '<button type="button" class="linkbtn mvmore" data-flmore="1">' + (state.flAll ? 'Show fewer' : 'View ' + (items.length - 2) + ' more') + '</button>' : '') : '<span class="cap">✅ Nothing is below its normal range today.</span>') + '</div></div>';
   }
   if (up) return '<div class="moved inhead"><div class="mvlist">' + drvLbl() + '' + liftAll + tier('big', big.concat(rest)) + '</div>' + '</div>';
