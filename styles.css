@@ -3732,3 +3732,10 @@ details.pbox.prov > summary { cursor: pointer; list-style: none; } details.pbox.
   .group.trun .abfilter { margin: 6px 0 0; width: 100%; }
 }
 .xbar { margin: 0 0.28em; text-decoration: overline; text-decoration-thickness: 1.2px; text-underline-offset: 0; }
+
+/* Nov and Dec on TeePublic: compare with comparable days or the same weekday last year (Mike, Nov 2) */
+.basistog { margin-left: auto; display: inline-flex; border: 1px solid var(--line, #d8dce6); border-radius: 8px; overflow: hidden; align-self: center; }
+.basistog button { font: inherit; font-size: 12.5px; padding: 5px 11px; background: transparent; color: var(--muted); border: 0; cursor: pointer; }
+.basistog button + button { border-left: 1px solid var(--line, #d8dce6); }
+.basistog button[aria-pressed="true"] { background: var(--ctl); color: #fff; font-weight: 600; }
+@media (max-width: 760px) { .basistog { margin-left: 0; width: 100%; } .basistog button { flex: 1; } }
