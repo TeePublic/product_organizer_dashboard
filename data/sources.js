@@ -1195,10 +1195,11 @@ const SRCS = {
   "s": {
    "kind": "slack",
    "where": "#temp-2026-marketing-email-consent",
-   "who": "Amelia Cacchione",
-   "date": "2026-10-27",
-   "url": "https://grid-articore.enterprise.slack.com/archives/C0BUREG6SG5/p1793136665533809?thread_ts=1793084766.791629&cid=C0BUREG6SG5",
-   "what": "Fix for cart opt-ins missing from the email platform is live; 8,673 contacts now show the cart as their opt-in source"
+   "who": "Efren Aguirre",
+   "date": "2026-11-02",
+   "url": "https://grid-articore.enterprise.slack.com/archives/C0BUREG6SG5/p1793644836923039",
+   "what": "Shopper country now populates on the checkout opt-in event in the warehouse (Jira DEAP-6831 released Nov 2); the opt-in work itself was released Oct 27",
+   "say": "Efren Aguirre posted in #temp-2026-marketing-email-consent on Nov 2 that the shopper country is now populating in the warehouse, and Jira DEAP-6831 was released the same day."
   },
   "s_sheet": {
    "kind": "sheet",
@@ -1233,6 +1234,14 @@ const SRCS = {
    "date": "2026-10-27",
    "url": "https://grid-articore.enterprise.slack.com/archives/C0BUREG6SG5/p1793084766791629?thread_ts=1793084766.791629&cid=C0BUREG6SG5",
    "what": "Opt-in method has been blank on new contacts since Oct 13; Customer team has the fix (DEAP-6539) in progress"
+  },
+  "eta": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Status column, row 35",
+   "date": "2026-11-02",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A35",
+   "what": "Complete / Shipped; released Oct 27",
+   "say": "The roadmap sheet lists the row as Complete and Shipped, and the release went out Oct 27."
   }
  },
  "Cart and cart-tray cross-sell": {
@@ -1652,11 +1661,12 @@ const SRCS = {
   },
   "s": {
    "kind": "jira",
-   "where": "Jira DEAP-6477, status change",
-   "url": "https://articore.atlassian.net/browse/DEAP-6477",
+   "where": "Jira DEAP-6256, released, comment",
    "who": "Will Soupcoff",
-   "date": "2026-10-26",
-   "what": "The ticket to decrypt the member's email for Simon's live event feed moved to Code Review on Oct 26; matching on the anonymous browser ID (DEAP-6535) is still in Backlog"
+   "date": "2026-11-02",
+   "url": "https://articore.atlassian.net/browse/DEAP-6256",
+   "what": "Shopper email on cart and wishlist events (signed-in accounts only) went to production Oct 30; follow-ups merged Nov 2 and the ticket was released; masking on the event tables (DEAP-6873) is next sprint",
+   "say": "Will Soupcoff closed Jira DEAP-6256 on Nov 2 with a comment that email on cart and wishlist events went to production Oct 30, with masking planned for next sprint."
   },
   "eta": {
    "kind": "jira",
@@ -2504,11 +2514,11 @@ const SRCS = {
   },
   "s": {
    "kind": "jira",
-   "where": "Jira DEAP-6722 and DEAP-6723, status changes under DEAP-6604",
-   "who": "Pankaj Gupta",
-   "date": "2026-10-28",
-   "url": "https://articore.atlassian.net/browse/DEAP-6722",
-   "what": "Two polish tickets moved to Code Review and a mark-all-as-read ticket to In Development on Oct 28; other polish tickets still in Backlog"
+   "where": "Jira DEAP-6604 children DEAP-6605, DEAP-6607, DEAP-6609",
+   "date": "2026-11-02",
+   "url": "https://articore.atlassian.net/browse/DEAP-6604",
+   "what": "Icon and text-styling polish tickets released Nov 2; the unread indicator is in Code Review; a QA ticket to hide the rich text editor was added to the backlog",
+   "say": "Under Jira DEAP-6604, two polish tickets were released on Nov 2 and the unread indicator moved to Code Review."
   },
   "s_sheet": {
    "kind": "sheet",
@@ -2736,11 +2746,12 @@ const SRCS = {
   },
   "s": {
    "kind": "jira",
-   "where": "Jira DEAP-4485, comment",
+   "where": "Jira DEAP-4485, status change and comments",
+   "who": "Revin Wade",
+   "date": "2026-11-02",
    "url": "https://articore.atlassian.net/browse/DEAP-4485",
-   "what": "Released to production Oct 26, but Sub Dimension has not yet confirmed the setup change it needs for shipping notices to work",
-   "who": "Palina Matskevich",
-   "date": "2026-10-28"
+   "what": "Moved to UAT / Product Verification on Nov 2; test orders to the fulfiller failed validation on Oct 31 and the team is fixing product codes and the shipping-method setup before sending new test orders",
+   "say": "Revin Wade commented on Jira DEAP-4485 on Nov 2 that he told production and is pushing new test orders out, and the ticket moved to UAT / Product Verification the same day."
   },
   "s_sheet": {
    "kind": "sheet",
@@ -2749,12 +2760,12 @@ const SRCS = {
    "what": "Dev Done / Shipped; note says pending shipping accounts"
   },
   "eta": {
-   "kind": "slack",
-   "where": "#ask-deap-data-engineering",
-   "who": "Umidjon Ustabaev",
-   "date": "2026-10-26",
-   "url": "https://grid-articore.enterprise.slack.com/archives/C0AB5N7LSNQ/p1793019160371369",
-   "what": "Sub Dimension and Shirt Monkey are set up on TeePublic and live in production as of Oct 26"
+   "kind": "jira",
+   "where": "Jira DEAP-4485, status change",
+   "date": "2026-11-02",
+   "url": "https://articore.atlassian.net/browse/DEAP-4485",
+   "what": "No new launch date while test orders are being fixed (back in testing Nov 2)",
+   "say": "Jira DEAP-4485 went back to UAT / Product Verification on Nov 2, and no new launch date has been given."
   },
   "eta_sheet": {
    "kind": "sheet",
@@ -3802,12 +3813,12 @@ const SRCS = {
   },
   "s": {
    "kind": "slack",
-   "where": "#temp-tpo-peak-2026-cvr-upsells",
-   "who": "Karl Fleener",
-   "date": "2026-10-29",
-   "url": "https://grid-articore.enterprise.slack.com/archives/C0BU9AUHX2N/p1793308013785129",
-   "what": "Mocks with two quantity options shared; effort check pending; Jira DEAP-6797 back in Backlog",
-   "say": "Karl Fleener posted two quantity design options in #temp-tpo-peak-2026-cvr-upsells on Oct 29, and DEAP-6797 went back to Backlog while engineering sizes them."
+   "where": "#temp-tpo-peak-2026-cvr-upsells, sticker multi-add thread",
+   "who": "Milan Sacher",
+   "date": "2026-11-02",
+   "url": "https://grid-articore.enterprise.slack.com/archives/C0BU9AUHX2N/p1793631976814439?thread_ts=1793308013.785129&cid=C0BU9AUHX2N",
+   "what": "Engineering estimated 2 to 3 weeks to build both design options; a half-day spike on the design-tile option was requested first, and Redbubble mock-ups were added",
+   "say": "Milan Sacher estimated 2 to 3 weeks for both options in the #temp-tpo-peak-2026-cvr-upsells sticker multi-add thread on Nov 2, and a half-day spike on the design-tile option was asked for the same afternoon."
   },
   "s_sheet": {
    "kind": "sheet",
@@ -4978,6 +4989,22 @@ const SRCS = {
    "where": "Roadmap sheet, Active Work tab, Project Name column, row 80",
    "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A80",
    "what": "The roadmap sheet lists \"Meta Shopping Feed (for product tagging)\" on the Active Work tab"
+  },
+  "s": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Current Phase and Status columns, row 80",
+   "date": "2026-11-02",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A80",
+   "what": "TDD/Scoping, On Track; phase Oct 16 to Nov 19",
+   "say": "The roadmap sheet lists Meta Shopping Feed in TDD/Scoping and on track, with the phase running Oct 16 to Nov 19."
+  },
+  "eta": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Est. Launch Date column, row 80",
+   "date": "2026-11-02",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A80",
+   "what": "Launch Q1 2027",
+   "say": "The roadmap sheet gives Q1 2027 as the estimated launch."
   }
  },
  "Amazon Ads tracking on TeePublic": {
