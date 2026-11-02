@@ -1995,10 +1995,8 @@ const abRd = t => (EXPS.reads || {})[t.id] || { goal: rpuOf(t) || t.kind === 'ao
 const abVal = (x, v) => x.f === 'usd' ? '$' + (v >= 10 ? v.toFixed(2) : v.toFixed(v < 1 ? 3 : 2)) : pct(v, v < 0.01 ? 3 : v < 0.1 ? 2 : 1);
 const abSure = x => x.s === 'sig' ? '✓ Significant' : x.s === 'nb' ? 'No error bar' : x.s === 'early' ? 'Too early' : x.c ? x.c + '% confidence' : 'Could be noise';
 const abSureL = x => x.s === 'sig' ? '<b class="b">Statistically significant:</b> at least 95% confidence of a true difference, not noise.' : x.s === 'nb' ? '<b>No error bar:</b> Amplitude can\'t calculate how sure it is for this metric, so read it as a direction only.' : x.s === 'early' ? '<b>Too early:</b> too few days of data to trust yet.' : x.c ? '<b>' + x.c + '% confidence</b> this is a true difference. We call it at 95%.' : '<b>Not significant yet:</b> this could still be random noise.';
-// Device cut (Mike, Nov 2): read r.dev.mobile / r.dev.desktop = { rpv, cvr, atc, aov: { v, s, a, b } } from the per-test device split; empty until it is pulled.
-const abDevOn = () => state.abDev === 'mobile' || state.abDev === 'desktop';
-const abMet = t => { const r = abRd(t); return abDevOn() ? ((r.dev || {})[state.abDev] || {}) : (r.m || {}); };
-const abNone = () => '<span class="abtbd"><b>TBD</b><small>' + (abDevOn() ? state.abDev + ' split not pulled' : 'not measured') + '</small></span>';
+const abMet = t => abRd(t).m || {};
+const abNone = () => '<span class="abtbd"><b>TBD</b><small>not measured</small></span>';
 function abCell(t, k) {
   const r = abRd(t), x = abMet(t)[k], goal = r.goal === k;
   if (!x) return abNone();
@@ -2010,7 +2008,7 @@ const abSig = t => { const r = abRd(t), g = abMet(t)[r.goal], nm = (g && g.name)
   const o = !g ? ['na', '–', '', ''] : g.s === 'sig' ? ['yes', 'Yes', '95%+ confidence', 'At least 95% confidence of a true difference.'] : g.s === 'early' ? ['early', 'Too early', 'few days of data', 'Not enough days to say anything yet.'] : g.s === 'nb' ? ['nb', 'Can\'t tell', 'no error bar', 'Amplitude gives no error bar for this metric.'] : g.c ? ['not', 'Not yet', g.c + '% confidence', 'Needs 95% before we call it.'] : ['not', 'Not yet', 'could be noise', 'Under 95% confidence, so it could still be noise.'];
   return '<span class="abst ' + o[0] + '">' + o[1] + '</span>';
 };
-const abImp = t => { if (abDevOn()) return abNone(); const v = siteImp(t.cvr.rel, t.reach); return hint('<span class="abv big lite ' + (v >= 0 ? 'b' : 'w') + '">' + sp(v, 1) + '</span><small class="abs">' + Math.round(t.reach * 100) + '% reach</small>', 'abm', '<span class="nosrc">In the test group: ' + pct(t.cvr.a, t.cvr.a < 0.1 ? 2 : 1) + ' → ' + pct(t.cvr.b, t.cvr.b < 0.1 ? 2 : 1) + ' CVR (' + sgn(t.cvr.rel, 1) + ').</span>'); };
+const abImp = t => { const v = siteImp(t.cvr.rel, t.reach); return hint('<span class="abv big lite ' + (v >= 0 ? 'b' : 'w') + '">' + sp(v, 1) + '</span><small class="abs">' + Math.round(t.reach * 100) + '% reach</small>', 'abm', '<span class="nosrc">In the test group: ' + pct(t.cvr.a, t.cvr.a < 0.1 ? 2 : 1) + ' → ' + pct(t.cvr.b, t.cvr.b < 0.1 ? 2 : 1) + ' CVR (' + sgn(t.cvr.rel, 1) + ').</span>'); };
 const abRpu = t => { const x = abMet(t).rpv; if (!x) return abNone(); return hint('<span class="abv big ' + (x.v >= 0 ? 'b' : 'w') + '">' + sgn(x.v, 1) + '</span><small class="abs">in test group</small>', 'abm', '<span class="nosrc">' + abVal(x, x.a) + ' → ' + abVal(x, x.b) + ' per user.</span>'); };
 const abDay = t => t.status === 'running' ? '<span class="abday"><b>Day ' + testDays(t) + '</b><small>since ' + short(t.start) + '</small></span>' : '<span class="abday"><b>' + (Math.round((parse(t.end) - parse(t.start)) / DAY) + 1) + ' days</b><small>ended ' + short(t.end) + '</small></span>';
 const abCall = t => { const r = abRd(t), pill = '<span class="abv2 v-' + r.verdict[0] + '">' + esc(r.verdict[1]) + '</span>'; return r.next && t.status === 'running' ? hint(pill, 'abcall', '<span class="nosrc">' + esc(r.next) + '</span>') : '<span class="abcall">' + pill + '</span>'; };
@@ -2019,6 +2017,18 @@ const abHeadSort = () => {
   return '<div class="tcols abcols">' + c('test', 'Test') + c('days', 'Running') + c('sig', 'Stat sig') + c('cvr', hint('Sitewide CVR impact', 'soft', '<span class="nosrc"><b>Sitewide CVR impact</b><br>The test group\'s CVR change, scaled by the share of orders it reaches: what it would do to the whole site.</span>')) + c('rpu', hint('Revenue per user', 'soft', '<span class="nosrc"><b>Revenue per user</b><br>Revenue per user in the test group vs control.</span>')) + c('call', 'The call') + '<span></span></div>';
 };
 const ABHEAD = '<div class="tcols abcols"><span>Test</span><span>Running</span>' + hint('Stat sig', 'soft', '<span class="nosrc"><b>Stat sig</b><br>Is there 95% confidence the main metric moved, not noise?</span>') + hint('Sitewide CVR impact', 'soft', '<span class="nosrc"><b>Sitewide CVR impact</b><br>The test group\'s CVR change, scaled by the share of orders it reaches: what it would do to the whole site.</span>') + hint('Revenue per user', 'soft', '<span class="nosrc"><b>Revenue per user</b><br>Revenue per user in the test group vs control.</span>') + '<span>The call</span><span></span></div>';
+// Desktop next to mobile (Mike, Nov 2): R.dev = { desktop: { n: [control, test], rpv: { v, s, a, b, f? }, cvr: {...} }, mobile: {...} }, from the per-device Amplitude Experiment split. Users on tablets are in the sitewide numbers only.
+function devSection(t, R) {
+  const D = (R.dev || {}), has = k => (D.desktop && D.desktop[k]) || (D.mobile && D.mobile[k]);
+  const ks = ABK.filter(k => has(k[0]));
+  const head = '<h4 class="ph">📱 Desktop vs mobile</h4>';
+  if (!ks.length) return '<div class="abwhat2">' + head + '<p class="cap">TBD: the desktop and mobile split has not been pulled for this test yet.</p>' + (R.devNote ? '<ul class="hul nrul">' + R.devNote.map(x => '<li>' + esc(x) + '</li>').join('') + '</ul>' : '') + '</div>';
+  const cell = (d, k) => { const x = D[d] && D[d][k[0]]; if (!x) return '<td class="na">–</td>'; const few = D[d].n && Math.min(D[d].n[0], D[d].n[1]) < 2000;
+    return '<td><span class="chn ' + (x.v >= 0 ? 'b' : 'w') + '">' + sgn(x.v, 1) + '</span><small class="abs ' + x.s + '">' + (few ? 'Too few users' : x.s === 'sig' ? '✓ Significant' : x.s === 'nb' ? 'No error bar' : 'Could be noise') + '</small></td>'; };
+  const nrow = '<tr><td><b>Users in test</b></td>' + ['desktop', 'mobile'].map(d => '<td>' + (D[d] && D[d].n ? int(D[d].n[0] + D[d].n[1]) : '–') + '</td>').join('') + '</tr>';
+  const tbl = '<table class="abt"><thead><tr><th>Change vs control</th><th>Desktop</th><th>Mobile</th></tr></thead><tbody>' + ks.map(k => '<tr><td>' + esc(((D.desktop || {})[k[0]] || (D.mobile || {})[k[0]]).name || k[1]) + '</td>' + cell('desktop', k) + cell('mobile', k) + '</tr>').join('') + nrow + '</tbody></table>';
+  return '<div class="abwhat2">' + head + tbl + (R.devNote ? '<ul class="hul nrul">' + R.devNote.map(x => '<li>' + esc(x) + '</li>').join('') + '</ul>' : '') + '<p class="cap">Desktop and mobile are the shopper\'s device in Amplitude; tablets are counted in the all-device numbers only. Source: Amplitude Experiment, ' + short(R.devAsOf || EXPS_AS_OF) + '.</p></div>';
+}
 function testDetailModal(id) {
   const t = [].concat(EXPS.live, EXPS.done).find(x => String(x.id) === String(id)); if (!t) return;
   const R = abRd(t), days = t.status === 'running' ? testDays(t) : Math.round((parse(t.end) - parse(t.start)) / DAY) + 1;
@@ -2030,7 +2040,7 @@ function testDetailModal(id) {
     : '<table class="abt"><thead><tr><th>Metric</th><th>Control</th><th>Test</th><th>Change</th><th>Stat sig</th></tr></thead><tbody>' + cols.map(k => { const x = R.m[k[0]]; return '<tr><td>' + esc(lab(k)) + '</td><td>' + abVal(x, x.a) + '</td><td>' + abVal(x, x.b) + '</td><td>' + ch(x.v, k[0] === 'rpv') + '</td><td>' + sureOf(x) + '</td></tr>'; }).join('') + '</tbody></table>';
   const pill = '<span class="abv2 v-' + R.verdict[0] + '">' + esc(R.verdict[1]) + '</span>';
   openModal('<div class="mhead"><h3 id="mtitle">' + esc(t.name) + '</h3></div><div class="mtags"><span class="rtag">' + siteDot(testSite(t)) + '</span><span class="rtag">' + esc(t.where) + '</span><span class="rtag">' + (t.status === 'running' ? 'Day ' + days + ', since ' + short(t.start) : days + ' days, ended ' + short(t.end)) + '</span>' + pill + '</div>' +
-    '<div class="abwhat2"><h4 class="ph">🧪 What we are testing</h4><p>' + esc(t.hyp) + '</p>' + '</div>' + tbl + (R.wg ? '<div class="abwhat2"><h4 class="ph">📌 Working group, Nov 2</h4><ul class="hul nrul">' + R.wg.map(x => '<li>' + esc(x) + '</li>').join('') + '</ul></div>' : '') + (t.status === 'running' ? '<div class="abwhat2"><h4 class="ph">📱 Desktop vs mobile</h4>' + (R.devNote ? '<ul class="hul nrul">' + R.devNote.map(x => '<li>' + esc(x) + '</li>').join('') + '</ul>' : '<p class="cap">TBD: the split by device has not been pulled yet. Desktop can drag a result down, so it is read next.</p>') + '</div>' : '') + '<div class="abfoot2">' + srcBtn('test:' + t.id) + '</div>');
+    '<div class="abwhat2"><h4 class="ph">🧪 What we are testing</h4><p>' + esc(t.hyp) + '</p>' + '</div>' + tbl + (R.wg ? '<div class="abwhat2"><h4 class="ph">📌 Working group, Nov 2</h4><ul class="hul nrul">' + R.wg.map(x => '<li>' + esc(x) + '</li>').join('') + '</ul></div>' : '') + (t.status === 'running' ? devSection(t, R) : '') + '<div class="abfoot2">' + srcBtn('test:' + t.id) + '</div>');
 }
 function testRow(t) {
   const site = siteImp(t.cvr.rel, t.reach), open = state.open.has('x' + t.id), r = Math.round(t.reach * 100);
@@ -2114,7 +2124,7 @@ function testsHtml() {
   const S = state.abSort || { k: 'days', dir: 1 }, key = { test: 'name', days: 'n', sig: 'sig', cvr: 'cvr', rpu: 'rpu', call: 'call' }[S.k] || 'n';
   const rows = rb.concat(tp).sort((p, q) => { const x = p[key], y = q[key]; if (x == null && y == null) return 0; if (x == null) return 1; if (y == null) return -1; return (typeof x === 'string' ? x.localeCompare(y) : x - y) * S.dir; });
   const facts = rows.length ? '<span class="sfacts"><span>' + rows.length + ' running</span><span aria-hidden="true">·</span><span>longest: day ' + Math.max(...rows.map(r => r.n)) + '</span></span>' : '';
-  const seg = '<div class="abfilter"><span class="lbl">Filter by</span><div class="segs" role="group" aria-label="Site">' + [['both', 'RBO + TPO'], ['RB', 'RBO'], ['TP', 'TPO'], ['DA', 'Dashery']].map(o => '<button type="button" data-absite="' + o[0] + '" aria-pressed="' + (f === o[0]) + '">' + o[1] + '</button>').join('') + '</div><span class="lbl">Device</span><div class="segs" role="group" aria-label="Device">' + [['all', 'All'], ['mobile', 'Mobile'], ['desktop', 'Desktop']].map(o => '<button type="button" data-abdev="' + o[0] + '" aria-pressed="' + ((state.abDev || 'all') === o[0]) + '">' + o[1] + '</button>').join('') + '</div></div>';
+  const seg = '<div class="abfilter"><span class="lbl">Filter by</span><div class="segs" role="group" aria-label="Site">' + [['both', 'RBO + TPO'], ['RB', 'RBO'], ['TP', 'TPO'], ['DA', 'Dashery']].map(o => '<button type="button" data-absite="' + o[0] + '" aria-pressed="' + (f === o[0]) + '">' + o[1] + '</button>').join('') + '</div></div>';
   return '<section class="sview"><div class="vhead vhl">' + abHeadline() + '</div>' +
     '<div class="group trun"><div class="ghead"><h3>Running</h3>' + facts + seg + '</div>' + abHeadSort() + '<div class="rows">' + (rows.length ? rows.map(r => r.html).join('') : '<p class="cap">No tests running here right now.</p>') + '</div></div>' +
     shippedHtml() +
@@ -3524,7 +3534,6 @@ document.addEventListener('click', ev => {
   if (t.closest('#aboutbtn')) { const m = $('#amenu'); m.hidden = !m.hidden; $('#aboutbtn').setAttribute('aria-expanded', String(!m.hidden)); return; }
   if (!t.closest('#amenu') && $('#amenu')) $('#amenu').hidden = true;
   const wt = t.closest('[data-watch]'); if (wt) { const [wb, wk] = wt.dataset.watch.split('|'); state.view = 'daily'; state.tab = wb; if (wk !== 'pay') state.open.add(wk); render(); const el = wk === 'pay' ? document.getElementById('g-pay') : document.querySelector('[data-row="' + CSS.escape(wk) + '"]'); if (el) { window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 110 }); el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 2600); } return; }
-  const abd = t.closest('[data-abdev]'); if (abd) { state.abDev = abd.dataset.abdev; return renderKeep(); }
   const abs = t.closest('[data-absite]'); if (abs) { const v = abs.dataset.absite; state.abSite = abs.classList.contains('sitepill') && state.abSite === v ? 'both' : v; return renderKeep(); }
   const tpx = t.closest('[data-tpx]'); if (tpx) return tpDetailModal(+tpx.dataset.tpx);
   const xr = t.closest('[data-xrow]'); if (xr) return testDetailModal(xr.dataset.xrow);
