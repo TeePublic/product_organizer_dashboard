@@ -2052,24 +2052,20 @@ function testDetailModal(id) {
   const devHead = devs.map(d => '<th class="num">' + (d === 'desktop' ? 'Desktop' : 'Mobile') + (dn(d) ? '<small>' + int(dn(d)) + ' users</small>' : '') + '</th>').join('');
   // 1. what the test is
   const what = '<section class="abwhat3"><span class="lbl">🧪 What we\'re testing</span><p>' + esc(t.hyp) + '</p></section>';
-  // 2. what it says so far: the call, then two facts as plain lines
-  const imp = siteImp(t.cvr.rel, t.reach), g = M[R.goal], gname = g ? lab(R.goal).toLowerCase() : '';
-  const sig = !g ? 'Not measured yet' : g.s === 'sig' ? 'Yes, 95%+ confidence on ' + gname : g.s === 'early' ? 'Too early to say' : g.s === 'nb' ? 'Can\'t tell (no error bar on ' + gname + ')' : g.c ? 'Not yet (' + g.c + '% confidence on ' + gname + ')' : 'Not yet (it could still be noise)';
-  const read = '<section class="abread"><span class="lbl">📣 So far</span>' + (R.next ? '<p class="abcallp">' + esc(R.next) + '</p>' : '') +
-    '<ul class="abfactl"><li><b>Stat sig:</b> ' + esc(sig) + '</li><li><b>Sitewide CVR impact:</b> <span class="chn ' + (imp >= 0 ? 'b' : 'w') + '">' + sp(imp, 1) + '</span> (' + esc(M.cvr && M.cvr.name && !/sitewide/i.test(M.cvr.name) ? M.cvr.name.toLowerCase() : 'test group CVR') + ' ' + sgn(t.cvr.rel, 1) + ', reaching ' + Math.round(t.reach * 100) + '% of traffic)</li></ul></section>';
   // 3. the proof: metrics as rows, all users then each device as columns
   const keys = ['rpv', 'cvr', 'atc', 'aov', 'eng'].filter(k => M[k]);
   const results = '<section><span class="lbl">📊 Results, test group vs control</span><div class="abbox"><table class="abres"><thead><tr><th>Metric</th><th class="num">All users</th>' + devHead + '<th>Stat sig</th></tr></thead><tbody>' +
     keys.map(k => '<tr' + (k === 'rpv' ? ' class="keyrow"' : '') + '><td>' + esc(lab(k)) + '</td>' + cell(M[k], k === 'rpv') + devs.map(d => cell(D[d][k], k === 'rpv')).join('') + '<td class="sure">' + sureOf(M[k]) + '</td></tr>').join('') + '</tbody></table></div>' +
     (running && !devs.length ? '<p class="cap">The desktop and mobile split has not been pulled for this test yet.</p>' : '') + '</section>';
-  // 4. versions, only when there are several: revenue per user by device
+  // 4. versions, only when there are several (Mike, Nov 3): one row per version, the data points as columns, revenue per user split by device like the main table.
   const vv = v => v == null ? '<td class="na">–</td>' : '<td><span class="chn ' + (v >= 0 ? 'b' : 'w') + '">' + sgn(v, 1) + '</span></td>';
-  const vers = R.vrows ? '<section><span class="lbl">🧬 Revenue per user by version</span><div class="abbox"><table class="abres"><thead><tr><th>Version</th><th class="num">All users</th>' + devs.map(d => '<th class="num">' + (d === 'desktop' ? 'Desktop' : 'Mobile') + '</th>').join('') + '</tr></thead><tbody>' +
-    R.vrows.map(v => '<tr><td><b>' + esc(v[0]) + '</b>' + ((R.vdef || {})[v[0]] ? '<small>' + esc(R.vdef[v[0]]) + '</small>' : '') + '</td>' + vv(v[1].rpv) + devs.map(d => vv((((D[d].vers || {})[v[0]]) || {}).rpv)).join('') + '</tr>').join('') + '</tbody></table></div></section>' : '';
+  const other = keys.filter(k => k !== 'rpv'), vdev = (d, name) => (((D[d] || {}).vers || {})[name] || {}).rpv;
+  const vers = R.vrows ? '<section><span class="lbl">🧬 By version</span><div class="abbox"><table class="abres"><thead><tr><th rowspan="2">Version</th><th class="num grp" colspan="' + (1 + devs.length) + '">Revenue per user</th>' + other.map(k => '<th class="num" rowspan="2">' + esc(lab(k)) + '</th>').join('') + '</tr><tr><th class="num">All users</th>' + devs.map(d => '<th class="num">' + (d === 'desktop' ? 'Desktop' : 'Mobile') + '</th>').join('') + '</tr></thead><tbody>' +
+    R.vrows.map(v => '<tr><td><b>' + esc(v[0]) + '</b>' + ((R.vdef || {})[v[0]] ? '<small>' + esc(R.vdef[v[0]]) + '</small>' : '') + '</td>' + vv(v[1].rpv) + devs.map(d => vv(vdev(d, v[0]))).join('') + other.map(k => vv(v[1][k])).join('') + '</tr>').join('') + '</tbody></table></div></section>' : '';
   const pill = '<span class="abv2 v-' + R.verdict[0] + '">' + esc(R.verdict[1]) + '</span>';
   const runTag = running ? 'Day ' + days + ', since ' + short(t.start) : days + ' days, ended ' + short(t.end);
   openModal('<div class="mhead"><h3 id="mtitle">' + esc(t.name) + '</h3></div><div class="mtags"><span class="rtag">' + siteDot(testSite(t)) + '</span><span class="rtag">' + esc(t.where) + '</span><span class="rtag">' + runTag + '</span>' + (running && more ? '<span class="rtag">Result in about ' + more + ' days</span>' : '') + pill + '</div>' +
-    '<div class="abdeep">' + what + read + results + vers + '<div class="abfoot2"><span class="cap">Amplitude gives no error bar for revenue, so read revenue as a direction, not proof.</span>' + srcBtn('test:' + t.id) + '</div></div>');
+    '<div class="abdeep">' + what + results + vers + '<div class="abfoot2"><span class="cap">Amplitude gives no error bar for revenue, so read revenue as a direction, not proof.</span>' + srcBtn('test:' + t.id) + '</div></div>');
 }
 function testRow(t, shipped) {
   const site = siteImp(t.cvr.rel, t.reach), open = state.open.has('x' + t.id), r = Math.round(t.reach * 100);

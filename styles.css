@@ -3789,7 +3789,6 @@ details.pbox.prov > summary { cursor: pointer; list-style: none; } details.pbox.
    Table columns: Test, Running, Stat sig, Revenue per user (All users, Desktop, Mobile), CVR (sitewide impact), AOV.
    Numbers are plain and colored only by direction, right-aligned under right-aligned labels; one group label ties the
    three revenue columns together, with no tint or container. The table stops at 1200px so a row reads in one glance. */
-.abview .group { max-width: 1200px; }
 :root:not(#z):not(#y) .abcols, :root:not(#z):not(#y) .abrow { grid-template-columns: minmax(240px, 1fr) 92px 116px repeat(3, 76px) 76px 72px; column-gap: 20px; }
 @media (min-width: 761px) and (max-width: 1240px) {
   :root:not(#z):not(#y) .abcols, :root:not(#z):not(#y) .abrow { grid-template-columns: minmax(190px, 1fr) 80px 104px repeat(3, 68px) 68px 64px; column-gap: 14px; }
@@ -3834,3 +3833,23 @@ details.pbox.prov > summary { cursor: pointer; list-style: none; } details.pbox.
 :root:not(#z):not(#y) .abbox .abres td.na { font-size: 14.5px; color: var(--faint); }
 .abdeep .abfoot2 { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin: 0; }
 .mbox:has(.abdeep) .mtags { margin-bottom: 0; }
+
+/* Side rail (Mike, Nov 3): hovering reveals the labels without moving anything, so the icon you aimed at stays under the pointer.
+   Labels slide out to the left of the icons; group titles keep the same 22px slot open and closed (empty when closed);
+   "On this page" sits above the list without pushing it down. */
+@media (max-width: 1660px) and (min-width: 761px) {
+  #srail .srlbl, #srail:hover .srlbl, #srail:focus-within .srlbl { display: block; position: absolute; bottom: 100%; right: 0; margin-bottom: 6px; padding: 0 12px 0 0; white-space: nowrap; visibility: hidden; }
+  #srail:hover .srlbl, #srail:focus-within .srlbl { visibility: visible; }
+  #srail button { flex-direction: row-reverse; min-height: 34px; }
+  #srail button > span { text-align: right; line-height: 18px; }
+  #srail .srgrp, #srail:hover .srgrp, #srail:focus-within .srgrp { display: block; height: 22px; line-height: 22px; padding: 0 10px; margin: 0; font-size: 0; text-align: right; overflow: hidden; }
+  #srail:hover .srgrp, #srail:focus-within .srgrp { font-size: 10px; }
+  #srail .srgrp.sep, #srail:hover .srgrp.sep, #srail:focus-within .srgrp.sep { margin: 4px 0 0; padding-top: 0; border-top: 1px solid var(--line); }
+}
+
+/* Nov 3, later: the A/B page is full width like every other page (the 1,200px cap looked odd next to them), so spare width is shared
+   across the columns instead of piling up after Test. Pop-up tables are white with hairlines, no grey fills. */
+:root:not(#z):not(#y) .abcols, :root:not(#z):not(#y) .abrow { grid-template-columns: minmax(240px, 2.2fr) minmax(92px, .9fr) minmax(116px, 1fr) repeat(5, minmax(76px, .75fr)); }
+.abres th { background: var(--surface) !important; border-bottom: 1px solid var(--line); }
+.abres th.grp { text-align: center !important; border-bottom: 1px solid var(--line); padding-bottom: 6px !important; }
+.abres .keyrow td { background: none; }
