@@ -2036,8 +2036,8 @@ const abHead = sortable => {
   const S = state.abSort || { k: 'days', dir: 1 }, tip = (b, x) => '<span class="nosrc"><b>' + b + '</b><br>' + x + '</span>';
   const c = (k, inner, num) => '<span class="abh' + (num ? ' num' : '') + '"' + (sortable ? ' role="button" tabindex="0" data-absort="' + k + '"' : '') + '>' + inner + (sortable && S.k === k ? '<i class="sa" aria-hidden="true">' + (S.dir > 0 ? '↑' : '↓') + '</i>' : '') + '</span>';
   return '<div class="tcols abcols">' + c('test', 'Test') + c('days', sortable ? 'Running' : 'Ran') + c('sig', hint('Stat sig', 'soft', tip('Stat sig', 'Is there 95% confidence the main metric moved, not noise?'))) +
-    '<span class="abgrp"><span class="abgl">Revenue per user</span>' + c('rpu', hint('All users', 'soft', tip('Revenue per user, all users', 'Test group vs control.')), true) + c('rpud', hint('Desktop', 'soft', tip('Revenue per user, desktop', 'Test group vs control, desktop visitors only.')), true) + c('rpum', hint('Mobile', 'soft', tip('Revenue per user, mobile', 'Test group vs control, mobile visitors only.')), true) + '</span>' +
-    c('cvr', hint('CVR', 'soft', tip('Sitewide CVR impact', 'The test group\'s CVR change, scaled by the share of traffic it reaches: what it would do to the whole site.')), true) + c('aov', hint('AOV', 'soft', tip('AOV', 'Average order value in the test group vs control.')), true) + '</div>';
+    c('cvr', hint('CVR', 'soft', tip('Sitewide CVR impact', 'The test group\'s CVR change, scaled by the share of traffic it reaches: what it would do to the whole site.')), true) + c('aov', hint('AOV', 'soft', tip('AOV', 'Average order value in the test group vs control.')), true) +
+    c('rpu', hint('Revenue per user', 'soft', tip('Revenue per user', 'All users, test group vs control. The main number for every test.')), true) + c('rpud', hint('Desktop', 'soft', tip('Revenue per user, desktop', 'Test group vs control, desktop visitors only.')), true) + c('rpum', hint('Mobile', 'soft', tip('Revenue per user, mobile', 'Test group vs control, mobile visitors only.')), true) + '</div>';
 };
 const abHeadSort = () => abHead(true);
 // Test pop-up (Mike, Nov 3 rebuild). Reads top to bottom as a story: what the test is, what it says so far, then the proof.
@@ -2047,25 +2047,21 @@ function testDetailModal(id) {
   const R = abRd(t), M = R.m || {}, D = R.dev || {}, running = t.status === 'running', days = running ? testDays(t) : Math.round((parse(t.end) - parse(t.start)) / DAY) + 1;
   const more = (ttc(t).match(/~(\d+) more day/) || [])[1], devs = ['desktop', 'mobile'].filter(d => D[d]), dn = d => D[d].n ? D[d].n[0] + D[d].n[1] : 0;
   const lab = k => M[k].name || ABK.find(z => z[0] === k)[1];
-  const cell = (x, key) => x == null || x.v == null ? '<td class="na">–</td>' : '<td><span class="chn ' + (x.v >= 0 ? 'b' : 'w') + (key ? ' abk1' : '') + '">' + sgn(x.v, 1) + '</span>' + (x.a != null && x.b != null ? '<small>' + abVal(x, x.a) + ' → ' + abVal(x, x.b) + '</small>' : '') + '</td>';
-  const sureOf = x => x.s === 'sig' ? 'Yes' : x.s === 'early' ? 'Too early' : x.s === 'nb' ? 'No error bar' : x.c ? 'Not yet · ' + x.c + '%' : 'Not yet';
-  const devHead = devs.map(d => '<th class="num">' + (d === 'desktop' ? 'Desktop' : 'Mobile') + (dn(d) ? '<small>' + int(dn(d)) + ' users</small>' : '') + '</th>').join('');
   // 1. what the test is
-  const what = '<section class="abwhat3"><span class="lbl">🧪 What we\'re testing</span><p>' + esc(t.hyp) + '</p></section>';
-  // 3. the proof: metrics as rows, all users then each device as columns
-  const keys = ['rpv', 'cvr', 'atc', 'aov', 'eng'].filter(k => M[k]);
-  const results = '<section><span class="lbl">📊 Results, test group vs control</span><div class="abbox"><table class="abres"><thead><tr><th>Metric</th><th class="num">All users</th>' + devHead + '<th>Stat sig</th></tr></thead><tbody>' +
-    keys.map(k => '<tr' + (k === 'rpv' ? ' class="keyrow"' : '') + '><td>' + esc(lab(k)) + '</td>' + cell(M[k], k === 'rpv') + devs.map(d => cell(D[d][k], k === 'rpv')).join('') + '<td class="sure">' + sureOf(M[k]) + '</td></tr>').join('') + '</tbody></table></div>' +
+  const vdefs = R.vrows && R.vdef ? R.vrows.filter(v => R.vdef[v[0]]).map(v => '<li><b>' + esc(v[0]) + ':</b> ' + esc(R.vdef[v[0]]) + '</li>').join('') : '';
+  const what = '<section class="abwhat2"><h4 class="ph">🧪 What we\'re testing</h4><p>' + esc(t.hyp) + '</p>' + (vdefs ? '<ul class="abvdefs">' + vdefs + '</ul>' : '') + '</section>';
+  // One table (Mike, Nov 3): versions are the rows, the metrics are the columns in the main table's order (CVR-type metrics and AOV, then revenue per user, desktop, mobile).
+  const mk = ['cvr', 'atc', 'aov', 'eng'].filter(k => M[k]);
+  const num = x => typeof x === 'number' ? x : x && x.v != null ? x.v : null;
+  const cellv = (x, key) => { const v = num(x); return v == null ? '<td class="na">–</td>' : '<td><span class="chn ' + (v >= 0 ? 'b' : 'w') + (key ? ' abk1' : '') + '">' + sgn(v, 1) + '</span>' + (x && typeof x === 'object' && x.a != null && x.b != null ? '<small>' + abVal(x, x.a) + ' → ' + abVal(x, x.b) + '</small>' : '') + '</td>'; };
+  const rowsT = (R.vrows ? [['All versions', 'combined', M, d => (D[d] || {}).rpv]].concat(R.vrows.map(v => [v[0], '', v[1], d => (((D[d] || {}).vers || {})[v[0]] || {}).rpv])) : [['Test group', 'vs control', M, d => (D[d] || {}).rpv]]);
+  const results = '<section><div class="abbox"><table class="abres abone"><thead><tr><th>' + (R.vrows ? 'Version' : '') + '</th>' + mk.map(k => '<th class="num">' + esc(lab(k)) + '</th>').join('') + '<th class="num">Revenue per user</th>' + devs.map(d => '<th class="num">' + (d === 'desktop' ? 'Desktop' : 'Mobile') + (dn(d) ? '<small>' + int(dn(d)) + ' users</small>' : '') + '</th>').join('') + '</tr></thead><tbody>' +
+    rowsT.map((r, i) => '<tr' + (i === 0 && R.vrows ? ' class="allrow"' : '') + '><td><b>' + esc(r[0]) + '</b>' + (r[1] ? '<small>' + esc(r[1]) + '</small>' : '') + '</td>' + mk.map(k => cellv(r[2][k])).join('') + cellv(r[2].rpv, true) + devs.map(d => cellv(r[3](d))).join('') + '</tr>').join('') + '</tbody></table></div>' +
     (running && !devs.length ? '<p class="cap">The desktop and mobile split has not been pulled for this test yet.</p>' : '') + '</section>';
-  // 4. versions, only when there are several (Mike, Nov 3): one row per version, the data points as columns, revenue per user split by device like the main table.
-  const vv = v => v == null ? '<td class="na">–</td>' : '<td><span class="chn ' + (v >= 0 ? 'b' : 'w') + '">' + sgn(v, 1) + '</span></td>';
-  const other = keys.filter(k => k !== 'rpv'), vdev = (d, name) => (((D[d] || {}).vers || {})[name] || {}).rpv;
-  const vers = R.vrows ? '<section><span class="lbl">🧬 By version</span><div class="abbox"><table class="abres"><thead><tr><th rowspan="2">Version</th><th class="num grp" colspan="' + (1 + devs.length) + '">Revenue per user</th>' + other.map(k => '<th class="num" rowspan="2">' + esc(lab(k)) + '</th>').join('') + '</tr><tr><th class="num">All users</th>' + devs.map(d => '<th class="num">' + (d === 'desktop' ? 'Desktop' : 'Mobile') + '</th>').join('') + '</tr></thead><tbody>' +
-    R.vrows.map(v => '<tr><td><b>' + esc(v[0]) + '</b>' + ((R.vdef || {})[v[0]] ? '<small>' + esc(R.vdef[v[0]]) + '</small>' : '') + '</td>' + vv(v[1].rpv) + devs.map(d => vv(vdev(d, v[0]))).join('') + other.map(k => vv(v[1][k])).join('') + '</tr>').join('') + '</tbody></table></div></section>' : '';
   const pill = '<span class="abv2 v-' + R.verdict[0] + '">' + esc(R.verdict[1]) + '</span>';
   const runTag = running ? 'Day ' + days + ', since ' + short(t.start) : days + ' days, ended ' + short(t.end);
   openModal('<div class="mhead"><h3 id="mtitle">' + esc(t.name) + '</h3></div><div class="mtags"><span class="rtag">' + siteDot(testSite(t)) + '</span><span class="rtag">' + esc(t.where) + '</span><span class="rtag">' + runTag + '</span>' + (running && more ? '<span class="rtag">Result in about ' + more + ' days</span>' : '') + pill + '</div>' +
-    '<div class="abdeep">' + what + results + vers + '<div class="abfoot2"><span class="cap">Amplitude gives no error bar for revenue, so read revenue as a direction, not proof.</span>' + srcBtn('test:' + t.id) + '</div></div>');
+    '<div class="abdeep">' + what + results + '<div class="abfoot2"><span class="cap">Amplitude gives no error bar for revenue, so read revenue as a direction, not proof.</span>' + srcBtn('test:' + t.id) + '</div></div>');
 }
 function testRow(t, shipped) {
   const site = siteImp(t.cvr.rel, t.reach), open = state.open.has('x' + t.id), r = Math.round(t.reach * 100);
@@ -2073,7 +2069,7 @@ function testRow(t, shipped) {
   const more = (ttc(t).match(/~(\d+) more day/) || [])[1], dates = t.status === 'running' ? short(t.start) + ' → ' + (more ? '~' + short(addDays(EXPS_AS_OF, +more)) : 'open') + '<small>Day ' + testDays(t) + (more ? ' · result in ~' + more + ' days' : '') + '</small>' : short(t.start) + ' → ' + short(t.end) + '<small>' + (Math.round((parse(t.end) - parse(t.start)) / DAY) + 1) + ' days</small>';
   const fv = t.primary.name.indexOf('per') > -1 ? v => v.toFixed(3) : v => pct(v, v < 0.01 ? 3 : v < 0.05 ? 2 : 1);
   let h = '<div class="rowwrap"><div class="trow abrow" role="button" tabindex="0" aria-expanded="' + open + '" data-xrow="' + t.id + '"><span class="tname tnico"><span class="ge gico g-' + esc(testObj(t)) + '" aria-hidden="true">' + projIco({ t: t.name, obj: testObj(t) }) + '</span><b>' + esc(t.name) + '</b><span class="cap tmeta">' + sitePill(testSite(t)) + '<span class="tloc">' + esc(t.where) + '</span></span></span>' +
-    abDay(t) + abSig(t) + abN(abMet(t).rpv, 'Revenue per user, all users', true) + abN(abDevOf(t, 'desktop'), 'Revenue per user, desktop') + abN(abDevOf(t, 'mobile'), 'Revenue per user, mobile') + abImpN(t) + abN(abMet(t).aov, (abMet(t).aov || {}).name || 'AOV') + '</div>';
+    abDay(t) + abSig(t) + abImpN(t) + abN(abMet(t).aov, (abMet(t).aov || {}).name || 'AOV') + abN(abMet(t).rpv, 'Revenue per user, all users', true) + abN(abDevOf(t, 'desktop'), 'Revenue per user, desktop') + abN(abDevOf(t, 'mobile'), 'Revenue per user, mobile') + '</div>';
   return h + '</div>';
 }
 // One takeaway sentence for the tab: the running test that matters most, what is close to a call, and what was decided lately.
