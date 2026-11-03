@@ -3850,3 +3850,11 @@ details.pbox.prov > summary { cursor: pointer; list-style: none; } details.pbox.
 :root:not(#z):not(#y) .abrpus .abv.big + .abs { display: none; }
 .abbox td:first-child, .abbox td:first-child small { white-space: normal; overflow-wrap: anywhere; }
 :root:not(#z):not(#y) .abbox td.na { font-size: 14.5px; }
+
+/* Spread the table's slack across the columns instead of piling it all into Test (Mike, Nov 3: "SO much dead space between Test and Running"). Test keeps the largest share. */
+:root:not(#z):not(#y) .abcols, :root:not(#z):not(#y) .abrow { grid-template-columns: minmax(240px, 2.2fr) minmax(92px, 1fr) minmax(122px, 1fr) minmax(372px, 2.4fr) 14px; gap: 0 20px; }
+:root:not(#z):not(#y) .abcols.ab5, :root:not(#z):not(#y) .abrow.ab5 { grid-template-columns: minmax(240px, 2.2fr) minmax(92px, 1fr) minmax(122px, 1fr) minmax(132px, 1fr) 14px; }
+@media (min-width: 761px) and (max-width: 1240px) {
+  :root:not(#z):not(#y) .abcols, :root:not(#z):not(#y) .abrow { grid-template-columns: minmax(150px, 1.6fr) minmax(78px, .8fr) minmax(104px, .9fr) minmax(312px, 2.2fr) 14px; gap: 0 14px; }
+  :root:not(#z):not(#y) .abcols.ab5, :root:not(#z):not(#y) .abrow.ab5 { grid-template-columns: minmax(150px, 1.6fr) minmax(78px, .8fr) minmax(104px, .9fr) minmax(112px, 1fr) 14px; }
+}
