@@ -2144,20 +2144,19 @@ const SRCS = {
    "what": "Platform: Redbubble"
   },
   "s": {
-   "kind": "jira",
-   "where": "Jira DEAP-6433, status",
-   "url": "https://articore.atlassian.net/browse/DEAP-6433",
+   "kind": "sheet",
+   "where": "Data Engineering tracker (\"DE work Oct-Nov 2026\"), Sheet1, Status column, row 22",
+   "url": "https://docs.google.com/spreadsheets/d/1RIl96d3Pmj6kBkRwoD1Ex4oAic5cPsVh7I5T3n7LwJg/edit#gid=0&range=A22",
    "date": "2026-11-03",
-   "what": "DEAP-6433 (review the PR and backfill metrics) is In QA, due Nov 17, last updated Oct 30; the Data Engineering work tracker (posted in #working-group-data-eng, Nov 2) lists the work as Done",
-   "say": "DEAP-6433 is in QA with a Nov 17 due date, and the Data Engineering tracker posted Nov 2 lists the work as Done."
+   "what": "Status: Done. Jira DEAP-6433 still shows In QA (due Nov 17, last updated Oct 30); until code freeze the tracker wins for Data Engineering status and dates",
+   "say": "The Data Engineering tracker (read Nov 3) lists it as Done; Jira DEAP-6433 still shows QA with a Nov 17 due date."
   },
   "eta": {
-   "kind": "jira",
-   "where": "Jira DEAP-6433, due date",
-   "url": "https://articore.atlassian.net/browse/DEAP-6433",
-   "who": "Amelia Cacchione",
-   "date": "2026-10-20",
-   "what": "Due Nov 17"
+   "kind": "sheet",
+   "where": "Data Engineering tracker (\"DE work Oct-Nov 2026\"), Sheet1, Est. completion date column, row 22",
+   "url": "https://docs.google.com/spreadsheets/d/1RIl96d3Pmj6kBkRwoD1Ex4oAic5cPsVh7I5T3n7LwJg/edit#gid=0&range=A22",
+   "date": "2026-11-03",
+   "what": "Est. completion: Pre-peak, and listed Done as of the tracker's Nov 2 update (Jira due date Nov 17)"
   },
   "start": {
    "kind": "jira",
@@ -5148,18 +5147,18 @@ const SRCS = {
   },
   "s": {
    "kind": "sheet",
-   "where": "Roadmap sheet, Active Work tab, Current Phase and Status columns, row 74",
-   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A74",
+   "where": "Data Engineering tracker (\"DE work Oct-Nov 2026\"), Sheet1, Status column, row 10",
+   "url": "https://docs.google.com/spreadsheets/d/1RIl96d3Pmj6kBkRwoD1Ex4oAic5cPsVh7I5T3n7LwJg/edit#gid=0&range=A10",
    "date": "2026-11-03",
-   "what": "Ready for Dev, Not Started; the Data Engineering work tracker (posted in #working-group-data-eng, Nov 2) says planned but not started and not planned for peak",
-   "say": "The roadmap sheet lists it as Ready for Dev and Not Started (read Nov 3), and the Data Engineering tracker posted Nov 2 says it is not planned for peak."
+   "what": "Status: Planned but not started. The roadmap sheet still lists Ready for Dev with a Nov 9 to Nov 20 phase; until code freeze the tracker wins for Data Engineering status and dates",
+   "say": "The Data Engineering tracker (read Nov 3) says it is planned but not started and not planned for peak; it wins over the roadmap sheet until code freeze."
   },
   "eta": {
    "kind": "sheet",
-   "where": "Roadmap sheet, Active Work tab, Phase Start and End ETA columns, row 74",
-   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A74",
+   "where": "Data Engineering tracker (\"DE work Oct-Nov 2026\"), Sheet1, Est. completion date column, row 10",
+   "url": "https://docs.google.com/spreadsheets/d/1RIl96d3Pmj6kBkRwoD1Ex4oAic5cPsVh7I5T3n7LwJg/edit#gid=0&range=A10",
    "date": "2026-11-03",
-   "what": "Phase runs Nov 9 to Nov 20; no launch date, so the date is TBD"
+   "what": "Est. completion date: Not planned, so it is not committed for peak; the roadmap sheet's Nov 9 to Nov 20 phase has no launch date"
   },
   "imp": {
    "kind": "sheet",
