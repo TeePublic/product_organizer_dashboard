@@ -3949,6 +3949,14 @@ const SRCS = {
    "date": "2026-10-14",
    "url": "https://grid-articore.enterprise.slack.com/archives/C0B7V84UZE3/p1792004747429949?thread_ts=1792004678.492289&cid=C0B7V84UZE3",
    "what": "Thank-you page upsell projected at about $540K in revenue over 12 months; unclear how much comes at the expense of Rokt"
+  },
+  "d": {
+   "kind": "slack",
+   "where": "#2026-peak-priorities-customer-jeff",
+   "who": "",
+   "date": "2026-11-03",
+   "url": "https://grid-articore.enterprise.slack.com/archives/C0BU9AUHX2N",
+   "what": "Nov 3, 3:51 PM: Jeff posted that version C of the thank-you offer test puts the Quick Shop buttons above the fold and that the test will be removed with a cleanup change (no measured result posted)"
   }
  },
  "Feed images at 1260px": {
@@ -4047,6 +4055,14 @@ const SRCS = {
    "date": "2026-11-03",
    "url": "https://grid-articore.enterprise.slack.com/archives/C0BU9AUHX2N",
    "what": "Nov 3, 11:08 to 11:31 AM: test buckets drafted (control keeps the redirect to the cart page; two versions open the cart tray with the sticker cross-sell, one hiding items already added). Not fully committed to ship before peak; pending a leads review of time and capacity"
+  },
+  "d": {
+   "kind": "slack",
+   "where": "#2026-peak-priorities-customer-jeff",
+   "who": "",
+   "date": "2026-11-03",
+   "url": "https://grid-articore.enterprise.slack.com/archives/C0BU9AUHX2N",
+   "what": "Nov 3, 3:45 PM thread \"AB: PDP Cart Redirect v2 with Cross-Sell on TP\": two buckets, code review requested this week"
   }
  },
  "Premium tee upsell in cart": {
@@ -4096,6 +4112,22 @@ const SRCS = {
    "where": "Roadmap sheet, Active Work tab, Status column, row 137",
    "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A137",
    "what": "Ready for Dev"
+  },
+  "why": {
+   "kind": "slack",
+   "where": "#2026-peak-priorities-customer-jeff",
+   "who": "",
+   "date": "2026-11-03",
+   "url": "https://grid-articore.enterprise.slack.com/archives/C0BU9AUHX2N",
+   "what": "Nov 3, 3:42 PM thread \"Heavyweight T-Shirt Upsell\": the cart-page-only design with no pop-up goes first and an A/B test follows; roadmap sheet says Ready for Dev, Jira DEAP-6805 says In Development"
+  },
+  "d": {
+   "kind": "slack",
+   "where": "#2026-peak-priorities-customer-jeff",
+   "who": "",
+   "date": "2026-11-03",
+   "url": "https://grid-articore.enterprise.slack.com/archives/C0BU9AUHX2N",
+   "what": "Nov 3, 3:42 PM thread \"Heavyweight T-Shirt Upsell\""
   }
  },
  "Cross-sell module on the checkout landing page": {
@@ -5652,6 +5684,176 @@ const SRCS = {
    "where": "Roadmap sheet, Active Work tab, OKR and Goal columns, row 175",
    "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A175",
    "what": "O4KR6, Data Foundation: unified modern data foundation"
+  }
+ },
+ "TeePublic Basics | Cross Sell on Cart": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 63",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A63",
+   "date": "2026-11-03",
+   "what": "Row \"TeePublic Basics | Cross Sell on Cart\", PLC, TPO, In Dev, On Track, phase Oct 28 to Nov 15, launch Nov 17"
+  },
+  "team": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Team column, row 63",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A63",
+   "date": "2026-11-03",
+   "what": "Team: PLC"
+  },
+  "site": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Brand column, row 63",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A63",
+   "date": "2026-11-03",
+   "what": "Brand: TPO"
+  },
+  "s": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Status column, row 63",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A63",
+   "date": "2026-11-03",
+   "what": "In Dev, On Track"
+  },
+  "eta": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Est. Launch Date column, row 63",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A63",
+   "date": "2026-11-03",
+   "what": "Est. Launch Date: Nov 17"
+  },
+  "obj": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Pillar column, row 63",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A63",
+   "date": "2026-11-03",
+   "what": "Goal: CVR (Increase CVR 6 to 9%)"
+  },
+  "d": {
+   "kind": "slack",
+   "where": "#temp-cfx-basics-blanks-crossell",
+   "who": "",
+   "date": "2026-11-03",
+   "url": "https://grid-articore.enterprise.slack.com/archives/C0BRAAF51LM",
+   "what": "Product Manager posts in #temp-cfx-basics-blanks-crossell: scope update Oct 30 (same item as in the cart, apparel trigger, US and Canada only); Nov 2 and 3 placement concept and copy for legal approval"
+  },
+  "why": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 63",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A63",
+   "date": "2026-11-03",
+   "what": "Row \"TeePublic Basics | Cross Sell on Cart\", PLC, TPO, In Dev, On Track, phase Oct 28 to Nov 15, launch Nov 17"
+  }
+ },
+ "TeePublic Basics | Product Page": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 64",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A64",
+   "date": "2026-11-03",
+   "what": "Row \"TeePublic Basics | Product Page\", PLC, TPO, In Dev, On Track, phase Oct 28 to Nov 15, launch Nov 17"
+  },
+  "team": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Team column, row 64",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A64",
+   "date": "2026-11-03",
+   "what": "Team: PLC"
+  },
+  "site": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Brand column, row 64",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A64",
+   "date": "2026-11-03",
+   "what": "Brand: TPO"
+  },
+  "s": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Status column, row 64",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A64",
+   "date": "2026-11-03",
+   "what": "In Dev, On Track (Slack on Oct 30 said the product page was still in discovery; the sheet wins)"
+  },
+  "eta": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Est. Launch Date column, row 64",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A64",
+   "date": "2026-11-03",
+   "what": "Est. Launch Date: Nov 17"
+  },
+  "obj": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Pillar column, row 64",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A64",
+   "date": "2026-11-03",
+   "what": "Goal: CVR (Increase CVR 6 to 9%)"
+  },
+  "d": {
+   "kind": "slack",
+   "where": "#temp-cfx-basics-pdp-page",
+   "who": "",
+   "date": "2026-11-03",
+   "url": "https://grid-articore.enterprise.slack.com/archives/C0CEE6J2C7M",
+   "what": "Product Manager posted the Basics PDP product spec and opened #temp-cfx-basics-pdp-page on Nov 3"
+  },
+  "why": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 64",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A64",
+   "date": "2026-11-03",
+   "what": "Row \"TeePublic Basics | Product Page\", PLC, TPO, In Dev, On Track, phase Oct 28 to Nov 15, launch Nov 17"
+  }
+ },
+ "Peak Surcharge on Checkout": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 65",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A65",
+   "date": "2026-11-03",
+   "what": "Row \"Peak Surcharge on Checkout\", PLC, TPO, Not Started, On Track, phase Oct 29 to Nov 16, launch Nov 18"
+  },
+  "team": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Team column, row 65",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A65",
+   "date": "2026-11-03",
+   "what": "Team: PLC"
+  },
+  "site": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Brand column, row 65",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A65",
+   "date": "2026-11-03",
+   "what": "Brand: TPO"
+  },
+  "s": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Status column, row 65",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A65",
+   "date": "2026-11-03",
+   "what": "Not Started, On Track"
+  },
+  "eta": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Est. Launch Date column, row 65",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A65",
+   "date": "2026-11-03",
+   "what": "Est. Launch Date: Nov 18"
+  },
+  "d": {
+   "kind": "jira",
+   "where": "Jira DEAP-6835",
+   "who": "",
+   "date": "2026-11-03",
+   "url": "https://articore.atlassian.net/browse/DEAP-6835",
+   "what": "DEAP-6835 \"Add a shipping surcharge to TPO checkout\" is in Backlog"
+  },
+  "why": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 65",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A65",
+   "date": "2026-11-03",
+   "what": "Row \"Peak Surcharge on Checkout\", PLC, TPO, Not Started, On Track, phase Oct 29 to Nov 16, launch Nov 18"
   }
  }
 };
