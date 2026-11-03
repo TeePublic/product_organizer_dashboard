@@ -424,7 +424,7 @@ tr.salerow.sel td:first-child { box-shadow: inset 3px 0 0 var(--accent), inset 0
 .mkh { padding: 1px 4px; margin-left: -4px; }
 .bot { border: 0; cursor: pointer; font: 600 11px var(--body); }
 .bot:hover, .bot:focus-visible { background: var(--line); color: var(--ink); }
-.mvlist { display: flex; flex-wrap: wrap; gap: 8px; }
+.mvlist { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; } /* pills keep their own height: stretch made a row as tall as the Compare with control (Mike, Nov 3) */
 .mv { padding: 0; overflow: hidden; display: inline-flex; align-items: stretch; gap: 0; border-color: var(--line-2); }
 .mv .mvl { display: inline-flex; align-items: center; gap: 7px; padding: 6px 12px 6px 10px; }
 .mv .mvl b { font-weight: 700; color: var(--ink); }
