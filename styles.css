@@ -3783,3 +3783,22 @@ details.pbox.prov > summary { cursor: pointer; list-style: none; } details.pbox.
 .dctl1 { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 16px; }
 .dctl1 .lbl { font: 700 13px var(--body); color: var(--ink); }
 @media (max-width: 900px) { .dx2 { grid-template-columns: minmax(0, 1fr); } .dx2 > .sibs { grid-template-columns: minmax(0, 1fr); grid-template-areas: "l" "p" "b"; } }
+
+/* A/B tests table (Mike, Nov 3): the Call column became desktop and mobile revenue per user on Running and is gone from Recently shipped.
+   Columns share one rhythm so there is no dead space after Stat sig; the Test column takes the slack. */
+:root:not(#z):not(#y) .abcols, :root:not(#z):not(#y) .abrow { grid-template-columns: minmax(220px, 1fr) 92px 122px 108px 108px 116px 116px 14px; gap: 0 16px; }
+:root:not(#z):not(#y) .abcols.ab5, :root:not(#z):not(#y) .abrow.ab5 { grid-template-columns: minmax(220px, 1fr) 92px 122px 108px 108px 14px; }
+@media (min-width: 761px) and (max-width: 1240px) {
+  :root:not(#z):not(#y) .abcols, :root:not(#z):not(#y) .abrow { grid-template-columns: minmax(150px, 1fr) 78px 104px 88px 88px 100px 100px 14px; gap: 0 10px; }
+  :root:not(#z):not(#y) .abcols.ab5, :root:not(#z):not(#y) .abrow.ab5 { grid-template-columns: minmax(150px, 1fr) 78px 104px 88px 88px 14px; }
+}
+.abcols .abh, .abcols .hint { white-space: normal; line-height: 1.25; }
+/* hovering a sortable header must not turn its text the same color as the dark header */
+.tcols .abh:hover, .tcols .abh:focus-visible { color: var(--surface); text-decoration: underline; text-underline-offset: 3px; }
+/* detail tables: never clip; tighter cells and wrapping headers so five metrics fit, scroll sideways as the backstop */
+.abbox { overflow-x: auto; }
+.abbox th { padding: 10px 12px !important; white-space: normal; line-height: 1.25; }
+.abbox td { padding: 12px !important; }
+.abbox th:first-child, .abbox td:first-child { padding-left: 20px !important; min-width: 150px; }
+.abbox th:first-child, .abbox td:first-child { width: 30%; max-width: 280px; }
+.abbox td.na { color: var(--muted); font-weight: 400; }
