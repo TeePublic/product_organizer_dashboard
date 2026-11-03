@@ -3784,107 +3784,53 @@ details.pbox.prov > summary { cursor: pointer; list-style: none; } details.pbox.
 .dctl1 .lbl { font: 700 13px var(--body); color: var(--ink); }
 @media (max-width: 900px) { .dx2 { grid-template-columns: minmax(0, 1fr); } .dx2 > .sibs { grid-template-columns: minmax(0, 1fr); grid-template-areas: "l" "p" "b"; } }
 
-/* A/B tests table (Mike, Nov 3): the Call column became desktop and mobile revenue per user on Running and is gone from Recently shipped.
-   Columns share one rhythm so there is no dead space after Stat sig; the Test column takes the slack. */
-:root:not(#z):not(#y) .abcols, :root:not(#z):not(#y) .abrow { grid-template-columns: minmax(220px, 1fr) 92px 122px 108px 108px 116px 116px 14px; gap: 0 16px; }
-:root:not(#z):not(#y) .abcols.ab5, :root:not(#z):not(#y) .abrow.ab5 { grid-template-columns: minmax(220px, 1fr) 92px 122px 108px 108px 14px; }
+
+/* ========== A/B tests: table and test pop-up (Mike, Nov 3 rebuild; replaces the day's patches) ==========
+   Table columns: Test, Running, Stat sig, Revenue per user (All users, Desktop, Mobile), CVR (sitewide impact), AOV.
+   Numbers are plain and colored only by direction, right-aligned under right-aligned labels; one group label ties the
+   three revenue columns together, with no tint or container. The table stops at 1200px so a row reads in one glance. */
+.abview .group { max-width: 1200px; }
+:root:not(#z):not(#y) .abcols, :root:not(#z):not(#y) .abrow { grid-template-columns: minmax(240px, 1fr) 92px 116px repeat(3, 76px) 76px 72px; column-gap: 20px; }
 @media (min-width: 761px) and (max-width: 1240px) {
-  :root:not(#z):not(#y) .abcols, :root:not(#z):not(#y) .abrow { grid-template-columns: minmax(150px, 1fr) 78px 104px 88px 88px 100px 100px 14px; gap: 0 10px; }
-  :root:not(#z):not(#y) .abcols.ab5, :root:not(#z):not(#y) .abrow.ab5 { grid-template-columns: minmax(150px, 1fr) 78px 104px 88px 88px 14px; }
+  :root:not(#z):not(#y) .abcols, :root:not(#z):not(#y) .abrow { grid-template-columns: minmax(190px, 1fr) 80px 104px repeat(3, 68px) 68px 64px; column-gap: 14px; }
 }
-.abcols .abh, .abcols .hint { white-space: normal; line-height: 1.25; }
-/* hovering a sortable header must not turn its text the same color as the dark header */
-.tcols .abh:hover, .tcols .abh:focus-visible { color: var(--surface); text-decoration: underline; text-underline-offset: 3px; }
-/* detail tables: never clip; tighter cells and wrapping headers so five metrics fit, scroll sideways as the backstop */
+:root:not(#z):not(#y) .abcols { padding: 12px 16px; align-items: end; }
+:root:not(#z):not(#y) .abrow { padding: 18px 16px; }
+.abcols .num { justify-self: end; text-align: right; }
+.abgrp { grid-column: span 3; display: grid; grid-template-columns: subgrid; row-gap: 6px; align-self: end; }
+.abgl { grid-column: 1 / -1; text-align: center; font-size: 10.5px; letter-spacing: .08em; opacity: .7; padding-bottom: 6px; border-bottom: 1px solid color-mix(in srgb, currentColor 30%, transparent); }
+.tcols .abh:hover, .tcols .abh:focus-visible { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
+.abn { font: 500 15px/1.2 var(--body); font-variant-numeric: tabular-nums; color: var(--ink-2); white-space: nowrap; }
+.abn.b { color: var(--good); } .abn.w { color: var(--bad); } .abn.na { color: var(--faint); }
+.abn.abk1 { font-weight: 700; }
+:root:not(#z):not(#y) .abrow .hint.abnh, .abrow > .abn { justify-self: end; border-bottom: 0; }
+.abna { grid-column: span 5; justify-self: center; font-size: 13px; color: var(--muted); }
+@media (max-width: 760px) { .abrow .abna { grid-column: 1 / -1; justify-self: start; } }
+
+/* Test pop-up: reads top to bottom. What we're testing (plain text, the subtitle), So far (the one soft card: the call and two facts),
+   then the proof (one results table, devices as columns like the main table), then versions when there are several. */
+.mbox:has(.abdeep) { width: min(920px, 94vw); max-width: none; }
+.abdeep { display: flex; flex-direction: column; gap: 28px; margin-top: 8px; }
+.abdeep > section > .lbl { display: block; margin-bottom: 10px; }
+.abwhat3 p { margin: 0; font-size: 16px; line-height: 1.55; color: var(--ink); }
+.abread { background: color-mix(in srgb, var(--ctl) 6%, var(--surface)); border-radius: 12px; padding: 16px 20px; }
+.abcallp { margin: 0 0 10px; font-size: 16px; font-weight: 600; line-height: 1.5; color: var(--ink); }
+.abfactl { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; font-size: 14px; line-height: 1.45; color: var(--ink-2); }
+.abfactl b { color: var(--ink); font-weight: 600; }
+.abread .chn { font-weight: 600; } .abread .chn.b { color: var(--good); } .abread .chn.w { color: var(--bad); }
 .abbox { overflow-x: auto; }
-.abbox th { padding: 10px 12px !important; white-space: normal; line-height: 1.25; }
-.abbox td { padding: 12px !important; }
-.abbox th:first-child, .abbox td:first-child { padding-left: 20px !important; min-width: 150px; }
-.abbox th:first-child, .abbox td:first-child { width: 30%; max-width: 280px; }
-.abbox td.na { color: var(--muted); font-weight: 400; }
-
-/* A/B tests, take two (Mike, Nov 3): Sitewide CVR impact moved into the expanded view; the three revenue per user numbers sit on one soft tinted panel.
-   Dial: --abp is how strong the tint is. */
-:root { --abp: 8%; }
-:root:not(#z):not(#y) .abcols, :root:not(#z):not(#y) .abrow { grid-template-columns: minmax(220px, 1fr) 92px 122px 372px 14px; gap: 0 16px; }
-:root:not(#z):not(#y) .abcols.ab5, :root:not(#z):not(#y) .abrow.ab5 { grid-template-columns: minmax(220px, 1fr) 92px 122px 132px 14px; }
-@media (min-width: 761px) and (max-width: 1240px) {
-  :root:not(#z):not(#y) .abcols, :root:not(#z):not(#y) .abrow { grid-template-columns: minmax(150px, 1fr) 78px 104px 312px 14px; gap: 0 10px; }
-  :root:not(#z):not(#y) .abcols.ab5, :root:not(#z):not(#y) .abrow.ab5 { grid-template-columns: minmax(150px, 1fr) 78px 104px 112px 14px; }
-}
-.abrpus { display: grid; grid-template-columns: repeat(var(--n, 3), minmax(0, 1fr)); gap: 8px; align-items: center; padding: 10px 12px; border-radius: 12px; background: color-mix(in srgb, var(--ctl) var(--abp), var(--surface)); transition: background .15s; }
-.abrpus.n1 { --n: 1; } .abrpus.n2 { --n: 2; }
-.abrow:hover .abrpus { background: color-mix(in srgb, var(--ctl) calc(var(--abp) + 5%), var(--surface)); }
-.abrpus.hd { padding: 4px 12px; background: rgba(255, 255, 255, .13); }
-.abrpus .abv.big { font-size: 20px; font-weight: 700; letter-spacing: -.01em; }
-.abrpus .abs { font-size: 11.5px; color: var(--muted); }
-.abrpus .abm { justify-self: start; }
-.abimp { display: flex; align-items: center; gap: 18px; padding: 16px 22px; }
-.abimp .abv.big { font-size: 30px; font-weight: 700; flex: none; }
-.abimp p { margin: 0; font-size: 14px; line-height: 1.5; color: var(--ink-2); }
-@media (max-width: 760px) { .abrow .abrpus { grid-column: 1 / -1; } .abimp { flex-direction: column; align-items: flex-start; gap: 6px; } }
-.abrpus .abs { white-space: nowrap !important; }
-
-/* Calmer revenue panel (Mike, Nov 3: "a little too aggressive... blompy and a lot"): lighter tint, values only, the dollars live in the hover and the pop-up. */
-:root { --abp: 4%; }
-.abrpus { padding: 6px 12px; border-radius: 10px; }
-.abrow:hover .abrpus { background: color-mix(in srgb, var(--ctl) calc(var(--abp) + 2%), var(--surface)); }
-.abrpus .abv.big { font-size: 16px; font-weight: 650; }
-.abrpus .abv.big + .abs { display: none; }
-/* test pop-up: the call, three facts, what we are testing, the three revenue per user numbers, one switchable table */
-.abtake { margin: 14px 0 0; font-size: 17px; font-weight: 700; line-height: 1.4; color: var(--ink); }
-.abfacts, .abkeys { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 16px; }
-.abfact { display: flex; flex-direction: column; gap: 3px; padding: 12px 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); min-width: 0; }
-.abfact b, .abfact .hint b { font-size: 22px; font-weight: 700; line-height: 1.2; }
-.abfact b.b, .abfact .b { color: var(--good); } .abfact b.w, .abfact .w { color: var(--bad); }
-.abfact small, .abk small { font-size: 12.5px; color: var(--muted); }
-.abkeys { margin-top: 0; }
-.abk { display: flex; flex-direction: column; gap: 4px; padding: 14px 16px; border-radius: 12px; background: color-mix(in srgb, var(--ctl) 5%, var(--surface)); min-width: 0; }
-.abk .lbl i { font-style: normal; font-weight: 400; margin-left: 6px; color: var(--muted); text-transform: none; letter-spacing: 0; }
-.abk .abv.big { font-size: 28px; font-weight: 700; line-height: 1.15; }
-.abnote { margin: 8px 0 0; }
-.abthead { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
-.abthead h4.ph { margin: 0; }
-.abpane[hidden] { display: none; }
-@media (max-width: 760px) { .abfacts, .abkeys { grid-template-columns: 1fr; } }
-:root:not(#z):not(#y) .abrpus .abv.big + .abs { display: none; }
-.abbox td:first-child, .abbox td:first-child small { white-space: normal; overflow-wrap: anywhere; }
-:root:not(#z):not(#y) .abbox td.na { font-size: 14.5px; }
-
-/* Spread the table's slack across the columns instead of piling it all into Test (Mike, Nov 3: "SO much dead space between Test and Running"). Test keeps the largest share. */
-:root:not(#z):not(#y) .abcols, :root:not(#z):not(#y) .abrow { grid-template-columns: minmax(240px, 2.2fr) minmax(92px, 1fr) minmax(122px, 1fr) minmax(372px, 2.4fr) 14px; gap: 0 20px; }
-:root:not(#z):not(#y) .abcols.ab5, :root:not(#z):not(#y) .abrow.ab5 { grid-template-columns: minmax(240px, 2.2fr) minmax(92px, 1fr) minmax(122px, 1fr) minmax(132px, 1fr) 14px; }
-@media (min-width: 761px) and (max-width: 1240px) {
-  :root:not(#z):not(#y) .abcols, :root:not(#z):not(#y) .abrow { grid-template-columns: minmax(150px, 1.6fr) minmax(78px, .8fr) minmax(104px, .9fr) minmax(312px, 2.2fr) 14px; gap: 0 14px; }
-  :root:not(#z):not(#y) .abcols.ab5, :root:not(#z):not(#y) .abrow.ab5 { grid-template-columns: minmax(150px, 1.6fr) minmax(78px, .8fr) minmax(104px, .9fr) minmax(112px, 1fr) 14px; }
-}
-
-/* A/B tests, take three (Mike, Nov 3: "this is really ugly... the bubble in the nav to the padding in the bubble"): no floating bubbles.
-   The three revenue columns share one group label in the header and one full-height tint that runs unbroken down the rows; numbers sit right-aligned under their labels. */
-.abrow .abrpus { align-self: stretch; margin-block: -16px; padding: 0 14px; border-radius: 0; gap: 8px; justify-items: end; align-items: center; background: color-mix(in srgb, var(--ctl) var(--abp), var(--surface)); }
-.abrpus.tbd { justify-items: center; }
-.abrpus .abv.big { font-size: 17px; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: 0; }
-:root:not(#z):not(#y) .abrpus .hint.abm { justify-self: end; align-items: flex-end; }
-:root:not(#z):not(#y) .abrpus.tbd .abtbd { justify-self: center; align-items: center; }
-.abgrp { align-self: stretch; margin-block: -9px; padding: 0 14px; display: flex; flex-direction: column; justify-content: center; gap: 4px; background: rgba(255, 255, 255, .09); }
-.abgl { font-size: 10px; letter-spacing: .1em; opacity: .75; text-align: center; padding-bottom: 4px; border-bottom: 1px solid rgba(255, 255, 255, .22); }
-.abgs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; justify-items: end; }
-.abgrp.one .abgs { grid-template-columns: 1fr; }
-.abgrp.one { justify-content: center; }
-/* test pop-up: one even rhythm, the three revenue numbers first */
-.abdeep { display: flex; flex-direction: column; gap: 20px; margin-top: 20px; }
-.abdeep > * { margin: 0 !important; }
-.abcall2 .lbl { display: block; margin-bottom: 4px; }
-.abcall2 p { margin: 0; font-size: 15px; font-weight: 600; line-height: 1.45; color: var(--ink); }
-.abfacts { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 0; gap: 12px; }
-.abfact { padding: 10px 14px; }
-.abfact b, .abfact .hint b { font-size: 20px; }
-.abk { padding: 12px 16px; }
-.abk .abv.big { font-size: 26px; }
-.abnote { margin: 8px 0 0 !important; }
-.abdeep .abwhat2 { padding: 14px 18px; }
-.abdeep .abwhat2 p { margin: 6px 0 0; }
-@media (max-width: 760px) { .abfacts { grid-template-columns: 1fr; } }
-@media (min-width: 761px) and (max-width: 1240px) {
-  :root:not(#z):not(#y) .abcols, :root:not(#z):not(#y) .abrow { grid-template-columns: minmax(150px, 2.4fr) minmax(78px, .7fr) minmax(104px, .8fr) minmax(312px, 1fr) 14px; }
-}
+.abres { width: 100%; border-collapse: collapse; }
+.abbox .abres th, .abbox .abres td { padding: 12px 16px !important; }
+.abbox .abres th:first-child, .abbox .abres td:first-child { padding-left: 20px !important; min-width: 170px; max-width: 320px; }
+.abres th.num { text-align: right; }
+.abres td:not(:first-child):not(.sure) { text-align: right; }
+.abres th small { display: block; margin-top: 2px; font-size: 11px; font-weight: 500; letter-spacing: 0; text-transform: none; color: var(--muted); }
+.abres td small { display: block; margin-top: 3px; font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.abres td:first-child small { white-space: normal; }
+.abres .chn { font-variant-numeric: tabular-nums; } .abres .chn.abk1 { font-weight: 700; font-size: 16px; }
+.abres .keyrow td { background: color-mix(in srgb, var(--ctl) 4%, var(--surface)); }
+.abres .keyrow td:first-child { font-weight: 700; }
+.abres td.sure { color: var(--muted); font-size: 13px; white-space: nowrap; }
+:root:not(#z):not(#y) .abbox .abres td.na { font-size: 14.5px; color: var(--faint); }
+.abdeep .abfoot2 { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin: 0; }
+.mbox:has(.abdeep) .mtags { margin-bottom: 0; }
