@@ -3858,3 +3858,33 @@ details.pbox.prov > summary { cursor: pointer; list-style: none; } details.pbox.
   :root:not(#z):not(#y) .abcols, :root:not(#z):not(#y) .abrow { grid-template-columns: minmax(150px, 1.6fr) minmax(78px, .8fr) minmax(104px, .9fr) minmax(312px, 2.2fr) 14px; gap: 0 14px; }
   :root:not(#z):not(#y) .abcols.ab5, :root:not(#z):not(#y) .abrow.ab5 { grid-template-columns: minmax(150px, 1.6fr) minmax(78px, .8fr) minmax(104px, .9fr) minmax(112px, 1fr) 14px; }
 }
+
+/* A/B tests, take three (Mike, Nov 3: "this is really ugly... the bubble in the nav to the padding in the bubble"): no floating bubbles.
+   The three revenue columns share one group label in the header and one full-height tint that runs unbroken down the rows; numbers sit right-aligned under their labels. */
+.abrow .abrpus { align-self: stretch; margin-block: -16px; padding: 0 14px; border-radius: 0; gap: 8px; justify-items: end; align-items: center; background: color-mix(in srgb, var(--ctl) var(--abp), var(--surface)); }
+.abrpus.tbd { justify-items: center; }
+.abrpus .abv.big { font-size: 17px; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: 0; }
+:root:not(#z):not(#y) .abrpus .hint.abm { justify-self: end; align-items: flex-end; }
+:root:not(#z):not(#y) .abrpus.tbd .abtbd { justify-self: center; align-items: center; }
+.abgrp { align-self: stretch; margin-block: -9px; padding: 0 14px; display: flex; flex-direction: column; justify-content: center; gap: 4px; background: rgba(255, 255, 255, .09); }
+.abgl { font-size: 10px; letter-spacing: .1em; opacity: .75; text-align: center; padding-bottom: 4px; border-bottom: 1px solid rgba(255, 255, 255, .22); }
+.abgs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; justify-items: end; }
+.abgrp.one .abgs { grid-template-columns: 1fr; }
+.abgrp.one { justify-content: center; }
+/* test pop-up: one even rhythm, the three revenue numbers first */
+.abdeep { display: flex; flex-direction: column; gap: 20px; margin-top: 20px; }
+.abdeep > * { margin: 0 !important; }
+.abcall2 .lbl { display: block; margin-bottom: 4px; }
+.abcall2 p { margin: 0; font-size: 15px; font-weight: 600; line-height: 1.45; color: var(--ink); }
+.abfacts { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 0; gap: 12px; }
+.abfact { padding: 10px 14px; }
+.abfact b, .abfact .hint b { font-size: 20px; }
+.abk { padding: 12px 16px; }
+.abk .abv.big { font-size: 26px; }
+.abnote { margin: 8px 0 0 !important; }
+.abdeep .abwhat2 { padding: 14px 18px; }
+.abdeep .abwhat2 p { margin: 6px 0 0; }
+@media (max-width: 760px) { .abfacts { grid-template-columns: 1fr; } }
+@media (min-width: 761px) and (max-width: 1240px) {
+  :root:not(#z):not(#y) .abcols, :root:not(#z):not(#y) .abrow { grid-template-columns: minmax(150px, 2.4fr) minmax(78px, .7fr) minmax(104px, .8fr) minmax(312px, 1fr) 14px; }
+}
