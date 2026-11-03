@@ -3881,3 +3881,45 @@ details.pbox.prov > summary { cursor: pointer; list-style: none; } details.pbox.
 .abbox .abone td small { font-size: 11.5px; }
 .abbox .abone th, .abbox .abone td { padding-left: 10px !important; padding-right: 10px !important; }
 .abbox .abone th:first-child, .abbox .abone td:first-child { padding-left: 18px !important; }
+
+/* ===== A/B table, after reviewing the whole morning's feedback (Mike, Nov 3) =====
+   Columns are sized to what they hold (Running is short, Stat sig is at most "Not yet · 90%", CVR and AOV are a short number,
+   revenue columns hold a chip), the Test column takes no more than it needs, and leftover width becomes equal gaps between
+   columns instead of one canyon. Checked at Mike's own width (about 1000px), 1400px and phone. */
+:root:not(#z):not(#y) .abcols, :root:not(#z):not(#y) .abrow { grid-template-columns: minmax(260px, 400px) 100px 112px 76px 76px repeat(3, 124px); column-gap: 20px; justify-content: space-between; }
+@media (min-width: 761px) and (max-width: 1240px) {
+  :root:not(#z):not(#y) .abcols, :root:not(#z):not(#y) .abrow { grid-template-columns: minmax(200px, 1fr) 72px 104px 58px 58px repeat(3, 88px); column-gap: 10px; justify-content: stretch; }
+}
+/* the same inner padding on both edges, header and rows, so the last column never hugs the edge */
+:root:not(#z):not(#y) .abcols { padding: 12px 24px 12px 20px; }
+:root:not(#z):not(#y) .abrow { padding: 18px 24px 18px 20px; }
+/* revenue headers: a small "Revenue per user" line above who it is for */
+.abcols .rpul { display: block; font-size: 9.5px; letter-spacing: .07em; opacity: .7; margin-bottom: 2px; white-space: nowrap; }
+.abcols .rpul .sm { display: none; }
+@media (max-width: 1240px) { .abcols .rpul .lg { display: none; } .abcols .rpul .sm { display: inline; } }
+/* revenue values sit in a soft round chip colored by direction */
+.abn.chip { display: inline-block; padding: 3px 10px; border-radius: 99px; background: color-mix(in srgb, currentColor 10%, transparent); }
+/* clicking a row and closing its pop-up leaves no dark border: no focus outline on mouse use, a quiet left bar for keyboard */
+.trow.abrow:focus { outline: none; }
+.trow.abrow:focus-visible { outline: none; box-shadow: inset 3px 0 0 var(--ctl); }
+.trow.abrow[aria-expanded="true"]:not(:hover) { background: none; }
+/* headline test names look and behave like every other headline link: dotted underline, same color, solid on hover */
+:root:not(#z) .verdict .verd.hlink, :root:not(#z) .sulead .verd.hlink { color: color-mix(in srgb, var(--tp) 70%, var(--ink)); border-bottom: 2px dotted color-mix(in srgb, currentColor 40%, transparent); text-decoration: none; cursor: pointer; }
+:root:not(#z) .verdict .verd.hlink:hover, :root:not(#z) .sulead .verd.hlink:hover, :root:not(#z) .verdict .verd.hlink:focus-visible, :root:not(#z) .sulead .verd.hlink:focus-visible { color: color-mix(in srgb, var(--tp) 70%, var(--ink)); border-bottom-style: solid; outline: none; }
+/* Phone: name on top, then labeled values three to a row (the header is hidden on phones, so each value names itself). */
+@media (max-width: 760px) {
+  :root:not(#z):not(#y) .abrow { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px 12px; padding: 16px; justify-content: stretch; }
+  :root:not(#z):not(#y) .abrow > .tname { grid-column: 1 / -1; }
+  :root:not(#z):not(#y) .abrow > :not(.tname):not(.abna) { justify-self: start; display: flex; flex-direction: column; align-items: flex-start; gap: 3px; }
+  :root:not(#z):not(#y) .abrow > :not(.tname):not(.abna)::before { font: 600 10px var(--body); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+  .abrow > :nth-child(2)::before { content: 'Running'; }
+  .abrow > :nth-child(3)::before { content: 'Stat sig'; }
+  .abrow > :nth-child(4)::before { content: 'CVR'; }
+  .abrow > :nth-child(5)::before { content: 'AOV'; }
+  .abrow > :nth-child(6)::before { content: 'Rev / user'; }
+  .abrow > :nth-child(7)::before { content: 'Desktop'; }
+  .abrow > :nth-child(8)::before { content: 'Mobile'; }
+  :root:not(#z):not(#y) .abrow > .abna { grid-column: 1 / -1; justify-self: start; }
+}
+@media (max-width: 760px) { .abrow > .abna::before { content: none !important; } :root:not(#z):not(#y) .abrow { align-items: start; } }
+.trow.abrow:focus-visible { box-shadow: none; background: var(--sunk); }
