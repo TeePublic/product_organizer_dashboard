@@ -1629,6 +1629,14 @@ const SRCS = {
    "url": "https://grid-articore.enterprise.slack.com/archives/C0BPU9P07UK",
    "what": "Turned on around 1 PM ET Oct 29; needed time to propagate",
    "say": "Allison Cassara posted in #temp-google-sign-up on Oct 29 that it was switched on around 1 PM ET and needed a little time to take effect."
+  },
+  "s_latest": {
+   "kind": "slack",
+   "where": "#temp-google-sign-up",
+   "who": "",
+   "date": "2026-11-03",
+   "url": "https://grid-articore.enterprise.slack.com/archives/C0BPU9P07UK",
+   "what": "Nov 3, 11:01 AM: the sign_up_method property now shows in Amplitude (DEAP-6936 Release Pending); the backfill to Oct 29 is expected the same day"
   }
  },
  "Simon event matching": {
@@ -1689,6 +1697,22 @@ const SRCS = {
    "url": "https://articore.atlassian.net/browse/DEAP-2805",
    "who": "Amelia Cacchione",
    "what": "The live events feed Simon's trigger-based lifecycle emails, such as abandoned cart, product view and order placed"
+  },
+  "s_sheet": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 68 (\"Simon AI: Event matching\")",
+   "who": "",
+   "date": "2026-11-03",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A68",
+   "what": "Impact Analysis, Shipped; phase Oct 30 to Nov 30. Differs from the Data Engineering tracker (In progress, by peak), which wins for Data Engineering status until code freeze"
+  },
+  "s_tracker": {
+   "kind": "sheet",
+   "where": "Data Engineering tracker \"DE work Oct-Nov 2026\", Sheet1, row \"Event matching\"",
+   "who": "",
+   "date": "2026-11-02",
+   "url": "https://docs.google.com/spreadsheets/d/1RIl96d3Pmj6kBkRwoD1Ex4oAic5cPsVh7I5T3n7LwJg",
+   "what": "In progress, est. completion by peak"
   }
  },
  "New iPhone cases in the feed": {
@@ -1734,11 +1758,11 @@ const SRCS = {
   },
   "eta": {
    "kind": "sheet",
-   "where": "Roadmap sheet, Active Work tab, Phase Updated ETA column, row 72",
-   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A72",
-   "date": "2026-11-03",
-   "what": "Phase ran Oct 6 to Oct 31; updated ETA Nov 6; launch date TBD. The note says buffer was added because a new hire picked it up",
-   "say": "The roadmap sheet moved the phase end from Oct 31 to Nov 6 (read Nov 3), noting the extra buffer for a new hire."
+   "where": "Data Engineering tracker \"DE work Oct-Nov 2026\", Sheet1, row \"iphone 18 case - RB\"",
+   "who": "",
+   "date": "2026-11-02",
+   "url": "https://docs.google.com/spreadsheets/d/1RIl96d3Pmj6kBkRwoD1Ex4oAic5cPsVh7I5T3n7LwJg",
+   "what": "Est. completion \"In prog - End of Oct\", status In progress. The tracker wins for Data Engineering dates until code freeze (Nov 20); the roadmap sheet differs: updated ETA Nov 6, launch TBD, buffer added because a new hire picked it up"
   },
   "start": {
    "kind": "jira",
@@ -1759,6 +1783,14 @@ const SRCS = {
    "where": "Roadmap sheet, Active Work tab, OKR and Goal column, row 72",
    "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A72",
    "what": "Gross profit per order (GPAPA) up 1.5 to 3%"
+  },
+  "eta_sheet": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 70",
+   "who": "",
+   "date": "2026-11-03",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A70",
+   "what": "In Dev, Delayed; phase Oct 6 to Oct 31, updated ETA Nov 6, launch TBD (differs from the Data Engineering tracker)"
   }
  },
  "Feed fixes": {
@@ -1861,12 +1893,12 @@ const SRCS = {
    "say": "Dustin Chen commented on DEAP-6499 and DEAP-6613 on Nov 2 that cost of goods arrived, the image backfill plan is confirmed and shipping comparison QA is running."
   },
   "eta": {
-   "kind": "slack",
-   "where": "#temp-tpo-greeting-card-postcard-launch",
-   "url": "https://grid-articore.enterprise.slack.com/archives/C0BRM7CP7KL/p1793127131382959",
-   "who": "Jenna Monnoleto",
-   "date": "2026-10-27",
-   "what": "USA printer is ready; if UK and EU samples arrive overnight, cards launch on TeePublic the next morning"
+   "kind": "sheet",
+   "where": "Data Engineering tracker \"DE work Oct-Nov 2026\", Sheet1, row \"Greeting/post cards - TP\"",
+   "who": "",
+   "date": "2026-11-02",
+   "url": "https://docs.google.com/spreadsheets/d/1RIl96d3Pmj6kBkRwoD1Ex4oAic5cPsVh7I5T3n7LwJg",
+   "what": "Est. completion \"Hoping by peak\", status In progress. The tracker wins for Data Engineering dates until code freeze (Nov 20); the roadmap sheet differs: In Dev, On Track, phase Oct 28 to Nov 11"
   },
   "imp": {
    "kind": "jira",
@@ -3838,6 +3870,14 @@ const SRCS = {
    "what": "Story moved to In Development on Oct 26",
    "who": "Jeff Cooper",
    "date": "2026-10-26"
+  },
+  "s_jira": {
+   "kind": "jira",
+   "where": "Jira DEAP-6985",
+   "who": "",
+   "date": "2026-11-03",
+   "url": "https://articore.atlassian.net/browse/DEAP-6985",
+   "what": "Spike ticket for the design-tile and cart quick-add with a quantity picker created Nov 3 and In Development; the project channel agreed to skip a spec while spiking to move fast before the freeze"
   }
  },
  "Thank-you page upsell, 6 slots": {
@@ -3999,6 +4039,14 @@ const SRCS = {
    "where": "Roadmap sheet, Active Work tab, Status column, row 140",
    "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A140",
    "what": "Not Started"
+  },
+  "s_latest": {
+   "kind": "slack",
+   "where": "#temp-tpo-peak-2026-cvr-upsells",
+   "who": "",
+   "date": "2026-11-03",
+   "url": "https://grid-articore.enterprise.slack.com/archives/C0BU9AUHX2N",
+   "what": "Nov 3, 11:08 to 11:31 AM: test buckets drafted (control keeps the redirect to the cart page; two versions open the cart tray with the sticker cross-sell, one hiding items already added). Not fully committed to ship before peak; pending a leads review of time and capacity"
   }
  },
  "Premium tee upsell in cart": {
@@ -4355,6 +4403,14 @@ const SRCS = {
    "url": "https://grid-articore.enterprise.slack.com/archives/C0BRM7CP7KL",
    "date": "2026-11-01",
    "what": "Project channel update Nov 1: Nov 3 is a Melbourne public holiday, so the team is targeting first thing Wed Nov 4 AU time; all else is ready, waiting on confirmation from the fulfillment partner"
+  },
+  "s_latest": {
+   "kind": "slack",
+   "where": "#temp-tpo-greeting-card-postcard-launch",
+   "who": "",
+   "date": "2026-11-03",
+   "url": "https://grid-articore.enterprise.slack.com/archives/C0BRM7CP7KL",
+   "what": "Nov 3, 12:57 PM: the launch team asked whether greeting cards are still on track this week, checking on the fulfillment partner and an image backfill that was not yet confirmed complete"
   }
  },
  "More poster inventory on Redbubble": {
@@ -5171,6 +5227,431 @@ const SRCS = {
    "where": "Roadmap sheet, Active Work tab, OKR and Goal column, row 74",
    "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A74",
    "what": "Gross profit per order (GPAPA) up 1.5 to 3%"
+  }
+ },
+ "Account-level style defaults": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 81",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A81",
+   "what": "Row \"Account-level style defaults\", Dashery, Not Started, no launch date",
+   "who": "",
+   "date": "2026-11-03",
+   "say": "The roadmap sheet's Active Work tab added \"Account-level style defaults\" under Dashery (Not Started, no dates), first seen Nov 3."
+  },
+  "team": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Team column, row 81",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A81",
+   "what": "Team: Dashery"
+  },
+  "site": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Brand column, row 81",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A81",
+   "what": "Brand: Dashery"
+  },
+  "s": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Status column, row 81",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A81",
+   "what": "Not Started"
+  },
+  "eta": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Est. Launch Date column, row 81",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A81",
+   "what": "No launch date listed"
+  },
+  "obj": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, OKR and Goal columns, row 81",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A81",
+   "what": "No goal on the sheet (Dashery has not broken its goal into OKRs)"
+  },
+  "ref_whiteboard": {
+   "kind": "whiteboard",
+   "where": "Dashery Confluence whiteboard \"Roadmap CY2027\" (reference only)",
+   "url": "https://articore.atlassian.net/wiki/x/MADaLAE",
+   "who": "",
+   "date": "2026-11-02",
+   "what": "Whiteboard shows: Discovery Jan 2027, build Feb to Mar 2027 (\"Account-level defaults\"). Reference only; the roadmap sheet has no dates"
+  }
+ },
+ "Pre-made Marketing Assets v1": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 82",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A82",
+   "what": "Row \"Pre-made Marketing Assets v1\", Dashery, Not Started, no launch date",
+   "who": "",
+   "date": "2026-11-03",
+   "say": "The roadmap sheet's Active Work tab added \"Pre-made Marketing Assets v1\" under Dashery (Not Started, no dates), first seen Nov 3."
+  },
+  "team": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Team column, row 82",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A82",
+   "what": "Team: Dashery"
+  },
+  "site": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Brand column, row 82",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A82",
+   "what": "Brand: Dashery"
+  },
+  "s": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Status column, row 82",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A82",
+   "what": "Not Started"
+  },
+  "eta": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Est. Launch Date column, row 82",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A82",
+   "what": "No launch date listed"
+  },
+  "obj": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, OKR and Goal columns, row 82",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A82",
+   "what": "No goal on the sheet (Dashery has not broken its goal into OKRs)"
+  },
+  "ref_whiteboard": {
+   "kind": "whiteboard",
+   "where": "Dashery Confluence whiteboard \"Roadmap CY2027\" (reference only)",
+   "url": "https://articore.atlassian.net/wiki/x/MADaLAE",
+   "who": "",
+   "date": "2026-11-02",
+   "what": "Whiteboard shows: Build \"Marketing Assets v2\" Dec 2026 to Jan 2027; discovery \"Promoting and Assets\" Oct to Nov 2026. Reference only; the roadmap sheet has no dates"
+  }
+ },
+ "Automated marketing emails": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 83",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A83",
+   "what": "Row \"Automated marketing emails\", Dashery, Not Started, no launch date",
+   "who": "",
+   "date": "2026-11-03",
+   "say": "The roadmap sheet's Active Work tab added \"Automated marketing emails\" under Dashery (Not Started, no dates), first seen Nov 3."
+  },
+  "team": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Team column, row 83",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A83",
+   "what": "Team: Dashery"
+  },
+  "site": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Brand column, row 83",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A83",
+   "what": "Brand: Dashery"
+  },
+  "s": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Status column, row 83",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A83",
+   "what": "Not Started"
+  },
+  "eta": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Est. Launch Date column, row 83",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A83",
+   "what": "No launch date listed"
+  },
+  "obj": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, OKR and Goal columns, row 83",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A83",
+   "what": "No goal on the sheet (Dashery has not broken its goal into OKRs)"
+  },
+  "ref_whiteboard": {
+   "kind": "whiteboard",
+   "where": "Dashery Confluence whiteboard \"Roadmap CY2027\" (reference only)",
+   "url": "https://articore.atlassian.net/wiki/x/MADaLAE",
+   "who": "",
+   "date": "2026-11-02",
+   "what": "Whiteboard shows: Discovery \"Email Marketing\" Jan to Feb 2027, build \"Email Marketing V1\" Mar to Apr 2027. Reference only; the roadmap sheet has no dates"
+  }
+ },
+ "Storefront featured products": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 84",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A84",
+   "what": "Row \"Storefront featured products\", Dashery, Not Started, no launch date",
+   "who": "",
+   "date": "2026-11-03",
+   "say": "The roadmap sheet's Active Work tab added \"Storefront featured products\" under Dashery (Not Started, no dates), first seen Nov 3."
+  },
+  "team": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Team column, row 84",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A84",
+   "what": "Team: Dashery"
+  },
+  "site": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Brand column, row 84",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A84",
+   "what": "Brand: Dashery"
+  },
+  "s": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Status column, row 84",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A84",
+   "what": "Not Started"
+  },
+  "eta": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Est. Launch Date column, row 84",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A84",
+   "what": "No launch date listed"
+  },
+  "obj": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, OKR and Goal columns, row 84",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A84",
+   "what": "No goal on the sheet (Dashery has not broken its goal into OKRs)"
+  },
+  "ref_whiteboard": {
+   "kind": "whiteboard",
+   "where": "Dashery Confluence whiteboard \"Roadmap CY2027\" (reference only)",
+   "url": "https://articore.atlassian.net/wiki/x/MADaLAE",
+   "who": "",
+   "date": "2026-11-02",
+   "what": "Whiteboard shows: Build \"Sorting/Featured\" Dec 2026. Reference only; the roadmap sheet has no dates"
+  }
+ },
+ "TikTok Shop US integration": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 85",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A85",
+   "what": "Row \"TikTok Shop US integration\", Dashery, Not Started, no launch date",
+   "who": "",
+   "date": "2026-11-03",
+   "say": "The roadmap sheet's Active Work tab added \"TikTok Shop US integration\" under Dashery (Not Started, no dates), first seen Nov 3."
+  },
+  "team": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Team column, row 85",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A85",
+   "what": "Team: Dashery"
+  },
+  "site": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Brand column, row 85",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A85",
+   "what": "Brand: Dashery"
+  },
+  "s": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Status column, row 85",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A85",
+   "what": "Not Started"
+  },
+  "eta": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Est. Launch Date column, row 85",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A85",
+   "what": "No launch date listed"
+  },
+  "obj": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, OKR and Goal columns, row 85",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A85",
+   "what": "No goal on the sheet (Dashery has not broken its goal into OKRs)"
+  },
+  "ref_whiteboard": {
+   "kind": "whiteboard",
+   "where": "Dashery Confluence whiteboard \"Roadmap CY2027\" (reference only)",
+   "url": "https://articore.atlassian.net/wiki/x/MADaLAE",
+   "who": "",
+   "date": "2026-11-02",
+   "what": "Whiteboard shows: Discovery Dec 2026 to Jan 2027, build Feb to Apr 2027. Reference only; the roadmap sheet has no dates"
+  }
+ },
+ "Dashery Uploader Experience": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 86",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A86",
+   "what": "Row \"Dashery Uploader Experience\", Dashery, Not Started, no launch date",
+   "who": "",
+   "date": "2026-11-03",
+   "say": "The roadmap sheet's Active Work tab added \"Dashery Uploader Experience\" under Dashery (Not Started, no dates), first seen Nov 3."
+  },
+  "team": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Team column, row 86",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A86",
+   "what": "Team: Dashery"
+  },
+  "site": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Brand column, row 86",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A86",
+   "what": "Brand: Dashery"
+  },
+  "s": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Status column, row 86",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A86",
+   "what": "Not Started"
+  },
+  "eta": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Est. Launch Date column, row 86",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A86",
+   "what": "No launch date listed"
+  },
+  "obj": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, OKR and Goal columns, row 86",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A86",
+   "what": "No goal on the sheet (Dashery has not broken its goal into OKRs)"
+  },
+  "ref_whiteboard": {
+   "kind": "whiteboard",
+   "where": "Dashery Confluence whiteboard \"Roadmap CY2027\" (reference only)",
+   "url": "https://articore.atlassian.net/wiki/x/MADaLAE",
+   "who": "",
+   "date": "2026-11-02",
+   "what": "Whiteboard shows: Design \"Uploader V2\" Dec 2026 to Feb 2027, build Mar to May 2027. Reference only; the roadmap sheet has no dates"
+  }
+ },
+ "Etsy shopping integration": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 87",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A87",
+   "what": "Row \"Etsy shopping integration\", Dashery, Not Started, no launch date",
+   "who": "",
+   "date": "2026-11-03",
+   "say": "The roadmap sheet's Active Work tab added \"Etsy shopping integration\" under Dashery (Not Started, no dates), first seen Nov 3."
+  },
+  "team": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Team column, row 87",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A87",
+   "what": "Team: Dashery"
+  },
+  "site": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Brand column, row 87",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A87",
+   "what": "Brand: Dashery"
+  },
+  "s": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Status column, row 87",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A87",
+   "what": "Not Started"
+  },
+  "eta": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Est. Launch Date column, row 87",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A87",
+   "what": "No launch date listed"
+  },
+  "obj": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, OKR and Goal columns, row 87",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A87",
+   "what": "No goal on the sheet (Dashery has not broken its goal into OKRs)"
+  },
+  "ref_whiteboard": {
+   "kind": "whiteboard",
+   "where": "Dashery Confluence whiteboard \"Roadmap CY2027\" (reference only)",
+   "url": "https://articore.atlassian.net/wiki/x/MADaLAE",
+   "who": "",
+   "date": "2026-11-02",
+   "what": "Whiteboard shows: Discovery Jan to Feb 2027, build Mar to May 2027. Reference only; the roadmap sheet has no dates"
+  }
+ },
+ "In Product Inbox for web and app (redbubble)": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 174",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A174",
+   "what": "Row \"In Product Inbox for web and app (redbubble)\", MarTech, Status blank (shown as Not started), no launch date",
+   "who": "",
+   "date": "2026-11-03",
+   "say": "The roadmap sheet's Active Work tab added \"In Product Inbox for web and app (redbubble)\" under MarTech (Status blank (shown as Not started), no dates), first seen Nov 3."
+  },
+  "team": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Team column, row 174",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A174",
+   "what": "Team: MarTech"
+  },
+  "site": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Brand column, row 174",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A174",
+   "what": "Brand: RBO (Redbubble)"
+  },
+  "s": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Status column, row 174",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A174",
+   "what": "Status blank (shown as Not started)"
+  },
+  "eta": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Est. Launch Date column, row 174",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A174",
+   "what": "No launch date listed"
+  },
+  "obj": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, OKR and Goal columns, row 174",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A174",
+   "what": "O2KR1, CVR: increase CVR 6 to 9%"
+  }
+ },
+ "App Attribution (improve./replace branch) with LCM (Known channel) & not on Paid channel": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 175",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A175",
+   "what": "Row \"App Attribution (improve./replace branch) with LCM (Known channel) & not on Paid channel\", MarTech, Status blank (shown as Not started), no launch date",
+   "who": "",
+   "date": "2026-11-03",
+   "say": "The roadmap sheet's Active Work tab added \"App Attribution (improve./replace branch) with LCM (Known channel) & not on Paid channel\" under MarTech (Status blank (shown as Not started), no dates), first seen Nov 3."
+  },
+  "team": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Team column, row 175",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A175",
+   "what": "Team: MarTech"
+  },
+  "site": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Brand column, row 175",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A175",
+   "what": "Brand: RBO (Redbubble)"
+  },
+  "s": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Status column, row 175",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A175",
+   "what": "Status blank (shown as Not started)"
+  },
+  "eta": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Est. Launch Date column, row 175",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A175",
+   "what": "No launch date listed"
+  },
+  "obj": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, OKR and Goal columns, row 175",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A175",
+   "what": "O4KR6, Data Foundation: unified modern data foundation"
   }
  }
 };
