@@ -606,7 +606,7 @@ function movedFor(b, d) {
   }));
   // A segment only explains the day if it is worse than its peers. When the whole site drops, every segment drops with it;
   // naming those as drivers is noise. Keep one only if it is at least 8 points worse than the rest of its group (or a traffic spike).
-  const keep = out.filter(f => { const x = sibsOf(f.m, d); if (x) { f.rest = x.restMom; f.gap = x.gap; f.peers = x.rest.length === 1 ? x.rest[0].m.label : 'other ' + x.n[1]; } return f.mix || !x || x.gap <= -0.08; });
+  const keep = out.filter(f => { const x = sibsOf(f.m, d); if (x) { f.rest = x.restMom; f.gap = x.gap; f.peers = x.rest.length === 1 ? x.rest[0].m.label : 'other ' + x.n[1]; } return !isWholeFunnel(f.m) && (f.mix || !x || x.gap <= -0.08); });
   keep.sort((a, c) => (c.mix - a.mix) || (a.score - c.score));
   // Likely bots are not drivers: a Bot Squad note on this segment around this day, or traffic up 50%+ while CVR fell (Mike, Oct 26).
   BOTSET[b] = []; const real = [];
@@ -629,7 +629,7 @@ function liftsFor(b, d) {
   const sale = infoNow(b, d).sale, comps = compsFor(b, d), tot = cellsFor(metricsFor(b).overall[0], d, comps).sess || 1, out = [];
   ['device', 'funnel', 'channel', 'geo'].forEach(sec => metricsFor(b)[sec].forEach(m => {
     const c0 = cellsFor(m, d, comps), c = Object.assign({}, c0, { mom: c0.bs, momV: c0.bsV, sessMom: c0.sessBs }), jm = judge(m, 'bs', c0.bs, sale), jy = b === 'tp' ? judge(m, 'yoy', c0.yoy, sale) : null;
-    if (!jm || jm.mat !== 'good' || (jy && jy.mat === 'bad')) return;
+    if (!jm || jm.mat !== 'good' || (jy && jy.mat === 'bad') || isWholeFunnel(m)) return; // the whole funnel has no peers to stand out from (Mike, Nov 3)
     const x = sibsOf(m, d); if (x) { if (x.gap < 0.08) return; Object.assign(c, {}); }
     const f = { m, c, jm, jy, lift: true, rest: x ? x.restMom : null, gap: x ? x.gap : null, peers: x ? (x.rest.length === 1 ? x.rest[0].m.label : 'other ' + x.n[1]) : null };
     f.w = Math.max(0, jm.dlt) * (m.sec === 'funnel' ? 1 : Math.min(1, (c.sess || 0) / tot)); out.push(f);
