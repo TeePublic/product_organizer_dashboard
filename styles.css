@@ -3802,3 +3802,25 @@ details.pbox.prov > summary { cursor: pointer; list-style: none; } details.pbox.
 .abbox th:first-child, .abbox td:first-child { padding-left: 20px !important; min-width: 150px; }
 .abbox th:first-child, .abbox td:first-child { width: 30%; max-width: 280px; }
 .abbox td.na { color: var(--muted); font-weight: 400; }
+
+/* A/B tests, take two (Mike, Nov 3): Sitewide CVR impact moved into the expanded view; the three revenue per user numbers sit on one soft tinted panel.
+   Dial: --abp is how strong the tint is. */
+:root { --abp: 8%; }
+:root:not(#z):not(#y) .abcols, :root:not(#z):not(#y) .abrow { grid-template-columns: minmax(220px, 1fr) 92px 122px 372px 14px; gap: 0 16px; }
+:root:not(#z):not(#y) .abcols.ab5, :root:not(#z):not(#y) .abrow.ab5 { grid-template-columns: minmax(220px, 1fr) 92px 122px 132px 14px; }
+@media (min-width: 761px) and (max-width: 1240px) {
+  :root:not(#z):not(#y) .abcols, :root:not(#z):not(#y) .abrow { grid-template-columns: minmax(150px, 1fr) 78px 104px 312px 14px; gap: 0 10px; }
+  :root:not(#z):not(#y) .abcols.ab5, :root:not(#z):not(#y) .abrow.ab5 { grid-template-columns: minmax(150px, 1fr) 78px 104px 112px 14px; }
+}
+.abrpus { display: grid; grid-template-columns: repeat(var(--n, 3), minmax(0, 1fr)); gap: 8px; align-items: center; padding: 10px 12px; border-radius: 12px; background: color-mix(in srgb, var(--ctl) var(--abp), var(--surface)); transition: background .15s; }
+.abrpus.n1 { --n: 1; } .abrpus.n2 { --n: 2; }
+.abrow:hover .abrpus { background: color-mix(in srgb, var(--ctl) calc(var(--abp) + 5%), var(--surface)); }
+.abrpus.hd { padding: 4px 12px; background: rgba(255, 255, 255, .13); }
+.abrpus .abv.big { font-size: 20px; font-weight: 700; letter-spacing: -.01em; }
+.abrpus .abs { font-size: 11.5px; color: var(--muted); }
+.abrpus .abm { justify-self: start; }
+.abimp { display: flex; align-items: center; gap: 18px; padding: 16px 22px; }
+.abimp .abv.big { font-size: 30px; font-weight: 700; flex: none; }
+.abimp p { margin: 0; font-size: 14px; line-height: 1.5; color: var(--ink-2); }
+@media (max-width: 760px) { .abrow .abrpus { grid-column: 1 / -1; } .abimp { flex-direction: column; align-items: flex-start; gap: 6px; } }
+.abrpus .abs { white-space: nowrap !important; }
