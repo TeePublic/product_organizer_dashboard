@@ -1729,13 +1729,16 @@ const SRCS = {
    "kind": "sheet",
    "where": "Roadmap sheet, Active Work tab, Status column, row 72",
    "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A72",
-   "what": "In Dev, On Track"
+   "date": "2026-11-03",
+   "what": "In Dev, Delayed"
   },
   "eta": {
    "kind": "sheet",
-   "where": "Roadmap sheet, Active Work tab, Phase End ETA column, row 72",
+   "where": "Roadmap sheet, Active Work tab, Phase Updated ETA column, row 72",
    "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A72",
-   "what": "Phase runs Oct 6 to Oct 31; launch date TBD"
+   "date": "2026-11-03",
+   "what": "Phase ran Oct 6 to Oct 31; updated ETA Nov 6; launch date TBD. The note says buffer was added because a new hire picked it up",
+   "say": "The roadmap sheet moved the phase end from Oct 31 to Nov 6 (read Nov 3), noting the extra buffer for a new hire."
   },
   "start": {
    "kind": "jira",
@@ -1850,12 +1853,12 @@ const SRCS = {
   },
   "s": {
    "kind": "jira",
-   "where": "Jira DEAP-6499, status change",
+   "where": "Jira DEAP-6499 and DEAP-6613, comments",
    "who": "Dustin Chen",
-   "date": "2026-10-28",
+   "date": "2026-11-02",
    "url": "https://articore.atlassian.net/browse/DEAP-6499",
-   "what": "Add Greeting Cards to TeePublic product feed moved to In Development on Oct 28",
-   "say": "DEAP-6499 (greeting cards in the TeePublic feed), assigned to Dustin Chen, moved to In Development on Oct 28."
+   "what": "Nov 2 comments on both feed tickets: cost of goods received, image backfill strategy confirmed, shipping comparison QA running; both are In Development",
+   "say": "Dustin Chen commented on DEAP-6499 and DEAP-6613 on Nov 2 that cost of goods arrived, the image backfill plan is confirmed and shipping comparison QA is running."
   },
   "eta": {
    "kind": "slack",
@@ -2039,11 +2042,11 @@ const SRCS = {
   },
   "s": {
    "kind": "jira",
-   "where": "Jira DEAP-6468, sprint change",
+   "where": "Jira DEAP-6468, status",
    "url": "https://articore.atlassian.net/browse/DEAP-6468",
-   "who": "Amelia Cacchione",
-   "date": "2026-10-26",
-   "what": "Still in Backlog with no assignee; moved into DE Sprint 22, which runs Oct 27 to Nov 10"
+   "date": "2026-11-03",
+   "what": "In Code Review as of Nov 3, due Nov 17, in Data Engineering sprint 22; the Data Engineering work tracker (posted in #working-group-data-eng, Nov 2) lists it as in progress",
+   "say": "DEAP-6468 is in Code Review as of Nov 3 with a Nov 17 due date."
   },
   "eta": {
    "kind": "jira",
@@ -2093,7 +2096,7 @@ const SRCS = {
    "url": "https://grid-articore.enterprise.slack.com/archives/C0BT768BG7L/p1793057911688489?thread_ts=1791506628.088989&cid=C0BT768BG7L",
    "who": "Sangil Mun",
    "date": "2026-10-26",
-   "what": "Feeds ran overnight and listing prices match the site, so the fix is done; most remaining mismatches should clear as promos end"
+   "what": "Feeds ran overnight and listing prices match the site, so the fix is done; most remaining mismatches should clear as promos end; the Data Engineering work tracker (posted in #working-group-data-eng, Nov 2) also lists it as Done"
   },
   "start": {
    "kind": "slack",
@@ -2142,11 +2145,11 @@ const SRCS = {
   },
   "s": {
    "kind": "jira",
-   "where": "Jira DEAP-6433, status change",
+   "where": "Jira DEAP-6433, status",
    "url": "https://articore.atlassian.net/browse/DEAP-6433",
-   "who": "Sangil Mun",
-   "date": "2026-10-27",
-   "what": "Moved from Backlog to In Development on Oct 27"
+   "date": "2026-11-03",
+   "what": "DEAP-6433 (review the PR and backfill metrics) is In QA, due Nov 17, last updated Oct 30; the Data Engineering work tracker (posted in #working-group-data-eng, Nov 2) lists the work as Done",
+   "say": "DEAP-6433 is in QA with a Nov 17 due date, and the Data Engineering tracker posted Nov 2 lists the work as Done."
   },
   "eta": {
    "kind": "jira",
@@ -2514,11 +2517,11 @@ const SRCS = {
   },
   "s": {
    "kind": "jira",
-   "where": "Jira DEAP-6604 children DEAP-6605, DEAP-6607, DEAP-6609",
-   "date": "2026-11-02",
+   "where": "Jira DEAP-6604 children DEAP-6611, DEAP-6725, DEAP-6824, DEAP-6973",
    "url": "https://articore.atlassian.net/browse/DEAP-6604",
-   "what": "Icon and text-styling polish tickets released Nov 2; the unread indicator is in Code Review; a QA ticket to hide the rich text editor was added to the backlog",
-   "say": "Under Jira DEAP-6604, two polish tickets were released on Nov 2 and the unread indicator moved to Code Review."
+   "date": "2026-11-03",
+   "what": "On Nov 3, mark-all-as-read (DEAP-6611) and a QA ticket to hide the rich text editor (DEAP-6973) are still In Development, a read/seen-columns check (DEAP-6725) is in development, and clearing old notifications before go-live (DEAP-6824) is in the backlog; the roadmap sheet launch date is still Nov 6",
+   "say": "On Nov 3, the Jira tickets under DEAP-6604 show mark-all-as-read and the rich text editor fix still in development, with the roadmap sheet launch date still Nov 6."
   },
   "s_sheet": {
    "kind": "sheet",
@@ -3323,11 +3326,12 @@ const SRCS = {
   },
   "s": {
    "kind": "jira",
-   "where": "Jira DEAP-6326, child of DEAP-2622",
-   "url": "https://articore.atlassian.net/browse/DEAP-6326",
-   "what": "Ticket to release the LTR V2 experiment moved to Released on Oct 19",
-   "who": "Lili Molloy",
-   "date": "2026-10-19"
+   "where": "Jira DEAP-6964 and DEAP-6981, children of DEAP-2622",
+   "who": "Yulia Perunovskaia",
+   "date": "2026-11-03",
+   "url": "https://articore.atlassian.net/browse/DEAP-6964",
+   "what": "The short post-analysis ticket DEAP-6964 moved to Released on Nov 3 and a follow-up analysis ticket, DEAP-6981, is In QA; no result has been posted by the Product Manager",
+   "say": "Yulia Perunovskaia moved DEAP-6964 (ranking test post-analysis) to Released on Nov 3, and the follow-up DEAP-6981 is in QA."
   },
   "s_sheet": {
    "kind": "sheet",
@@ -3446,11 +3450,12 @@ const SRCS = {
   },
   "s": {
    "kind": "jira",
-   "where": "Jira DEAP-6807",
+   "where": "Jira DEAP-6807, status",
+   "who": "vlad",
+   "date": "2026-11-03",
    "url": "https://articore.atlassian.net/browse/DEAP-6807",
-   "what": "Build-and-test ticket is in Search Sprint 22 (Oct 27 to Nov 10), still in Backlog; scope widened Oct 27 to cover search-term-only queries too",
-   "who": "Wendy Fullam",
-   "date": "2026-10-27"
+   "what": "The build-and-test ticket shows In Development as of Nov 3 (it was in Backlog on Oct 27); the roadmap sheet still lists the phase as technical design and scoping, launch by the code freeze",
+   "say": "DEAP-6807, assigned to vlad, shows In Development on Nov 3; on Oct 27 it was still in Backlog."
   },
   "s_sheet": {
    "kind": "sheet",
@@ -4262,10 +4267,19 @@ const SRCS = {
    "kind": "jira",
    "where": "Jira DEAP-6285, status change",
    "who": "Mohit Bansal",
-   "date": "2026-10-28",
+   "date": "2026-11-03",
    "url": "https://articore.atlassian.net/browse/DEAP-6285",
-   "what": "Moved to Code Review on Oct 28",
-   "say": "DEAP-6285, assigned to Mohit Bansal, moved to Code Review on Oct 28."
+   "what": "Moved to Released (\"deployed to production and complete\") on Nov 3; the roadmap sheet still shows technical design running to Nov 11",
+   "say": "DEAP-6285, assigned to Mohit Bansal, moved to Released on Nov 3, which means it is in production."
+  },
+  "eta": {
+   "kind": "jira",
+   "where": "Jira DEAP-6285, status change",
+   "who": "Mohit Bansal",
+   "date": "2026-11-03",
+   "url": "https://articore.atlassian.net/browse/DEAP-6285",
+   "what": "Released Nov 3 (Sydney time, about 12:45 AM Nov 3 ET)",
+   "say": "DEAP-6285 reached Released on Nov 3, so the launch date is Nov 3."
   }
  },
  "Sticker sizes and finishes on TeePublic": {
@@ -4966,6 +4980,15 @@ const SRCS = {
    "where": "Roadmap sheet, Active Work tab, Project Name column, row 14",
    "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A14",
    "what": "The roadmap sheet lists \"QUALITY: Dormancy\" on the Active Work tab"
+  },
+  "s": {
+   "kind": "jira",
+   "where": "Jira DEAP-2049 and DEAP-6811, children of DEAP-2048",
+   "who": "Wendy Fullam",
+   "date": "2026-11-03",
+   "url": "https://articore.atlassian.net/browse/DEAP-6811",
+   "what": "The product spec for the re-run (DEAP-2049) was released on Nov 3 and the technical design (DEAP-6811) is in development; the roadmap sheet says the work starts after peak",
+   "say": "DEAP-2049 (the re-run spec) was released on Nov 3 and the technical design ticket DEAP-6811 is in development; the roadmap sheet says the build is after peak."
   }
  },
  "Vector and lexical search consolidation": {
@@ -5094,6 +5117,61 @@ const SRCS = {
    "where": "Jira DEAP-5747",
    "url": "https://articore.atlassian.net/browse/DEAP-5747",
    "what": "Jira ticket DEAP-5747 tracks this roadmap item"
+  }
+ },
+ "Trucker hats in feed": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Project Name column, row 74",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A74",
+   "date": "2026-11-03",
+   "what": "The roadmap sheet lists \"Trucker hats in feed\" on the Active Work tab, Data Engineering, Redbubble"
+  },
+  "pm": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Product Manager column, row 74",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A74",
+   "who": "Amelia Cacchione",
+   "what": "Product Manager column: Amelia"
+  },
+  "team": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Team column, row 74",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A74",
+   "what": "Team: Data Engineering"
+  },
+  "site": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Brand column, row 74",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A74",
+   "what": "Brand: RBO (Redbubble)"
+  },
+  "s": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Current Phase and Status columns, row 74",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A74",
+   "date": "2026-11-03",
+   "what": "Ready for Dev, Not Started; the Data Engineering work tracker (posted in #working-group-data-eng, Nov 2) says planned but not started and not planned for peak",
+   "say": "The roadmap sheet lists it as Ready for Dev and Not Started (read Nov 3), and the Data Engineering tracker posted Nov 2 says it is not planned for peak."
+  },
+  "eta": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Phase Start and End ETA columns, row 74",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A74",
+   "date": "2026-11-03",
+   "what": "Phase runs Nov 9 to Nov 20; no launch date, so the date is TBD"
+  },
+  "imp": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Estimated ROI column, row 74",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A74",
+   "what": "About $90K a month"
+  },
+  "obj": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, OKR and Goal column, row 74",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A74",
+   "what": "Gross profit per order (GPAPA) up 1.5 to 3%"
   }
  }
 };
