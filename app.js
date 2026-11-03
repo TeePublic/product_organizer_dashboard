@@ -1213,10 +1213,13 @@ function saleCalModal() {
 const SIBN = { device: ['device', 'devices'], geo: ['region', 'regions'], channel: ['channel', 'channels'], funnel: ['step', 'funnel steps'] };
 // Several peers are a blend, so say "on average" (Mike, Oct 28).
 const onAvg = p => /^other /i.test(p || '') ? ' on average' : '';
-function sibsOf(m, d) {
+// Funnel completion rate (add to cart or express checkout, through to order) is the whole funnel, so it is never a peer of its own steps (Mike, Nov 3).
+const isWholeFunnel = m => m.sec === 'funnel' && m.label === 'Funnel completion rate';
+function sibsOf(m, d, full) {
   if (!SIBN[m.sec]) return null;
+  if (!full && isWholeFunnel(m)) return null;
   const comps = compsFor(m.b, d), all = metricsFor(m.b)[m.sec].map(x => { const c = cellsFor(x, d, comps); return { m: x, mom: c.bs, sess: c.sess || 0 }; }).filter(x => x.mom != null);
-  const me = all.find(x => x.m.key === m.key), rest = all.filter(x => x.m.key !== m.key);
+  const me = all.find(x => x.m.key === m.key), rest = all.filter(x => x.m.key !== m.key && (full || !isWholeFunnel(x.m)));
   if (!me || !rest.length) return null;
   const w = sum(rest.map(x => x.sess)), restMom = w ? sum(rest.map(x => x.mom * x.sess)) / w : sum(rest.map(x => x.mom)) / rest.length;
   return { all, me, rest, restMom, gap: me.mom - restMom, n: SIBN[m.sec] };
@@ -1226,11 +1229,11 @@ function sibChip(m, d) {
   return '<span class="mvs">' + (x.rest.length === 1 ? esc(x.rest[0].m.label) : 'Other ' + x.n[1]) + ' ' + sgn(x.rest.length === 1 ? x.rest[0].mom : x.restMom, 0) + '</span>';
 }
 function sibHtml(m, d) {
-  d = d || dayOf().d; const x = sibsOf(m, d); if (!x) return '';
+  d = d || dayOf().d; const x = sibsOf(m, d, true); if (!x) return '';
   const who = x.rest.length === 1 ? esc(x.rest[0].m.label) : 'the other ' + x.n[1], lead = esc(m.label) + ' is ' + upDown(x.me.mom) + ' vs comparable days; ' + who + (x.rest.length === 1 ? ' is ' : ' are ') + upDown(x.restMom) + (x.rest.length === 1 ? '' : ' together') + '.';
   if (m.sec === 'funnel') {
-    const ov = cellsFor(metricsFor(m.b).overall[0], d, compsFor(m.b, d)).bs, worst = x.all.slice().sort((a, z) => a.mom - z.mom)[0];
-    const fl = esc(m.label) + ' is ' + upDown(x.me.mom) + ' vs comparable days' + (ov != null ? ', while overall CVR is ' + upDown(ov) : '') + '.' + (Math.max(...x.all.map(y => y.mom)) - worst.mom < 0.04 ? ' Every step is down by about the same amount, and the steps compound into the bigger CVR drop. So no single step is broken: fewer shoppers are moving forward at every stage.' : worst.m.key === m.key ? ' This is the weakest step in the funnel, so it explains the largest share of the CVR drop.' : ' The weakest step is ' + esc(worst.m.label) + ' (' + sgn(worst.mom, 0) + '), so look there first.');
+    const ov = cellsFor(metricsFor(m.b).overall[0], d, compsFor(m.b, d)).bs, steps = x.all.filter(y => !isWholeFunnel(y.m)), worst = steps.slice().sort((a, z) => a.mom - z.mom)[0];
+    const fl = esc(m.label) + ' is ' + upDown(x.me.mom) + ' vs comparable days' + (ov != null ? ', while overall CVR is ' + upDown(ov) : '') + '.' + (Math.max(...steps.map(y => y.mom)) - worst.mom < 0.04 ? ' Every step is down by about the same amount, and the steps compound into the bigger CVR drop. So no single step is broken: fewer shoppers are moving forward at every stage.' : worst.m.key === m.key ? ' This is the weakest step in the funnel, so it explains the largest share of the CVR drop.' : ' The weakest step is ' + esc(worst.m.label) + ' (' + sgn(worst.mom, 0) + '), so look there first.');
     const mx2 = Math.max(...x.all.map(y => Math.abs(y.mom)), Math.abs(ov || 0), 0.01), bar = (lab, v, me) => '<div class="sbrow' + (me ? ' me' : '') + '"><span class="sbl">' + lab + '</span><span class="sbt"><i class="' + (v < 0 ? 'neg' : 'pos') + '" style="width:' + Math.round(Math.abs(v) / mx2 * 50) + '%"></i></span><span class="sbv">' + sgn(v, Math.abs(v) < 0.01 ? 1 : 0) + '</span></div>';
     return '<div class="sibs"><span class="lbl">Where in the funnel (vs comparable days)</span><p>' + fl + '</p><div class="sbars">' + (ov != null ? bar('Overall CVR', ov, false) : '') + x.all.map(y => bar(esc(y.m.label), y.mom, y.m.key === m.key)).join('') + '</div></div>';
   }
