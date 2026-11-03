@@ -3824,3 +3824,29 @@ details.pbox.prov > summary { cursor: pointer; list-style: none; } details.pbox.
 .abimp p { margin: 0; font-size: 14px; line-height: 1.5; color: var(--ink-2); }
 @media (max-width: 760px) { .abrow .abrpus { grid-column: 1 / -1; } .abimp { flex-direction: column; align-items: flex-start; gap: 6px; } }
 .abrpus .abs { white-space: nowrap !important; }
+
+/* Calmer revenue panel (Mike, Nov 3: "a little too aggressive... blompy and a lot"): lighter tint, values only, the dollars live in the hover and the pop-up. */
+:root { --abp: 4%; }
+.abrpus { padding: 6px 12px; border-radius: 10px; }
+.abrow:hover .abrpus { background: color-mix(in srgb, var(--ctl) calc(var(--abp) + 2%), var(--surface)); }
+.abrpus .abv.big { font-size: 16px; font-weight: 650; }
+.abrpus .abv.big + .abs { display: none; }
+/* test pop-up: the call, three facts, what we are testing, the three revenue per user numbers, one switchable table */
+.abtake { margin: 14px 0 0; font-size: 17px; font-weight: 700; line-height: 1.4; color: var(--ink); }
+.abfacts, .abkeys { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 16px; }
+.abfact { display: flex; flex-direction: column; gap: 3px; padding: 12px 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); min-width: 0; }
+.abfact b, .abfact .hint b { font-size: 22px; font-weight: 700; line-height: 1.2; }
+.abfact b.b, .abfact .b { color: var(--good); } .abfact b.w, .abfact .w { color: var(--bad); }
+.abfact small, .abk small { font-size: 12.5px; color: var(--muted); }
+.abkeys { margin-top: 0; }
+.abk { display: flex; flex-direction: column; gap: 4px; padding: 14px 16px; border-radius: 12px; background: color-mix(in srgb, var(--ctl) 5%, var(--surface)); min-width: 0; }
+.abk .lbl i { font-style: normal; font-weight: 400; margin-left: 6px; color: var(--muted); text-transform: none; letter-spacing: 0; }
+.abk .abv.big { font-size: 28px; font-weight: 700; line-height: 1.15; }
+.abnote { margin: 8px 0 0; }
+.abthead { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
+.abthead h4.ph { margin: 0; }
+.abpane[hidden] { display: none; }
+@media (max-width: 760px) { .abfacts, .abkeys { grid-template-columns: 1fr; } }
+:root:not(#z):not(#y) .abrpus .abv.big + .abs { display: none; }
+.abbox td:first-child, .abbox td:first-child small { white-space: normal; overflow-wrap: anywhere; }
+:root:not(#z):not(#y) .abbox td.na { font-size: 14.5px; }
