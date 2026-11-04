@@ -3956,3 +3956,5 @@ details.pbox.prov > summary { cursor: pointer; list-style: none; } details.pbox.
 .abrow .tmeta .hint.abnh { justify-self: auto; border-bottom: 0; flex: none; }
 .abrow .vtag { background: color-mix(in srgb, var(--ctl) 12%, transparent); color: var(--ctl); font-weight: 600; white-space: nowrap; }
 :root:not(#z):not(#y) .abrow .tmeta .rtag.vtag { display: inline-flex; align-items: center; gap: 5px; background: color-mix(in srgb, var(--ctl) 14%, var(--surface)); color: var(--ctl); box-shadow: inset 0 0 0 1.5px var(--ctl); font-weight: 700; }
+/* Every change number in the A/B tables is bold (Mike, Nov 4). */
+:root:not(#z):not(#y) .abrow .abn, .abtab .abn, .abres .chn:not(.base) { font-weight: 700; }
