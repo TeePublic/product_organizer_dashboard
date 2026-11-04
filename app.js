@@ -2108,7 +2108,7 @@ function testDetailModal(id) {
 function abVarRows(t) {
   const R = abRd(t), M = R.m || {}, D = R.dev || {};
   const mkx = (m, v) => m && v != null ? { v: v, a: m.a, b: m.a * (1 + v), f: m.f, s: m.s, name: m.name } : null;
-  return '<div class="abvars">' + R.vrows.map(r => {
+  return '<div class="abvars"><span class="abvcap">Each version vs control</span>' + R.vrows.map(r => {
     const n = r[0], c = r[1], dv = d => (((D[d] || {}).vers || {})[n] || {}).rpv;
     const imp = c.cvr != null ? siteImp(c.cvr, t.reach) : null;
     return '<div class="abvr"><span class="abvname">' + esc(n) + '</span>' +
