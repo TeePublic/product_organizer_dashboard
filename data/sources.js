@@ -1678,10 +1678,10 @@ const SRCS = {
   },
   "eta": {
    "kind": "jira",
-   "where": "Jira DEAP-6256, due date",
-   "url": "https://articore.atlassian.net/browse/DEAP-6256",
-   "who": "Will Soupcoff",
-   "what": "The ticket to forward the member's email on cart and wishlist events to Simon is due Nov 17"
+   "where": "Jira DEAP-2805, DE board (DEAP board 580, DE Sprint 22)",
+   "url": "https://articore.atlassian.net/browse/DEAP-2805",
+   "date": "2026-11-04",
+   "what": "Epic DEAP-2805 due date Nov 20 (start May 1), read from the DE board on Nov 4. Replaces \"Before peak\"."
   },
   "start": {
    "kind": "jira",
@@ -1757,12 +1757,11 @@ const SRCS = {
    "what": "In Dev, Delayed"
   },
   "eta": {
-   "kind": "sheet",
-   "where": "Data Engineering tracker \"DE work Oct-Nov 2026\", Sheet1, row \"iphone 18 case - RB\"",
-   "who": "",
-   "date": "2026-11-02",
-   "url": "https://docs.google.com/spreadsheets/d/1RIl96d3Pmj6kBkRwoD1Ex4oAic5cPsVh7I5T3n7LwJg",
-   "what": "Est. completion \"In prog - End of Oct\", status In progress. The tracker wins for Data Engineering dates until code freeze (Nov 20); the roadmap sheet differs: updated ETA Nov 6, launch TBD, buffer added because a new hire picked it up"
+   "kind": "jira",
+   "where": "Jira DEAP-5726, DE board (DEAP board 580, DE Sprint 22)",
+   "url": "https://articore.atlassian.net/browse/DEAP-5726",
+   "date": "2026-11-04",
+   "what": "DEAP-5726 due date Nov 17, read from the DE board on Nov 4. Replaces \"End of Oct\"."
   },
   "start": {
    "kind": "jira",
@@ -1893,12 +1892,11 @@ const SRCS = {
    "say": "Dustin Chen commented on DEAP-6499 and DEAP-6613 on Nov 2 that cost of goods arrived, the image backfill plan is confirmed and shipping comparison QA is running."
   },
   "eta": {
-   "kind": "sheet",
-   "where": "Data Engineering tracker \"DE work Oct-Nov 2026\", Sheet1, row \"Greeting/post cards - TP\"",
-   "who": "",
-   "date": "2026-11-02",
-   "url": "https://docs.google.com/spreadsheets/d/1RIl96d3Pmj6kBkRwoD1Ex4oAic5cPsVh7I5T3n7LwJg",
-   "what": "Est. completion \"Hoping by peak\", status In progress. The tracker wins for Data Engineering dates until code freeze (Nov 20); the roadmap sheet differs: In Dev, On Track, phase Oct 28 to Nov 11"
+   "kind": "jira",
+   "where": "Jira DEAP-6499, DE board (DEAP board 580, DE Sprint 22)",
+   "url": "https://articore.atlassian.net/browse/DEAP-6499",
+   "date": "2026-11-04",
+   "what": "Neither DEAP-6499 nor DEAP-6613 has a due date, so this is the parent epic DEAP-6948 due date, Nov 20, read from the DE board on Nov 4. Replaces \"Hoping by peak\". Add a due date in Jira to firm it up."
   },
   "imp": {
    "kind": "jira",
@@ -2004,11 +2002,10 @@ const SRCS = {
   },
   "eta": {
    "kind": "jira",
-   "where": "Jira DEAP-6445, due date",
-   "url": "https://articore.atlassian.net/browse/DEAP-6445",
-   "who": "Amelia Cacchione",
-   "date": "2026-10-15",
-   "what": "Due Nov 17"
+   "where": "Jira DEAP-4449, DE board (DEAP board 580, DE Sprint 22)",
+   "url": "https://articore.atlassian.net/browse/DEAP-4449",
+   "date": "2026-11-04",
+   "what": "Epic DEAP-4449 due date Nov 20 (start Jul 20), read from the DE board on Nov 4. Replaces \"Before peak\"."
   },
   "eta_sheet": {
    "kind": "sheet",
@@ -2074,19 +2071,17 @@ const SRCS = {
   },
   "s": {
    "kind": "jira",
-   "where": "Jira DEAP-6468, status",
+   "where": "Jira DEAP-6468, DE board (DEAP board 580, DE Sprint 22)",
    "url": "https://articore.atlassian.net/browse/DEAP-6468",
-   "date": "2026-11-03",
-   "what": "In Code Review as of Nov 3, due Nov 17, in Data Engineering sprint 22; the Data Engineering work tracker (posted in #working-group-data-eng, Nov 2) lists it as in progress",
-   "say": "DEAP-6468 is in Code Review as of Nov 3 with a Nov 17 due date."
+   "date": "2026-11-04",
+   "what": "DEAP-6468 status Approved, read from the DE board on Nov 4. Replaces \"Code review\"."
   },
   "eta": {
    "kind": "jira",
-   "where": "Jira DEAP-6468, due date",
+   "where": "Jira DEAP-6468, DE board (DEAP board 580, DE Sprint 22)",
    "url": "https://articore.atlassian.net/browse/DEAP-6468",
-   "who": "Amelia Cacchione",
-   "date": "2026-10-16",
-   "what": "Due Nov 17"
+   "date": "2026-11-04",
+   "what": "DEAP-6468 due date Nov 17, read from the DE board on Nov 4. Replaces \"Before peak\"."
   },
   "imp": {
    "kind": "slack",
@@ -5186,6 +5181,20 @@ const SRCS = {
    "where": "Jira DEAP-2807",
    "url": "https://articore.atlassian.net/browse/DEAP-2807",
    "what": "Jira epic DEAP-2807 tracks this roadmap item"
+  },
+  "eta": {
+   "kind": "jira",
+   "where": "Jira DEAP-2807, DE board (DEAP board 580, DE Sprint 22)",
+   "url": "https://articore.atlassian.net/browse/DEAP-2807",
+   "date": "2026-11-04",
+   "what": "Epic DEAP-2807 due date Nov 11 (start May 1), read from the DE board on Nov 4. Replaces \"Oct 27\"."
+  },
+  "s": {
+   "kind": "jira",
+   "where": "Jira DEAP-2807, DE board (DEAP board 580, DE Sprint 22)",
+   "url": "https://articore.atlassian.net/browse/DEAP-2807",
+   "date": "2026-11-04",
+   "what": "Epic DEAP-2807 status In Development, read from the DE board on Nov 4. Replaces \"Launched\"."
   }
  },
  "Ranking test for 3+ word queries": {
@@ -5248,19 +5257,18 @@ const SRCS = {
    "what": "Brand: RBO (Redbubble)"
   },
   "s": {
-   "kind": "sheet",
-   "where": "Data Engineering tracker (\"DE work Oct-Nov 2026\"), Sheet1, Status column, row 10",
-   "url": "https://docs.google.com/spreadsheets/d/1RIl96d3Pmj6kBkRwoD1Ex4oAic5cPsVh7I5T3n7LwJg/edit#gid=0&range=A10",
-   "date": "2026-11-03",
-   "what": "Status: Planned but not started. The roadmap sheet still lists Ready for Dev with a Nov 9 to Nov 20 phase; until code freeze the tracker wins for Data Engineering status and dates",
-   "say": "The Data Engineering tracker (read Nov 3) says it is planned but not started and not planned for peak; it wins over the roadmap sheet until code freeze."
+   "kind": "jira",
+   "where": "Jira DEAP-6809, DE board (DEAP board 580, DE Sprint 22)",
+   "url": "https://articore.atlassian.net/browse/DEAP-6809",
+   "date": "2026-11-04",
+   "what": "DEAP-6809 status In Development, read from the DE board on Nov 4. Replaces \"Planned\"."
   },
   "eta": {
-   "kind": "sheet",
-   "where": "Data Engineering tracker (\"DE work Oct-Nov 2026\"), Sheet1, Est. completion date column, row 10",
-   "url": "https://docs.google.com/spreadsheets/d/1RIl96d3Pmj6kBkRwoD1Ex4oAic5cPsVh7I5T3n7LwJg/edit#gid=0&range=A10",
-   "date": "2026-11-03",
-   "what": "Est. completion date: Not planned, so it is not committed for peak; the roadmap sheet's Nov 9 to Nov 20 phase has no launch date"
+   "kind": "jira",
+   "where": "Jira DEAP-6809, DE board (DEAP board 580, DE Sprint 22)",
+   "url": "https://articore.atlassian.net/browse/DEAP-6809",
+   "date": "2026-11-04",
+   "what": "DEAP-6809 due date Nov 20, read from the DE board on Nov 4. Replaces \"Not planned for peak\"."
   },
   "imp": {
    "kind": "sheet",
