@@ -3946,3 +3946,14 @@ details.pbox.prov > summary { cursor: pointer; list-style: none; } details.pbox.
 
 /* Side nav: "Split CVR by" sits halfway between its divider and the first section under it (Mike, Nov 3). */
 #srail .srgrp.sep, #srail:hover .srgrp.sep, #srail:focus-within .srgrp.sep { height: auto; line-height: 1; margin: 8px 0 0; padding: 10px 10px; }
+
+/* A/B versions (Mike, Nov 4): control is a row in the pop-up; each version is its change vs control, one line per version on the main row. */
+.abres .chn.base { color: var(--ink-2); font-weight: 500; }
+.abbox .abone .ctlrow td { background: color-mix(in srgb, var(--ctl) 5%, var(--surface)); }
+.abvn { grid-column: span 5; justify-self: end; font-size: 12.5px; color: var(--muted); }
+.abvars { grid-column: 1 / -1; display: grid; grid-template-columns: subgrid; row-gap: 0; margin-top: -2px; }
+.abvr { grid-column: 1 / -1; display: grid; grid-template-columns: subgrid; align-items: center; padding: 5px 0; }
+.abvname { grid-column: 1 / 4; font-size: 13.5px; color: var(--ink-2); padding-left: 14px; position: relative; }
+.abvname::before { content: ''; position: absolute; left: 2px; top: 50%; width: 6px; height: 6px; margin-top: -3px; border-radius: 50%; background: var(--faint); }
+.abvr > .abn, .abvr > .hint { justify-self: end; border-bottom: 0; }
+@media (max-width: 760px) { .abvn { grid-column: 1 / -1; justify-self: start; } .abvr { grid-template-columns: repeat(5, auto); gap: 4px 12px; } .abvname { grid-column: 1 / -1; } }
