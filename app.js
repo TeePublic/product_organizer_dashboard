@@ -3176,10 +3176,13 @@ function drawChart(host, spec) {
   }
   if (!mini) { g += '<text x="' + mg.l + '" y="14" style="fill:var(--ink);font-weight:600;font-size:12px">' + esc(m.axis) + '</text>'; if (showS) g += '<text x="' + (W - mg.r) + '" y="14" text-anchor="end" style="fill:var(--sess);font-weight:600;font-size:12px">Sessions per day</text>'; }
   if (showS) {
-    let area = 'M' + x(0).toFixed(1) + ' ' + y2(0).toFixed(1); m.sess.forEach((v, i) => { area += 'L' + x(i).toFixed(1) + ' ' + y2(v).toFixed(1); }); area += 'L' + x(n - 1).toFixed(1) + ' ' + y2(0).toFixed(1) + 'Z';
+    // Days with no sessions value (a product series that lags the site by a day) are left out, never drawn as 0 (Emma, Nov 4: sessions "dropped off a cliff").
+    let area = '', top = '', run = [];
+    const flush = () => { if (run.length) { area += 'M' + x(run[0]).toFixed(1) + ' ' + y2(0).toFixed(1); run.forEach(i => { area += 'L' + x(i).toFixed(1) + ' ' + y2(m.sess[i]).toFixed(1); }); area += 'L' + x(run[run.length - 1]).toFixed(1) + ' ' + y2(0).toFixed(1) + 'Z'; run.forEach((i, k) => { top += (k ? 'L' : 'M') + x(i).toFixed(1) + ' ' + y2(m.sess[i]).toFixed(1); }); } run = []; };
+    m.sess.forEach((v, i) => { if (v == null) flush(); else run.push(i); }); flush();
     // Stronger sessions fill with a top edge, so it reads as its own layer (Allison, Oct 28).
     g += '<path d="' + area + '" style="fill:var(--sess);opacity:.26"/>';
-    { let top = ''; m.sess.forEach((v, i) => { top += (i ? 'L' : 'M') + x(i).toFixed(1) + ' ' + y2(v).toFixed(1); }); g += '<path d="' + top + '" style="fill:none;stroke:var(--sess);stroke-width:1.2;opacity:.6"/>'; }
+    g += '<path d="' + top + '" style="fill:none;stroke:var(--sess);stroke-width:1.2;opacity:.6"/>';
   }
   for (let i = 0; i < n; i++) { const d = S.dates[i], con = isContam(b, d); if (infoNow(b, d).sale || con) g += '<rect x="' + (mg.l + iw * i / n).toFixed(1) + '" y="' + (bottom + 5) + '" width="' + Math.max(1, iw / n - 0.6).toFixed(1) + '" height="5" rx="1" style="fill:' + (con ? 'var(--strip-x)' : BR[b].strip) + '"/>'; }
   for (let i = n - 1; i >= 0; i -= (mini ? 28 : 14)) g += '<text x="' + x(i).toFixed(1) + '" y="' + (H - (mini ? 4 : 14)) + '" text-anchor="middle">' + short(S.dates[i]) + '</text>';
