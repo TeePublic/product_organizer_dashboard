@@ -2122,7 +2122,7 @@ function abLeadCells(t, lead) {
 function abLeadNote(t, lead) {
   const R = abRd(t), M = R.m || {}, tot = R.vrows.length;
   const list = R.vrows.map(v => '<li><b>' + esc(v[0]) + '</b>' + (v[1].rpv != null ? ' ' + sgn(v[1].rpv, 1) + ' revenue per user' : '') + (v[0] === lead[0] ? ' (shown)' : '') + '</li>').join('');
-  return hint('<span class="rtag vtag"><svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path d="M8 2 1.5 5.5 8 9l6.5-3.5zM2.5 8.2 8 11.2l5.5-3M2.5 10.7 8 13.7l5.5-3" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round"/></svg>' + tot + ' versions</span>', 'abm abnh', '<span class="nosrc"><b>' + tot + ' versions, each vs control</b><ul class="abvl">' + list + '</ul>This row shows <b>' + esc(lead[0]) + '</b>, the one ' + (t.status === 'shipped' ? 'that shipped' : 'leading on revenue per user') + '. Open the test for control and every version.</span>');
+  return hint('<span class="rtag vtag"><svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path d="M8 2 1.5 5.5 8 9l6.5-3.5zM2.5 8.2 8 11.2l5.5-3M2.5 10.7 8 13.7l5.5-3" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round"/></svg>' + tot + ' versions</span>', 'abm abnh', '<span class="nosrc"><b>' + tot + ' versions, each vs control</b><ul class="abvl">' + list + '</ul></span>');
 }
 function testRow(t, shipped) {
   const site = siteImp(t.cvr.rel, t.reach), open = state.open.has('x' + t.id), r = Math.round(t.reach * 100);
