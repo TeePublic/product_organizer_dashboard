@@ -28,6 +28,24 @@ for (const n of required) get(n) === undefined ? fail(`dataset ${n} is missing`)
 // Freshness: show the as-of dates so a stale snapshot is obvious.
 for (const [n, v] of [['D', get('D')], ['PROD', get('PROD')]]) if (v && v.asOf) console.log(`info ${n}.asOf = ${v.asOf}`);
 
+// Product CVR must reach the same last day as each site's CVR series, with a value on that day for every product (Emma, Nov 3 and Nov 4: "no RBO product data").
+// Compares the real dates, not the asOf label. A gap here shows up on the page as "No value" and a sessions chart that falls to 0.
+{
+  const D = get('D'), PROD = get('PROD');
+  const addDays = (d, n) => { const x = new Date(d + 'T00:00:00Z'); x.setUTCDate(x.getUTCDate() + n); return x.toISOString().slice(0, 10); };
+  if (D && PROD) for (const b of ['tp', 'rb']) {
+    const site = D[b], P = PROD[b];
+    if (!site || !P) { fail(`PROD.${b} or D.${b} is missing`); continue; }
+    const siteEnd = addDays(site.start, site.cvr.length - 1), prodEnd = P.dates[P.dates.length - 1];
+    if (prodEnd !== siteEnd) fail(`PROD.${b} ends ${prodEnd} but the ${b.toUpperCase()} site series ends ${siteEnd}: extend PROD to ${siteEnd}`);
+    else ok(`PROD.${b} ends ${prodEnd}, same as the site series`);
+    for (const [name, it] of Object.entries(P.items)) {
+      if (it.v.length !== P.dates.length || it.s.length !== P.dates.length) fail(`PROD.${b} ${name}: v/s length does not match dates`);
+      else if (it.v[it.v.length - 1] == null || it.s[it.s.length - 1] == null) fail(`PROD.${b} ${name}: no value on the last day ${prodEnd}`);
+    }
+  }
+}
+
 // Every roadmap item should have a source link (this is what the agent maps against).
 const coming = get('COMING'), srcs = get('SRCS');
 if (coming && srcs && Array.isArray(coming.teams)) {
