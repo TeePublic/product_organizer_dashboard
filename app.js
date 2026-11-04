@@ -315,7 +315,7 @@ const metricsFor = b => MCACHE[b] || (MCACHE[b] = metricList(b));
 /* ---------- bot filter: Maximum (default) or Strong, swapped in place (Mike, Oct 26) ---------- */
 // Maximum comes from Amplitude dashboard 5ec1pe2j (src/datamax.js). Strong is the original data in D, L, R and ORD.
 // Where the CVR page's numbers come from, with links out (Allison, Oct 28: "I need reassurance that it is confirmed correct").
-const AMPD = { strong: 'lm29400h', max: '5ec1pe2j' }, AMPY = { tp: 'usaj36an', rb: 'zvsdv2k8' };
+const AMPD = { strong: 'lm29400h', max: '5ec1pe2j', standard: 'bsjj5vr9' }, AMPY = { tp: 'usaj36an', rb: 'zvsdv2k8' };
 // Every named source is a link (Mike, Oct 28: "All sources should always be linkable").
 const SLK = (id, name) => '<a href="https://grid-articore.enterprise.slack.com/archives/' + id + '" target="_blank" rel="noopener">#' + name + ' ↗</a>';
 const LNK = (u, t) => '<a href="' + u + '" target="_blank" rel="noopener">' + t + ' ↗</a>';
@@ -361,7 +361,7 @@ const SECAMP = {
             rb: { overall: [['CVR', 'hv3jdftd']], channel: [['CVR by channel', 'bjjgl1uu']], device: [['CVR by device', 'ucllwnls']], funnel: [['Add to cart rate', 'ir369hds'], ['Funnel completion rate', 'o6krg9lp'], ['Checkout completion rate', 'nhhy4cjn']] } }
 };
 function secSrc(b, sec) {
-  const bf = state.botf === 'strong' ? 'strong' : 'max', ch = ((SECAMP[bf] || {})[b] || {})[sec] || [], L = [];
+  const bf = bfKey(), ch = ((SECAMP[bf] || {})[b] || {})[sec] || [], L = [];
   const ac = (id, t) => '<a href="https://app.amplitude.com/analytics/tpub/chart/' + id + '" target="_blank" rel="noopener">' + esc(t) + ' ↗</a>';
   if (ch.length) L.push('📊 <b>Amplitude charts (' + BOTF[bf].l + ' bot filter):</b> ' + ch.map(x => ac(x[1], x[0])).join(' · '));
   if (sec === 'product') L.push('📊 <b>Amplitude, pulled each morning:</b> people who viewed a product page of each type, then ordered that type within 24 hours, divided by those viewers (Maximum bot filter).');
@@ -370,7 +370,7 @@ function secSrc(b, sec) {
 }
 function tipSrcHtml(html) {
   if (state.view !== 'daily') return pageSrcHtml(html);
-  const b = state.tab, bf = state.botf === 'strong' ? 'strong' : 'max', a = (id, t) => '<a href="https://app.amplitude.com/analytics/tpub/dashboard/' + id + '" target="_blank" rel="noopener">' + t + ' ↗</a>', L = [];
+  const b = state.tab, bf = bfKey(), a = (id, t) => '<a href="https://app.amplitude.com/analytics/tpub/dashboard/' + id + '" target="_blank" rel="noopener">' + t + ' ↗</a>', L = [];
   L.push('📊 <b>The numbers:</b> ' + a(AMPD[bf], 'Amplitude, CVR Pacer dashboard (' + BOTF[bf].l + ' bot filter)') + '. CVR is people who viewed a page and ordered within a day, divided by people who viewed a page.');
   L.push('🔁 <b>Cross-check:</b> ' + a(AMPY[b], BR[b].name + ' Yesterday\'s Performance') + '. Its filters differ, so numbers can be a little different.');
   if (/last year|vs last year|2025/i.test(html)) L.push('📅 <b>Last year:</b> the same ' + a(AMPD[bf], 'Amplitude charts') + ', run for the same weekday 364 days back.');
@@ -380,23 +380,26 @@ function tipSrcHtml(html) {
 }
 const BOTF = {
   max: { l: 'Maximum', tip: '<b>Maximum bot filter</b><br>Counts only visitors Cloudflare scores 90 or higher (very likely human). TeePublic also drops verified crawlers and counts only the USA, UK, Australia and Canada. Redbubble counts only the USA, Canada, UK, Australia, Germany, France and New Zealand.<br><br>It over-corrects on purpose, so read the direction, not the level. Revenue and AOV count every order under both filters. Payment mix, hourly charts and Trending use the Strong filter.' },
+  standard: { l: 'Standard', tip: '<b>Standard bot filter</b><br>Drops only visitors Cloudflare scores below 30. No country limit, no verified-crawler or fingerprint exclusions.<br><br>Some people score 30 to 70, so Strong can drop them. The cost is that bots scoring 30 and above stay in, mostly on Redbubble Direct and desktop, so levels read lower. Read direction, not level.' },
   strong: { l: 'Strong', tip: '<b>Strong bot filter</b><br>Counts visitors Cloudflare scores 70 or higher (likely human), in every country. TeePublic also drops verified crawlers. This is the filter the page used through Oct 26. Bots that score above 70, like the fleets the Bot Squad has tracked, still get through.' }
 };
 // Short version for the label hover, so it fits above the headline.
 // Short hovers on each option (Mike, Oct 26: on the options, not the label).
 // Only the site on screen, on one line (Mike, Oct 26).
-const BOTF_TIP = { max: b => '<b>Maximum</b> (default): Bot score 90+, only ' + (b === 'tp' ? 'US, UK, AU and CA' : 'US, UK, AU, CA, DE, FR and NZ') + '.<br><i class="cap">Revenue and AOV measure every order placed.</i>', strong: () => '<b>Strong</b>: Bot score 70+, all countries.<br><i class="cap">Revenue and AOV measure every order placed.</i>' };
+const BOTF_TIP = { max: b => '<b>Maximum</b> (default): Bot score 90+, only ' + (b === 'tp' ? 'US, UK, AU and CA' : 'US, UK, AU, CA, DE, FR and NZ') + '.<br><i class="cap">Revenue and AOV measure every order placed.</i>', strong: () => '<b>Strong</b>: Bot score 70+, all countries.<br><i class="cap">Revenue and AOV measure every order placed.</i>', standard: () => '<b>Standard</b>: Bot score 30+, nothing else dropped.<br><i class="cap">Revenue and AOV measure every order placed.</i>' };
 const STRONG = { D: { tp: { cvr: D.tp.cvr, sess: D.tp.sess }, rb: { cvr: D.rb.cvr, sess: D.rb.sess }, tpLY: { cvr: D.tpLY.cvr, sess: D.tpLY.sess } }, L: { tp: L.tp, rb: L.rb, tpLY: L.tpLY }, R: { tp: R.tp, rb: R.rb, tpLY: R.tpLY }, ORD: typeof ORD !== 'undefined' ? { tp: ORD.tp, rb: ORD.rb } : null };
 const hasMax = () => typeof MAX !== 'undefined' && MAX && MAX.D;
+const hasStd = () => typeof STD !== 'undefined' && STD && STD.D;
+const bfKey = () => state.botf === 'strong' ? 'strong' : state.botf === 'standard' ? 'standard' : 'max';
 function applyBotFilter(mode) {
-  const src = mode === 'max' && hasMax() ? MAX : STRONG, pick = (a, b) => a != null ? a : b;
+  const src = mode === 'max' && hasMax() ? MAX : mode === 'standard' && hasStd() ? STD : STRONG, pick = (a, b) => a != null ? a : b;
   ['tp', 'rb', 'tpLY'].forEach(k => {
     D[k].cvr = pick(src.D[k] && src.D[k].cvr, STRONG.D[k].cvr); D[k].sess = pick(src.D[k] && src.D[k].sess, STRONG.D[k].sess);
     // Revenue and orders count every order under both filters: bots don't buy, and a country-limited total would understate the business (Oct 26).
     L[k] = pick(src.L && src.L[k], STRONG.L[k]); R[k] = STRONG.R[k];
   });
   ['tp', 'rb'].forEach(b => { SER[b].cvr = D[b].cvr; SER[b].sess = D[b].sess; delete MCACHE[b]; });
-  state.botf = mode === 'max' && hasMax() ? 'max' : 'strong';
+  state.botf = mode === 'max' && hasMax() ? 'max' : mode === 'standard' && hasStd() ? 'standard' : 'strong';
   BASE_START = state.botf === 'max' ? BASE_START_MAX : '2026-08-20';
   // Comparable days and "usual" depend on the data and the baseline start, so they're rebuilt for the new filter.
   [COMPC, BASEC, NRC].forEach(o => Object.keys(o).forEach(k => delete o[k]));
@@ -790,7 +793,7 @@ function guideModal() {
     ['Holidays', 'Nov 1 to Dec 31 every date behaves differently, so vs last year leads and uses the same calendar date. The rest of the year, vs a week ago leads.'],
     ['What moved', 'The segments that are worse than usual on every comparison, worst first. The rolling cell beside each one shows context: how the other devices, regions or channels did, overall CVR for funnel steps, and traffic. Click one for the full read.'],
     ['Seen on the other site?', 'The CVR row says whether the other site is seeing the same move (the same direction, at least 3%, and at least a third as big). Other rows only show a tag when they differ from that; otherwise the column is blank. It is also blank when a segment\'s traffic swung too much to read fairly.'],
-    ['Bot filter', state.botf === 'max' ? 'Maximum (the default): bot score 90 or higher, top countries only. ' + (b === 'tp' ? 'USA, UK, Australia and Canada; verified crawlers excluded.' : 'USA, Canada, UK, Australia, Germany, France and New Zealand.') + ' It over-corrects on purpose: read the direction, not the level. Switch to Strong at the top of the page for the score-70 view.' : b === 'tp' ? 'Visitors need a Cloudflare bot score of 70 or higher, and verified crawlers are excluded. Levels read higher than the unfiltered Amplitude charts.' : 'Redbubble uses the score of 70 or higher only. Bots still sit in Direct and desktop traffic, so levels read low. Read direction, not level.'],
+    ['Bot filter', state.botf === 'max' ? 'Maximum (the default): bot score 90 or higher, top countries only. ' + (b === 'tp' ? 'USA, UK, Australia and Canada; verified crawlers excluded.' : 'USA, Canada, UK, Australia, Germany, France and New Zealand.') + ' It over-corrects on purpose: read the direction, not the level. Switch to Strong at the top of the page for the score-70 view.' : state.botf === 'standard' ? 'Visitors need a Cloudflare bot score of 30 or higher and nothing else is dropped: no country limit, no verified-crawler or fingerprint exclusion. People who score 30 to 70 stay in, and so do bots that score above 30' + (b === 'rb' ? ', mostly in Direct and desktop traffic, so levels read low' : '') + '. Read direction, not level.' : b === 'tp' ? 'Visitors need a Cloudflare bot score of 70 or higher, and verified crawlers are excluded. Levels read higher than the unfiltered Amplitude charts.' : 'Redbubble uses the score of 70 or higher only. Bots still sit in Direct and desktop traffic, so levels read low. Read direction, not level.'],
     ['Settling', 'The newest two days usually revise up 4 to 11% over the next 48 hours. Do not call a day weak until it has settled.'],
     b === 'tp' ? ['Sep 30 to Oct 4', 'A $16.50 tee price test ran all week and a bot spike hit Oct 2 and 3. Those days are never used as comparison or comparable days.'] : ['Channel on Redbubble', 'Redbubble\'s Channel property is broken upstream (DEAP-5099), so channel uses campaign medium. Direct is (none), Paid Search is cpc.'],
     b === 'tp' ? ['Last year\'s sale days', 'The 2025 sale calendar is not logged, so a day at or above 3% bot-filtered CVR counts as a sale day there.'] : ['Checkout completion', 'Not comparable across Aug 17 and Sep 8 because of the cart shipping removal test. It steps down from about 85% to about 70% across those dates.'],
@@ -823,7 +826,7 @@ function cmpTip1(b, d, kind, mk, bare) {
   const sw = bare ? '' : '<div class="kctop"><div class="kcsw">' + [['cvr', 'CVR'], ['sess', 'Sessions'], ['rev', 'Revenue']].map(o => '<button type="button" data-kctip="' + b + '|' + d + '|' + kind + '|' + o[0] + '" aria-pressed="' + (o[0] === mk) + '">' + o[1] + '</button>').join('') + '</div>' +
     '<button type="button" class="swtog kctog" role="switch" data-kctip="' + b + '|' + d + '|' + kind + '|' + mk + '|o" aria-checked="' + !!state.tipOther + '"><span class="trk"><span class="knb"></span></span>' + BR[BR[b].other].name + '</button></div>';
   // Hourly overlay when we have hours: the day's line against the comparison (one day, or the hour-by-hour average of several).
-  const HR = state.botf !== 'max' && typeof HOURLY !== 'undefined' && HOURLY[b] ? HOURLY[b] : null, hd = HR && HR[d] && HR[d][mk];
+  const HR = state.botf === 'strong' && typeof HOURLY !== 'undefined' && HOURLY[b] ? HOURLY[b] : null, hd = HR && HR[d] && HR[d][mk];
   const hc = HR && kind !== 'hero' ? ds.map(x => HR[x] && HR[x][mk]).filter(Boolean) : [];
   if (hd && hc.length) {
     const cmp = Array.from({ length: 24 }, (_, h) => { const xs = hc.map(a => a[h]).filter(x => x != null); return xs.length ? sum(xs) / xs.length : null; });
@@ -1156,9 +1159,9 @@ function topHtml(b) {
   // Hidden until src/datamax.js exists, so the switch never offers a filter with no data behind it.
   // Each option explains itself on hover; the label is plain (Mike, Oct 26).
   // Bot filter: a quiet menu top right, above the date, so it doesn't sit between the sale and the headline (Mike, Oct 28).
-  const bfk = state.botf === 'strong' ? 'strong' : 'max';
+  const bfk = bfKey();
   const bot = !hasMax() ? '' : '<div class="bfwrap"><span class="bftitle">Bot filter</span><details class="bfdd"><summary><svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><path d="M8 1.6 3 3.6v4c0 3 2.1 5.3 5 6.4 2.9-1.1 5-3.4 5-6.4v-4z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg><b>' + BOTF[bfk].l + '</b><span class="bfcar" aria-hidden="true">▾</span></summary><div class="bfmenu">' +
-    ['max', 'strong'].map(k => '<button type="button" class="bfitem" data-botf="' + k + '" aria-pressed="' + (bfk === k) + '"><b>' + BOTF[k].l + (k === 'max' ? ' <span class="bfdef">default</span>' : '') + '</b><span>' + BOTF_TIP[k](b).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().replace(/^\S+( \(default\))?\s*:\s*/, '').replace(/\bUS\b/g, 'USA').replace(/^Bot score/, 'Cloudflare bot score') + '</span></button>').join('') + '</div></details></div>'; // "Bot filter" as the title, the shield and the choice as the dropdown (Mike, Oct 28)
+    ['max', 'strong'].concat(hasStd() ? ['standard'] : []).map(k => '<button type="button" class="bfitem" data-botf="' + k + '" aria-pressed="' + (bfk === k) + '"><b>' + BOTF[k].l + (k === 'max' ? ' <span class="bfdef">default</span>' : '') + '</b><span>' + BOTF_TIP[k](b).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().replace(/^\S+( \(default\))?\s*:\s*/, '').replace(/\bUS\b/g, 'USA').replace(/^Bot score/, 'Cloudflare bot score') + '</span></button>').join('') + '</div></details></div>'; // "Bot filter" as the title, the shield and the choice as the dropdown (Mike, Oct 28)
   const chip = '<div class="dchipw"><button type="button" class="dchip' + (atEnd ? '' : ' past') + '" data-dayopen="1" aria-expanded="' + !!state.dayOpen + '"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><rect x="2" y="3" width="12" height="11" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M2 6.5h12M5.5 1.8v2.6M10.5 1.8v2.6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><b>' + label(d) + '</b><span class="dcar" aria-hidden="true"><svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><path d="M10.6 2.6a1.6 1.6 0 0 1 2.3 2.3L5.7 12.1 2.5 13l.9-3.2z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="m9.4 3.8 2.3 2.3" stroke="currentColor" stroke-width="1.5"/></svg></span></button><div class="daypop"' + (state.dayOpen ? '' : ' hidden') + '>' + panel + '</div></div>';
   return '<section aria-label="Day under review"><div class="dtop">' + bot + '</div>' +
     '<div class="vsalew vsale2">' + chip + (st.sale ? '<span class="vsale">🏷️ ' + saleTxt + '</span>' : '<span class="vsale off">No sale · regular prices</span>') + '</div>' /* above the headline on the CVR tabs, in the earlier brand-tinted design (Mike, Oct 28) */ + '<p class="verdict">' + (verdictHtml(b), VLEAD) + '</p>' + standupLine(b, d) /* the subhead is back (Mike, Oct 28) */ + movedHtml() + '<div class="keys kov' + (c.custom ? ' kcus' : '') + (!c.custom ? ' ksolo' : '') /* full width on both sites now the last-year tile is gone (Mike, Oct 28) */ + '">' + keys + '</div>' + '</section>';
@@ -1347,7 +1350,7 @@ const RT = { db: null, user: null, me: null, canWrite: null, docs: [], names: {}
   try { RT.canWrite = user && user.can ? user.can('data.write') : null; } catch (e) { RT.canWrite = null; }
   if (user && user.search) { const names = [ADMIN, REVIEWER].concat(...Object.values(EDITORS)).filter((n, i, a) => a.indexOf(n) === i); for (const n of names) { try { const r = await user.search(n); const hit = (r || []).find(p => sameName(p.name, n)); if (hit) OR.ids[n] = hit.id; } catch (e) { /* directory unavailable */ } } }
   db.collection('order').onSnapshot(snap => { OR.docs = snap.docs.map(d => ({ id: d.id, orders: (d.data() || {}).orders || {} })); OR.ready = true; if (state.view === 'soon') renderKeep(); }, () => { /* keep the default order */ });
-  db.collection('flags').onSnapshot(snap => { FLAGS = {}; snap.docs.forEach(d => { FLAGS[d.id] = (d.data() || {}).items || {}; }); if (state.view === 'impact') renderKeep(); }, () => { /* flags unavailable */ });
+  db.collection('flags').onSnapshot(snap => { FLAGS = {}; snap.docs.forEach(d => { FLAGS[d.id] = (d.data() || {}).items || {}; }); if (state.view === 'impact' || state.view === 'soon') renderKeep(); }, () => { /* flags unavailable */ });
   db.collection('acks').onSnapshot(snap => { Object.keys(ACK).forEach(k => delete ACK[k]); snap.docs.forEach(d => { ACK[d.id] = d.data() || {}; }); if (state.view === 'soon') renderKeep(); }, () => { /* no shared reviews */ });
   db.collection('ticks').onSnapshot(snap => { SHT = {}; snap.docs.forEach(d => { SHT[d.id] = d.data() || {}; }); TKSH = true; if (state.view === 'standup') renderKeep(); }, () => { /* fall back to this browser's ticks */ });
   db.collection('topics').onSnapshot(async snap => {
@@ -1945,8 +1948,29 @@ function topOne() {
   const tp = topicOf(t.title);
   return '<a class="top1" href="https://www.teepublic.com/t-shirt/' + TOP_IDS[0] + '" target="_blank" rel="noopener"><span class="t1k">🏆 Top design, last 24 hours</span><span class="t1img"><img src="' + t.img + '" alt="' + esc(t.title) + '" loading="lazy"><span class="rank">1</span></span><b>' + esc(t.title) + '</b>' + (tp ? '<span class="ttag gold">' + (hotTopic(tp) ? '🔥 ' : '#') + esc(tp) + '</span>' : '') + '<span class="cap">' + int(t.orders) + ' orders</span></a>';
 }
+const hasRbTops = () => typeof TOPS_RB !== 'undefined' && TOPS_RB && TOPS_RB.items && TOPS_RB.items.length > 0;
 function topsHtml() {
+  const rb = hasRbTops() && state.topSite === 'rb';
+  if (rb) return '<div class="topgrid">' + TOPS_RB.items.map((t, i) => '<a class="top" href="' + esc((TOPS_RB.links || [])[i] || 'https://www.redbubble.com/shop/?query=' + encodeURIComponent(t.title)) + '" target="_blank" rel="noopener"><span class="rank">' + (i + 1) + '</span>' + (t.img ? '<img src="' + t.img + '" alt="' + esc(t.title) + '" loading="lazy">' : '<span class="noimg" aria-hidden="true">' + esc(t.title) + '</span>') + '<b title="' + esc(t.title) + '">' + esc(t.title) + '</b><span class="cap">' + int(t.orders) + ' orders</span></a>').join('') + '</div>';
   return '<div class="topgrid">' + TOPS.items.map((t, i) => '<a class="top" href="https://www.teepublic.com/t-shirt/' + TOP_IDS[i] + '" target="_blank" rel="noopener"><span class="rank">' + (i + 1) + '</span><img src="' + t.img + '" alt="' + esc(t.title) + '" loading="lazy"><b title="' + esc(t.title) + '">' + esc(t.title) + '</b>' + (topicOf(t.title) ? '<span class="ttag' + (hotTopic(topicOf(t.title)) ? ' hot' : '') + '" title="Topic this design rides on' + (hotTopic(topicOf(t.title)) ? ', heating up right now' : '') + '">' + (hotTopic(topicOf(t.title)) ? '🔥 ' : '#') + esc(topicOf(t.title)) + '</span>' : '') + '<span class="cap">' + int(t.orders) + ' orders</span></a>').join('') + '</div>';
+}
+function topSiteSwitch() {
+  if (!hasRbTops()) return '';
+  return '<div class="seg" role="group" aria-label="Site for top designs">' + [['tp', 'TeePublic', 'Show TeePublic top designs'], ['rb', 'Redbubble', 'Show Redbubble top designs']].map(([k, n, tip]) => '<button data-topsite="' + k + '" title="' + tip + '" aria-pressed="' + ((state.topSite || 'tp') === k) + '">' + n + '</button>').join('') + '</div>';
+}
+function topsPanel() {
+  const rb = hasRbTops() && state.topSite === 'rb';
+  const sub = rb
+    ? 'Redbubble designs in the most orders, last 24 hours. ' + esc(TOPS_RB.note || '') + ' <a class="srclink" href="https://app.amplitude.com/analytics/tpub/dashboard/lm29400h" target="_blank" rel="noopener">Source: Amplitude orders by design, Strong bot filter\u00a0↗</a>'
+    : 'TeePublic designs in the most orders, last 24 hours. Each is tagged with the topic it rides on; 🔥 marks a topic that is heating up right now. ' + esc(TOPS.note || '') + ' <a class="srclink" href="https://app.amplitude.com/analytics/tpub/dashboard/lm29400h" target="_blank" rel="noopener">Source: orders by design in Amplitude, not TeePublic admin\u00a0↗</a>';
+  return panel('🏆', 'Top designs', sub, topsHtml(), 'p-top', topSiteSwitch());
+}
+// Incidents from the public #inc-* channels, in Trending under Bot Squad updates (Mike, Nov 3; the design agency's call: Trending is where "what blew up" is read each morning, and a separate tab would add one more place to check).
+function incidentsHtml() {
+  if (typeof INCIDENTS === 'undefined' || !INCIDENTS.items.length) return '';
+  const tone = { bad: 'bad', warn: 'warn', good: 'good' };
+  return '<section class="bare tinc"><div class="ghead"><div class="gt"><h3>🚨 Incidents</h3><p class="gsub">The ' + esc(INCIDENTS.window) + ', from the public incident channels. <a class="srclink" href="' + esc(INCIDENTS.log) + '" target="_blank" rel="noopener">Incident Log\u00a0↗</a></p></div></div><div class="say4">' +
+    INCIDENTS.items.map(s => '<a class="scard ' + (tone[s.tone] || 'warn') + '" href="' + esc(s.url) + '" target="_blank" rel="noopener" style="text-decoration:none;color:inherit"><div class="schd"><h4><span class="scic" aria-hidden="true">' + s.e + '</span><span>' + esc(s.title) + '</span></h4><span class="sctags"><span class="stat-chip ' + (tone[s.tone] || 'warn') + '">' + esc(s.status) + '</span><span class="scmeta">' + esc(SITE[s.site] || s.site) + '</span></span></div><p title="' + esc(s.body) + '">' + esc(s.body) + '</p><div class="scft"><span class="cap">' + esc(s.channel) + ' · ' + esc(s.when) + '</span></div></a>').join('') + '</div></section>';
 }
 function trendingHtml() {
   const call = typeof SELLCALL !== 'undefined' ? '<section class="callcard2"><h3>' + SELLCALL.e + ' ' + esc(SELLCALL.title) + '</h3><p>' + esc(SELLCALL.body) + '</p><p class="ask">💰 ' + esc(SELLCALL.ask) + '</p><a class="ref ext" href="' + esc(SELLCALL.src) + '" target="_blank" rel="noopener">Series preview ↗</a></section>' : '';
@@ -1955,12 +1979,13 @@ function trendingHtml() {
     (() => { const L = SLACK, more = L.length - 4; return '<section class="bare tsay"><div class="ghead"><div class="gt"><h3>💬 What people are saying</h3><p class="gsub">The last 48 hours.</p></div></div>' + (L.length ? '' : '<p class="cap">Quiet: nothing new in the last 48 hours.</p>') + sayList(state.sayAll ? L : L.slice(0, 4), state.sayAll ? L.length : 4) + (more > 0 && !state.sayAll ? '<button type="button" class="linkbtn saymore" data-saymore="1">Show ' + more + ' more</button>' : '') + '</section>'; })() +
     // Bot Squad updates moved here from the CVR pages, under What people are saying, both sites (Mike, Oct 27).
     '<section class="botsec" id="g-bots"><div class="bothead"><h2>🤖 Bot Squad updates</h2><span class="botlinks">' + ['rb', 'tp'].map(b => botNotesFor(b).length ? '<button type="button" class="linkbtn bmore" data-botwatch="' + b + '">All ' + BR[b].name + ' bot notes →</button>' : '').join('') + '</span></div><div class="say4 botsay">' + ['rb', 'tp'].map(b => botRow(b, true)).join('') + '</div></section>' +
+    incidentsHtml() +
     // Customer service lives here once, for both sites (Mike, Oct 24), instead of on each CVR page.
     (typeof CS !== 'undefined' && CS.tp && CS.rb ? '<section class="bare tcs"><div class="ghead"><div class="gt"><h3>🎧 What customer service is seeing</h3><p class="gsub">Repeat customer complaints from the customer service channels, ' + esc(String(CS.window || '').replace(/^Customer service channels,\s*/i, '')) + '.</p></div></div>' + csHtml() + '</section>' : '') +
-    '<div class="sellrow">' + panel('🏷️', 'What is selling', 'Share of TeePublic orders by category in the last 24 hours, and the topics moving fastest.', sellingHtml(), 'p-sell') +
+    '<div class="sellrow">' + panel('🏷️', 'What is selling', 'Share of TeePublic orders by category in the last 24 hours, and the topics moving fastest. <a class="srclink" href="https://app.amplitude.com/analytics/tpub/dashboard/lm29400h" target="_blank" rel="noopener">Source: order data in Amplitude\u00a0↗</a>', sellingHtml(), 'p-sell') +
     '</div>' +
     (call ? '<section class="sec2 dbl"><div class="shead"><div><h2>💡 Should we double down?</h2></div></div>' + call + '</section>' : '') +
-    panel('🏆', 'Top designs', 'TeePublic designs in the most orders, last 24 hours. Each is tagged with the topic it rides on; 🔥 marks a topic that is heating up right now. ' + esc(TOPS.note || ''), topsHtml(), 'p-top') +
+    topsPanel() +
     (typeof SHOUTS !== 'undefined' ? panel('🙌', 'Shout-out of the day', 'One person who drove something through.', shoutCard(), 'p-shout p-shoutw') : '') + '</section>';
 }
 function scoreHtml(b) {
@@ -2038,7 +2063,7 @@ const abHead = sortable => {
   const S = state.abSort || { k: 'days', dir: 1 }, tip = (b, x) => '<span class="nosrc"><b>' + b + '</b><br>' + x + '</span>';
   const c = (k, inner, num) => '<span class="abh' + (num ? ' num' : '') + '"' + (sortable ? ' role="button" tabindex="0" data-absort="' + k + '"' : '') + '>' + inner + (sortable && S.k === k ? '<i class="sa" aria-hidden="true">' + (S.dir > 0 ? '↑' : '↓') + '</i>' : '') + '</span>';
   return '<div class="tcols abcols">' + c('test', 'Test') + c('days', sortable ? 'Running' : 'Ran') + c('sig', hint('Stat sig', 'soft', tip('Stat sig', 'Is there 95% confidence the main metric moved, not noise?'))) +
-    c('cvr', hint('CVR', 'soft', tip('Sitewide CVR impact', 'The test group\'s CVR change, scaled by the share of traffic it reaches: what it would do to the whole site.')), true) + c('aov', hint('AOV', 'soft', tip('AOV', 'Average order value in the test group vs control.')), true) +
+    c('cvr', hint('<small class="rpul"><span class="lg">Sitewide</span><span class="sm">Sitewide</span></small>CVR impact', 'soft', tip('Sitewide CVR impact', 'The test group\'s CVR change, scaled by the share of traffic it reaches: what it would do to the whole site.')), true) + c('aov', hint('AOV', 'soft', tip('AOV', 'Average order value in the test group vs control.')), true) +
     c('rpu', hint(rpuL + 'All users', 'soft', tip('Revenue per user, all users', 'Test group vs control. The main number for every test.')), true) + c('rpud', hint(rpuL + 'Desktop', 'soft', tip('Revenue per user, desktop', 'Test group vs control, desktop visitors only.')), true) + c('rpum', hint(rpuL + 'Mobile', 'soft', tip('Revenue per user, mobile', 'Test group vs control, mobile visitors only.')), true) + '</div>';
 };
 const abHeadSort = () => abHead(true);
@@ -2585,22 +2610,25 @@ function impactList() {
 const OUTN = { win: ['🟢', 'Win'], flat: ['⚪', 'No change'], loss: ['🔴', 'Didn\'t work'], measuring: ['🟡', 'Measuring'] };
 // Flags on Claude's estimates: anyone can mark one inaccurate or helpful, with a note, so Mike can fix the numbers.
 let FLAGS = {};
+// Flags work on any estimate Claude made: Recent impact revenue estimates and purple Est. impact on the roadmap (Mike, Nov 3).
+const flagEst = it => revEst(it) || cest(it);
+const flagItem = t => { const a = impactList().find(x => x.t === t); if (a && revEst(a)) return a; return allItems().find(x => x.t === t && !IMPS[x.t] && !x.imp && cest(x)) || null; };
 const flagKey = it => it.t.replace(/[^A-Za-z0-9]+/g, '-').slice(0, 60);
 const flagCount = it => { let off = 0, good = 0; Object.values(FLAGS).forEach(m => { const f = m[flagKey(it)]; if (f) f.v === 'off' ? off++ : good++; }); return { off, good }; };
 const flagBtn = it => { const n = flagCount(it), mine = RT.me && FLAGS[RT.me] && FLAGS[RT.me][flagKey(it)]; return '<button type="button" class="flagb' + (n.off ? ' has' : '') + (mine ? ' mine' : '') + '" data-flag="' + esc(it.t) + '" aria-label="Flag this estimate" title="' + (n.off || n.good ? n.off + ' flagged inaccurate · ' + n.good + ' marked helpful' : 'Flag this estimate') + '"><svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 14V2.5"/><path d="M3.5 3h8l-1.6 3 1.6 3h-8"/></svg>' + (n.off ? '<span>' + n.off + '</span>' : '') + '</button>'; };
 function flagModal(t) {
-  const it = impactList().find(x => x.t === t); if (!it || !revEst(it)) return;
+  const it = flagItem(t); if (!it) return;
   const mine = (RT.me && FLAGS[RT.me] && FLAGS[RT.me][flagKey(it)]) || {}, can = RT.db && RT.me && RT.canWrite !== false, n = flagCount(it);
   openModal('<div class="mhead"><span class="lbl">Claude\'s estimate</span><h3 id="mtitle">' + it.e + ' ' + esc(it.t) + '</h3></div>' +
-    '<div class="pbox"><b>' + esc(revEst(it).short) + '</b><p class="cap">' + esc(revEst(it).how) + '</p></div>' +
-    (can ? '<form class="flagf" data-flagf="' + esc(it.t) + '"><div class="flagv" role="radiogroup" aria-label="Your read"><label><input type="radio" name="fv" value="off"' + (mine.v !== 'good' ? ' checked' : '') + '> ⚑ Looks inaccurate</label><label><input type="radio" name="fv" value="good"' + (mine.v === 'good' ? ' checked' : '') + '> 👍 This was helpful</label></div>' +
+    '<div class="pbox"><b>' + esc(flagEst(it).short) + '</b><p class="cap">' + esc(flagEst(it).how) + '</p></div>' +
+    (can ? '<form class="flagf" data-flagf="' + esc(it.t) + '"><div class="flagv" role="radiogroup" aria-label="Your read"><label><input type="radio" name="fv" value="off"' + (mine.v !== 'good' ? ' checked' : '') + '> 👎 Looks inaccurate</label><label><input type="radio" name="fv" value="good"' + (mine.v === 'good' ? ' checked' : '') + '> 👍 Looks right</label></div>' +
       '<label class="flagn"><span class="lbl">Why? What would make it right?</span><textarea name="note" rows="3" maxlength="600" placeholder="e.g. the lift only applies to Redbubble apparel, not the whole site">' + esc(mine.note || '') + '</textarea></label>' +
       '<div class="flagact"><button type="submit" class="btn pri">' + (mine.v ? 'Update' : 'Send') + '</button>' + (mine.v ? '<button type="button" class="linkbtn" data-flagdel="' + esc(it.t) + '">Remove my flag</button>' : '') + '<span class="cap">' + (n.off || n.good ? n.off + ' flagged inaccurate · ' + n.good + ' marked helpful so far' : 'Mike reviews these and updates the numbers.') + '</span></div></form>'
       : ''));
 }
 async function flagSave(t, v, note) {
-  const it = impactList().find(x => x.t === t); if (!it || !RT.db || !RT.me) return;
-  const cur = Object.assign({}, FLAGS[RT.me] || {}); if (v) cur[flagKey(it)] = { v, note: (note || '').slice(0, 600), at: new Date().toISOString(), est: revEst(it).short, item: it.t }; else delete cur[flagKey(it)];
+  const it = flagItem(t); if (!it || !RT.db || !RT.me) return;
+  const cur = Object.assign({}, FLAGS[RT.me] || {}); if (v) cur[flagKey(it)] = { v, note: (note || '').slice(0, 600), at: new Date().toISOString(), est: flagEst(it).short, item: it.t }; else delete cur[flagKey(it)];
   try { await RT.db.collection('flags').doc(RT.me).set({ items: cur }); FLAGS[RT.me] = cur; closeModal && closeModal(); renderKeep(); } catch (e) { const f = document.querySelector('.flagf .cap'); if (f) f.textContent = 'Could not save. You may need edit access to this page.'; }
 }
 function impModal(i) {
@@ -2694,7 +2722,7 @@ function chgBar() {
 // (sprint priorities, new asks, experiments, up next), grouped by objective inside each section.
 const MEETS = [['customer', 'Customer'], ['plc', 'Purchase Lifecycle'], ['search', 'Search & Content'], ['artist', 'Artist and Apps'], ['core', 'Core'], ['de', 'Data Engineering'], ['martech', 'MarTech'], ['dashery', 'Dashery']];
 // Impact: people's estimates show as written; Claude's own estimates carry the robot so nobody mistakes them for the team's.
-const impCell = it => { const p = IMPS[it.t] || it.imp; return p ? hint(esc(p), 'rmimp', '<b>From ' + esc(it.impSrc ? (/^(roadmap sheet|the roadmap sheet)/i.test(it.impSrc) ? it.impSrc.replace(/^the /i, '') : it.impSrc) : 'Roadmap sheet estimate') + '</b>') : cest(it) ? hint(cest(it).short, 'rmimp ce', '<b>Claude\'s estimate, not the team\'s</b><br>Shown in purple so it is not mistaken for a team number.<br><br>' + esc(cest(it).how)) : ''; };
+const impCell = it => { const p = IMPS[it.t] || it.imp; return p ? hint(esc(p), 'rmimp', '<b>From ' + esc(it.impSrc ? (/^(roadmap sheet|the roadmap sheet)/i.test(it.impSrc) ? it.impSrc.replace(/^the /i, '') : it.impSrc) : 'Roadmap sheet estimate') + '</b>') : cest(it) ? hint(cest(it).short, 'rmimp ce', '<b>Claude\'s estimate, not the team\'s</b><br>Shown in purple so it is not mistaken for a team number.<br><br>' + esc(cest(it).how)) + flagBtn(it) : ''; };
 const impVal = it => { const c = cest(it), s = String(IMPS[it.t] || it.imp || (c ? c.short : '')), m = s.match(/([\d.]+)\s*([KkMm])/); if (!m) return -1; const v = parseFloat(m[1]) * (/m/i.test(m[2]) ? 1e6 : 1e3); return /month/i.test(s) ? v * 12 : v; };
 // Seven steps from idea to live. The status cell shows where a project is now and what comes next.
 const STEPS = ['Discovery', 'Sizing', 'Coding', 'Review', 'QA', 'Launch', 'Live'];
@@ -3219,7 +3247,7 @@ function srcMenu0(cvr) {
   if (v === 'tests') return a('https://app.amplitude.com/experiment/tpub/774278', '🧪 All tests in Amplitude Experiment') + a('https://articore.atlassian.net/browse/DEAP-6266', '🎫 Next test in Jira') + how;
   if (v === 'soon') return a(SHEET, '🗂️ Product org roadmap sheet') + a('https://articore.atlassian.net/jira/software/c/projects/DEAP/issues', '🎫 DEAP project in Jira') + how;
   if (v === 'impact') return a('https://articore.atlassian.net/wiki/spaces/EC1/pages/5056036893/RB+A+B+Cart+Shipping+Options+Test+-+Post-Project+Analysis', '🏅 Latest results write-up') + a('https://app.amplitude.com/experiment/tpub/774278', '🧪 Test results in Amplitude Experiment') + how;
-  if (v === 'trending') return a('https://www.teepublic.com/t-shirts?query=brewers', '🛍️ Brewers designs on TeePublic') + a('https://app.amplitude.com/analytics/tpub/dashboard/lm29400h', '📊 Orders data in Amplitude') + how;
+  if (v === 'trending') return a('https://www.teepublic.com/t-shirts?query=brewers', '🛍️ Brewers designs on TeePublic') + a('https://app.amplitude.com/analytics/tpub/dashboard/lm29400h', '📊 Orders data in Amplitude') + (typeof INCIDENTS !== 'undefined' ? a(INCIDENTS.log, '🚨 Incident Log in Confluence') : '') + how;
   return a(SHEET, '🗂️ Product org roadmap sheet') + how;
 }
 function tickerItems() {
@@ -3308,7 +3336,7 @@ function drawOpenCharts() {
 const ccmpOf = b => state.ccmp === 'mom' ? 'mom' : state.ccmp === 'sim' || b !== 'tp' ? 'sim' : 'yoy';
 // Sources under the 90-day chart, bottom-left, expanding in place (Mike, Oct 28).
 function chartSrc(b) {
-  const bf = state.botf === 'strong' ? 'strong' : 'max', L = [
+  const bf = bfKey(), L = [
     '📊 <b>CVR and sessions:</b> ' + LNK('https://app.amplitude.com/analytics/tpub/dashboard/' + AMPD[bf], 'Amplitude, CVR Pacer dashboard (' + BOTF[bf].l + ' bot filter)') + '; the comparison line is the same charts run 364 days back (last year) or 28 days back',
     '🏷️ <b>Sale days:</b> ' + SLK('CBHK9E864', 'promotions'),
     '🚀 <b>Key releases:</b> ' + SLK('C0V4PM9DW', 'released'),
@@ -3442,7 +3470,7 @@ function render() {
   if (!$('#brand').innerHTML) $('#brand').innerHTML = '<svg class="slogo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="40" height="40" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#14202e"/><rect x="7" y="17" width="4.6" height="8" rx="1.6" fill="#34465a"/><rect x="13.7" y="12" width="4.6" height="13" rx="1.6" fill="#34465a"/><rect x="20.4" y="7" width="4.6" height="18" rx="1.6" fill="#4fd18b"/></svg>' + '<span class="bstack"><span class="beyebrow">Articore</span><span class="btitle">Product Org Dashboard</span></span>';
   $('#meta').innerHTML = 
     (TKOFF ? '<button type="button" class="tkshow" data-act="ticker" title="Show the headline ticker"><span class="tkdot" aria-hidden="true"></span>Show today\'s headlines</button>' : '');
-  $('#meta').insertAdjacentHTML('beforeend', '<span class="util' + (CDTOP ? ' quiet' : '') + '">' + '<div class="about"><button type="button" class="linkbtn" id="aboutbtn" aria-haspopup="true" aria-expanded="false">' + '<svg class="abico" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><ellipse cx="8" cy="3.6" rx="5.5" ry="2.1" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M2.5 3.6v8.8c0 1.2 2.5 2.1 5.5 2.1s5.5-.9 5.5-2.1V3.6M2.5 8c0 1.2 2.5 2.1 5.5 2.1s5.5-.9 5.5-2.1" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>About this data' + ' <span aria-hidden="true">▾</span></button><div class="amenu" id="amenu" hidden role="menu">' + srcMenu(cvr) + '</div></div>' + (CDTOP || '') + hint('↻ <span class="rfll">Last refreshed </span><b>' + esc(REFRESH.last) + '</b>', 'rfl rflnav', '<b class="tiph nosrc">How often this page refreshes</b><ul class="hul nrul"><li>🔄 <b>Three times a day:</b> about 8:30 AM, 2:30 PM and 4:30 PM ET</li><li>🌅 <b>8:30 AM:</b> yesterday\'s full numbers and overnight Slack</li><li>📣 <b>2:30 PM:</b> fresh for the daily peak standup</li><li>🗺️ <b>Before each exec roadmap review:</b> a full refresh 30 minutes ahead (Tuesdays, every two weeks)</li><li>📅 <b>Numbers cover full days:</b> the CVR pages show yesterday at the latest</li></ul>') /* how often it refreshes, on hover (Mike, Oct 28) */  + '</span>')
+  $('#meta').insertAdjacentHTML('beforeend', '<span class="util' + (CDTOP ? ' quiet' : '') + '">' + '<div class="about"><button type="button" class="linkbtn" id="aboutbtn" aria-haspopup="true" aria-expanded="false">' + '<svg class="abico" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><ellipse cx="8" cy="3.6" rx="5.5" ry="2.1" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M2.5 3.6v8.8c0 1.2 2.5 2.1 5.5 2.1s5.5-.9 5.5-2.1V3.6M2.5 8c0 1.2 2.5 2.1 5.5 2.1s5.5-.9 5.5-2.1" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>About this data' + ' <span aria-hidden="true">▾</span></button><div class="amenu" id="amenu" hidden role="menu">' + srcMenu(cvr) + '</div></div>' + (CDTOP || '') + hint('↻ <span class="rfll">Last refreshed </span><b>' + esc(REFRESH.last) + '</b>', 'rfl rflnav', '<b class="tiph nosrc">How often this page refreshes</b><ul class="hul nrul"><li>🔄 <b>Once a day:</b> about 8:00 AM ET, the whole board</li><li>🌅 <b>Each refresh:</b> yesterday\'s full numbers, overnight Slack, tests and the roadmap</li><li>📅 <b>Numbers cover full days:</b> the CVR pages show yesterday at the latest</li></ul>') /* how often it refreshes, on hover (Mike, Oct 28) */  + '</span>')
   tickCD(); // fill the countdown tiles right away, so it never flashes empty between tab clicks (Mike, Oct 27)
   const main = $('#main');
   if (state.view !== 'daily') { HINTS = []; hideHint(); main.innerHTML = state.view === 'tests' ? testsHtml() : state.view === 'impact' ? impactHtml() : state.view === 'soon' ? comingHtml() : state.view === 'trending' ? trendingHtml() : standupHtml(); return; }
@@ -3562,6 +3590,7 @@ document.addEventListener('click', ev => {
   const sw = t.closest('[data-abdev]'); if (sw) { const box = sw.closest('.abtabs'); box.querySelectorAll('[data-abdev]').forEach(b => b.setAttribute('aria-pressed', String(b === sw))); box.querySelectorAll('[data-abpane]').forEach(pn => { pn.hidden = pn.dataset.abpane !== sw.dataset.abdev; }); return; }
   const xr = t.closest('[data-xrow]'); if (xr) return testDetailModal(xr.dataset.xrow);
   const why = t.closest('[data-why]'); if (why) { ev.stopPropagation(); return whyModal(why.dataset.why); }
+  const tsite = t.closest('[data-topsite]'); if (tsite) { state.topSite = tsite.dataset.topsite; renderKeep(); return; }
   const mode = t.closest('[data-cmpmode]'); if (mode) { state.cmpMode = mode.dataset.cmpmode; const [cb, ck] = state.cmp.split('|'); const m = findMetric(cb, state.cmp.slice(cb.length + 1)); if (m) compareModal(m); return; }
   const pgb = t.closest('[data-pgeo]'); if (pgb) { const [k, g] = pgb.dataset.pgeo.split('|'); state.pgeo = state.pgeo || {}; state.pgeo[k] = g; return renderKeep(); }
   const mvbk = t.closest('[data-mvback]'); if (mvbk) { ev.stopPropagation(); const [bb, kk] = mvbk.dataset.mvback.split('|'); const m = findMetric(bb, kk); if (m) movedModal(movedFor1(m)); return; }
@@ -3612,7 +3641,7 @@ window.addEventListener('scroll', () => {
 
 { const hb = document.createElement('div'); hb.id = 'hintbox'; hb.className = 'hintbox'; hb.hidden = true; hb.setAttribute('role', 'tooltip'); document.body.appendChild(hb); }
 // One footer for every page: what this is, when it refreshes, where the data comes from, who to ask.
-$('#foot').innerHTML = '<div class="fin"><div class="fbrand"><b>' + LOGO('pod', 22) + ' Product Org Dashboard</b>How the Articore product org is doing: CVR, what is shipping, what we are testing and what changed.<p class="fsmall">Built by Mike Carafa with Claude. Updates at 8:30 AM, 2:30 PM and 4:30 PM ET.</p></div>' +
+$('#foot').innerHTML = '<div class="fin"><div class="fbrand"><b>' + LOGO('pod', 22) + ' Product Org Dashboard</b>How the Articore product org is doing: CVR, what is shipping, what we are testing and what changed.<p class="fsmall">Built by Mike Carafa with Claude. Updates once a day at 8 AM ET.</p></div>' +
   '<div><h4>Feedback or ideas for this dashboard</h4><a href="https://grid-articore.enterprise.slack.com/team/U2XU2NP7T" target="_blank" rel="noopener">Ask Mike in Slack ↗</a></div></div>';
 try { state.tipOther = localStorage.getItem('pod.tipo') === '1'; state.ccOth = localStorage.getItem('pod.ccoth2') === 'on'; } catch (e) {}
 // The viewer never updates the address bar, so a link's #tab sticks after clicking around. On a reload of the same link,
@@ -3626,7 +3655,7 @@ let h0 = (location.hash || '').slice(1);
 const HPARTS = h0.split('~'); h0 = HASHIN[HPARTS[0]] || HPARTS[0];
 if (HPARTS.length > 1) { state.teams = []; state.goals = []; state.views = []; state.sites = []; state.pms = [];
   HPARTS.slice(1).forEach(p => { const [k, v] = [p.slice(0, p.indexOf('_')), p.slice(p.indexOf('_') + 1)];
-    if (k === 'mv' || k === 'cmp') state.openTok = [k, v]; else if (k === 's') state.sites.push(v); else if (k === 'p') state.pmsRaw = (state.pmsRaw || []).concat(v); else if (k === 't') state.teams.push(v); else if (k === 'g') state.goals.push(v); else if (k === 'v') state.views.push(v); else if (k === 'gb') state.gGroup = v; else if (p === 'list') state.rmGantt = false; else if (k === 'bf') state.botf = v; else if (k === 'd') state.day = v.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3'); }); }
+    if (k === 'mv' || k === 'cmp') state.openTok = [k, v]; else if (k === 's') state.sites.push(v); else if (k === 'p') state.pmsRaw = (state.pmsRaw || []).concat(v); else if (k === 't') state.teams.push(v); else if (k === 'g') state.goals.push(v); else if (k === 'v') state.views.push(v); else if (k === 'gb') state.gGroup = v; else if (p === 'list') state.rmGantt = false; else if (k === 'bf') applyBotFilter(v); else if (k === 'd') state.day = v.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3'); }); }
 try {
   const lastH = localStorage.getItem('pod.lasth') || '', lastV = localStorage.getItem('pod.lastv') || '';
   localStorage.setItem('pod.lasth', h0);
