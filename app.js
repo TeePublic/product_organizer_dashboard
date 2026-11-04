@@ -2122,7 +2122,7 @@ function abLeadCells(t, lead) {
 function abLeadNote(t, lead) {
   const R = abRd(t), M = R.m || {}, tot = R.vrows.length;
   const list = R.vrows.map(v => '<li><b>' + esc(v[0]) + '</b>' + (v[1].rpv != null ? ' ' + sgn(v[1].rpv, 1) + ' revenue per user' : '') + (v[0] === lead[0] ? ' (shown)' : '') + '</li>').join('');
-  return hint('<span class="abbest">Showing <b>' + esc(lead[0]) + '</b> · 1 of ' + tot + '</span>', 'abm abnh', '<span class="nosrc"><b>' + tot + ' versions, each vs control</b><ul class="abvl">' + list + '</ul>This row shows the one ' + (t.status === 'shipped' ? 'that shipped' : 'leading on revenue per user') + '. Open the test for control and every version.</span>');
+  return hint('<span class="rtag vtag">' + tot + ' versions</span>', 'abm abnh', '<span class="nosrc"><b>' + tot + ' versions, each vs control</b><ul class="abvl">' + list + '</ul>This row shows <b>' + esc(lead[0]) + '</b>, the one ' + (t.status === 'shipped' ? 'that shipped' : 'leading on revenue per user') + '. Open the test for control and every version.</span>');
 }
 function testRow(t, shipped) {
   const site = siteImp(t.cvr.rel, t.reach), open = state.open.has('x' + t.id), r = Math.round(t.reach * 100);
@@ -2130,7 +2130,7 @@ function testRow(t, shipped) {
   const more = (ttc(t).match(/~(\d+) more day/) || [])[1], dates = t.status === 'running' ? short(t.start) + ' → ' + (more ? '~' + short(addDays(EXPS_AS_OF, +more)) : 'open') + '<small>Day ' + testDays(t) + (more ? ' · result in ~' + more + ' days' : '') + '</small>' : short(t.start) + ' → ' + short(t.end) + '<small>' + (Math.round((parse(t.end) - parse(t.start)) / DAY) + 1) + ' days</small>';
   const fv = t.primary.name.indexOf('per') > -1 ? v => v.toFixed(3) : v => pct(v, v < 0.01 ? 3 : v < 0.05 ? 2 : 1);
   const lead = abLead(t);
-  let h = '<div class="rowwrap"><div class="trow abrow" role="button" tabindex="0" aria-expanded="' + open + '" data-xrow="' + t.id + '"><span class="tname tnico"><span class="ge gico g-' + esc(testObj(t)) + '" aria-hidden="true">' + projIco({ t: t.name, obj: testObj(t) }) + '</span><b>' + esc(t.name) + '</b><span class="cap tmeta">' + sitePill(testSite(t)) + '<span class="tloc">' + esc(t.where) + '</span></span>' + (lead ? abLeadNote(t, lead) : '') + '</span>' +
+  let h = '<div class="rowwrap"><div class="trow abrow" role="button" tabindex="0" aria-expanded="' + open + '" data-xrow="' + t.id + '"><span class="tname tnico"><span class="ge gico g-' + esc(testObj(t)) + '" aria-hidden="true">' + projIco({ t: t.name, obj: testObj(t) }) + '</span><b>' + esc(t.name) + '</b><span class="cap tmeta">' + sitePill(testSite(t)) + (lead ? abLeadNote(t, lead) : '') + '<span class="tloc">' + esc(t.where) + '</span></span></span>' +
     abDay(t) + abSig(t) + (lead ? abLeadCells(t, lead) : abImpN(t) + abN(abMet(t).aov, (abMet(t).aov || {}).name || 'AOV') + abN(abMet(t).rpv, 'Revenue per user, all users', true, true) + abN(abDevOf(t, 'desktop'), 'Revenue per user, desktop', false, true) + abN(abDevOf(t, 'mobile'), 'Revenue per user, mobile', false, true)) + '</div>';
   return h + '</div>';
 }

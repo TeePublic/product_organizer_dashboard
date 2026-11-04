@@ -3950,8 +3950,8 @@ details.pbox.prov > summary { cursor: pointer; list-style: none; } details.pbox.
 /* A/B versions (Mike, Nov 4): the pop-up has a Control row; the main row shows the leading version with a note that others exist. */
 .abres .chn.base { color: var(--ink-2); font-weight: 500; }
 .abbox .abone .ctlrow td { background: color-mix(in srgb, var(--ctl) 5%, var(--surface)); }
-.abrow .abbest { display: block; margin-top: 4px; font-size: 12.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
-.abrow .abbest b { font-weight: 600; color: var(--ink-2); }
 .abvl { margin: 6px 0; padding-left: 16px; } .abvl li { margin: 2px 0; }
-:root:not(#z):not(#y) .abrow .tnico > .hint.abnh { grid-column: 2; justify-self: start; min-width: 0; max-width: 100%; }
-@media (max-width: 760px) { .abrow .abbest { white-space: normal; } }
+
+
+.abrow .tmeta .hint.abnh { justify-self: auto; border-bottom: 0; flex: none; }
+.abrow .vtag { background: color-mix(in srgb, var(--ctl) 12%, transparent); color: var(--ctl); font-weight: 600; white-space: nowrap; }
