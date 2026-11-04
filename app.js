@@ -2104,27 +2104,34 @@ function testDetailModal(id) {
   openModal('<div class="mhead"><h3 id="mtitle">' + esc(t.name) + '</h3></div><div class="mtags"><span class="rtag">' + siteDot(testSite(t)) + '</span><span class="rtag">' + esc(t.where) + '</span><span class="rtag">' + runTag + '</span>' + (running && more ? '<span class="rtag">Result in about ' + more + ' days</span>' : '') + pill + '</div>' +
     '<div class="abdeep">' + what + results + '<div class="abfoot2"><span class="cap">Amplitude gives no error bar for revenue, so read revenue as a direction, not proof.</span>' + srcBtn('test:' + t.id) + '</div></div>');
 }
-// One line per version on the main row, each its change vs control (Mike, Nov 4). Lines sit on the row's own columns (subgrid) so they line up with the header.
-function abVarRows(t) {
-  const R = abRd(t), M = R.m || {}, D = R.dev || {};
-  const mkx = (m, v) => m && v != null ? { v: v, a: m.a, b: m.a * (1 + v), f: m.f, s: m.s, name: m.name } : null;
-  return '<div class="abvars"><span class="abvcap">Each version vs control</span>' + R.vrows.map(r => {
-    const n = r[0], c = r[1], dv = d => (((D[d] || {}).vers || {})[n] || {}).rpv;
-    const imp = c.cvr != null ? siteImp(c.cvr, t.reach) : null;
-    return '<div class="abvr"><span class="abvname">' + esc(n) + '</span>' +
-      (imp == null ? '<span class="abn na">–</span>' : '<span class="abn ' + (imp >= 0 ? 'b' : 'w') + '">' + sp(imp, 1) + '</span>') +
-      abN(mkx(M.aov, c.aov), n + ': ' + ((M.aov || {}).name || 'AOV')) + abN(mkx(M.rpv, c.rpv), n + ': revenue per user, all users', true, true) +
-      abN(mkx((D.desktop || {}).rpv, dv('desktop')), n + ': revenue per user, desktop', false, true) + abN(mkx((D.mobile || {}).rpv, dv('mobile')), n + ': revenue per user, mobile', false, true) + '</div>';
-  }).join('') + '</div>';
+// Tests with several versions show one row: the leading version vs control, with a note that others exist (Mike, Nov 4). The pop-up has control and every version.
+function abLead(t) {
+  const R = abRd(t); if (!R.vrows) return null;
+  const M = R.m || {}, rp = v => v[1].rpv != null ? v[1].rpv : -9;
+  const sh = t.status === 'shipped' && M.rpv ? R.vrows.find(v => Math.abs(rp(v) - M.rpv.v) < 1e-4) : null;
+  return sh || R.vrows.slice().sort((x, y) => rp(y) - rp(x))[0];
+}
+function abLeadCells(t, lead) {
+  const R = abRd(t), M = R.m || {}, D = R.dev || {}, n = lead[0], c = lead[1];
+  const mkx = (m, v) => m && v != null ? { v: v, a: m.a, b: m.a * (1 + v), f: m.f, s: m.s, name: m.name } : null, dv = d => (((D[d] || {}).vers || {})[n] || {}).rpv;
+  const imp = c.cvr != null ? siteImp(c.cvr, t.reach) : null;
+  return (imp == null ? '<span class="abn na">–</span>' : '<span class="abn ' + (imp >= 0 ? 'b' : 'w') + '">' + sp(imp, 1) + '</span>') +
+    abN(mkx(M.aov, c.aov), n + ': ' + ((M.aov || {}).name || 'AOV')) + abN(mkx(M.rpv, c.rpv), n + ': revenue per user, all users', true, true) +
+    abN(mkx((D.desktop || {}).rpv, dv('desktop')), n + ': revenue per user, desktop', false, true) + abN(mkx((D.mobile || {}).rpv, dv('mobile')), n + ': revenue per user, mobile', false, true);
+}
+function abLeadNote(t, lead) {
+  const R = abRd(t), M = R.m || {}, tot = R.vrows.length;
+  const list = R.vrows.map(v => '<li><b>' + esc(v[0]) + '</b>' + (v[1].rpv != null ? ' ' + sgn(v[1].rpv, 1) + ' revenue per user' : '') + (v[0] === lead[0] ? ' (shown)' : '') + '</li>').join('');
+  return hint('<span class="abbest">Showing <b>' + esc(lead[0]) + '</b> · 1 of ' + tot + '</span>', 'abm abnh', '<span class="nosrc"><b>' + tot + ' versions, each vs control</b><ul class="abvl">' + list + '</ul>This row shows the one ' + (t.status === 'shipped' ? 'that shipped' : 'leading on revenue per user') + '. Open the test for control and every version.</span>');
 }
 function testRow(t, shipped) {
   const site = siteImp(t.cvr.rel, t.reach), open = state.open.has('x' + t.id), r = Math.round(t.reach * 100);
   const st = t.status === 'running' ? 'Running' : t.status === 'shipped' ? 'Shipped' : 'Kept control';
   const more = (ttc(t).match(/~(\d+) more day/) || [])[1], dates = t.status === 'running' ? short(t.start) + ' → ' + (more ? '~' + short(addDays(EXPS_AS_OF, +more)) : 'open') + '<small>Day ' + testDays(t) + (more ? ' · result in ~' + more + ' days' : '') + '</small>' : short(t.start) + ' → ' + short(t.end) + '<small>' + (Math.round((parse(t.end) - parse(t.start)) / DAY) + 1) + ' days</small>';
   const fv = t.primary.name.indexOf('per') > -1 ? v => v.toFixed(3) : v => pct(v, v < 0.01 ? 3 : v < 0.05 ? 2 : 1);
-  let h = '<div class="rowwrap"><div class="trow abrow" role="button" tabindex="0" aria-expanded="' + open + '" data-xrow="' + t.id + '"><span class="tname tnico"><span class="ge gico g-' + esc(testObj(t)) + '" aria-hidden="true">' + projIco({ t: t.name, obj: testObj(t) }) + '</span><b>' + esc(t.name) + '</b><span class="cap tmeta">' + sitePill(testSite(t)) + '<span class="tloc">' + esc(t.where) + '</span></span></span>' +
-    abDay(t) + abSig(t) + (abRd(t).vrows ? '' : abImpN(t) + abN(abMet(t).aov, (abMet(t).aov || {}).name || 'AOV') + abN(abMet(t).rpv, 'Revenue per user, all users', true, true) + abN(abDevOf(t, 'desktop'), 'Revenue per user, desktop', false, true) + abN(abDevOf(t, 'mobile'), 'Revenue per user, mobile', false, true)) +
-    (abRd(t).vrows ? abVarRows(t) : '') + '</div>';
+  const lead = abLead(t);
+  let h = '<div class="rowwrap"><div class="trow abrow" role="button" tabindex="0" aria-expanded="' + open + '" data-xrow="' + t.id + '"><span class="tname tnico"><span class="ge gico g-' + esc(testObj(t)) + '" aria-hidden="true">' + projIco({ t: t.name, obj: testObj(t) }) + '</span><b>' + esc(t.name) + '</b><span class="cap tmeta">' + sitePill(testSite(t)) + '<span class="tloc">' + esc(t.where) + '</span></span>' + (lead ? abLeadNote(t, lead) : '') + '</span>' +
+    abDay(t) + abSig(t) + (lead ? abLeadCells(t, lead) : abImpN(t) + abN(abMet(t).aov, (abMet(t).aov || {}).name || 'AOV') + abN(abMet(t).rpv, 'Revenue per user, all users', true, true) + abN(abDevOf(t, 'desktop'), 'Revenue per user, desktop', false, true) + abN(abDevOf(t, 'mobile'), 'Revenue per user, mobile', false, true)) + '</div>';
   return h + '</div>';
 }
 // One takeaway sentence for the tab: the running test that matters most, what is close to a call, and what was decided lately.
