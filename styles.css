@@ -3935,3 +3935,14 @@ details.pbox.prov > summary { cursor: pointer; list-style: none; } details.pbox.
 .topsite + .topgrid + .topsite { margin-top: 22px; }
 .topsite > b { display: inline-flex; align-items: center; gap: 6px; font: 700 14px var(--display); }
 .botfoot { justify-content: flex-start; margin-top: 10px; }
+
+/* Scorecard: one Compare with toggle, in a sticky header row so it is reachable from every section below (Mike, Nov 3). */
+.score { --sbh: 52px; }
+.scorebar { position: sticky; top: calc(env(safe-area-inset-top, 0px) + var(--barh, 56px)); z-index: 6; display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: var(--sbh); background: var(--bg); }
+.scorebar h2.title { margin: 0; }
+.scorebar .basiswrap { margin-left: auto; }
+.score .colhead { top: calc(env(safe-area-inset-top, 0px) + var(--barh, 56px) + var(--sbh)); margin-top: 0; }
+@media (max-width: 760px) { .scorebar { position: static; flex-wrap: wrap; padding: 6px 0; } }
+
+/* Side nav: "Split CVR by" sits halfway between its divider and the first section under it (Mike, Nov 3). */
+#srail .srgrp.sep, #srail:hover .srgrp.sep, #srail:focus-within .srgrp.sep { height: auto; line-height: 1; margin: 8px 0 0; padding: 10px 10px; }

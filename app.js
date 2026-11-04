@@ -248,7 +248,10 @@ function monthAvg(b, d) {
 }
 const COMPC = {};
 /* Nov and Dec on TeePublic (Mike, Nov 2): a toggle swaps "comparable days" for the same weekday last year (Redbubble has no last year, so no toggle). */
-const basisOn = (b, d) => b === 'tp' && state.basis !== 'cmp' && isHoliday(d) && lyIndex(addDays(d, -364)) >= 0;
+// Two independent Compare with toggles (Mike, Nov 3): one for the top of the page (state.basis), one for the scorecard (state.basisSc). BSCOPE says which one is being drawn.
+let BSCOPE = 'top';
+const basisPick = () => BSCOPE === 'sc' ? state.basisSc : state.basis;
+const basisOn = (b, d) => b === 'tp' && basisPick() !== 'cmp' && isHoliday(d) && lyIndex(addDays(d, -364)) >= 0;
 const wsh = z => WD[dow(z)] + ' ' + short(z);
 const lyDays = d => [addDays(d, -365), addDays(d, -364)].filter(z => lyIndex(z) >= 0); // same date, then same weekday (Mike, Nov 2)
 const lyKind = (d, z) => z === addDays(d, -365) ? 'date' : 'weekday';
@@ -428,7 +431,7 @@ function cellsFor(m, d, comps) {
 /* "usual" = this metric's average change since BASE_START, split into sale days and non-sale days */
 const BASEC = {};
 function baseline(m, kind, sale) {
-  const k = m.b + '|' + m.key + '|' + kind + '|' + sale; if (k in BASEC) return BASEC[k];
+  const k = m.b + '|' + m.key + '|' + kind + '|' + sale + '|' + basisPick(); if (k in BASEC) return BASEC[k];
   const vals = [], last = addDays(D.asOf, -2); let from = null, to = null;
   for (let d = BASE_START; d <= last; d = addDays(d, 1)) {
     if (isContam(m.b, d) || infoNow(m.b, d).sale !== sale) continue;
@@ -443,7 +446,7 @@ function baseline(m, kind, sale) {
 const NRC = {};
 const NRB = { rate: [0.05, 0.12], funnel: [0.04, 0.12], seg: [0.08, 0.25], count: [0.08, 0.20] };
 function normBand(m) {
-  const k = m.b + '|' + m.key; if (k in NRC) return NRC[k];
+  const k = m.b + '|' + m.key + '|' + basisPick(); if (k in NRC) return NRC[k];
   // Only ordinary days count (Mike, Oct 27: a day that was on fire isn't a normal fluctuation). Left out: the price test week,
   // days a Bot Squad note covers, and any day so far off that it's an incident rather than noise (more than 3x the typical swing,
   // measured with the median so the bad days can't inflate it).
@@ -1251,12 +1254,12 @@ function rankMoved() {
   const tot = rankTot(), wt = f => Math.max(0, -(f.jm ? f.jm.dlt : f.c.mom || 0)) * (f.m.sec === 'funnel' ? 1 : Math.min(1, (f.c.sess || 0) / tot));
   return MOVED.slice(0, 8).map((f, i) => ({ f, i, w: wt(f) })).sort((a, z) => z.w - a.w);
 }
-function basisTog() {
+function basisTog(sc) {
   const b = state.tab, d = state.day; if (b !== 'tp' || !isHoliday(d) || lyIndex(addDays(d, -364)) < 0) return '';
-  const on = basisOn(b, d), bt = (k, t, tip) => '<button type="button" data-basis="' + k + '" aria-pressed="' + (on === (k === 'yoy')) + '" title="' + esc(tip) + '">' + t + '</button>';
+  const on = basisOn(b, d), bt = (k, t, tip) => '<button type="button" data-basis="' + k + '" data-bscope="' + (sc ? 'sc' : 'top') + '" aria-pressed="' + (on === (k === 'yoy')) + '" title="' + esc(tip) + '">' + t + '</button>';
   return '<span class="basiswrap"><span class="btl">Compare with</span><span class="basistog" role="group" aria-label="Compare with">' + bt('cmp', 'This year', 'This year\'s recent days like this one: the same weekday, or the same point in a sale') + bt('yoy', 'YoY', 'Year over year: ' + lyBody(d)) + '</span></span>';
 }
-function movedHtml() { const h = movedHtmlB(), tg = basisTog(); return tg ? h.replace(/<\/div><\/div>$/, tg + '</div></div>') : h; }
+function movedHtml() { const h = movedHtmlB(), tg = basisTog(false); return tg ? h.replace(/<\/div><\/div>$/, tg + '</div></div>') : h; }
 function movedHtmlB() {
   let h = movedHtml0(); if (state.view === 'daily') return h; // flagged pills come back ready: 3 plus "View N more" (Mike, Oct 28)
   const all0 = h.match(/<button class="mv[^"]*"[\s\S]*?<\/button>/g) || [];
@@ -1829,7 +1832,7 @@ function groupHtml(b, sec) {
   if (!metricsFor(b)[sec] || !metricsFor(b)[sec].length) return '';
   const full = state.full.has(sec);
   const hl = highlight(b, sec);
-  return '<div class="group" id="g-' + sec + '"><div class="ghead"><div class="gt"><h3>' + SEC_EMOJI[sec] + ' ' + SECS[sec] + '</h3>' + (hl ? '<p class="gsub">' + hl + '</p>' : '') + '</div><div class="gacts">' + (state.view === 'daily' ? basisTog() : '') + secSrc(b, sec) + '<button class="linkbtn" data-full="' + sec + '">' + (full ? 'Hide the full data table' : 'View full data table') + '</button></div></div>' +
+  return '<div class="group" id="g-' + sec + '"><div class="ghead"><div class="gt"><h3>' + SEC_EMOJI[sec] + ' ' + SECS[sec] + '</h3>' + (hl ? '<p class="gsub">' + hl + '</p>' : '') + '</div><div class="gacts">' + secSrc(b, sec) + '<button class="linkbtn" data-full="' + sec + '">' + (full ? 'Hide the full data table' : 'View full data table') + '</button></div></div>' +
     '<div class="rows">' + metricsFor(b)[sec].map(rowHtml).join('') + '</div>' + (full ? wideTable(b, sec) : '') + '</div>';
 }
 
@@ -1999,7 +2002,7 @@ function scoreHtml(b) {
   // Column headers explain themselves on hover; no "What's this?" (Mike, Oct 27). Prior day keeps its date.
   const CHT = { bs: '<b>vs comparable days</b><br>The day vs the average of matching days since ' + short(BASE_START) + ' (same weekday, or the same point in a sale at the same discount).<ul class="hul"><li>📏 <b>Band:</b> the metric\'s normal fluctuation</li><li>📍 <b>Dot:</b> this day</li><li>🎨 <b>Color:</b> red below the range; rows below it are tinted red</li></ul>', pd: '<b>vs prior day</b><br>Always the day before. Context, never graded.', yoy: '<b class="tiph nosrc">vs LY: last year</b><span class="tipv">Each metric vs ' + esc(kname('yoy', comps)) + '.</span><ul class="hul nrul"><li>📅 <b>Which days:</b> ' + (comps.yoy && comps.yoy.dates ? comps.yoy.dates.map(x => short(x)).join(', ') + ', 2025' : 'the same weekday, 364 days back') + '</li><li>🤖 <b>Up 30% or more:</b> likely last year\'s bot traffic, not shoppers</li></ul>' };
   const ch = k => '<span class="ch"><button type="button" class="chbtn" data-why="' + k + '">' + (k === 'pd' ? '<span class="chh">' + kcol(k, comps) + '</span>' /* prior day needs no explanation (Mike, Oct 27) */ : hint(k === 'mom' && comps.mom && comps.mom.custom ? 'vs your range' : k === 'yoy' ? 'vs LY' /* short header, detail on hover (Mike, Oct 28) */ : kcol(k, comps), 'soft chh', CHT[k] || '')) + (k === 'pd' && comps[k] ? '<small>' + cmpShort(comps[k], k) + '</small>' : !comps[k] ? '<small>no match</small>' : '') + '</button></span>';
-  return '<section class="score' + (hasLY ? '' : ' nly') + '"><h2 class="title">📊 Scorecard</h2><div class="colhead"><span>Metric</span><span>' + short(d) + '</span>' + ch('bs') + '<span>Last 90 days</span>' + KINDS(b).filter(k => k !== 'bs' && k !== 'pd').map(ch).join('') + '<span>Sessions</span><span>Seen on ' + ob + '?</span><span></span></div>' +
+  return '<section class="score' + (hasLY ? '' : ' nly') + '"><div class="scorebar"><h2 class="title">📊 Scorecard</h2>' + basisTog(true) + '</div><div class="colhead"><span>Metric</span><span>' + short(d) + '</span>' + ch('bs') + '<span>Last 90 days</span>' + KINDS(b).filter(k => k !== 'bs' && k !== 'pd').map(ch).join('') + '<span>Sessions</span><span>Seen on ' + ob + '?</span><span></span></div>' +
     Object.keys(SECS).map(sec => groupHtml(b, sec)).join('') + '</section>';
 }
 
@@ -3426,8 +3429,11 @@ function botWatchModal(b) {
 function paint() {
   const b = state.tab;
   HINTS = []; hideHint();
+  BSCOPE = 'top';
   MOVED = movedFor(b, state.day); LIFTS = liftsFor(b, state.day); ALERTS = alertsFor(b, state.day);
-  $('#main').innerHTML = cw(topHtml(b) + cvrChartHtml(b) + '<section>' + payHtml(b) + '</section>' + scoreHtml(b)); // What people are saying lives on the Trending tab only (Mike, Oct 26)
+  const topPart = cw(topHtml(b) + cvrChartHtml(b) + '<section>' + payHtml(b) + '</section>');
+  BSCOPE = 'sc'; // the scorecard has its own Compare with toggle; detail views opened from its rows follow it too
+  $('#main').innerHTML = topPart + cw(scoreHtml(b)); // What people are saying lives on the Trending tab only (Mike, Oct 26)
   drawOpenCharts();
 }
 // The sale pill lives next to the logo on every page (Mike, Oct 28): the selected day's sale on the CVR pages, today's for both sites elsewhere.
@@ -3531,7 +3537,7 @@ document.addEventListener('click', ev => {
     const ntr = $('#ticker .tk-track'); if (ntr) { ntr.style.animationDelay = tkd; const nka = ntr.getAnimations()[0]; if (nka && tkt != null) nka.currentTime = tkt; }
     return; }
   const bwo = t.closest('[data-botwatch]'); if (bwo) return botWatchModal(bwo.dataset.botwatch);
-  const bsw = t.closest('[data-basis]'); if (bsw) { state.basis = bsw.dataset.basis; [BASEC, NRC].forEach(o => Object.keys(o).forEach(k => delete o[k])); render(); return; }
+  const bsw = t.closest('[data-basis]'); if (bsw) { if (bsw.dataset.bscope === 'sc') state.basisSc = bsw.dataset.basis; else state.basis = bsw.dataset.basis; [BASEC, NRC].forEach(o => Object.keys(o).forEach(k => delete o[k])); render(); return; }
   const kct = t.closest('[data-kctip]'); if (kct) { ev.stopPropagation(); const [kb, kd, kk, km, ko] = kct.dataset.kctip.split('|'), hb = document.getElementById('hintbox'); if (ko) { state.tipOther = !state.tipOther; try { localStorage.setItem('pod.tipo', state.tipOther ? '1' : ''); } catch (e) {} } if (hb) hb.innerHTML = cmpTip(kb, kd, kk, km); return; }
   const ht = t.closest('.hint');
   // A hover-able name that also links (segLink) jumps on click instead of pinning its tip (Mike, Oct 27).
