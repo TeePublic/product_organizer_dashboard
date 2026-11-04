@@ -3924,3 +3924,14 @@ details.pbox.prov > summary { cursor: pointer; list-style: none; } details.pbox.
 }
 @media (max-width: 760px) { .abrow > .abna::before { content: none !important; } :root:not(#z):not(#y) .abrow { align-items: start; } }
 .trow.abrow:focus-visible { box-shadow: none; background: var(--sunk); }
+
+/* Panel-level ⓘ Sources link (Mike, Nov 3): same component as everywhere, left-aligned under the content with room around it. */
+.psrc { margin: 14px 0 0; padding: 0 2px 4px; }
+#g-pay .psrc { padding: 0 20px 18px; margin-top: 6px; }
+.psrc .tipsrc { padding: 0 !important; margin: 0 !important; border: 0 !important; border-left: 0 !important; background: none; color: var(--ctl); font: 600 13px/1.4 var(--body); cursor: pointer; }
+.psrc .tipsrcbox { margin-top: 8px; font-size: 13px; }
+.psrc .tipsrcbox a { color: var(--ctl); font-weight: 600; text-decoration: none; } .psrc .tipsrcbox a:hover { text-decoration: underline; }
+.topsite { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin: 4px 0 10px; }
+.topsite + .topgrid + .topsite { margin-top: 22px; }
+.topsite > b { display: inline-flex; align-items: center; gap: 6px; font: 700 14px var(--display); }
+.botfoot { justify-content: flex-start; margin-top: 10px; }

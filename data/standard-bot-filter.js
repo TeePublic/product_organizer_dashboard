@@ -1,13 +1,13 @@
-// Standard bot filter, pulled 2026-11-03 (Tue Nov 3, evening ET) with ad-hoc queries on the Amplitude MCP (TeePublic project 499673, Redbubble project 774278).
+// Moderate bot filter, pulled 2026-11-03 (Tue Nov 3, evening ET) with ad-hoc queries on the Amplitude MCP (TeePublic project 499673, Redbubble project 774278).
 // What it is: a third bot filter beside Maximum (const MAX in max-bot-filter-and-products.js) and Strong (D in cvr-pacer-snapshot.js, L in cvr-ledger.js).
-//   Standard drops ONLY visitors below Cloudflare bot score 30 (gp:cloudflare_bot_score >= 30) and nothing else: no verified-bot exclusion on TeePublic,
+//   Moderate drops ONLY visitors below Cloudflare bot score 30 (gp:cloudflare_bot_score >= 30) and nothing else: no verified-bot exclusion on TeePublic,
 //   no JA4 fingerprint exclusion on Redbubble, no country limit. Added because Amelia and Jon said some real people score 30 to 70 and are dropped by Strong.
 //   Segment series keep their own segment definition (device = mobile/desktop, channel = the five shown, geo = US, CA, AU, Europe = GB IE DE FR NL BE IT ES PT AT CH SE NO DK FI PL),
 //   same as the Strong charts; Redbubble geo uses the Cloudflare country property and Redbubble channel uses campaign_medium, as in Strong.
-// Dashboard: "CVR Pacer · TP + RB (bot score >=30, Standard)" https://app.amplitude.com/analytics/tpub/dashboard/bsjj5vr9 (clone of lm29400h with only the bot filter changed; personal space, unpublished).
+// Dashboard: "CVR Pacer · TP + RB (bot score >=30, Moderate)" https://app.amplitude.com/analytics/tpub/dashboard/bsjj5vr9 (clone of lm29400h with only the bot filter changed; personal space, unpublished).
 // Data through: Mon 2026-11-02 for both sites (last complete day; TeePublic Nov 3 is partial and Redbubble has no Nov 3 events, so neither is stored).
 // Shape: exactly the keys, array lengths and dates of MAX. D.tp / D.rb / L.tp / L.rb run daily from 2026-08-01 (94 values, through 2026-11-02);
-//   D.tpLY / L.tpLY (TeePublic last year) run daily from 2025-09-01 (122 values, through 2025-12-31), same definitions and Standard filter.
+//   D.tpLY / L.tpLY (TeePublic last year) run daily from 2025-09-01 (122 values, through 2025-12-31), same definitions and Moderate filter.
 //   v = CVR (pageview or page to order_completed, 1-day window, unique users), s = sessions. Funnel series have v only. Values truncated to 6 decimals.
 // Caveats: CVR values revise upward for a day or two as late orders land, so Oct 31 to Nov 2 may move slightly on re-pull.
 //   Redbubble device labels look swapped Aug 3 to 18 (same upstream tagging issue as Strong). Redbubble at score >=30 still carries heavy bot traffic in Direct and desktop,

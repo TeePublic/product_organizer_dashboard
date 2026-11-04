@@ -315,7 +315,7 @@ const metricsFor = b => MCACHE[b] || (MCACHE[b] = metricList(b));
 /* ---------- bot filter: Maximum (default) or Strong, swapped in place (Mike, Oct 26) ---------- */
 // Maximum comes from Amplitude dashboard 5ec1pe2j (src/datamax.js). Strong is the original data in D, L, R and ORD.
 // Where the CVR page's numbers come from, with links out (Allison, Oct 28: "I need reassurance that it is confirmed correct").
-const AMPD = { strong: 'lm29400h', max: '5ec1pe2j', standard: 'bsjj5vr9' }, AMPY = { tp: 'usaj36an', rb: 'zvsdv2k8' };
+const AMPD = { strong: 'lm29400h', max: '5ec1pe2j', moderate: 'bsjj5vr9' }, AMPY = { tp: 'usaj36an', rb: 'zvsdv2k8' };
 // Every named source is a link (Mike, Oct 28: "All sources should always be linkable").
 const SLK = (id, name) => '<a href="https://grid-articore.enterprise.slack.com/archives/' + id + '" target="_blank" rel="noopener">#' + name + ' ↗</a>';
 const LNK = (u, t) => '<a href="' + u + '" target="_blank" rel="noopener">' + t + ' ↗</a>';
@@ -380,26 +380,26 @@ function tipSrcHtml(html) {
 }
 const BOTF = {
   max: { l: 'Maximum', tip: '<b>Maximum bot filter</b><br>Counts only visitors Cloudflare scores 90 or higher (very likely human). TeePublic also drops verified crawlers and counts only the USA, UK, Australia and Canada. Redbubble counts only the USA, Canada, UK, Australia, Germany, France and New Zealand.<br><br>It over-corrects on purpose, so read the direction, not the level. Revenue and AOV count every order under both filters. Payment mix, hourly charts and Trending use the Strong filter.' },
-  standard: { l: 'Standard', tip: '<b>Standard bot filter</b><br>Drops only visitors Cloudflare scores below 30. No country limit, no verified-crawler or fingerprint exclusions.<br><br>Some people score 30 to 70, so Strong can drop them. The cost is that bots scoring 30 and above stay in, mostly on Redbubble Direct and desktop, so levels read lower. Read direction, not level.' },
+  moderate: { l: 'Moderate', tip: '<b>Moderate bot filter</b><br>Drops only visitors Cloudflare scores below 30. No country limit, no verified-crawler or fingerprint exclusions.<br><br>Some people score 30 to 70, so Strong can drop them. The cost is that bots scoring 30 and above stay in, mostly on Redbubble Direct and desktop, so levels read lower. Read direction, not level.' },
   strong: { l: 'Strong', tip: '<b>Strong bot filter</b><br>Counts visitors Cloudflare scores 70 or higher (likely human), in every country. TeePublic also drops verified crawlers. This is the filter the page used through Oct 26. Bots that score above 70, like the fleets the Bot Squad has tracked, still get through.' }
 };
 // Short version for the label hover, so it fits above the headline.
 // Short hovers on each option (Mike, Oct 26: on the options, not the label).
 // Only the site on screen, on one line (Mike, Oct 26).
-const BOTF_TIP = { max: b => '<b>Maximum</b> (default): Bot score 90+, only ' + (b === 'tp' ? 'US, UK, AU and CA' : 'US, UK, AU, CA, DE, FR and NZ') + '.<br><i class="cap">Revenue and AOV measure every order placed.</i>', strong: () => '<b>Strong</b>: Bot score 70+, all countries.<br><i class="cap">Revenue and AOV measure every order placed.</i>', standard: () => '<b>Standard</b>: Bot score 30+, nothing else dropped.<br><i class="cap">Revenue and AOV measure every order placed.</i>' };
+const BOTF_TIP = { max: b => '<b>Maximum</b> (default): Bot score 90+, only ' + (b === 'tp' ? 'US, UK, AU and CA' : 'US, UK, AU, CA, DE, FR and NZ') + '.<br><i class="cap">Revenue and AOV measure every order placed.</i>', strong: () => '<b>Strong</b>: Bot score 70+, all countries.<br><i class="cap">Revenue and AOV measure every order placed.</i>', moderate: () => '<b>Moderate</b>: Bot score 30+, nothing else dropped.<br><i class="cap">Revenue and AOV measure every order placed.</i>' };
 const STRONG = { D: { tp: { cvr: D.tp.cvr, sess: D.tp.sess }, rb: { cvr: D.rb.cvr, sess: D.rb.sess }, tpLY: { cvr: D.tpLY.cvr, sess: D.tpLY.sess } }, L: { tp: L.tp, rb: L.rb, tpLY: L.tpLY }, R: { tp: R.tp, rb: R.rb, tpLY: R.tpLY }, ORD: typeof ORD !== 'undefined' ? { tp: ORD.tp, rb: ORD.rb } : null };
 const hasMax = () => typeof MAX !== 'undefined' && MAX && MAX.D;
 const hasStd = () => typeof STD !== 'undefined' && STD && STD.D;
-const bfKey = () => state.botf === 'strong' ? 'strong' : state.botf === 'standard' ? 'standard' : 'max';
+const bfKey = () => state.botf === 'strong' ? 'strong' : state.botf === 'moderate' ? 'moderate' : 'max';
 function applyBotFilter(mode) {
-  const src = mode === 'max' && hasMax() ? MAX : mode === 'standard' && hasStd() ? STD : STRONG, pick = (a, b) => a != null ? a : b;
+  const src = mode === 'max' && hasMax() ? MAX : mode === 'moderate' && hasStd() ? STD : STRONG, pick = (a, b) => a != null ? a : b;
   ['tp', 'rb', 'tpLY'].forEach(k => {
     D[k].cvr = pick(src.D[k] && src.D[k].cvr, STRONG.D[k].cvr); D[k].sess = pick(src.D[k] && src.D[k].sess, STRONG.D[k].sess);
     // Revenue and orders count every order under both filters: bots don't buy, and a country-limited total would understate the business (Oct 26).
     L[k] = pick(src.L && src.L[k], STRONG.L[k]); R[k] = STRONG.R[k];
   });
   ['tp', 'rb'].forEach(b => { SER[b].cvr = D[b].cvr; SER[b].sess = D[b].sess; delete MCACHE[b]; });
-  state.botf = mode === 'max' && hasMax() ? 'max' : mode === 'standard' && hasStd() ? 'standard' : 'strong';
+  state.botf = mode === 'max' && hasMax() ? 'max' : mode === 'moderate' && hasStd() ? 'moderate' : 'strong';
   BASE_START = state.botf === 'max' ? BASE_START_MAX : '2026-08-20';
   // Comparable days and "usual" depend on the data and the baseline start, so they're rebuilt for the new filter.
   [COMPC, BASEC, NRC].forEach(o => Object.keys(o).forEach(k => delete o[k]));
@@ -793,7 +793,7 @@ function guideModal() {
     ['Holidays', 'Nov 1 to Dec 31 every date behaves differently, so vs last year leads and uses the same calendar date. The rest of the year, vs a week ago leads.'],
     ['What moved', 'The segments that are worse than usual on every comparison, worst first. The rolling cell beside each one shows context: how the other devices, regions or channels did, overall CVR for funnel steps, and traffic. Click one for the full read.'],
     ['Seen on the other site?', 'The CVR row says whether the other site is seeing the same move (the same direction, at least 3%, and at least a third as big). Other rows only show a tag when they differ from that; otherwise the column is blank. It is also blank when a segment\'s traffic swung too much to read fairly.'],
-    ['Bot filter', state.botf === 'max' ? 'Maximum (the default): bot score 90 or higher, top countries only. ' + (b === 'tp' ? 'USA, UK, Australia and Canada; verified crawlers excluded.' : 'USA, Canada, UK, Australia, Germany, France and New Zealand.') + ' It over-corrects on purpose: read the direction, not the level. Switch to Strong at the top of the page for the score-70 view.' : state.botf === 'standard' ? 'Visitors need a Cloudflare bot score of 30 or higher and nothing else is dropped: no country limit, no verified-crawler or fingerprint exclusion. People who score 30 to 70 stay in, and so do bots that score above 30' + (b === 'rb' ? ', mostly in Direct and desktop traffic, so levels read low' : '') + '. Read direction, not level.' : b === 'tp' ? 'Visitors need a Cloudflare bot score of 70 or higher, and verified crawlers are excluded. Levels read higher than the unfiltered Amplitude charts.' : 'Redbubble uses the score of 70 or higher only. Bots still sit in Direct and desktop traffic, so levels read low. Read direction, not level.'],
+    ['Bot filter', state.botf === 'max' ? 'Maximum (the default): bot score 90 or higher, top countries only. ' + (b === 'tp' ? 'USA, UK, Australia and Canada; verified crawlers excluded.' : 'USA, Canada, UK, Australia, Germany, France and New Zealand.') + ' It over-corrects on purpose: read the direction, not the level. Switch to Strong at the top of the page for the score-70 view.' : state.botf === 'moderate' ? 'Visitors need a Cloudflare bot score of 30 or higher and nothing else is dropped: no country limit, no verified-crawler or fingerprint exclusion. People who score 30 to 70 stay in, and so do bots that score above 30' + (b === 'rb' ? ', mostly in Direct and desktop traffic, so levels read low' : '') + '. Read direction, not level.' : b === 'tp' ? 'Visitors need a Cloudflare bot score of 70 or higher, and verified crawlers are excluded. Levels read higher than the unfiltered Amplitude charts.' : 'Redbubble uses the score of 70 or higher only. Bots still sit in Direct and desktop traffic, so levels read low. Read direction, not level.'],
     ['Settling', 'The newest two days usually revise up 4 to 11% over the next 48 hours. Do not call a day weak until it has settled.'],
     b === 'tp' ? ['Sep 30 to Oct 4', 'A $16.50 tee price test ran all week and a bot spike hit Oct 2 and 3. Those days are never used as comparison or comparable days.'] : ['Channel on Redbubble', 'Redbubble\'s Channel property is broken upstream (DEAP-5099), so channel uses campaign medium. Direct is (none), Paid Search is cpc.'],
     b === 'tp' ? ['Last year\'s sale days', 'The 2025 sale calendar is not logged, so a day at or above 3% bot-filtered CVR counts as a sale day there.'] : ['Checkout completion', 'Not comparable across Aug 17 and Sep 8 because of the cart shipping removal test. It steps down from about 85% to about 70% across those dates.'],
@@ -1161,7 +1161,7 @@ function topHtml(b) {
   // Bot filter: a quiet menu top right, above the date, so it doesn't sit between the sale and the headline (Mike, Oct 28).
   const bfk = bfKey();
   const bot = !hasMax() ? '' : '<div class="bfwrap"><span class="bftitle">Bot filter</span><details class="bfdd"><summary><svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><path d="M8 1.6 3 3.6v4c0 3 2.1 5.3 5 6.4 2.9-1.1 5-3.4 5-6.4v-4z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg><b>' + BOTF[bfk].l + '</b><span class="bfcar" aria-hidden="true">▾</span></summary><div class="bfmenu">' +
-    ['max', 'strong'].concat(hasStd() ? ['standard'] : []).map(k => '<button type="button" class="bfitem" data-botf="' + k + '" aria-pressed="' + (bfk === k) + '"><b>' + BOTF[k].l + (k === 'max' ? ' <span class="bfdef">default</span>' : '') + '</b><span>' + BOTF_TIP[k](b).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().replace(/^\S+( \(default\))?\s*:\s*/, '').replace(/\bUS\b/g, 'USA').replace(/^Bot score/, 'Cloudflare bot score') + '</span></button>').join('') + '</div></details></div>'; // "Bot filter" as the title, the shield and the choice as the dropdown (Mike, Oct 28)
+    ['max', 'strong'].concat(hasStd() ? ['moderate'] : []).map(k => '<button type="button" class="bfitem" data-botf="' + k + '" aria-pressed="' + (bfk === k) + '"><b>' + BOTF[k].l + (k === 'max' ? ' <span class="bfdef">default</span>' : '') + '</b><span>' + BOTF_TIP[k](b).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().replace(/^\S+( \(default\))?\s*:\s*/, '').replace(/\bUS\b/g, 'USA').replace(/^Bot score/, 'Cloudflare bot score') + '</span></button>').join('') + '</div></details></div>'; // "Bot filter" as the title, the shield and the choice as the dropdown (Mike, Oct 28)
   const chip = '<div class="dchipw"><button type="button" class="dchip' + (atEnd ? '' : ' past') + '" data-dayopen="1" aria-expanded="' + !!state.dayOpen + '"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><rect x="2" y="3" width="12" height="11" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M2 6.5h12M5.5 1.8v2.6M10.5 1.8v2.6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><b>' + label(d) + '</b><span class="dcar" aria-hidden="true"><svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><path d="M10.6 2.6a1.6 1.6 0 0 1 2.3 2.3L5.7 12.1 2.5 13l.9-3.2z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="m9.4 3.8 2.3 2.3" stroke="currentColor" stroke-width="1.5"/></svg></span></button><div class="daypop"' + (state.dayOpen ? '' : ' hidden') + '>' + panel + '</div></div>';
   return '<section aria-label="Day under review"><div class="dtop">' + bot + '</div>' +
     '<div class="vsalew vsale2">' + chip + (st.sale ? '<span class="vsale">🏷️ ' + saleTxt + '</span>' : '<span class="vsale off">No sale · regular prices</span>') + '</div>' /* above the headline on the CVR tabs, in the earlier brand-tinted design (Mike, Oct 28) */ + '<p class="verdict">' + (verdictHtml(b), VLEAD) + '</p>' + standupLine(b, d) /* the subhead is back (Mike, Oct 28) */ + movedHtml() + '<div class="keys kov' + (c.custom ? ' kcus' : '') + (!c.custom ? ' ksolo' : '') /* full width on both sites now the last-year tile is gone (Mike, Oct 28) */ + '">' + keys + '</div>' + '</section>';
@@ -1402,8 +1402,7 @@ function agendaHtml(s) {
     ['must', '🗣️', 'Roundtable', (() => { const n = rtList(s.date).length; return n ? n + ' topic' + (n === 1 ? '' : 's') + ' added above.' : 'No topics yet. Add one above.'; })(), 'standup|.rt'],
     ['time', '🖼️', 'Did the feed fix land?', 'TeePublic Paid Search should lift from Oct 22.', 'w:tp|channel/Paid Search'],
     ['time', '💳', 'PayPlus guardrail', 'Agree the drop that pauses it.', 'w:tp|funnel/Checkout completion rate'],
-    ['sugg', '🧪', 'Tests to call', esc(best.name), 'tests|.trow'],
-    ['sugg', '⚾', 'Market the Brewers?', '2.5× their usual share of orders', 'trending|.callcard']
+    ['sugg', '🧪', 'Tests to call', esc(best.name), 'tests|.trow']
   ];
   const TIER = { must: 'Must cover', time: 'If there\'s time', sugg: 'Suggestions from the dashboard' };
   const row = i => { const go = i[4] ? (i[4].indexOf('w:') === 0 ? ' data-watch="' + esc(i[4].slice(2)) + '"' : ' data-goto="' + esc(i[4]) + '"') : ''; return '<li class="' + i[0] + '"><button type="button" class="arow"' + go + '><div><b><span aria-hidden="true">' + i[1] + '</span> ' + i[2] + '</b><p>' + i[3] + '</p></div><span class="ago" aria-hidden="true">→</span></button></li>'; };
@@ -1884,12 +1883,14 @@ function donut(mix) {
   });
   return '<svg class="donut" viewBox="0 0 180 180" width="190" height="190" role="img" aria-label="Payment mix on the selected day, with the last 30 days average as a thin outer ring">' + g + '<text x="90" y="86" text-anchor="middle" style="font:700 15px var(--display);fill:var(--ink)">' + int(sum(mix.today.map(r => r.n))) + '</text><text x="90" y="103" text-anchor="middle" style="font:500 11px var(--body);fill:var(--muted)">orders</text></svg>';
 }
+// Panel-level ⓘ Sources link, left-aligned under the content (Mike, Nov 3): the same component as everywhere else, never a pill link.
+const psrc = L => '<div class="tipsrcw psrc"><button type="button" class="srcbtn tipsrc" data-tipsrc="1">ⓘ ' + (L.length === 1 ? 'Source' : 'Sources') + '</button><div class="tipsrcbox" hidden><ul class="hul nrul">' + L.map(x => '<li>' + x + '</li>').join('') + '</ul></div></div>';
 // Where the payment mix comes from (Allison, Oct 28: "we need a source for the payment data").
 function paySrc(b) {
   const L = ['💳 <b>Payment methods:</b> every order_completed event in ' + LNK('https://app.amplitude.com/analytics/tpub', 'Amplitude') + ' (' + BR[b].name + ' project ' + (b === 'tp' ? '499673' : '774278') + '), grouped by payment type' + (b === 'rb' ? '; Stripe orders are split into card, Apple Pay and Google Pay by wallet type' : '') + '. Orders count every buyer, with no bot filter.',
     '📱 <b>Apple Pay from product pages:</b> estimated from taps on the product page buy-now button',
     '📏 <b>Normal range:</b> each method\'s day-to-day swing over the last 30 days'];
-  return '<div class="tipsrcw"><button type="button" class="srcbtn tipsrc" data-tipsrc="1">ⓘ Sources</button><div class="tipsrcbox" hidden><ul class="hul nrul">' + L.map(x => '<li>' + x + '</li>').join('') + '</ul></div></div>';
+  return psrc(L);
 }
 function payHtml(b) {
   const d = state.day, mix = payMix(b, d);
@@ -1936,7 +1937,6 @@ function sellingHtml() {
   const hot = all.filter(r => r.x >= 1.15).sort((a, z) => z.x - a.x).slice(0, 4), cold = all.filter(r => r.x <= 0.8).sort((a, z) => a.x - z.x).slice(0, 3), mx = Math.max(...hot.map(r => r.x), 2);
   const mover = (r, up) => '<li><a href="https://www.teepublic.com/t-shirts?query=' + encodeURIComponent(r.n) + '" target="_blank" rel="noopener">' + esc(r.n) + '</a><span class="mvbar"><i class="' + (up ? 'up' : 'down') + '" style="width:' + (up ? (r.x / mx * 100) : (r.x * 100)).toFixed(0) + '%"></i></span><b class="' + (up ? 'b' : 'dimx') + '">' + r.x.toFixed(1) + '×</b></li>';
   const movers = '<div class="movers"><h4>🔥 Heating up</h4><ol>' + hot.map(r => mover(r, true)).join('') + '</ol><h4>🧊 Cooling off</h4><ol>' + cold.map(r => mover(r, false)).join('') + '</ol><p class="cap">× = share of the last 24 hours\' orders compared with its share over the 7 days before. 1.0× is normal.</p></div>';
-  const call = typeof SELLCALL !== 'undefined' ? '<div class="sellcall"><span class="sbig" aria-hidden="true">' + SELLCALL.e + '</span><div><b>' + esc(SELLCALL.title) + '</b><p>' + esc(SELLCALL.body) + '</p><p class="ask">👉 ' + esc(SELLCALL.ask) + ' <a href="' + esc(SELLCALL.src) + '" target="_blank" rel="noopener">Source ↗</a></p></div></div>' : '';
   return '<div class="selling">' + pie + movers + '</div>';
 }
 const TOPIC = [[/brewers/i, 'Brewers World Series'], [/rays/i, 'World Series'], [/eagles/i, 'Philadelphia Eagles'], [/twenty one pilots/i, 'Twenty One Pilots'], [/kentucky|football/i, 'College football'], [/oozma|kappa/i, 'Monsters University'], [/usps|postal/i, 'US Postal Service']];
@@ -1950,41 +1950,47 @@ function topOne() {
 }
 const hasRbTops = () => typeof TOPS_RB !== 'undefined' && TOPS_RB && TOPS_RB.items && TOPS_RB.items.length > 0;
 function topsHtml() {
-  const rb = hasRbTops() && state.topSite === 'rb';
-  if (rb) return '<div class="topgrid">' + TOPS_RB.items.map((t, i) => '<a class="top" href="' + esc((TOPS_RB.links || [])[i] || 'https://www.redbubble.com/shop/?query=' + encodeURIComponent(t.title)) + '" target="_blank" rel="noopener"><span class="rank">' + (i + 1) + '</span>' + (t.img ? '<img src="' + t.img + '" alt="' + esc(t.title) + '" loading="lazy">' : '<span class="noimg" aria-hidden="true">' + esc(t.title) + '</span>') + '<b title="' + esc(t.title) + '">' + esc(t.title) + '</b><span class="cap">' + int(t.orders) + ' orders</span></a>').join('') + '</div>';
-  return '<div class="topgrid">' + TOPS.items.map((t, i) => '<a class="top" href="https://www.teepublic.com/t-shirt/' + TOP_IDS[i] + '" target="_blank" rel="noopener"><span class="rank">' + (i + 1) + '</span><img src="' + t.img + '" alt="' + esc(t.title) + '" loading="lazy"><b title="' + esc(t.title) + '">' + esc(t.title) + '</b>' + (topicOf(t.title) ? '<span class="ttag' + (hotTopic(topicOf(t.title)) ? ' hot' : '') + '" title="Topic this design rides on' + (hotTopic(topicOf(t.title)) ? ', heating up right now' : '') + '">' + (hotTopic(topicOf(t.title)) ? '🔥 ' : '#') + esc(topicOf(t.title)) + '</span>' : '') + '<span class="cap">' + int(t.orders) + ' orders</span></a>').join('') + '</div>';
-}
-function topSiteSwitch() {
-  if (!hasRbTops()) return '';
-  return '<div class="seg" role="group" aria-label="Site for top designs">' + [['tp', 'TeePublic', 'Show TeePublic top designs'], ['rb', 'Redbubble', 'Show Redbubble top designs']].map(([k, n, tip]) => '<button data-topsite="' + k + '" title="' + tip + '" aria-pressed="' + ((state.topSite || 'tp') === k) + '">' + n + '</button>').join('') + '</div>';
+  const tp = '<div class="topgrid">' + TOPS.items.map((t, i) => '<a class="top" href="https://www.teepublic.com/t-shirt/' + TOP_IDS[i] + '" target="_blank" rel="noopener"><span class="rank">' + (i + 1) + '</span><img src="' + t.img + '" alt="' + esc(t.title) + '" loading="lazy"><b title="' + esc(t.title) + '">' + esc(t.title) + '</b>' + (topicOf(t.title) ? '<span class="ttag' + (hotTopic(topicOf(t.title)) ? ' hot' : '') + '" title="Topic this design rides on' + (hotTopic(topicOf(t.title)) ? ', heating up right now' : '') + '">' + (hotTopic(topicOf(t.title)) ? '🔥 ' : '#') + esc(topicOf(t.title)) + '</span>' : '') + '<span class="cap">' + int(t.orders) + ' orders</span></a>').join('') + '</div>';
+  // Redbubble sits under TeePublic in the same panel (Mike, Nov 3), with topic tags the same way. The 🔥 comes from TeePublic's trending data, so it is never shown on Redbubble.
+  const rb = hasRbTops() ? '<div class="topgrid">' + TOPS_RB.items.map((t, i) => '<a class="top" href="' + esc((TOPS_RB.links || [])[i] || 'https://www.redbubble.com/shop/?query=' + encodeURIComponent(t.title)) + '" target="_blank" rel="noopener"><span class="rank">' + (i + 1) + '</span>' + (t.img ? '<img src="' + t.img + '" alt="' + esc(t.title) + '" loading="lazy">' : '<span class="noimg" aria-hidden="true">' + esc(t.title) + '</span>') + '<b title="' + esc(t.title) + '">' + esc(t.title) + '</b>' + (topicOf(t.title) ? '<span class="ttag" title="Topic this design rides on">#' + esc(topicOf(t.title)) + '</span>' : '') + '<span class="cap">' + int(t.orders) + ' orders</span></a>').join('') + '</div>' : '';
+  const lab = (code, note) => '<div class="topsite"><b>' + siteDot(code) + '</b>' + (note ? '<span class="cap">' + esc(note) + '</span>' : '') + '</div>';
+  return lab('TP', TOPS.note) + tp + (rb ? lab('RB', TOPS_RB.note) + rb : '');
 }
 function topsPanel() {
-  const rb = hasRbTops() && state.topSite === 'rb';
-  const sub = rb
-    ? 'Redbubble designs in the most orders, last 24 hours. ' + esc(TOPS_RB.note || '') + ' <a class="srclink" href="https://app.amplitude.com/analytics/tpub/dashboard/lm29400h" target="_blank" rel="noopener">Source: Amplitude orders by design, Strong bot filter\u00a0↗</a>'
-    : 'TeePublic designs in the most orders, last 24 hours. Each is tagged with the topic it rides on; 🔥 marks a topic that is heating up right now. ' + esc(TOPS.note || '') + ' <a class="srclink" href="https://app.amplitude.com/analytics/tpub/dashboard/lm29400h" target="_blank" rel="noopener">Source: orders by design in Amplitude, not TeePublic admin\u00a0↗</a>';
-  return panel('🏆', 'Top designs', sub, topsHtml(), 'p-top', topSiteSwitch());
+  const L = ['🏆 <b>TeePublic:</b> ' + LNK('https://app.amplitude.com/analytics/tpub/dashboard/usaj36an', 'Amplitude, TeePublic order_completed') + ' by design, last 24 hours. Not the top sellers in TeePublic admin.'];
+  if (hasRbTops()) L.push('🏆 <b>Redbubble:</b> ' + LNK('https://app.amplitude.com/analytics/tpub/dashboard/zvsdv2k8', 'Amplitude, Redbubble order_completed') + ' by design, the same day.');
+  return panel('🏆', 'Top designs', 'Designs in the most orders, last 24 hours, TeePublic first. Each is tagged with the topic it rides on; 🔥 marks a topic that is heating up right now.', topsHtml() + psrc(L), 'p-top');
 }
 // Incidents from the public #inc-* channels, in Trending under Bot Squad updates (Mike, Nov 3; the design agency's call: Trending is where "what blew up" is read each morning, and a separate tab would add one more place to check).
 function incidentsHtml() {
   if (typeof INCIDENTS === 'undefined' || !INCIDENTS.items.length) return '';
-  const tone = { bad: 'bad', warn: 'warn', good: 'good' };
-  return '<section class="bare tinc"><div class="ghead"><div class="gt"><h3>🚨 Incidents</h3><p class="gsub">The ' + esc(INCIDENTS.window) + ', from the public incident channels. <a class="srclink" href="' + esc(INCIDENTS.log) + '" target="_blank" rel="noopener">Incident Log\u00a0↗</a></p></div></div><div class="say4">' +
-    INCIDENTS.items.map(s => '<a class="scard ' + (tone[s.tone] || 'warn') + '" href="' + esc(s.url) + '" target="_blank" rel="noopener" style="text-decoration:none;color:inherit"><div class="schd"><h4><span class="scic" aria-hidden="true">' + s.e + '</span><span>' + esc(s.title) + '</span></h4><span class="sctags"><span class="stat-chip ' + (tone[s.tone] || 'warn') + '">' + esc(s.status) + '</span><span class="scmeta">' + esc(SITE[s.site] || s.site) + '</span></span></div><p title="' + esc(s.body) + '">' + esc(s.body) + '</p><div class="scft"><span class="cap">' + esc(s.channel) + ' · ' + esc(s.when) + '</span></div></a>').join('') + '</div></section>';
+  const tone = { bad: 'bad', warn: 'warn', good: 'good' }, all = INCIDENTS.items, more = all.length - 4, list = state.incAll ? all : all.slice(0, 4);
+  return '<section class="bare tinc"><div class="ghead"><div class="gt"><h3>🚨 Incidents</h3><p class="gsub">The ' + esc(INCIDENTS.window) + ', from the public incident channels.</p></div></div><div class="say4">' +
+    list.map((s, i) => '<article class="scard ' + (tone[s.tone] || 'warn') + '" role="button" tabindex="0" data-inc="' + i + '"><div class="schd"><h4><span class="scic" aria-hidden="true">' + s.e + '</span><span>' + esc(s.title) + '</span></h4><span class="sctags"><span class="stat-chip ' + (tone[s.tone] || 'warn') + '">' + esc(s.status) + '</span><span class="scmeta">' + esc(SITE[s.site] || s.site) + '</span></span></div><p title="' + esc(s.body) + '">' + esc(s.body) + '</p><div class="scft"><span class="cap">' + esc(s.channel) + ' · ' + esc(s.when) + '</span></div></article>').join('') + '</div>' +
+    (more > 0 && !state.incAll ? '<button type="button" class="linkbtn saymore" data-incmore="1">Show ' + more + ' more</button>' : '') +
+    psrc(['🚨 <b>Incident channels:</b> the public #inc-* channels in Slack, one per incident (each card opens its details and the channel link).', '📒 <b>Write-ups:</b> ' + LNK(INCIDENTS.log, 'Incident Log in Confluence')]) + '</section>';
+}
+// Detail overlay for an incident (Mike, Nov 3: clicking must open more information, not launch Slack).
+function incModal(i) {
+  const s = INCIDENTS.items[i]; if (!s) return;
+  const tone = { bad: 'bad', warn: 'warn', good: 'good' }[s.tone] || 'warn', li = a => a.map(x => '<li>' + esc(x) + '</li>').join('');
+  openModal('<div class="mhead"><h3 id="mtitle">' + s.e + ' ' + esc(s.title) + '</h3></div><div class="mtags"><span class="rtag">' + esc(SITE[s.site] || s.site) + '</span><span class="rtag">' + esc(s.when) + '</span><span class="stat-chip ' + tone + '">' + esc(s.status) + '</span></div>' +
+    '<div class="pbox"><b>' + esc(s.body) + '</b></div>' +
+    (s.know && s.know.length ? '<div class="pbox"><h4 class="ph">What we know</h4><ul class="hul">' + li(s.know) + '</ul></div>' : '') +
+    (s.open && s.open.length ? '<div class="pbox"><h4 class="ph">Still open</h4><ul class="hul">' + li(s.open) + '</ul></div>' : '') +
+    '<div class="tipsrcw"><button type="button" class="srcbtn tipsrc" data-tipsrc="1">ⓘ Sources</button><div class="tipsrcbox" hidden><ul class="hul nrul"><li>💬 <b>Incident channel:</b> ' + LNK(s.url, esc(s.channel)) + ', public in Slack</li><li>📒 <b>Write-up:</b> ' + LNK(INCIDENTS.log, 'Incident Log in Confluence') + '</li></ul></div></div>');
 }
 function trendingHtml() {
-  const call = typeof SELLCALL !== 'undefined' ? '<section class="callcard2"><h3>' + SELLCALL.e + ' ' + esc(SELLCALL.title) + '</h3><p>' + esc(SELLCALL.body) + '</p><p class="ask">💰 ' + esc(SELLCALL.ask) + '</p><a class="ref ext" href="' + esc(SELLCALL.src) + '" target="_blank" rel="noopener">Series preview ↗</a></section>' : '';
   return '<section class="sview"><div class="vhead vhl">' + trHeadline() + '</div>' +
     // Topics go straight under the title (Mike, Oct 22): four cards, then a one-time "Show N more".
     (() => { const L = SLACK, more = L.length - 4; return '<section class="bare tsay"><div class="ghead"><div class="gt"><h3>💬 What people are saying</h3><p class="gsub">The last 48 hours.</p></div></div>' + (L.length ? '' : '<p class="cap">Quiet: nothing new in the last 48 hours.</p>') + sayList(state.sayAll ? L : L.slice(0, 4), state.sayAll ? L.length : 4) + (more > 0 && !state.sayAll ? '<button type="button" class="linkbtn saymore" data-saymore="1">Show ' + more + ' more</button>' : '') + '</section>'; })() +
     // Bot Squad updates moved here from the CVR pages, under What people are saying, both sites (Mike, Oct 27).
-    '<section class="botsec" id="g-bots"><div class="bothead"><h2>🤖 Bot Squad updates</h2><span class="botlinks">' + ['rb', 'tp'].map(b => botNotesFor(b).length ? '<button type="button" class="linkbtn bmore" data-botwatch="' + b + '">All ' + BR[b].name + ' bot notes →</button>' : '').join('') + '</span></div><div class="say4 botsay">' + ['rb', 'tp'].map(b => botRow(b, true)).join('') + '</div></section>' +
     incidentsHtml() +
+    '<section class="botsec" id="g-bots"><div class="bothead"><h2>🤖 Bot Squad updates</h2></div><div class="say4 botsay">' + ['rb', 'tp'].map(b => botRow(b, true)).join('') + '</div><div class="botlinks botfoot">' + ['rb', 'tp'].map(b => botNotesFor(b).length ? '<button type="button" class="linkbtn bmore" data-botwatch="' + b + '">All ' + BR[b].name + ' bot notes →</button>' : '').join('') + '</div></section>' +
     // Customer service lives here once, for both sites (Mike, Oct 24), instead of on each CVR page.
     (typeof CS !== 'undefined' && CS.tp && CS.rb ? '<section class="bare tcs"><div class="ghead"><div class="gt"><h3>🎧 What customer service is seeing</h3><p class="gsub">Repeat customer complaints from the customer service channels, ' + esc(String(CS.window || '').replace(/^Customer service channels,\s*/i, '')) + '.</p></div></div>' + csHtml() + '</section>' : '') +
-    '<div class="sellrow">' + panel('🏷️', 'What is selling', 'Share of TeePublic orders by category in the last 24 hours, and the topics moving fastest. <a class="srclink" href="https://app.amplitude.com/analytics/tpub/dashboard/lm29400h" target="_blank" rel="noopener">Source: order data in Amplitude\u00a0↗</a>', sellingHtml(), 'p-sell') +
+    '<div class="sellrow">' + panel('🏷️', 'What is selling', 'Share of TeePublic orders by category in the last 24 hours, and the topics moving fastest.', sellingHtml() + psrc(['📊 <b>Orders:</b> ' + LNK('https://app.amplitude.com/analytics/tpub/dashboard/usaj36an', 'Amplitude, TeePublic order_completed') + ' by category and tag, last 24 hours, compared with the 7 days before. Not TeePublic admin.']), 'p-sell') +
     '</div>' +
-    (call ? '<section class="sec2 dbl"><div class="shead"><div><h2>💡 Should we double down?</h2></div></div>' + call + '</section>' : '') +
     topsPanel() +
     (typeof SHOUTS !== 'undefined' ? panel('🙌', 'Shout-out of the day', 'One person who drove something through.', shoutCard(), 'p-shout p-shoutw') : '') + '</section>';
 }
@@ -3267,7 +3273,6 @@ function tickerItems() {
   const bt = [].concat(EXPS.live).sort((a, z) => z.cvr.rel * z.reach - a.cvr.rel * a.reach)[0];
   if (bt) out.push({ e: '🧪', tone: bt.p != null && conf(bt) >= 80 ? (siteImp(bt.cvr.rel, bt.reach) >= 0 ? 'up' : 'dn') : '', t: bt.name + ': ' + sgn(siteImp(bt.cvr.rel, bt.reach), 1) + ' whole-site so far, not significant yet', go: 'j:' + bt.id, tip: '<b>' + esc(bt.name) + '</b><div class="gkv"><span class="gk">Status</span><span class="gv">Running · day ' + testDays(bt) + '</span><span class="gk">Whole site</span><span class="gv">' + sgn(siteImp(bt.cvr.rel, bt.reach), 1) + '</span><span class="gk">In the test</span><span class="gv">' + sgn(bt.cvr.rel, 1) + ' CVR</span><span class="gk">Confidence</span><span class="gv">' + (bt.p != null ? conf(bt) + '% (needs 95%)' : 'too early') + '</span></div><span class="segmore">Click for the test →</span>' });
   preList().slice(0, 2).forEach(it => { const DT = (typeof DATES !== 'undefined' && DATES[it.t]) || {}; out.push({ e: it.e, t: it.t + ': ' + lcx(it.s) + (/^(this|next) /i.test(it.eta || '') ? ' ' + it.eta.toLowerCase() : ', launch ' + it.eta), go: 'g:soon|.p-org', tip: gTip(it, etaDate(it.eta), false, null, DT.start ? parse(DT.start) : null).replace('Click for the full project →', 'Click for the Roadmap →') }); });
-  if (typeof SELLCALL !== 'undefined') out.push({ e: SELLCALL.e, tone: '', t: SELLCALL.tk || SELLCALL.title, go: 'g:trending|.callcard', tip: '<b>' + esc(SELLCALL.title) + '</b><br>' + esc(sents(SELLCALL.body)[0] || '') + '<span class="segmore">Click for the full read →</span>' }); // tk: a short ticker line (Mike, Oct 26: the full title is too wordy there). Neutral: a suggestion, not a result, so no caret.
   return out;
 }
 let TKN = 0, CDTOP = '';
@@ -3562,6 +3567,8 @@ document.addEventListener('click', ev => {
   const js = t.closest('[data-js]'); if (js) { closeModal(); state.view = 'soon'; state.fteam = js.dataset.js; render(); window.scrollTo({ top: 0 }); const el = document.querySelector('.tmpick [aria-selected="true"]'); if (el) { el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 2600); } return; }
   const rd = t.closest('[data-rtdel]'); if (rd) { rtSave(myItems().filter(x => String(x.at) !== rd.dataset.rtdel)); return; }
   if (t.closest('[data-mvmore]')) { state.mvAll = !state.mvAll; return renderKeep(); }
+  const incb = t.closest('[data-inc]'); if (incb) { ev.stopPropagation(); return incModal(+incb.dataset.inc); }
+  const incm = t.closest('[data-incmore]'); if (incm) { state.incAll = true; renderKeep(); return; }
   const flb = t.closest('[data-flag]'); if (flb) { ev.stopPropagation(); hideHint(); return flagModal(flb.dataset.flag); }
   const fdl = t.closest('[data-flagdel]'); if (fdl) return flagSave(fdl.dataset.flagdel, null);
   const io = t.closest('[data-imp]'); if (io) return impModal(+io.dataset.imp);
@@ -3590,7 +3597,6 @@ document.addEventListener('click', ev => {
   const sw = t.closest('[data-abdev]'); if (sw) { const box = sw.closest('.abtabs'); box.querySelectorAll('[data-abdev]').forEach(b => b.setAttribute('aria-pressed', String(b === sw))); box.querySelectorAll('[data-abpane]').forEach(pn => { pn.hidden = pn.dataset.abpane !== sw.dataset.abdev; }); return; }
   const xr = t.closest('[data-xrow]'); if (xr) return testDetailModal(xr.dataset.xrow);
   const why = t.closest('[data-why]'); if (why) { ev.stopPropagation(); return whyModal(why.dataset.why); }
-  const tsite = t.closest('[data-topsite]'); if (tsite) { state.topSite = tsite.dataset.topsite; renderKeep(); return; }
   const mode = t.closest('[data-cmpmode]'); if (mode) { state.cmpMode = mode.dataset.cmpmode; const [cb, ck] = state.cmp.split('|'); const m = findMetric(cb, state.cmp.slice(cb.length + 1)); if (m) compareModal(m); return; }
   const pgb = t.closest('[data-pgeo]'); if (pgb) { const [k, g] = pgb.dataset.pgeo.split('|'); state.pgeo = state.pgeo || {}; state.pgeo[k] = g; return renderKeep(); }
   const mvbk = t.closest('[data-mvback]'); if (mvbk) { ev.stopPropagation(); const [bb, kk] = mvbk.dataset.mvback.split('|'); const m = findMetric(bb, kk); if (m) movedModal(movedFor1(m)); return; }
