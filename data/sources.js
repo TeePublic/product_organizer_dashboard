@@ -3023,11 +3023,18 @@ const SRCS = {
    "what": "In Dev / On Track"
   },
   "eta": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Est. Launch Date column, row 5",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A5",
+   "date": "2026-11-04",
+   "what": "Launch Nov 2 (passed), so shown as TBD. Jira DEAP-6717 says Released on Nov 3 evening USA, which differs from the sheet's In Dev"
+  },
+  "eta_jira": {
    "kind": "jira",
-   "where": "Jira DEAP-6717, summary",
+   "where": "Jira DEAP-6717, status",
    "url": "https://articore.atlassian.net/browse/DEAP-6717",
-   "date": "2026-11-02",
-   "what": "On track for launch: Nov 3 (USA) / Nov 4 (AU)"
+   "date": "2026-11-04",
+   "what": "Released (summary: on track for launch Nov 4 AU / Nov 3 US)"
   },
   "eta_sheet": {
    "kind": "sheet",
@@ -3102,6 +3109,13 @@ const SRCS = {
    "what": "In Dev / On Track"
   },
   "eta": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Est. Launch Date column, row 10",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A10",
+   "date": "2026-11-04",
+   "what": "Launch Nov 11; phase Oct 5 to Nov 11 (the Oct 13 review target was Nov 3)"
+  },
+  "eta_old": {
    "kind": "meeting",
    "where": "Meeting notes, Exec Roadmap Review",
    "date": "2026-10-13",
@@ -4430,11 +4444,11 @@ const SRCS = {
    "what": "Project channel update Nov 1: Nov 3 is a Melbourne public holiday, so the team is targeting first thing Wed Nov 4 AU time; all else is ready, waiting on confirmation from the fulfillment partner"
   },
   "eta": {
-   "kind": "slack",
-   "where": "#temp-tpo-greeting-card-postcard-launch",
-   "url": "https://grid-articore.enterprise.slack.com/archives/C0BRM7CP7KL",
-   "date": "2026-11-01",
-   "what": "Project channel update Nov 1: Nov 3 is a Melbourne public holiday, so the team is targeting first thing Wed Nov 4 AU time; all else is ready, waiting on confirmation from the fulfillment partner"
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Est. Launch Date column, row 6",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A6",
+   "date": "2026-11-04",
+   "what": "Launch Sep 22 (phase Jul 15 to Aug 22), already passed, so shown as TBD. Slack differs: Nov 4 AU target, now waiting on a fulfillment partner test-order fix for postcards"
   },
   "s_latest": {
    "kind": "slack",
