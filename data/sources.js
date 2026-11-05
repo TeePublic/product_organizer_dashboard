@@ -1536,11 +1536,9 @@ const SRCS = {
   "s": {
    "kind": "jira",
    "where": "Jira DEAP-5099, status change",
-   "who": "Oliver Belmont",
-   "date": "2026-10-28",
    "url": "https://articore.atlassian.net/browse/DEAP-5099",
-   "what": "Moved to In Development on Oct 28",
-   "say": "DEAP-5099, assigned to Oliver Belmont, moved from Backlog to In Development on Oct 28."
+   "date": "2026-11-05",
+   "what": "Moved to Released on Nov 5, read Nov 5 (In Development since Oct 28)"
   },
   "eta": {
    "kind": "jira",
@@ -1903,6 +1901,13 @@ const SRCS = {
    "where": "Jira DEAP-6499, summary",
    "url": "https://articore.atlassian.net/browse/DEAP-6499",
    "what": "Puts the new card products in the TeePublic product feed for Shopping ads"
+  },
+  "s_latest": {
+   "kind": "jira",
+   "where": "Jira DEAP-6499, DEAP-6613 and DEAP-5964",
+   "url": "https://articore.atlassian.net/browse/DEAP-6499",
+   "date": "2026-11-05",
+   "what": "DEAP-6499 (greeting cards) and DEAP-6613 (postcards) are both In Development, read Nov 5; Jira DEAP-5964 (search and feed validation for the TeePublic launch) is Released"
   }
  },
  "Stop mailing about 80K contacts": {
@@ -2073,8 +2078,8 @@ const SRCS = {
    "kind": "jira",
    "where": "Jira DEAP-6468, DE board (DEAP board 580, DE Sprint 22)",
    "url": "https://articore.atlassian.net/browse/DEAP-6468",
-   "date": "2026-11-04",
-   "what": "DEAP-6468 status Approved, read from the DE board on Nov 4. Replaces \"Code review\"."
+   "date": "2026-11-05",
+   "what": "DEAP-6468 status Released, read from the DE board on Nov 5 (it was Approved on Nov 4)"
   },
   "eta": {
    "kind": "jira",
@@ -2238,12 +2243,10 @@ const SRCS = {
   },
   "s": {
    "kind": "jira",
-   "where": "Jira DEAP-4278, status change",
+   "where": "Jira DEAP-4278, status",
    "url": "https://articore.atlassian.net/browse/DEAP-4278",
-   "what": "Moved from In Development to Code Review on Oct 29",
-   "who": "Vaibhav Soni",
-   "date": "2026-10-29",
-   "say": "Vaibhav Soni moved DEAP-4278 from In Development to Code Review on Oct 29."
+   "date": "2026-11-05",
+   "what": "DEAP-4278 is in Code Review as of Nov 5"
   },
   "start": {
    "kind": "jira",
@@ -2543,11 +2546,10 @@ const SRCS = {
   },
   "s": {
    "kind": "jira",
-   "where": "Jira DEAP-6604 children DEAP-6611, DEAP-6725, DEAP-6824, DEAP-6973",
-   "url": "https://articore.atlassian.net/browse/DEAP-6604",
-   "date": "2026-11-03",
-   "what": "On Nov 3, mark-all-as-read (DEAP-6611) and a QA ticket to hide the rich text editor (DEAP-6973) are still In Development, a read/seen-columns check (DEAP-6725) is in development, and clearing old notifications before go-live (DEAP-6824) is in the backlog; the roadmap sheet launch date is still Nov 6",
-   "say": "On Nov 3, the Jira tickets under DEAP-6604 show mark-all-as-read and the rich text editor fix still in development, with the roadmap sheet launch date still Nov 6."
+   "where": "Jira DEAP-6604 children",
+   "url": "https://articore.atlassian.net/browse/DEAP-6611",
+   "date": "2026-11-05",
+   "what": "Nov 5: DEAP-6611 (mark all as read), DEAP-6973 (hide rich text editor) and DEAP-6725 (unread indicator) are all Code Review; DEAP-6824 (clear old notifications) is Backlog"
   },
   "s_sheet": {
    "kind": "sheet",
@@ -2917,10 +2919,8 @@ const SRCS = {
    "kind": "jira",
    "where": "Jira DEAP-6261, status change",
    "url": "https://articore.atlassian.net/browse/DEAP-6261",
-   "what": "Launch epic moved to In QA; routing, ordering and pricing tickets Released, end-to-end test In Development",
-   "who": "Matthew Wills",
-   "date": "2026-10-29",
-   "say": "The trucker hat launch epic (DEAP-6261) moved to In QA on Oct 29, with its routing, ordering and pricing tickets released and the end-to-end staging test in development."
+   "date": "2026-11-05",
+   "what": "Launch Trucker Hats epic moved to Released (read Nov 5); the sheet row Product Addition Support: Trucker Hat says Complete, Done"
   },
   "s_sheet": {
    "kind": "sheet",
@@ -3052,6 +3052,13 @@ const SRCS = {
    "date": "2026-10-07",
    "url": "https://grid-articore.enterprise.slack.com/archives/C0AD6GL7JP6/p1791416608252969?thread_ts=1791407189.391339&cid=C0AD6GL7JP6",
    "what": "Monthly estimate for the Redbubble trucker hat: about $90K, based on current sales where the product is offered"
+  },
+  "s_latest": {
+   "kind": "slack",
+   "where": "#released",
+   "url": "https://grid-articore.enterprise.slack.com/archives/C0V4PM9DW/p1793819811941099",
+   "date": "2026-11-04",
+   "what": "Nov 4, 2:16 PM ET: the Redbubble trucker hats launch was announced in #released. Jira DEAP-6717 is Released. The roadmap sheet still says In Dev, so the sheet differs and is shown until the Product Manager updates it"
   }
  },
  "Standardized wall art sizes": {
@@ -3564,16 +3571,15 @@ const SRCS = {
    "kind": "jira",
    "where": "Jira DEAP-6615, status change",
    "url": "https://articore.atlassian.net/browse/DEAP-6615",
-   "what": "Moved to Code Review on Oct 30",
-   "who": "Mohit Bansal",
-   "date": "2026-10-30",
-   "say": "Mohit Bansal moved DEAP-6615 to Code Review on Oct 30, and design supplied the new search icon the same morning."
+   "date": "2026-11-05",
+   "what": "Moved to Released on Nov 5, read Nov 5 (Code Review on Oct 30)"
   },
   "s_sheet": {
    "kind": "sheet",
-   "where": "Roadmap sheet, Active Work tab, Status column, row 25",
-   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A25",
-   "what": "TDD/Scoping, On Track. Dashboard shows Planned"
+   "where": "Roadmap sheet, Active Work tab, row PATHWAYS: Search box visual update",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268",
+   "date": "2026-11-05",
+   "what": "The row PATHWAYS: Search box visual update still says TDD/Scoping, On Track (read Nov 5); Jira is shown because it says Released"
   },
   "eta": {
    "kind": "jira",
@@ -4109,12 +4115,11 @@ const SRCS = {
    "what": "Brand: TPO (TeePublic)"
   },
   "s": {
-   "kind": "slack",
-   "where": "#temp-tpo-peak-2026-cvr-upsells",
-   "who": "Allison Cassara",
-   "date": "2026-10-26",
-   "url": "https://grid-articore.enterprise.slack.com/archives/C0BU9AUHX2N/p1793031143784139?thread_ts=1793031143.784139&cid=C0BU9AUHX2N",
-   "what": "Draft product spec shared for the Heavyweight tee upgrade, still marked work in progress with open action items; Jira DEAP-6805 was created Oct 26 and sits in Backlog"
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268",
+   "date": "2026-11-05",
+   "what": "Row Premium tee upsell, Customer (Tiger): In Dev (read Nov 5). Jira DEAP-6805 (heavyweight tee upsell) is also In Development, so the two agree"
   },
   "s_sheet": {
    "kind": "sheet",
@@ -4227,17 +4232,17 @@ const SRCS = {
   },
   "s": {
    "kind": "jira",
-   "where": "Jira DEAP-6559, status change",
+   "where": "Jira DEAP-6559 and Amplitude dashboard 00gntbuv",
    "url": "https://articore.atlassian.net/browse/DEAP-6559",
-   "what": "Social proof badge ticket moved from Code Review to Released on Oct 26. The first badge, a trending tag, went live as an A/B/C test on Oct 23 (#released, Jonathan Tan)",
-   "who": "Jeff Cooper",
-   "date": "2026-10-26"
+   "date": "2026-11-05",
+   "what": "Social proof badge ticket is Released (Oct 26). The trending tag test has run since Oct 23 and the best seller tag test since Oct 27, per Jon's TeePublic Amplitude dashboard Social Proof Badges on PDP: A/B Test (00gntbuv), read Nov 5"
   },
   "s_sheet": {
    "kind": "sheet",
-   "where": "Roadmap sheet, Active Work tab, Status column, row 136",
-   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A136",
-   "what": "In Dev"
+   "where": "Roadmap sheet, Active Work tab",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268",
+   "date": "2026-11-05",
+   "what": "Row PDP badges (trending, best seller), Customer (Tiger): Current Phase Dev Done (read Nov 5)"
   },
   "start": {
    "kind": "jira",
@@ -4448,10 +4453,9 @@ const SRCS = {
   "s_latest": {
    "kind": "slack",
    "where": "#temp-tpo-greeting-card-postcard-launch",
-   "who": "",
-   "date": "2026-11-03",
-   "url": "https://grid-articore.enterprise.slack.com/archives/C0BRM7CP7KL",
-   "what": "Nov 3, 12:57 PM: the launch team asked whether greeting cards are still on track this week, checking on the fulfillment partner and an image backfill that was not yet confirmed complete"
+   "url": "https://grid-articore.enterprise.slack.com/archives/C0BRM7CP7KL/p1793813643932479",
+   "date": "2026-11-04",
+   "what": "Nov 4: greeting cards and postcards announced live on TeePublic; the product canvas was set to active that afternoon. Jira DEAP-5964 (launch search and feed validation) is Released. The roadmap sheet still says In Dev, so the sheet differs"
   }
  },
  "More poster inventory on Redbubble": {
@@ -4564,10 +4568,10 @@ const SRCS = {
   },
   "s": {
    "kind": "sheet",
-   "where": "Roadmap sheet, Active Work tab, row 48",
-   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A48",
-   "date": "2026-10-28",
-   "what": "The roadmap sheet shows In Dev, On Track, phase Sep 1 to Sep 15 (read Oct 28)."
+   "where": "Roadmap sheet, Active Work tab",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268",
+   "date": "2026-11-05",
+   "what": "Row Product Localization 2.0: Complete, Done, phase Sep 1 to Sep 15 (read Nov 5); note says implementation with Inno Line has started"
   }
  },
  "Rounded prices on Redbubble": {
@@ -4588,9 +4592,9 @@ const SRCS = {
   "s": {
    "kind": "sheet",
    "where": "Roadmap sheet, Active Work tab, row 62",
-   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A62",
-   "date": "2026-10-28",
-   "what": "The roadmap sheet shows In Dev, Blocked, phase Sep 1 to Oct 15 (read Oct 28)."
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268",
+   "date": "2026-11-05",
+   "what": "Row Rounding Prices on RBO: Complete, Done, phase Sep 1 to Oct 15 (read Nov 5; it said Blocked on Oct 28). Jira epic DEAP-5736, RB Price Rounding Pre-Peak CY26, is Released"
   }
  },
  "Topics-first navigation on Redbubble": {
