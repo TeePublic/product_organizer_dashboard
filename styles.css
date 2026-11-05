@@ -3975,7 +3975,7 @@ details.pbox.prov > summary { cursor: pointer; list-style: none; } details.pbox.
 @media (max-width: 760px) {
   .abrow.tpg > :nth-child(4)::before { content: 'Metric'; }
   .abrow.tpg > :nth-child(5)::before { content: 'Metric change'; }
-  .abrow.tpg > :nth-child(6)::before { content: 'Revenue per shopper'; }
+  .abrow.tpg > :nth-child(6)::before { content: 'Revenue per user'; }
 }
 :root:not(#z):not(#y) .abcols.tpg .abh { white-space: normal; line-height: 1.25; }
 @media (min-width: 761px) and (max-width: 1240px) { :root:not(#z):not(#y) .abcols.tpg, :root:not(#z):not(#y) .abrow.tpg { grid-template-columns: minmax(180px, 1fr) 72px 100px 100px 112px 116px; } }
