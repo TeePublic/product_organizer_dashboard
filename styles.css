@@ -3980,3 +3980,11 @@ details.pbox.prov > summary { cursor: pointer; list-style: none; } details.pbox.
 :root:not(#z):not(#y) .abcols.tpg .abh { white-space: normal; line-height: 1.25; }
 @media (min-width: 761px) and (max-width: 1240px) { :root:not(#z):not(#y) .abcols.tpg, :root:not(#z):not(#y) .abrow.tpg { grid-template-columns: minmax(180px, 1fr) 72px 100px 100px 112px 116px; } }
 :root:not(#z):not(#y) .abrow.tpg > .abtbd { justify-self: end; text-align: right; }
+
+/* Side nav headings (Mike, Nov 5): one shape for "At a glance" and "Split CVR by". The visible space is the same on both sides of a heading:
+   from the divider (or the panel edge) to the text, and from the text to the first item's label, all about 15px, measured on the letters (font metrics), not the boxes. The slot has one fixed height open or
+   closed, so no icon moves when the rail opens (the Nov 3 fix let "Split CVR by" grow 10px on hover). */
+#srail .srgrp, #srail:hover .srgrp, #srail:focus-within .srgrp, #srail .srgrp:first-of-type { box-sizing: border-box; display: block; height: 21px; line-height: 10px; margin: 0; padding: 9px 10px 2px; overflow: hidden; border-top: 0; }
+#srail .srgrp.sep, #srail:hover .srgrp.sep, #srail:focus-within .srgrp.sep { height: 27px; margin: 8px 0 0; padding: 14px 10px 2px; border-top: 1px solid var(--line); }
+/* The open (hover) rail sets its labels about 2px lower than the always-open wide rail, so its divider-to-heading space is 2px more to match. */
+@media (min-width: 761px) and (max-width: 1660px) { #srail .srgrp.sep, #srail:hover .srgrp.sep, #srail:focus-within .srgrp.sep { height: 29px; padding-top: 16px; } }
