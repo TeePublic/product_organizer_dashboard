@@ -3958,3 +3958,22 @@ details.pbox.prov > summary { cursor: pointer; list-style: none; } details.pbox.
 :root:not(#z):not(#y) .abrow .tmeta .rtag.vtag { display: inline-flex; align-items: center; gap: 5px; background: color-mix(in srgb, var(--ctl) 14%, var(--surface)); color: var(--ctl); box-shadow: inset 0 0 0 1.5px var(--ctl); font-weight: 700; }
 /* Every change number in the A/B tables is bold (Mike, Nov 4). */
 :root:not(#z):not(#y) .abrow .abn, .abtab .abn, .abres .chn:not(.base) { font-weight: 700; }
+
+/* A/B tests, TeePublic table (Mike, Nov 5): six columns, named for what TeePublic can report. Same row grammar as the Redbubble table. */
+:root:not(#z):not(#y) .abcols.tpg, :root:not(#z):not(#y) .abrow.tpg { grid-template-columns: minmax(260px, 420px) 100px 112px 150px 150px 110px; column-gap: 20px; justify-content: space-between; }
+.abrow.tpg .abmet { font-size: 14px; } .abrow.tpg .abmet b { font-weight: 600; } .abrow.tpg .abmet.na { color: var(--muted); font-size: 13px; }
+.abrow.tpg .abchg { display: flex; flex-direction: column; align-items: flex-end; gap: 1px; } .abrow.tpg .abchg small { font-size: 11.5px; color: var(--muted); white-space: nowrap; }
+.abrow.tpg .abn.plain { color: var(--ink); font-weight: 500; }
+:root:not(#z):not(#y) .abrow.tpg .hint.abnh { justify-self: end; }
+@media (min-width: 761px) and (max-width: 1240px) { :root:not(#z):not(#y) .abcols.tpg, :root:not(#z):not(#y) .abrow.tpg { grid-template-columns: minmax(190px, 1fr) 72px 104px 108px 112px 84px; column-gap: 10px; justify-content: stretch; } }
+@media (max-width: 760px) { :root:not(#z):not(#y) .abrow.tpg { grid-template-columns: repeat(2, 1fr); gap: 10px 12px; } .abrow.tpg .tname { grid-column: 1 / -1; } .abrow.tpg .abchg { align-items: flex-start; } :root:not(#z):not(#y) .abrow.tpg .hint.abnh { justify-self: start; } }
+:root:not(#z):not(#y) .abrow.tpg .hint.abl { justify-self: start; text-align: left; }
+.abt.tpv td small { display: block; color: var(--muted); font-size: 11.5px; } .tpcap { margin: 10px 28px 0; }
+.abt.tpv td .tpchd { display: block; margin-top: 3px; font-size: 11.5px; color: var(--muted); white-space: nowrap; }
+:root:not(#z):not(#y) .mbox .abt.tpv th { white-space: normal; }
+.abv2.v-down { background: var(--bad-bg); color: var(--bad); }
+@media (max-width: 760px) {
+  .abrow.tpg > :nth-child(4)::before { content: 'Metric'; }
+  .abrow.tpg > :nth-child(5)::before { content: 'Metric change'; }
+  .abrow.tpg > :nth-child(6)::before { content: 'Shoppers'; }
+}

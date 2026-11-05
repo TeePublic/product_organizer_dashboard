@@ -1552,7 +1552,17 @@ function rmHeadline() {
   const nw = new Date(), td = Date.UTC(nw.getFullYear(), nw.getMonth(), nw.getDate()), wkStart = td - ((new Date(td).getUTCDay() + 6) % 7) * DAY;
   return '<p class="verdict">' + h1 + '</p>' + (sub.length ? '<p class="sulead">' + sub.map(ucf).join(' ') + '</p>' : '');
 }
+// TeePublic headline (Mike, Nov 5): no revenue per user there, so it names the tests and who has the most confidence, with the change and the metric's confidence.
+function tpHeadline() {
+  const words = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'], items = typeof TPEXPS !== 'undefined' ? TPEXPS.items : [];
+  if (!items.length) return '<p class="verdict vtests">No TeePublic tests are running right now.</p>';
+  const it = items.map((x, i) => ({ x, i, v: tpLeadV(x), c: x.statsig ? 0 : x.variants.reduce((m, v) => Math.max(m, v.conf || 0), 0) }));
+  const best = it.filter(o => o.c >= 80).sort((a, z) => z.c - a.c).slice(0, 2), up = (EXPS.soon || []).filter(x => abSiteOk(x.site)).slice(0, 2).map(x => esc(x.name)), won = it.filter(o => o.c >= 95).length;
+  const lead = o => '<span class="verd n2 hlink" role="link" tabindex="0" data-tpx="' + o.i + '">' + esc(o.x.name) + '</span> (' + esc(o.v.n) + ' ' + sgn(o.v.rel, 1) + ', ' + o.c + '%)';
+  return '<p class="verdict vtests">There ' + (items.length === 1 ? 'is one test' : 'are ' + words[items.length] + ' tests') + ' running on TeePublic, and ' + (won ? words[won] + ' ' + (won === 1 ? 'has' : 'have') + ' reached 95% confidence' : 'none has reached 95% confidence yet') + '.</p><p class="sulead">' + (best.length ? 'Highest confidence so far: ' + andJoin(best.map(lead)) + '. ' : '') + (up.length ? 'Up next: ' + up.join(' and ') + '.' : '') + '</p>';
+}
 function abHeadline() {
+  if (abSiteNow() === 'TP') return tpHeadline();
   const live = (EXPS.live || []).filter(t => abSiteOk(testSite(t))), done = EXPS.done || [], soon = EXPS.soon || [], imp = t => siteImp(t.cvr.rel, t.reach);
   // Each running test hovers to a card: where it runs, day N, whole-site and in-test effect, a confidence bar to 95%, the primary metric.
   const card = t => { const c = t.p != null ? conf(t) : null, w = c == null ? 0 : Math.min(100, c);
@@ -2075,7 +2085,17 @@ const abHead = sortable => {
     c('cvr', hint('<small class="rpul"><span class="lg">Sitewide</span><span class="sm">Sitewide</span></small>CVR impact', 'soft', tip('Sitewide CVR impact', 'The test group\'s CVR change, scaled by the share of traffic it reaches: what it would do to the whole site.')), true) + c('aov', hint('AOV', 'soft', tip('AOV', 'Average order value in the test group vs control.')), true) +
     c('rpu', hint(rpuL + 'All users', 'soft', tip('Revenue per user, all users', 'Test group vs control. The main number for every test.')), true) + c('rpud', hint(rpuL + 'Desktop', 'soft', tip('Revenue per user, desktop', 'Test group vs control, desktop visitors only.')), true) + c('rpum', hint(rpuL + 'Mobile', 'soft', tip('Revenue per user, mobile', 'Test group vs control, mobile visitors only.')), true) + '</div>';
 };
-const abHeadSort = () => abHead(true);
+// TeePublic header (Mike, Nov 5): TeePublic tests run in their own tools, so each test measures its own goal. No CVR impact, AOV or revenue columns: they can't be totaled across tests.
+// The row names the metric when we have it; the small top line on each header says what to expect, and the hover explains.
+const abHeadTP = sortable => {
+  const S = state.abSort || { k: 'days', dir: 1 }, tip = (b, x) => '<span class="nosrc"><b>' + b + '</b><br>' + x + '</span>', top = t => '<small class="rpul"><span class="lg">' + t + '</span><span class="sm">' + t + '</span></small>';
+  const c = (k, inner, num) => '<span class="abh' + (num ? ' num' : '') + '"' + (sortable ? ' role="button" tabindex="0" data-absort="' + k + '"' : '') + '>' + inner + (sortable && S.k === k ? '<i class="sa" aria-hidden="true">' + (S.dir > 0 ? '↑' : '↓') + '</i>' : '') + '</span>';
+  return '<div class="tcols abcols tpg">' + c('test', 'Test') + c('days', sortable ? 'Running' : 'Ran') + c('sig', hint('Stat sig', 'soft', tip('Stat sig', 'Is there 95% confidence the metric moved, not noise?'))) +
+    '<span class="abh">' + hint(top('Set per test') + 'Metric', 'soft', tip('Metric', 'TeePublic tests are not run as experiments, so each one measures its own goal and none is sitewide CVR. The row names the metric when we have it, and says "Not defined" when we do not.')) + '</span>' +
+    c('tpchg', hint(top('Hover for details') + 'Metric change', 'soft', tip('Metric change', 'The leading version vs control on that test\'s metric. Hover a number for the control and every version.')), true) +
+    c('tpn', hint(top('All versions') + 'Shoppers', 'soft', tip('Shoppers', 'People in the test so far, control and every version together.')), true) + '</div>';
+};
+const abHeadSort = () => abSiteNow() === 'TP' ? abHeadTP(true) : abHead(true);
 // Test pop-up (Mike, Nov 3 rebuild). Reads top to bottom as a story: what the test is, what it says so far, then the proof.
 // One results table with devices as columns, the same way the main table shows them; no toggles. R.dev = { desktop: { n: [control, test], rpv, cvr, aov, vers }, mobile: {...} }.
 function testDetailModal(id) {
@@ -2174,15 +2194,29 @@ function testModal(kind, i) {
     '<div class="pbox"><h4 class="ph">📝 What happened</h4>' + (wu && wu[1] ? '<p>' + esc(wu[1]) + '</p>' : '') + '<p>' + esc(o.note) + '</p></div>' +
     '<div class="pbox"><h4 class="ph">🔗 Links</h4><p><a href="' + esc(o.url) + '" target="_blank" rel="noopener">Open the test in Amplitude Experiment ↗</a></p>' + (wu && /^https?:/.test(wu[0]) ? '<p><a href="' + esc(wu[0]) + '" target="_blank" rel="noopener">Read the write-up in Confluence ↗</a></p>' : '') + '</div>');
 }
-const abSiteOk = s => { const f = state.abSite || 'both'; if (f === 'both') return true; const c = /dashery|^da$/i.test(s || '') ? 'DA' : /tee|^tp$/i.test(s || '') ? 'TP' : /both/i.test(s || '') ? 'B' : 'RB'; return f === 'DA' ? c === 'DA' : (c === 'B' || c === f); };
+// RBO or TPO, never both (Mike, Nov 5): the two sites measure tests differently, so each gets its own table and columns. RBO is the default.
+const abSiteNow = () => state.abSite === 'TP' ? 'TP' : 'RB';
+const abSiteOk = s => { const c = /dashery|^da$/i.test(s || '') ? 'DA' : /tee|^tp$/i.test(s || '') ? 'TP' : /both/i.test(s || '') ? 'B' : 'RB'; return c === 'B' || c === abSiteNow(); };
 const tpDays = x => Math.round((parse(EXPS_AS_OF) - parse(x.start)) / DAY) + 1;
-// TeePublic tests read from Amplitude (Jon's dashboard) carry numbers: show the leading version on the row.
-function tpLead(x) { const v = x.variants.reduce((m, q) => (m == null || q.rel > m.rel ? q : m), null); return v ? '<b>' + esc(v.n) + ' ' + sgn(v.rel, 1) + '</b> <small>order rate vs control</small>' : ''; }
+// The Beam test is read from Statsig, not Split: no control counts, just each version's change per metric with a margin. Its row shows Cart CVR (Beam is a conversion test).
+const tpSg = x => { const g = x.statsig; if (!g) return null; return g.metrics.find(m => /cart cvr/i.test(m.name)) || g.metrics[0]; };
+const tpMetric = x => x.metric || (x.statsig ? tpSg(x).name : null);
+const tpVersions = x => x.statsig ? [{ n: 'Version A', rel: tpSg(x).a, w: tpSg(x).aw }, { n: 'Version B', rel: tpSg(x).b, w: tpSg(x).bw }] : x.variants;
+const tpLeadV = x => tpVersions(x).reduce((m, q) => (m == null || q.rel > m.rel ? q : m), null);
+const tpUsers = x => x.statsig ? parseFloat(x.statsig.exposures) * (/M/i.test(x.statsig.exposures) ? 1e6 : /k/i.test(x.statsig.exposures) ? 1e3 : 1) : (x.control.u != null ? x.control.u : x.control.p) + x.variants.reduce((m, v) => m + (v.u != null ? v.u : v.p), 0);
+// Metric change cell: the leading version vs control, bold and colored by direction (uncertainty lives in Stat sig); the hover shows control and every version.
+function tpChange(x) {
+  const v = tpLeadV(x); if (!v) return '<span class="abn na">–</span>';
+  const nm = tpMetric(x) || 'Metric (not defined)', fp = r => pct(r, r < 0.1 ? 2 : 1);
+  const list = x.statsig ? tpVersions(x).map(q => '<li><b>' + esc(q.n) + '</b> ' + sgn(q.rel, 1) + ' <span class="cap">±' + (q.w * 100).toFixed(1) + '% margin</span>' + (q === v ? ' · shown' : '') + '</li>').join('') : '<li><b>Control</b> ' + fp(x.control.conv) + '</li>' + x.variants.map(q => '<li><b>' + esc(q.n) + '</b> ' + fp(q.conv) + ' (' + sgn(q.rel, 1) + (q.conf ? ', ' + q.conf + '% confidence' : '') + ')' + (q === v ? ' · shown' : '') + '</li>').join('');
+  return hint('<span class="abchg"><span class="abn ' + (v.rel >= 0 ? 'b' : 'w') + '">' + sgn(v.rel, 1) + '</span><small>' + esc(v.n) + '</small></span>', 'abm abnh', '<span class="nosrc"><b>' + esc(nm) + ', each version vs control</b><ul class="abvl">' + list + '</ul>' + (tpMetric(x) ? '' : 'Split does not say which metric this is. Ask Jon or Mike.') + '</span>');
+}
 function tpRow(x, i) {
-  const best = x.variants.reduce((m, v) => Math.max(m, v.conf || 0), 0), dash = '<span class="abtbd"><b>TBD</b><small>' + (x.statsig ? 'see test' : 'not in Split') + '</small></span>';
+  const best = x.variants.reduce((m, v) => Math.max(m, v.conf || 0), 0);
   const chip = best >= 95 ? '<span class="abst yes">Yes</span>' : '<span class="abst">' + (best >= 80 ? 'Not yet · ' + best + '%' : 'Not yet') + '</span>';
-  const tip = best >= 95 ? 'At least 95% confidence of a true difference.' : best >= 80 ? 'The best version has ' + best + '% confidence. It needs 95%.' : 'No version is close to 95% yet.';
-  return '<div class="rowwrap"><div class="trow abrow" role="button" tabindex="0" data-tpx="' + i + '"><span class="tname tnico"><span class="ge gico g-CVR" aria-hidden="true">' + projIco({ t: x.name, obj: 'CVR' }) + '</span><b>' + esc(x.name) + '</b><span class="cap tmeta">' + sitePill('TP') + '<span class="tloc">' + esc(x.where) + '</span></span></span><span class="abday"><b>Day ' + tpDays(x) + '</b><small>since ' + short(x.start) + '</small></span>' + chip + '<span class="abna">' + (x.statsig ? 'Numbers in the test detail' : x.src === 'amplitude' ? tpLead(x) : 'Split does not report these') + '</span></div></div>';
+  const mn = tpMetric(x), met = mn ? hint('<span class="abmet"><b>' + esc(mn) + '</b></span>', 'abm abnh abl', '<span class="nosrc"><b>' + esc(mn) + '</b><br>' + esc(x.metricNote || (x.statsig ? 'Share of cart visitors who order, read from Statsig. Beam is a conversion test.' : x.goal) || '') + '</span>') : hint('<span class="abmet na">Not defined</span>', 'abm abnh abl', '<span class="nosrc"><b>Metric not defined</b><br>This test is read from Split, which does not say what it measures. Ask Jon or Mike.</span>');
+  const n = tpUsers(x), nh = hint('<span class="abn plain">' + compact(n) + '</span>', 'abm abnh', '<span class="nosrc"><b>Shoppers in the test</b><br>' + (x.statsig ? x.statsig.exposures + ' so far, ' + esc(x.statsig.split) : int(x.control.u != null ? x.control.u : x.control.p) + ' in control' + x.variants.map(v => '<br>' + int(v.u != null ? v.u : v.p) + ' in ' + esc(v.n)).join('')) + '</span>');
+  return '<div class="rowwrap"><div class="trow abrow tpg" role="button" tabindex="0" data-tpx="' + i + '"><span class="tname tnico"><span class="ge gico g-CVR" aria-hidden="true">' + projIco({ t: x.name, obj: 'CVR' }) + '</span><b>' + esc(x.name) + '</b><span class="cap tmeta">' + sitePill('TP') + '<span class="tloc">' + esc(x.where) + '</span></span></span><span class="abday"><b>Day ' + tpDays(x) + '</b><small>since ' + short(x.start) + '</small></span>' + chip + met + tpChange(x) + nh + '</div></div>';
 }
 function statsigModal(x) {
   const g = x.statsig, d = v => '<span class="chn n">' + sgn(v, 1) + '</span>', row = m => '<tr><td>' + esc(m.name) + '</td><td>' + d(m.a) + ' <span class="cap">±' + (m.aw * 100).toFixed(1) + '%</span></td><td>' + d(m.b) + ' <span class="cap">±' + (m.bw * 100).toFixed(1) + '%</span></td></tr>';
@@ -2193,23 +2227,35 @@ function statsigModal(x) {
     (g.beam ? '<div class="abwhat2"><h4 class="ph">🤝 Beam\'s own report (' + g.beam.month + ')</h4><ul class="hul nrul"><li>🛒 <b>Order value:</b> ' + sgn(g.beam.aovLift, 1) + ' ($' + g.beam.aovNo.toFixed(2) + ' without Beam vs $' + g.beam.aovBeam.toFixed(2) + ' with it)</li><li>✅ <b>Carts completed:</b> ' + pct(g.beam.ccrBeam, 1) + ' with Beam vs ' + pct(g.beam.ccrNo, 1) + ' without</li><li>🙋 <b>Use:</b> ' + int(g.beam.users) + ' customers used Beam; ' + int(g.beam.redeemed) + ' donations since ' + short(x.start) + ' (about $' + int(g.beam.donated) + ' in total); redemption rate about ' + pct(g.beam.rate, 0) + '</li></ul><p>Beam compares shoppers who used Beam with those who didn\'t, so it can\'t separate Beam\'s effect from who chooses to use it. The Statsig table above is the fair read.</p></div>' : '') +
     '<div class="abfoot2"><a class="srclink" href="' + esc(g.url) + '" target="_blank" rel="noopener">Open in Statsig\u00a0↗</a> <a class="srclink" href="' + esc(g.portal) + '" target="_blank" rel="noopener">Beam partner portal\u00a0↗</a></div>');
 }
+// Plain verdict from the best confidence on the test (Mike's wording: too early under 50%, leaning 50 to 79, likely 80 to 94, clear 95+).
+function tpVerdict(x) {
+  const b = x.variants.reduce((m, v) => (v.conf || 0) > (m.conf || 0) ? v : m, { conf: 0, rel: 0 }), c = b.conf || 0, up = b.rel >= 0;
+  return c >= 95 ? [up ? 'ship' : 'down', up ? 'Clear winner' : 'Clear loser'] : c >= 80 ? [up ? 'lean' : 'down', up ? 'Likely up' : 'Likely down'] : c >= 50 ? [up ? 'lean' : 'down', up ? 'Leaning up' : 'Leaning down'] : ['early', 'Too early to tell'];
+}
 function tpDetailModal(i) {
   const x = typeof TPEXPS !== 'undefined' ? TPEXPS.items[i] : null; if (!x) return;
   if (x.statsig) return statsigModal(x);
   const rows = [{ n: 'Control', p: x.control.p, c: x.control.conv, rel: null }].concat(x.variants.map(v => ({ n: v.n, p: v.p, c: v.conv, rel: v.rel, conf: v.conf })));
   const amp = x.src === 'amplitude', mtip = amp ? 'Metric: ' + x.goal + '.' : 'This is still measured in an old Ruby gem, so we can\'t say which metric it is. Ask Jon or Mike. We\'ll pull these tests into Amplitude soon.', mh = t => hint(t + ' <span class="thi" aria-hidden="true">ⓘ</span>', 'thhint', mtip);
-  const tbl = '<table class="abt tpv"><thead><tr><th>Version</th><th>Participants</th><th>' + mh('Metric') + '</th><th>' + mh('Metric change') + '</th><th>Confidence</th></tr></thead><tbody>' + rows.map(r => '<tr><td>' + esc(r.n) + '</td><td>' + int(r.p) + '</td><td>' + pct(r.c, r.c < 0.1 ? 2 : 1) + '</td><td>' + (r.rel == null ? '–' : '<span class="chn ' + (r.rel >= 0 ? 'b' : 'w') + '">' + sgn(r.rel, 1) + '</span>') + '</td><td>' + (r.rel == null ? '–' : r.conf ? r.conf + '% confidence' : 'Not enough yet') + '</td></tr>').join('') + '</tbody></table>';
-  openModal('<span class="tipsrc" hidden></span><div class="mhead"><h3 id="mtitle">' + esc(x.name) + '</h3></div><div class="mtags"><span class="rtag">' + siteDot('TP') + '</span><span class="rtag">' + esc(x.where) + '</span><span class="rtag">Day ' + tpDays(x) + ', since ' + short(x.start) + '</span><span class="abv2 v-' + x.call[0] + '">' + esc(x.call[1]) + '</span></div><div class="abwhat2"><h4 class="ph">🧪 About this test</h4><p>' + (amp ? 'Read from Amplitude on ' + short(TPEXPS.asOf) + ', covering ' + short(x.start) + ' to ' + short(x.through) + '. The goal is: ' + esc(x.goal) + '. This is not sitewide CVR, and the numbers are not bot-filtered (the bot cohorts exist only in the Redbubble project), so read them with that in mind.' : 'Read from the Split dashboard on ' + short(TPEXPS.asOf) + '. Split reports each test\'s own conversion goal, so these rates are not comparable across tests and none of them is sitewide CVR.') + '</p></div>' + tbl + '<div class="abfoot2"><a class="srclink" href="' + esc(amp ? x.url : TPEXPS.url) + '" target="_blank" rel="noopener">Open in ' + (amp ? 'Amplitude' : 'Split') + '\u00a0↗</a></div>');
+  let tbl = '<table class="abt tpv"><thead><tr><th>Version</th><th>Participants</th><th>' + mh('Metric') + '</th><th>' + mh('Metric change') + '</th><th>Confidence</th></tr></thead><tbody>' + rows.map(r => '<tr><td>' + esc(r.n) + '</td><td>' + int(r.p) + '</td><td>' + pct(r.c, r.c < 0.1 ? 2 : 1) + '</td><td>' + (r.rel == null ? '–' : '<span class="chn ' + (r.rel >= 0 ? 'b' : 'w') + '">' + sgn(r.rel, 1) + '</span>') + '</td><td>' + (r.rel == null ? '–' : r.conf ? r.conf + '% confidence' : 'Not enough yet') + '</td></tr>').join('') + '</tbody></table>';
+  // Amplitude-sourced tests (Jon's dashboard) carry more than one metric: show them all in one table, versions as rows, each change vs control (Mike, Nov 5).
+  if (amp && x.control.atc != null) {
+    const f1 = (v, k) => k === 'usd' ? '$' + (v >= 10 ? v.toFixed(2) : v.toFixed(3)) : pct(v, v < 0.1 ? 2 : 1);
+    const cell = (val, k, rel, conf) => val == null ? '<td class="na">–</td>' : '<td>' + f1(val, k) + (rel == null ? '' : '<small class="tpchd"><span class="chn ' + (rel >= 0 ? 'b' : 'w') + '">' + sgn(rel, 1) + '</span>' + (conf ? ' ' + conf + '% sure' : '') + '</small>') + '</td>';
+    const c = x.control, r2 = ['<tr class="ctlrow"><td><b>Control</b><small>baseline</small></td><td>' + int(c.u != null ? c.u : c.p) + '</td>' + cell(c.atc, 'p') + cell(c.conv, 'p') + cell(c.rpu, 'usd') + cell(c.aov, 'usd') + '</tr>'].concat(x.variants.map(v => '<tr><td><b>' + esc(v.n) + '</b><small>vs control</small></td><td>' + int(v.u != null ? v.u : v.p) + '</td>' + cell(v.atc, 'p', v.atcRel, v.atcConf) + cell(v.conv, 'p', v.rel, v.conf) + cell(v.rpu, 'usd', v.rpuRel) + cell(v.aov, 'usd', v.aovRel) + '</tr>'));
+    tbl = '<table class="abt tpv"><thead><tr><th>Version</th><th>Shoppers</th><th>Add to cart</th><th>Order rate</th><th>Revenue per shopper</th><th>Order value</th></tr></thead><tbody>' + r2.join('') + '</tbody></table><p class="cap tpcap">Revenue per shopper and order value have no error bar in Amplitude, so read them as a direction.</p>';
+  }
+  openModal('<span class="tipsrc" hidden></span><div class="mhead"><h3 id="mtitle">' + esc(x.name) + '</h3></div><div class="mtags"><span class="rtag">' + siteDot('TP') + '</span><span class="rtag">' + esc(x.where) + '</span><span class="rtag">Day ' + tpDays(x) + ', since ' + short(x.start) + '</span><span class="abv2 v-' + tpVerdict(x)[0] + '">' + tpVerdict(x)[1] + '</span></div><div class="abwhat2"><h4 class="ph">🧪 About this test</h4><p>' + (amp ? 'Read from Amplitude on ' + short(TPEXPS.asOf) + ', covering ' + short(x.start) + ' to ' + short(x.through) + '. <b>Order rate</b> is the share of product-page viewers who order within 24 hours, not sitewide CVR. The numbers are not bot-filtered: the bot cohorts exist only in the Redbubble project.' : 'Read from the Split dashboard on ' + short(TPEXPS.asOf) + '. Split reports each test\'s own conversion goal, so these rates are not comparable across tests and none of them is sitewide CVR.') + '</p></div>' + tbl + '<div class="abfoot2"><a class="srclink" href="' + esc(amp ? x.url : TPEXPS.url) + '" target="_blank" rel="noopener">Open in ' + (amp ? 'Amplitude' : 'Split') + '\u00a0↗</a></div>');
 }
 function testsHtml() {
-  const f = state.abSite || 'both';
+  const f = abSiteNow();
   const sigVal = t => { const r = abRd(t), g = (r.m || {})[r.goal]; return !g ? 0 : g.s === 'sig' ? 100 : g.c ? g.c : g.s === 'nb' ? -1 : g.s === 'early' ? -2 : 0; };
   const rb = (EXPS.live || []).filter(t => abSiteOk(testSite(t))).map(t => ({ start: t.start, html: testRow(t), n: testDays(t), name: t.name, sig: sigVal(t), cvr: siteImp(t.cvr.rel, t.reach), rpu: ((abRd(t).m || {}).rpv || {}).v, rpud: (abDevOf(t, 'desktop') || {}).v, rpum: (abDevOf(t, 'mobile') || {}).v, aov: ((abRd(t).m || {}).aov || {}).v }));
-  const tp = typeof TPEXPS !== 'undefined' && abSiteOk('TP') ? TPEXPS.items.map((x, i) => ({ start: x.start, html: tpRow(x, i), n: tpDays(x), name: x.name, sig: x.variants.reduce((m, v) => Math.max(m, v.conf || 0), 0), cvr: null, rpu: null, rpud: null, rpum: null, aov: null })) : [];
-  const S = state.abSort || { k: 'days', dir: 1 }, key = { test: 'name', days: 'n', sig: 'sig', cvr: 'cvr', rpu: 'rpu', rpud: 'rpud', rpum: 'rpum', aov: 'aov' }[S.k] || 'n';
+  const tp = typeof TPEXPS !== 'undefined' && abSiteOk('TP') ? TPEXPS.items.map((x, i) => ({ start: x.start, html: tpRow(x, i), n: tpDays(x), name: x.name, sig: x.variants.reduce((m, v) => Math.max(m, v.conf || 0), 0), cvr: null, rpu: null, rpud: null, rpum: null, aov: null, chg: (tpLeadV(x) || {}).rel, users: tpUsers(x) })) : [];
+  const S = state.abSort || { k: 'days', dir: 1 }, key = { test: 'name', days: 'n', sig: 'sig', cvr: 'cvr', rpu: 'rpu', rpud: 'rpud', rpum: 'rpum', aov: 'aov', tpchg: 'chg', tpn: 'users' }[S.k] || 'n';
   const rows = rb.concat(tp).sort((p, q) => { const x = p[key], y = q[key]; if (x == null && y == null) return 0; if (x == null) return 1; if (y == null) return -1; return (typeof x === 'string' ? x.localeCompare(y) : x - y) * S.dir; });
   const facts = rows.length ? '<span class="sfacts"><span>' + rows.length + ' running</span><span aria-hidden="true">·</span><span>longest: day ' + Math.max(...rows.map(r => r.n)) + '</span></span>' : '';
-  const seg = '<div class="abfilter"><span class="lbl">Filter by</span><div class="segs" role="group" aria-label="Site">' + [['both', 'RBO + TPO'], ['RB', 'RBO'], ['TP', 'TPO'], ['DA', 'Dashery']].map(o => '<button type="button" data-absite="' + o[0] + '" aria-pressed="' + (f === o[0]) + '">' + o[1] + '</button>').join('') + '</div></div>';
+  const seg = '<div class="abfilter"><span class="lbl">Site</span><div class="segs" role="group" aria-label="Site">' + [['RB', 'RBO'], ['TP', 'TPO']].map(o => '<button type="button" data-absite="' + o[0] + '" aria-pressed="' + (f === o[0]) + '">' + o[1] + '</button>').join('') + '</div></div>';
   return '<section class="sview abview"><div class="vhead vhl">' + abHeadline() + '</div>' +
     '<div class="group trun"><div class="ghead"><h3>Running</h3>' + facts + seg + '</div>' + abHeadSort() + '<div class="rows">' + (rows.length ? rows.map(r => r.html).join('') : '<p class="cap">No tests running here right now.</p>') + '</div></div>' +
     shippedHtml() +
@@ -3533,7 +3579,7 @@ document.addEventListener('focusin', ev => { const h = ev.target.closest && ev.t
 document.addEventListener('focusout', ev => { const h = ev.target.closest && ev.target.closest('.hint, .mv[data-hint]'); if (h && !pinned) hideHint(); });
 document.addEventListener('click', ev => {
   const t = ev.target;
-  const so = t.closest('[data-absort]'); if (so) { const k = so.dataset.absort, S = state.abSort || { k: 'days', dir: 1 }; state.abSort = S.k === k ? { k, dir: -S.dir } : { k, dir: k === 'cvr' || k === 'rpu' || k === 'rpud' || k === 'rpum' || k === 'aov' || k === 'sig' ? -1 : 1 }; return renderKeep(); }
+  const so = t.closest('[data-absort]'); if (so) { const k = so.dataset.absort, S = state.abSort || { k: 'days', dir: 1 }; state.abSort = S.k === k ? { k, dir: -S.dir } : { k, dir: k === 'cvr' || k === 'rpu' || k === 'rpud' || k === 'rpum' || k === 'aov' || k === 'sig' || k === 'tpchg' || k === 'tpn' ? -1 : 1 }; return renderKeep(); }
   const tsb = t.closest('[data-tipsrc]'); if (tsb) { ev.stopImmediatePropagation(); ev.preventDefault(); const w = tsb.closest('.tipsrcw'), bx = w && w.querySelector('.tipsrcbox'); if (bx) { bx.hidden = !bx.hidden; tsb.setAttribute('aria-expanded', String(!bx.hidden)); } pinned = pinned || $('#hintbox'); const hb = $('#hintbox'), r = hb.getBoundingClientRect(); if (r.bottom > innerHeight - 8) hb.style.top = Math.max(8, innerHeight - 8 - r.height) + 'px'; return; }
   const jsx = t.closest('[data-jumpsec]'); if (jsx) { if (typeof hideHint === 'function') hideHint(); const el = document.getElementById('g-' + jsx.dataset.jumpsec); if (el) { const bar = document.querySelector('.bar'); window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - (bar ? bar.offsetHeight : 60) - 80, behavior: 'smooth' }); } return; }
   const ddo = t.closest('[data-ddopen]'); if (ddo) { const m = document.querySelector('[data-ddmenu="' + ddo.dataset.ddopen + '"]'), was = m.hidden; document.querySelectorAll('.ddmenu').forEach(x => { x.hidden = true; }); m.hidden = !was; ddo.setAttribute('aria-expanded', String(was)); state.ddOpen = was ? ddo.dataset.ddopen : null; return; }
@@ -3629,7 +3675,7 @@ document.addEventListener('click', ev => {
   if (t.closest('#aboutbtn')) { const m = $('#amenu'); m.hidden = !m.hidden; $('#aboutbtn').setAttribute('aria-expanded', String(!m.hidden)); return; }
   if (!t.closest('#amenu') && $('#amenu')) $('#amenu').hidden = true;
   const wt = t.closest('[data-watch]'); if (wt) { const [wb, wk] = wt.dataset.watch.split('|'); state.view = 'daily'; state.tab = wb; if (wk !== 'pay') state.open.add(wk); render(); const el = wk === 'pay' ? document.getElementById('g-pay') : document.querySelector('[data-row="' + CSS.escape(wk) + '"]'); if (el) { window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 110 }); el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 2600); } return; }
-  const abs = t.closest('[data-absite]'); if (abs) { const v = abs.dataset.absite; state.abSite = abs.classList.contains('sitepill') && state.abSite === v ? 'both' : v; return renderKeep(); }
+  const abs = t.closest('[data-absite]'); if (abs) { const v = abs.dataset.absite; state.abSite = v === 'TP' ? 'TP' : 'RB'; return renderKeep(); }
   const tpx = t.closest('[data-tpx]'); if (tpx) return tpDetailModal(+tpx.dataset.tpx);
   const sw = t.closest('[data-abdev]'); if (sw) { const box = sw.closest('.abtabs'); box.querySelectorAll('[data-abdev]').forEach(b => b.setAttribute('aria-pressed', String(b === sw))); box.querySelectorAll('[data-abpane]').forEach(pn => { pn.hidden = pn.dataset.abpane !== sw.dataset.abdev; }); return; }
   const xr = t.closest('[data-xrow]'); if (xr) return testDetailModal(xr.dataset.xrow);
