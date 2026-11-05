@@ -129,4 +129,11 @@ const TPEXPS = { asOf: '2026-11-05', url: 'https://www.teepublic.com/manage/spli
     statsig: { url: 'https://console.statsig.com/shared_report/o5gEO9yaWHK?ref=pulse_public_share&experiment_name=beam_ab_test_live&custom_query_id=2uH7MYmCac7TZsUVzRLEcw', portal: 'https://partner-portal.beamimpact.com/overview', through: '2026-11-01', exposures: '9.78M', split: 'about a third of shoppers each in control, Version A and Version B', ci: 90,
       beam: { asOf: '2026-11-02', month: 'October', aovNo: 36.75, aovBeam: 44.02, aovLift: 0.198, ccrBeam: 0.583, ccrNo: 0.330, users: 210, redeemed: 1585, donated: 699, rate: 0.02 },
       metrics: [{ name: 'Total revenue', a: 0.017, aw: 0.033, b: -0.003, bw: 0.033 }, { name: 'Average order value', a: 0.013, aw: 0.021, b: 0.003, bw: 0.021 }, { name: 'Conversions', a: 0.005, aw: 0.025, b: -0.006, bw: 0.025 }, { name: 'Cart CVR', a: 0.006, aw: 0.022, b: 0.005, bw: 0.022 }] } }
-] };
+] ,
+  // Finished TeePublic tests (Mike, Nov 5: "check for recently shipped"). Split has no finished state, so a test counts as finished when its own launch and end are posted (here #released, Sep 15: "Today through Sunday", the sale's last day). conv = completed / participants as Split lists them; rel is vs control.
+  done: [
+    { id: 'free_shipping_threshold_on_sale_deap4607', name: 'Free shipping threshold during a sale', start: '2026-09-15', end: '2026-09-20', where: 'Cart (USA)',
+      control: { p: 28479281, conv: 0.000526 },
+      variants: [{ n: 'Free shipping over $85', p: 28484364, conv: 0.000508, rel: -0.0349, conf: 99 }, { n: 'Free shipping over $90', p: 28468655, conv: 0.000513, rel: -0.0247, conf: 95 }, { n: 'Free shipping over $95', p: 28482532, conv: 0.000504, rel: -0.0431, conf: 99 }],
+      call: ['loss', 'Every version below control'] }
+  ] };
