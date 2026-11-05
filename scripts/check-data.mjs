@@ -46,6 +46,33 @@ for (const [n, v] of [['D', get('D')], ['PROD', get('PROD')]]) if (v && v.asOf) 
   }
 }
 
+// Parity between the two sites (Mike, Nov 5: "a change on one CVR dashboard applies to the other; the pages are far more the same than different").
+// The two sites carry the same datasets with the same fields; only things that truly differ by site (channel and product names, last year, which exists only for TeePublic) may differ.
+{
+  const sites = (name, X, skip = []) => {
+    if (!X || !X.tp || !X.rb) return;
+    const a = Object.keys(X.tp), b = Object.keys(X.rb);
+    for (const k of a.filter((k) => !b.includes(k) && !skip.includes(k))) fail(`parity: ${name}.tp has "${k}" but ${name}.rb does not`);
+    for (const k of b.filter((k) => !a.includes(k) && !skip.includes(k))) fail(`parity: ${name}.rb has "${k}" but ${name}.tp does not`);
+  };
+  for (const n of ['D', 'R', 'ORD', 'PROD', 'CS']) sites(n, get(n));
+  const L = get('L');
+  if (L) for (const sec of ['device', 'funnel', 'geo']) sites(`L.${sec}`, { tp: (L.tp || {})[sec], rb: (L.rb || {})[sec] });
+  const D = get('D'), PROD = get('PROD');
+  if (D && PROD) for (const b of ['tp', 'rb']) {
+    const shapes = new Set(Object.values(PROD[b].items).map((it) => Object.keys(it).filter((k) => !['ly', 'lys'].includes(k)).sort().join(',')));
+    if (shapes.size > 1) fail(`parity: PROD.${b} items do not all have the same fields`);
+  }
+  // Last year exists for TeePublic only (Redbubble has no usable last year). Wherever the site has a last-year series, every product must have one too.
+  if (D && PROD && D.tpLY) for (const [name, it] of Object.entries(PROD.tp.items)) {
+    if (!Array.isArray(it.ly) || it.ly.length !== D.tpLY.cvr.length) fail(`parity: PROD.tp "${name}" has no last-year series (ly) of length ${D.tpLY.cvr.length}: the By product table shows "No LY value"`);
+  }
+  for (const [n, X] of [['MAX', get('MAX')], ['STD', get('STD')]]) if (X && D) for (const b of ['tp', 'rb']) {
+    const len = X.D && X.D[b] && X.D[b].cvr ? X.D[b].cvr.length : null;
+    if (len != null && len !== D[b].cvr.length) warn(`parity: ${n}.${b} series is ${len} long but D.${b} is ${D[b].cvr.length}: one filter is a day behind`);
+  }
+}
+
 // Every roadmap item should have a source link (this is what the agent maps against).
 const coming = get('COMING'), srcs = get('SRCS');
 if (coming && srcs && Array.isArray(coming.teams)) {

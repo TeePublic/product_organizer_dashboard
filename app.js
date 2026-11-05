@@ -303,7 +303,8 @@ function metricList(b) {
   const P = typeof PROD !== 'undefined' && PROD && PROD[b];
   if (P && P.items) { const al = arr => SER[b].dates.map(dt => { const i = P.dates.indexOf(dt); return i < 0 || !arr ? null : arr[i]; });
     Object.entries(P.items).forEach(([name, r]) => { const geo = {}; Object.entries(r.geo || {}).forEach(([g, x]) => { geo[g] = { v: al(x.v), s: al(x.s) }; });
-      metrics.product.push({ key: 'product/' + name, label: name, sec: 'product', v: al(r.v), sess: al(r.s), ly: null, fmt: 'cvr', b, axis: name + ' CVR', pgeo: geo }); }); }
+      metrics.product.push({ key: 'product/' + name, label: name, sec: 'product', v: al(r.v), sess: al(r.s), ly: b === 'tp' && r.ly ? r.ly : null, lysess: b === 'tp' && r.lys ? r.lys : null, // last-year arrays are indexed from D.tpLY.start like the site's, not aligned to PROD dates
+      fmt: 'cvr', b, axis: name + ' CVR', pgeo: geo }); }); }
   ['device', 'funnel', 'channel', 'geo'].forEach(g => {
     Object.entries(L[b][g]).forEach(([name, r]) => {
       // Display "USA", not "US" (Mike, Oct 22); the key stays geo/US so saved links and data refs keep working.
@@ -1605,7 +1606,12 @@ function trHeadline() {
 const erSite = s => /tee/i.test(s || '') ? 'TP' : /both/i.test(s || '') ? 'Both' : 'RB';
 const sitePill = code => '<span class="rtag sitepill"' + (code === 'RB' || code === 'TP' ? ' data-absite="' + code + '" role="button" tabindex="0"' : '') + '>' + siteDot(code) + '</span>';
 const erName = (name, team, site, note) => '<span class="tname tnico"><span class="ge gico g-CVR" aria-hidden="true">' + projIco({ t: name, obj: 'CVR' }) + '</span><b>' + esc(name) + '</b><span class="cap tmeta">' + sitePill(erSite(site)) + (note ? '<span class="tloc">' + esc(note) + '</span>' : '') + '</span></span>';
+function tpShippedHtml() {
+  const cut = addDays(EXPS_AS_OF, -60), done = (typeof TPEXPS !== 'undefined' ? TPEXPS.done || [] : []).map((x, i) => ({ x, i })).filter(o => o.x.end >= cut).sort((p, q) => p.x.end < q.x.end ? 1 : -1);
+  return '<div class="group"><div class="ghead"><h3>Recently shipped</h3><span class="sfacts">' + done.length + ' tests</span></div>' + (done.length ? abHeadTP(false) + '<div class="rows">' + done.map(o => tpRow(o.x, o.i, true)).join('') + '</div>' : '<p class="cap">No TeePublic test has finished in the last 60 days. Tests move here when they end.</p>') + '</div>';
+}
 function shippedHtml() {
+  if (abSiteNow() === 'TP') return tpShippedHtml();
   const cut = addDays(EXPS_AS_OF, -60), sx = (typeof SEXP !== 'undefined' ? SEXP.items : []);
   const dash = '<span class="abtbd"><b>TBD</b><small>not recorded</small></span>', tbd = '<span class="abst tbd">TBD</span>', dayC = d => '<span class="abday"><b>' + short(d) + '</b><small>ended</small></span>';
   const D1 = (abSiteOk('RB') ? EXPS.done || [] : []).map(t => ({ end: t.end, html: testRow(t, true) }));
@@ -2093,7 +2099,7 @@ const abHeadTP = sortable => {
   return '<div class="tcols abcols tpg">' + c('test', 'Test') + c('days', sortable ? 'Running' : 'Ran') + c('sig', hint('Stat sig', 'soft', tip('Stat sig', 'Is there 95% confidence the metric moved, not noise?'))) +
     '<span class="abh">' + hint(top('Set per test') + 'Metric', 'soft', tip('Metric', 'TeePublic tests are not run as experiments, so each one measures its own goal and none is sitewide CVR. The row names the metric when we have it, and says "Not defined" when we do not.')) + '</span>' +
     c('tpchg', hint(top('Hover for details') + 'Metric change', 'soft', tip('Metric change', 'The leading version vs control on that test\'s metric. Hover a number for the control and every version.')), true) +
-    c('tpn', hint(top('All versions') + 'Shoppers', 'soft', tip('Shoppers', 'People in the test so far, control and every version together.')), true) + '</div>';
+    c('tprev', hint('Revenue per shopper', 'soft', tip('Revenue per shopper', 'Order revenue per shopper in the same version as Metric change, vs control. Only where the test reports revenue, and a direction only: there is no error bar.')), true) + '</div>';
 };
 const abHeadSort = () => abSiteNow() === 'TP' ? abHeadTP(true) : abHead(true);
 // Test pop-up (Mike, Nov 3 rebuild). Reads top to bottom as a story: what the test is, what it says so far, then the proof.
@@ -2139,10 +2145,11 @@ function abLeadCells(t, lead) {
     abN(mkx(M.aov, c.aov), n + ': ' + ((M.aov || {}).name || 'AOV')) + abN(mkx(M.rpv, c.rpv), n + ': revenue per user, all users', true, true) +
     abN(mkx((D.desktop || {}).rpv, dv('desktop')), n + ': revenue per user, desktop', false, true) + abN(mkx((D.mobile || {}).rpv, dv('mobile')), n + ': revenue per user, mobile', false, true);
 }
+// One versions tag for both sites (Mike, Nov 5: TeePublic tests with several versions must show it like Redbubble's): "N versions" with a hover listing each version vs control.
+const verTag = (tot, list) => hint('<span class="rtag vtag"><svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path d="M8 2 1.5 5.5 8 9l6.5-3.5zM2.5 8.2 8 11.2l5.5-3M2.5 10.7 8 13.7l5.5-3" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round"/></svg>' + tot + ' versions</span>', 'abm abnh', '<span class="nosrc"><b>' + tot + ' versions, each vs control</b><ul class="abvl">' + list + '</ul></span>');
 function abLeadNote(t, lead) {
   const R = abRd(t), M = R.m || {}, tot = R.vrows.length;
-  const list = R.vrows.map(v => '<li><b>' + esc(v[0]) + '</b>' + (v[1].rpv != null ? ' ' + sgn(v[1].rpv, 1) + ' revenue per user' : '') + (v[0] === lead[0] ? ' (shown)' : '') + '</li>').join('');
-  return hint('<span class="rtag vtag"><svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path d="M8 2 1.5 5.5 8 9l6.5-3.5zM2.5 8.2 8 11.2l5.5-3M2.5 10.7 8 13.7l5.5-3" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round"/></svg>' + tot + ' versions</span>', 'abm abnh', '<span class="nosrc"><b>' + tot + ' versions, each vs control</b><ul class="abvl">' + list + '</ul></span>');
+  return verTag(tot, R.vrows.map(v => '<li><b>' + esc(v[0]) + '</b>' + (v[1].rpv != null ? ' ' + sgn(v[1].rpv, 1) + ' revenue per user' : '') + (v[0] === lead[0] ? ' (shown)' : '') + '</li>').join(''));
 }
 function testRow(t, shipped) {
   const site = siteImp(t.cvr.rel, t.reach), open = state.open.has('x' + t.id), r = Math.round(t.reach * 100);
@@ -2203,6 +2210,7 @@ const tpSg = x => { const g = x.statsig; if (!g) return null; return g.metrics.f
 const tpMetric = x => x.metric || (x.statsig ? tpSg(x).name : null);
 const tpVersions = x => x.statsig ? [{ n: 'Version A', rel: tpSg(x).a, w: tpSg(x).aw }, { n: 'Version B', rel: tpSg(x).b, w: tpSg(x).bw }] : x.variants;
 const tpLeadV = x => tpVersions(x).reduce((m, q) => (m == null || q.rel > m.rel ? q : m), null);
+const tpVerTag = x => { const vs = tpVersions(x), lead = tpLeadV(x); return vs.length > 1 ? verTag(vs.length, vs.map(q => '<li><b>' + esc(q.n) + '</b> ' + sgn(q.rel, 1) + ' ' + esc((tpMetric(x) || 'metric').toLowerCase()) + (q === lead ? ' (shown)' : '') + '</li>').join('')) : ''; };
 const tpUsers = x => x.statsig ? parseFloat(x.statsig.exposures) * (/M/i.test(x.statsig.exposures) ? 1e6 : /k/i.test(x.statsig.exposures) ? 1e3 : 1) : (x.control.u != null ? x.control.u : x.control.p) + x.variants.reduce((m, v) => m + (v.u != null ? v.u : v.p), 0);
 // Metric change cell: the leading version vs control, bold and colored by direction (uncertainty lives in Stat sig); the hover shows control and every version.
 function tpChange(x) {
@@ -2211,12 +2219,20 @@ function tpChange(x) {
   const list = x.statsig ? tpVersions(x).map(q => '<li><b>' + esc(q.n) + '</b> ' + sgn(q.rel, 1) + ' <span class="cap">±' + (q.w * 100).toFixed(1) + '% margin</span>' + (q === v ? ' · shown' : '') + '</li>').join('') : '<li><b>Control</b> ' + fp(x.control.conv) + '</li>' + x.variants.map(q => '<li><b>' + esc(q.n) + '</b> ' + fp(q.conv) + ' (' + sgn(q.rel, 1) + (q.conf ? ', ' + q.conf + '% confidence' : '') + ')' + (q === v ? ' · shown' : '') + '</li>').join('');
   return hint('<span class="abchg"><span class="abn ' + (v.rel >= 0 ? 'b' : 'w') + '">' + sgn(v.rel, 1) + '</span><small>' + esc(v.n) + '</small></span>', 'abm abnh', '<span class="nosrc"><b>' + esc(nm) + ', each version vs control</b><ul class="abvl">' + list + '</ul>' + (tpMetric(x) ? '' : 'Split does not say which metric this is. Ask Jon or Mike.') + '</span>');
 }
-function tpRow(x, i) {
+// Revenue per shopper cell: the same version as Metric change, so the row reads across. Amplitude tests have revenue per shopper (direction only, no error bar); Beam has Statsig's Total revenue with a margin; Split reports none.
+function tpRev(x) {
+  const v = tpLeadV(x), tbd = '<span class="abtbd"><b>TBD</b><small>not in Split</small></span>';
+  if (!v) return tbd;
+  if (x.statsig) { const m = x.statsig.metrics.find(q => /total revenue/i.test(q.name)); if (!m) return tbd; const lead = v.n === 'Version A' ? [m.a, m.aw] : [m.b, m.bw]; return hint('<span class="abchg"><span class="abn ' + (lead[0] >= 0 ? 'b' : 'w') + '">' + sgn(lead[0], 1) + '</span><small>±' + (lead[1] * 100).toFixed(1) + '% margin</small></span>', 'abm abnh', '<span class="nosrc"><b>Revenue per shopper, ' + esc(v.n) + ' vs control</b><br>Statsig\'s Total revenue metric, ' + x.statsig.ci + '% margin of error. The margin is bigger than the change, so we can\'t tell it from zero yet.</span>'); }
+  if (v.rpuRel == null || x.control.rpu == null) return tbd;
+  return hint('<span class="abchg"><span class="abn ' + (v.rpuRel >= 0 ? 'b' : 'w') + '">' + sgn(v.rpuRel, 1) + '</span><small>$' + v.rpu.toFixed(2) + ' vs $' + x.control.rpu.toFixed(2) + '</small></span>', 'abm abnh', '<span class="nosrc"><b>Revenue per shopper, ' + esc(v.n) + ' vs control</b><br>Order revenue per shopper who saw the test. Amplitude gives no error bar for revenue, so read it as a direction.</span>');
+}
+const tpRevV = x => { const v = tpLeadV(x); if (!v) return null; if (x.statsig) { const m = x.statsig.metrics.find(q => /total revenue/i.test(q.name)); return m ? (v.n === 'Version A' ? m.a : m.b) : null; } return v.rpuRel != null ? v.rpuRel : null; };
+function tpRow(x, i, done) {
   const best = x.variants.reduce((m, v) => Math.max(m, v.conf || 0), 0);
   const chip = best >= 95 ? '<span class="abst yes">Yes</span>' : '<span class="abst">' + (best >= 80 ? 'Not yet · ' + best + '%' : 'Not yet') + '</span>';
   const mn = tpMetric(x), met = mn ? hint('<span class="abmet"><b>' + esc(mn) + '</b></span>', 'abm abnh abl', '<span class="nosrc"><b>' + esc(mn) + '</b><br>' + esc(x.metricNote || (x.statsig ? 'Share of cart visitors who order, read from Statsig. Beam is a conversion test.' : x.goal) || '') + '</span>') : hint('<span class="abmet na">Not defined</span>', 'abm abnh abl', '<span class="nosrc"><b>Metric not defined</b><br>This test is read from Split, which does not say what it measures. Ask Jon or Mike.</span>');
-  const n = tpUsers(x), nh = hint('<span class="abn plain">' + compact(n) + '</span>', 'abm abnh', '<span class="nosrc"><b>Shoppers in the test</b><br>' + (x.statsig ? x.statsig.exposures + ' so far, ' + esc(x.statsig.split) : int(x.control.u != null ? x.control.u : x.control.p) + ' in control' + x.variants.map(v => '<br>' + int(v.u != null ? v.u : v.p) + ' in ' + esc(v.n)).join('')) + '</span>');
-  return '<div class="rowwrap"><div class="trow abrow tpg" role="button" tabindex="0" data-tpx="' + i + '"><span class="tname tnico"><span class="ge gico g-CVR" aria-hidden="true">' + projIco({ t: x.name, obj: 'CVR' }) + '</span><b>' + esc(x.name) + '</b><span class="cap tmeta">' + sitePill('TP') + '<span class="tloc">' + esc(x.where) + '</span></span></span><span class="abday"><b>Day ' + tpDays(x) + '</b><small>since ' + short(x.start) + '</small></span>' + chip + met + tpChange(x) + nh + '</div></div>';
+  return '<div class="rowwrap"><div class="trow abrow tpg" role="button" tabindex="0" data-tpx="' + (done ? 'd' : '') + i + '"><span class="tname tnico"><span class="ge gico g-CVR" aria-hidden="true">' + projIco({ t: x.name, obj: 'CVR' }) + '</span><b>' + esc(x.name) + '</b><span class="cap tmeta">' + sitePill('TP') + tpVerTag(x) + '<span class="tloc">' + esc(x.where) + '</span></span></span>' + (done ? '<span class="abday"><b>' + (Math.round((parse(x.end) - parse(x.start)) / DAY) + 1) + ' days</b><small>ended ' + short(x.end) + '</small></span>' : '<span class="abday"><b>Day ' + tpDays(x) + '</b><small>since ' + short(x.start) + '</small></span>') + chip + met + tpChange(x) + tpRev(x) + '</div></div>';
 }
 function statsigModal(x) {
   const g = x.statsig, d = v => '<span class="chn n">' + sgn(v, 1) + '</span>', row = m => '<tr><td>' + esc(m.name) + '</td><td>' + d(m.a) + ' <span class="cap">±' + (m.aw * 100).toFixed(1) + '%</span></td><td>' + d(m.b) + ' <span class="cap">±' + (m.bw * 100).toFixed(1) + '%</span></td></tr>';
@@ -2233,7 +2249,7 @@ function tpVerdict(x) {
   return c >= 95 ? [up ? 'ship' : 'down', up ? 'Clear winner' : 'Clear loser'] : c >= 80 ? [up ? 'lean' : 'down', up ? 'Likely up' : 'Likely down'] : c >= 50 ? [up ? 'lean' : 'down', up ? 'Leaning up' : 'Leaning down'] : ['early', 'Too early to tell'];
 }
 function tpDetailModal(i) {
-  const x = typeof TPEXPS !== 'undefined' ? TPEXPS.items[i] : null; if (!x) return;
+  const x = typeof TPEXPS !== 'undefined' ? (/^d/.test(String(i)) ? (TPEXPS.done || [])[+String(i).slice(1)] : TPEXPS.items[+i]) : null; if (!x) return;
   if (x.statsig) return statsigModal(x);
   const rows = [{ n: 'Control', p: x.control.p, c: x.control.conv, rel: null }].concat(x.variants.map(v => ({ n: v.n, p: v.p, c: v.conv, rel: v.rel, conf: v.conf })));
   const amp = x.src === 'amplitude', mtip = amp ? 'Metric: ' + x.goal + '.' : 'This is still measured in an old Ruby gem, so we can\'t say which metric it is. Ask Jon or Mike. We\'ll pull these tests into Amplitude soon.', mh = t => hint(t + ' <span class="thi" aria-hidden="true">ⓘ</span>', 'thhint', mtip);
@@ -2251,8 +2267,8 @@ function testsHtml() {
   const f = abSiteNow();
   const sigVal = t => { const r = abRd(t), g = (r.m || {})[r.goal]; return !g ? 0 : g.s === 'sig' ? 100 : g.c ? g.c : g.s === 'nb' ? -1 : g.s === 'early' ? -2 : 0; };
   const rb = (EXPS.live || []).filter(t => abSiteOk(testSite(t))).map(t => ({ start: t.start, html: testRow(t), n: testDays(t), name: t.name, sig: sigVal(t), cvr: siteImp(t.cvr.rel, t.reach), rpu: ((abRd(t).m || {}).rpv || {}).v, rpud: (abDevOf(t, 'desktop') || {}).v, rpum: (abDevOf(t, 'mobile') || {}).v, aov: ((abRd(t).m || {}).aov || {}).v }));
-  const tp = typeof TPEXPS !== 'undefined' && abSiteOk('TP') ? TPEXPS.items.map((x, i) => ({ start: x.start, html: tpRow(x, i), n: tpDays(x), name: x.name, sig: x.variants.reduce((m, v) => Math.max(m, v.conf || 0), 0), cvr: null, rpu: null, rpud: null, rpum: null, aov: null, chg: (tpLeadV(x) || {}).rel, users: tpUsers(x) })) : [];
-  const S = state.abSort || { k: 'days', dir: 1 }, key = { test: 'name', days: 'n', sig: 'sig', cvr: 'cvr', rpu: 'rpu', rpud: 'rpud', rpum: 'rpum', aov: 'aov', tpchg: 'chg', tpn: 'users' }[S.k] || 'n';
+  const tp = typeof TPEXPS !== 'undefined' && abSiteOk('TP') ? TPEXPS.items.map((x, i) => ({ start: x.start, html: tpRow(x, i), n: tpDays(x), name: x.name, sig: x.variants.reduce((m, v) => Math.max(m, v.conf || 0), 0), cvr: null, rpu: null, rpud: null, rpum: null, aov: null, chg: (tpLeadV(x) || {}).rel, rev: tpRevV(x) })) : [];
+  const S = state.abSort || { k: 'days', dir: 1 }, key = { test: 'name', days: 'n', sig: 'sig', cvr: 'cvr', rpu: 'rpu', rpud: 'rpud', rpum: 'rpum', aov: 'aov', tpchg: 'chg', tprev: 'rev' }[S.k] || 'n';
   const rows = rb.concat(tp).sort((p, q) => { const x = p[key], y = q[key]; if (x == null && y == null) return 0; if (x == null) return 1; if (y == null) return -1; return (typeof x === 'string' ? x.localeCompare(y) : x - y) * S.dir; });
   const facts = rows.length ? '<span class="sfacts"><span>' + rows.length + ' running</span><span aria-hidden="true">·</span><span>longest: day ' + Math.max(...rows.map(r => r.n)) + '</span></span>' : '';
   const seg = '<div class="abfilter"><span class="lbl">Site</span><div class="segs" role="group" aria-label="Site">' + [['RB', 'RBO'], ['TP', 'TPO']].map(o => '<button type="button" data-absite="' + o[0] + '" aria-pressed="' + (f === o[0]) + '">' + o[1] + '</button>').join('') + '</div></div>';
@@ -3579,7 +3595,7 @@ document.addEventListener('focusin', ev => { const h = ev.target.closest && ev.t
 document.addEventListener('focusout', ev => { const h = ev.target.closest && ev.target.closest('.hint, .mv[data-hint]'); if (h && !pinned) hideHint(); });
 document.addEventListener('click', ev => {
   const t = ev.target;
-  const so = t.closest('[data-absort]'); if (so) { const k = so.dataset.absort, S = state.abSort || { k: 'days', dir: 1 }; state.abSort = S.k === k ? { k, dir: -S.dir } : { k, dir: k === 'cvr' || k === 'rpu' || k === 'rpud' || k === 'rpum' || k === 'aov' || k === 'sig' || k === 'tpchg' || k === 'tpn' ? -1 : 1 }; return renderKeep(); }
+  const so = t.closest('[data-absort]'); if (so) { const k = so.dataset.absort, S = state.abSort || { k: 'days', dir: 1 }; state.abSort = S.k === k ? { k, dir: -S.dir } : { k, dir: k === 'cvr' || k === 'rpu' || k === 'rpud' || k === 'rpum' || k === 'aov' || k === 'sig' || k === 'tpchg' || k === 'tprev' ? -1 : 1 }; return renderKeep(); }
   const tsb = t.closest('[data-tipsrc]'); if (tsb) { ev.stopImmediatePropagation(); ev.preventDefault(); const w = tsb.closest('.tipsrcw'), bx = w && w.querySelector('.tipsrcbox'); if (bx) { bx.hidden = !bx.hidden; tsb.setAttribute('aria-expanded', String(!bx.hidden)); } pinned = pinned || $('#hintbox'); const hb = $('#hintbox'), r = hb.getBoundingClientRect(); if (r.bottom > innerHeight - 8) hb.style.top = Math.max(8, innerHeight - 8 - r.height) + 'px'; return; }
   const jsx = t.closest('[data-jumpsec]'); if (jsx) { if (typeof hideHint === 'function') hideHint(); const el = document.getElementById('g-' + jsx.dataset.jumpsec); if (el) { const bar = document.querySelector('.bar'); window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - (bar ? bar.offsetHeight : 60) - 80, behavior: 'smooth' }); } return; }
   const ddo = t.closest('[data-ddopen]'); if (ddo) { const m = document.querySelector('[data-ddmenu="' + ddo.dataset.ddopen + '"]'), was = m.hidden; document.querySelectorAll('.ddmenu').forEach(x => { x.hidden = true; }); m.hidden = !was; ddo.setAttribute('aria-expanded', String(was)); state.ddOpen = was ? ddo.dataset.ddopen : null; return; }
@@ -3676,7 +3692,7 @@ document.addEventListener('click', ev => {
   if (!t.closest('#amenu') && $('#amenu')) $('#amenu').hidden = true;
   const wt = t.closest('[data-watch]'); if (wt) { const [wb, wk] = wt.dataset.watch.split('|'); state.view = 'daily'; state.tab = wb; if (wk !== 'pay') state.open.add(wk); render(); const el = wk === 'pay' ? document.getElementById('g-pay') : document.querySelector('[data-row="' + CSS.escape(wk) + '"]'); if (el) { window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 110 }); el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 2600); } return; }
   const abs = t.closest('[data-absite]'); if (abs) { const v = abs.dataset.absite; state.abSite = v === 'TP' ? 'TP' : 'RB'; return renderKeep(); }
-  const tpx = t.closest('[data-tpx]'); if (tpx) return tpDetailModal(+tpx.dataset.tpx);
+  const tpx = t.closest('[data-tpx]'); if (tpx) return tpDetailModal(tpx.dataset.tpx);
   const sw = t.closest('[data-abdev]'); if (sw) { const box = sw.closest('.abtabs'); box.querySelectorAll('[data-abdev]').forEach(b => b.setAttribute('aria-pressed', String(b === sw))); box.querySelectorAll('[data-abpane]').forEach(pn => { pn.hidden = pn.dataset.abpane !== sw.dataset.abdev; }); return; }
   const xr = t.closest('[data-xrow]'); if (xr) return testDetailModal(xr.dataset.xrow);
   const why = t.closest('[data-why]'); if (why) { ev.stopPropagation(); return whyModal(why.dataset.why); }
