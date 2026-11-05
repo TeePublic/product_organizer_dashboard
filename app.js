@@ -93,7 +93,7 @@ const YOYMAX = '<b>Year over year under the Maximum filter</b><br>Maximum keeps 
 const SECS = { overall: 'All users', device: 'Device', funnel: 'Funnel steps', channel: 'Channel', geo: 'Region', product: 'By product' };
 const SEC_EMOJI = { product: '🛍️', overall: '🛒', device: '📱', funnel: '🔻', channel: '📣', geo: '🌎', pay: '💳' };
 const EMO = {
-  'T-shirts': '👕', 'Long sleeve T-shirts': '👕', 'Kids T-shirts': '🧒', 'Hoodies': '🧥', 'Hoodies & sweatshirts': '🧥', 'Hats': '🧢', 'Stickers': '🏷️', 'Posters': '🖼️', 'Posters & art prints': '🖼️', 'Wall art prints': '🖼️', 'Tapestries': '🧶', 'Phone cases': '📱', 'Greeting cards': '💌', 'Throw pillows': '🛋️',
+  'T-shirts': '👕', 'Long sleeve T-shirts': '👕', 'Kids T-shirts': '🧒', 'Hoodies': '🧥', 'Hoodies & sweatshirts': '🧥', 'Hats': '🧢', 'Stickers': '🏷️', 'Posters': '🖼️', 'Posters & art prints': '🖼️', 'Wall art prints': '🖼️', 'Tapestries': '🧶', 'Phone cases': '📱', 'Greeting cards': '💌', 'Throw pillows': '🛋️', 'Pillows': '🛋️', 'Mugs': '☕', 'Magnets': '🧲', 'Totes & bags': '👜', 'Tote bags': '👜', 'Socks': '🧦', 'Blankets': '🛏️',
   'CVR': '🛒', 'Sessions': '👥', 'Revenue': '💵', 'Desktop': '💻', 'Mobile': '📱',
   'Add to cart rate': '🛍️', 'Funnel completion rate': '✅', 'Checkout completion rate': '💳',
   'Paid Search': '🔎', 'Paid Search (cpc)': '🔎', 'Direct': '🧭', 'Direct (none)': '🧭',
@@ -106,6 +106,7 @@ const em = l => EMO[l] || '•';
 const CP = { 'Organic Search': 'Organic', 'Organic': 'Organic Search', 'Paid Search': 'Paid Search (cpc)', 'Paid Search (cpc)': 'Paid Search', 'Direct': 'Direct (none)', 'Direct (none)': 'Direct' };
 
 /* ---------- definitions: how each metric is measured ---------- */
+const prodStyles = m => { const S = typeof PROD !== 'undefined' && PROD.styles && PROD.styles[m.b]; return (S && S[m.label]) || 'Style list not recorded yet.'; };
 function defOf(m) {
   if (m.sec === 'product') return (typeof PROD !== 'undefined' && PROD.def) || 'Of visitors who view a ' + m.label.toLowerCase() + ' product page, the share who order one.';
   const b = m.b, bots = b === 'tp' ? 'bot score 70 or higher, verified crawlers excluded' : 'bot score 70 or higher';
@@ -704,6 +705,7 @@ function movedModal(f) {
   const bd = (comps.bs && comps.bs.dates) || [];
   const facts = [['📏 Comparable days', fmtVal(m, c.momV) + ' → <b>' + fmtVal(m, c.val) + '</b> ' + hint('(avg of ' + bd.length + ' day' + (bd.length === 1 ? '' : 's') + ')', 'soft kvh', '<b>Days like ' + short(d) + '</b><br>' + bd.map(x => short(x)).join(', ')) + (bd.length && bd.length <= 2 ? '<span class="thinb">Only ' + bd.length + ' matching day' + (bd.length === 1 ? '' : 's') + ', so treat this as a rough read. The comparison days are marked on the chart.</span>' : '')],
     [BR[BR[m.b].other].name, x && x.rel === 'shared' ? 'Seeing it too' : x && x.rel === 'only' ? 'Not seeing it, so it\'s specific to ' + BR[m.b].name : 'No clear read'],
+    ...(m.sec === 'product' ? [['📦 Includes', esc(prodStyles(m)) ], ['📐 Measured as', esc(defOf(m)) + ' This is not sitewide CVR, and it will not match Amplitude\'s own product or category rates.']] : []),
     ['👉 Next', esc(f.lift ? 'Find what is working here and whether it can be repeated elsewhere.' : NEXT[m.label] || NEXT[m.label.replace(/ \(.*\)$/, '')] || 'Check what changed on the site for this segment.')]];
   const ctx = '<div class="mvctx"><span class="mvday' + (infoNow(m.b, d).sale ? ' sale' : '') + '">🏷️ <b>' + short(d) + ':</b> ' + esc(dayKind(m.b, d)) + '</span>' + (bd.length ? '<span class="mvcmp">🎯 <b>Compared with</b> ' + esc(cmpKind(m.b, d, bd.length)) + '</span>' : '') + '</div>';
   openModal('<div class="mhead"><span class="lbl">' + SECS[m.sec] + ' · ' + label(d) + '</span><h3 id="mtitle">' + em(m.label) + ' ' + head + '</h3>' + ctx + '</div>' + mvTabs(m, 'one') +
@@ -1797,7 +1799,7 @@ function detailHtml(m) {
   const geoTog = m.pgeo && Object.keys(m.pgeo).length ? '<div class="segs pgeo" role="group" aria-label="Country">' + ['all'].concat(Object.keys(m.pgeo)).map(g => '<button type="button" data-pgeo="' + esc(m.key + '|' + g) + '" aria-pressed="' + (pg === g) + '">' + (GN[g] || g) + '</button>').join('') + '</div>' : '';
   const gs = pg !== 'all' && m.pgeo && m.pgeo[pg] ? (m.pgeo[pg].s || []).filter(x => x != null).slice(-14).sort((x, y) => x - y) : [], thin = gs.length && gs[Math.floor(gs.length / 2)] < 100;
   // The row above already names the metric, so no second title (Mike, Nov 2). Order: what it is, the two verdict cards side by side, then the 90-day line full width with its controls on top.
-  return '<p class="dsub">' + esc(defOf(m)) + (thin ? ' <b>Under 100 product-page viewers a day here, so daily swings are mostly noise.</b>' : '') + '</p>' +
+  return '<p class="dsub">' + esc(defOf(m)) + (m.sec === 'product' ? ' <b>Includes:</b> ' + esc(prodStyles(m)) : '') + (thin ? ' <b>Under 100 product-page viewers a day here, so daily swings are mostly noise.</b>' : '') + '</p>' +
     '<div class="dx2">' + cbBlock(m) + sibHtml(m) + '</div>' +
     '<div class="dctl"><div class="dctl1"><span class="lbl">Last 90 days</span>' + leg + '</div><div class="dbtns">' + geoTog +
     (m.sess && !m.isSess ? '<button type="button" class="swtog" role="switch" data-sesstog="' + esc(m.key) + '" aria-checked="' + sessOn + '"><span class="trk"><span class="knb"></span></span>Sessions</button>' : '') +
@@ -1848,7 +1850,7 @@ function groupHtml(b, sec) {
   if (!metricsFor(b)[sec] || !metricsFor(b)[sec].length) return '';
   const full = state.full.has(sec);
   const hl = highlight(b, sec);
-  return '<div class="group" id="g-' + sec + '"><div class="ghead"><div class="gt"><h3>' + SEC_EMOJI[sec] + ' ' + SECS[sec] + '</h3>' + (hl ? '<p class="gsub">' + hl + '</p>' : '') + '</div><div class="gacts">' + secSrc(b, sec) + '<button class="linkbtn" data-full="' + sec + '">' + (full ? 'Hide the full data table' : 'View full data table') + '</button></div></div>' +
+  return '<div class="group" id="g-' + sec + '"><div class="ghead"><div class="gt"><h3>' + SEC_EMOJI[sec] + ' ' + SECS[sec] + '</h3>' + (hl ? '<p class="gsub">' + hl + '</p>' : '') + (sec === 'product' ? '<p class="gsub pdef">' + esc(defOf(metricsFor(b).product[0] || { sec: 'product', label: 'product' })) + (state.botf !== 'max' ? ' <b>These rows always use the Maximum bot filter</b>, whichever filter is selected above: they are not yet pulled at Strong or Moderate.' : '') + '</p>' : '') + '</div><div class="gacts">' + secSrc(b, sec) + '<button class="linkbtn" data-full="' + sec + '">' + (full ? 'Hide the full data table' : 'View full data table') + '</button></div></div>' +
     '<div class="rows">' + metricsFor(b)[sec].map(rowHtml).join('') + '</div>' + (full ? wideTable(b, sec) : '') + '</div>';
 }
 
