@@ -295,6 +295,8 @@ const KINDS = b => b === 'tp' ? ['pd', 'bs', 'yoy'] : ['pd', 'bs'];
 const cv = (c, k) => k === 'yoy' ? c.ly : k === 'wow' ? c.wowV : k === 'pd' ? c.pdV : k === 'bs' ? c.bsV : c.momV;
 
 /* ---------- metrics ---------- */
+// A product CVR of exactly 0 on 500+ viewers is a tracking gap, not a real drop (TeePublic Pillows, Nov 4: 0 on 1,175 viewers while neighbours ran 0.3 to 1.5%). Show it as no value so it never reads -100%. Applies to both sites.
+const gapZero = (v, s) => v.map((x, i) => x === 0 && s && s[i] != null && s[i] >= 500 ? null : x);
 function metricList(b) {
   const o = { key: 'overall', label: 'CVR', v: D[b].cvr, ly: b === 'tp' ? D.tpLY.cvr : null, lysess: b === 'tp' ? D.tpLY.sess : null, sess: D[b].sess, fmt: 'cvr', sec: 'overall', b, axis: 'CVR' };
   const sessM = { key: 'sessions', label: 'Sessions', v: D[b].sess, ly: b === 'tp' ? D.tpLY.sess : null, fmt: 'int', sec: 'overall', isSess: true, b, axis: 'Sessions per day' };
@@ -304,7 +306,7 @@ function metricList(b) {
   const P = typeof PROD !== 'undefined' && PROD && PROD[b];
   if (P && P.items) { const al = arr => SER[b].dates.map(dt => { const i = P.dates.indexOf(dt); return i < 0 || !arr ? null : arr[i]; });
     Object.entries(P.items).forEach(([name, r]) => { const geo = {}; Object.entries(r.geo || {}).forEach(([g, x]) => { geo[g] = { v: al(x.v), s: al(x.s) }; });
-      metrics.product.push({ key: 'product/' + name, label: name, sec: 'product', v: al(r.v), sess: al(r.s), ly: b === 'tp' && r.ly ? r.ly : null, lysess: b === 'tp' && r.lys ? r.lys : null, // last-year arrays are indexed from D.tpLY.start like the site's, not aligned to PROD dates
+      metrics.product.push({ key: 'product/' + name, label: name, sec: 'product', v: gapZero(al(r.v), al(r.s)), sess: al(r.s), ly: b === 'tp' && r.ly ? r.ly : null, lysess: b === 'tp' && r.lys ? r.lys : null, // last-year arrays are indexed from D.tpLY.start like the site's, not aligned to PROD dates
       fmt: 'cvr', b, axis: name + ' CVR', pgeo: geo }); }); }
   ['device', 'funnel', 'channel', 'geo'].forEach(g => {
     Object.entries(L[b][g]).forEach(([name, r]) => {
