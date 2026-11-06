@@ -1745,7 +1745,7 @@ const SRCS = {
    "url": "https://articore.atlassian.net/browse/DEAP-5726",
    "who": "Amelia Cacchione",
    "date": "2026-10-26",
-   "what": "In Code Review since Oct 15; on Oct 26 Marketing signed off on the images and the team kept soft cases in the feed. Moved to In QA, read from the DE board on Nov 6. The roadmap sheet differs (In Dev, Delayed)"
+   "what": "In Code Review since Oct 15; on Oct 26 Marketing signed off on the images and the team kept soft cases in the feed. Moved to In QA, read from the DE board on Nov 6. The roadmap sheet differs (In Dev, On Track since Nov 6)"
   },
   "s_sheet": {
    "kind": "sheet",
@@ -2549,7 +2549,7 @@ const SRCS = {
    "where": "Jira DEAP-6604 children",
    "url": "https://articore.atlassian.net/browse/DEAP-6611",
    "date": "2026-11-05",
-   "what": "Nov 6: DEAP-6611 (mark all as read) and DEAP-6724 (unread tab) are In QA, DEAP-6973 (hide rich text editor) is Approved, DEAP-6725 (unread indicator research) is UAT / Product Verification, DEAP-6824 (clear old notifications) is Code Review. The sheet row still says In Dev, so the status shown is the sheet's"
+   "what": "Nov 6, 12:21 PM ET: DEAP-6611 (mark all as read), DEAP-6724 (unread tab), DEAP-6973 (hide rich text editor) and DEAP-6725 (unread indicator research) are Released; DEAP-6824 (clear old notifications) is Code Review. The sheet row still says In Dev, so the status shown is the sheet's"
   },
   "s_sheet": {
    "kind": "sheet",
@@ -5265,7 +5265,7 @@ const SRCS = {
    "where": "Jira DEAP-6809, DE board (DEAP board 580, DE Sprint 22)",
    "url": "https://articore.atlassian.net/browse/DEAP-6809",
    "date": "2026-11-04",
-   "what": "DEAP-6809 status In QA, read from the DE board on Nov 6 (In Development on Nov 4). The roadmap sheet differs (In Dev)."
+   "what": "DEAP-6809 status In QA, read from the DE board on Nov 6 (In Development on Nov 4). The roadmap sheet has no separate row for this on the Nov 6 12:22 PM read (see New canvases in feed (pre-peak))."
   },
   "eta": {
    "kind": "jira",

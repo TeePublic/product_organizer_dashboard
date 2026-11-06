@@ -1,3 +1,4 @@
+// Nov 6 ~1:20 PM ET (afternoon refresh, subagent A): MAX and PROD re-checked, no values changed. Dashboard 5ec1pe2j chart filters re-read and unchanged (last modified Nov 5 about 3 PM ET); Nov 2 to Nov 5 sitewide CVR and sessions re-pulled for both sites and identical to the morning values, so Nov 5 stays the last complete day (Nov 6 is partial and not stored). TeePublic Pillows re-pulled with the same Maximum filter: Nov 4 is still exactly 0 on the same viewers while Nov 3 (0.0074) and Nov 5 (0.0072) are normal, so it stays a one-day tracking gap under the page gapZero rule. BOTN: added the Nov 5 daily bot checks for TeePublic and Redbubble.
 // Nov 6 ~8 AM ET (refresh, subagent F2): MAX and PROD rolled to Wed Nov 5 (last complete day for both sites; Nov 6 is partial and not stored). MAX: dashboard 5ec1pe2j chart filters re-read and unchanged (TP score>=90, verified bots out, geo_country US/GB/AU/CA; RB score>=90, cloudflare_ip_country US/CA/GB/AU/DE/FR/NZ, JA4 cb7bf out); Nov 1 to Nov 4 re-pulled and Nov 5 added for every D and L series (late orders revised Nov 4 up, e.g. TP sitewide CVR 0.054999 to 0.059124, RB 0.028092 to 0.030611; Nov 3 and sessions unchanged); region series from ad hoc queries with the same filters (TP US/CA/AU/GB, RB US/CA/AU and Europe = GB+DE+FR). PROD: window now Aug 8 to Nov 5, 13 products per site, Nov 1 to Nov 4 re-pulled (per-country funnel and viewer queries with the Maximum filter; overall CVR is the viewer-weighted mean of the country rates, which reproduced the stored Nov 3 values to 4 decimals) and Nov 5 added; Nov 4 product CVRs revised up 0.1 to 0.6 points as late orders landed. TeePublic Pillows Nov 4 is still 0 on about 1,140 viewers with the orders event present (Nov 3 and Nov 5 are normal), so it is a one-day tracking gap, left as 0 for the page gapZero rule. Redbubble product mapping unchanged (RB T-shirts use 16 type slugs, wall art 5, per the current pdp page types). The Jon cohorts are not applied.
 // Nov 5 (product table expansion, from Mike's call with a Redbubble analyst): PROD now has 13 products per site. Added TeePublic: Mugs (Mug), Pillows (Pillow), Phone cases (Phone Case), Magnets (Magnet), Totes & bags (Tote + Bag). Added Redbubble: Mugs (standard-mug + tall-mug), Socks, Blankets, Tote bags (tote-bag; cotton-tote left out), Magnets (die-cut-magnet). Same method and Maximum filter as the other items; method validated on Stickers (TP, incl. last year) and Throw pillows (RB: viewers exact, CVR 87 of 90 days within 0.05 points, the rest late-order revisions). PROD.styles lists what each product includes (shown on click). TeePublic Pillows Nov 4 is 0 on about 1,175 viewers (13 unfiltered Pillow orders that day): possible tracking gap, not verified. Still Maximum filter only: not pulled at Strong or Moderate.
 // Nov 5 ~9 AM ET (refresh part 3): PROD.tp items now carry `ly` (last year's product CVR) and `lys` (last year's product-page viewers), indexed like D.tpLY: element k is the calendar date 2025-09-01 + k, length 122 (2025-09-01..2025-12-31); the page shifts them by 364 days (same weekday). Same definition as the item's `v`/`s` (viewers of that product type's page who order the same type within 24 hours, project 499673: pageview request_controller=product_pages by product_canvas, order_completed matched on products.product_canvas; canvases as in REFRESH.md By product, Kids T-shirts = Kids T-Shirt + Baby & Kids T-Shirt) and the SAME Maximum filter as MAX.tpLY: gp:cloudflare_bot_score >= 90, gp:is_cloudflare_bot_verified not true, gp:geo_country in US/GB/AU/CA (the filter exists in 2025 data). Method validated against PROD.tp T-shirts for Nov 1 to Nov 3 2026 (Nov 3 identical at 0.078212). No geo split for last year. Values truncated to 6 decimals.
@@ -771,6 +772,48 @@ const BOTN = [
      "Redbubble images: about 15.5M, falling after the limit was raised.",
      "Fix in progress (DEAP-7063); Search Console check to follow."
    ]
+ },
+ {
+  "date": "2026-11-05",
+  "end": "2026-11-05",
+  "site": "tp",
+  "metrics": [
+   "overall"
+  ],
+  "title": "Daily bot check: likely bots from Morocco, Indonesia and Singapore on TeePublic Nov 5",
+  "note": "The daily bot check put TeePublic bot traffic at moderate for Nov 5, about 10.3% of events (modeled), with 6.0% confirmed by bot score. The likely bots come from outside the core countries (Morocco, Indonesia and Singapore) and score 85 to 96 on Cloudflare, yet show no orders, so a score cut alone does not remove them. The check puts the drag on all-traffic CVR at about 0.50 points (2.01% with them, 2.52% without). Confidence is medium.",
+  "link": "https://grid-articore.enterprise.slack.com/archives/C095R5DPN3H/p1793977602906529",
+  "brief": "The same likely bots from {Morocco, Indonesia and Singapore|Scores 85 to 96 with zero orders; outside the countries the Maximum view counts.} were back on TeePublic Nov 5.",
+  "emoji": "🌍",
+  "short": "Likely bots abroad, Nov 5",
+  "sum": "Likely bots outside the main countries were again about 10% of TeePublic events on Nov 5; the Maximum view leaves them out.",
+  "bot": true,
+  "pts": [
+   "Nov 5: about 10.3% modeled bot share of events.",
+   "Visitors scoring 85 to 96 from Morocco, Indonesia and Singapore with no orders; third day running.",
+   "CVR reads about 0.50 points lower with them in (2.01% vs 2.52%)."
+  ]
+ },
+ {
+  "date": "2026-11-05",
+  "end": "2026-11-05",
+  "site": "rb",
+  "metrics": [
+   "overall"
+  ],
+  "title": "Daily bot check: moderate bot traffic on Redbubble Nov 5, no high-score evasion",
+  "note": "The daily bot check put Redbubble bot traffic at moderate for Nov 5, about 8.3% of events (about 534K of 6.4M). It found no high-score evasion: traffic scoring 30 or more matches the expected human country and channel mix. All-traffic CVR reads 0.36% against 0.47% once suspicious traffic is left out, a 0.11 point (32% relative) gap. Confidence is high.",
+  "link": "https://grid-articore.enterprise.slack.com/archives/C095R5DPN3H/p1793979288414379",
+  "brief": "Redbubble bot traffic was {moderate|About 8.3% of events on Nov 5; no high-score evasion found.} and lowers reported CVR by about a third.",
+  "emoji": "🤖",
+  "short": "Moderate bots, Nov 5",
+  "sum": "About 8% of Redbubble events were bots on Nov 5; the filtered views leave them out, and none score high enough to slip past.",
+  "bot": true,
+  "pts": [
+   "Nov 5: about 8.3% modeled bot share of events.",
+   "No high-score evasion; traffic scoring 30 or more looks human.",
+   "CVR reads 0.36% with all traffic and 0.47% without suspicious traffic."
+  ]
  }
 ];
 const LATEST = {
