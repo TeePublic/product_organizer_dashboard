@@ -11,7 +11,7 @@ export const segmentationUrl = (q, start, end) => `https://amplitude.com/api/2/e
 export async function amplitudeGet(url, brand, { env, fetchImpl, sleep, timeoutMs = 30000 }) {
   const order = [brand, brand === 'tp' ? 'rb' : 'tp'].filter((b) => creds(env, b));
   if (!order.length) throw new Error('No Amplitude keys are configured');
-  let last;
+  let last, attempts = 0;
   for (const b of order) {
     const { k, s } = creds(env, b);
     for (let attempt = 1; attempt <= 3; attempt++) {
@@ -25,13 +25,16 @@ export async function amplitudeGet(url, brand, { env, fetchImpl, sleep, timeoutM
         throw e;
       } finally { clearTimeout(timer); }
       if (res.status === 429 && /hour/i.test(last.text)) throw new Error(`HTTP 429 (Amplitude's hourly limit is used up): ${last.text.slice(0, 140)}`); // retrying cannot help
-      if (res.status === 429 && attempt < 3) { await sleep(4000 * attempt); continue; }
+      attempts++;
+      if (res.status === 429 && attempt < 3) { console.log(`[refresh] Amplitude said slow down (429); waiting ${4 * attempt}s before retry ${attempt + 1}`); await sleep(4000 * attempt); continue; }
       break;
     }
     if (last.status !== 400 && last.status !== 404) break;
   }
   if (last.status !== 200) throw new Error(`HTTP ${last.status}${last.status === 429 ? ' (still rate limited after 3 tries)' : ''}: ${last.text.slice(0, 160)}`);
-  try { return JSON.parse(last.text); } catch { throw new Error('the response was not JSON'); }
+  let body; try { body = JSON.parse(last.text); } catch { throw new Error('the response was not JSON'); }
+  // Amplitude's own timing, when it reports it: tells us whether a slow answer was computing, throttling or a cold cache.
+  return { body, meta: { attempts, cached: body?.wasCached, amplitudeMs: body?.novaRuntime ?? body?.novaRequestDuration, throttleMs: body?.throttleTime } };
 }
 
 export async function collectUpdates({ charts, adhoc, baselineEnd, lastComplete, env, fetchImpl, sleep = sleepReal, timeoutMs = 30000, deadlineMs = 240000 }) {
@@ -49,9 +52,10 @@ export async function collectUpdates({ charts, adhoc, baselineEnd, lastComplete,
     const t1 = Date.now();
     try {
       requests++;
-      const body = await amplitudeGet(j.url, j.brand, { env, fetchImpl, sleep, timeoutMs });
+      const { body, meta } = await amplitudeGet(j.url, j.brand, { env, fetchImpl, sleep, timeoutMs });
       addToUpdates(updates, j.entry, readChart(body), errors, warnings);
-      console.log(`[refresh] ${requests}/${jobs.length} ${j.label} ok ${Date.now() - t1}ms`); // visible in the Vercel logs while it runs
+      const extra = [meta.attempts > 1 ? `attempts ${meta.attempts}` : '', meta.cached != null ? `cached ${meta.cached}` : '', meta.amplitudeMs != null ? `amplitude ${meta.amplitudeMs}ms` : '', meta.throttleMs ? `throttled ${meta.throttleMs}ms` : ''].filter(Boolean).join(', ');
+      console.log(`[refresh] ${requests}/${jobs.length} ${j.label} ok ${Date.now() - t1}ms${extra ? ` (${extra})` : ''}`); // visible in the Vercel logs while it runs
     } catch (e) {
       errors.push(`${j.label}: ${e.message}`);
       console.log(`[refresh] ${requests}/${jobs.length} ${j.label} FAILED ${Date.now() - t1}ms: ${e.message.slice(0, 120)}`);
