@@ -1580,7 +1580,7 @@ function abHeadline() {
   const tn = t => hint(esc(midCase(t.name)), 'verd n2 hlink" data-jt="' + esc(t.id), card(t));
   const li = (t, x) => '<li>' + testE(t.name) + ' <b>' + esc(t.name) + '</b>' + (x ? ': ' + x : '') + '</li>';
   const words = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'];
-  const rpvOf = t => ((abRd(t).m || {}).rpv || {}).v, asOfD = parse(EXPS_AS_OF);
+  const rpvOf = t => { const v = ((abRd(t).m || {}).rpv || {}).v; return v == null ? v : v * (t.reach == null ? 1 : t.reach); }, asOfD = parse(EXPS_AS_OF);
   const tps = (typeof TPEXPS !== 'undefined' && abSiteOk('TP') ? TPEXPS.items : []).map((x, i) => Object.assign({ tp: true, ix: i }, x)), all2 = live.concat(tps);
   const recent = all2.filter(t => (asOfD - parse(t.start)) / DAY <= 2).sort((p, q) => parse(q.start) - parse(p.start))[0];
   const next24 = (EXPS.soon || []).find(x => x.start && (parse(x.start) - asOfD) / DAY >= 0 && (parse(x.start) - asOfD) / DAY <= 1);
@@ -1631,7 +1631,7 @@ function tpShippedHtml() {
 function shippedHtml() {
   if (abSiteNow() === 'TP') return tpShippedHtml();
   const cut = addDays(EXPS_AS_OF, -60), sx = (typeof SEXP !== 'undefined' ? SEXP.items : []);
-  const D1 = (abSiteOk('RB') ? EXPS.done || [] : []).map(t => ({ name: t.name, site: 'RB', end: t.end, win: t.status === 'shipped', label: t.status === 'shipped' ? '' : 'Kept control', rev: ((abRd(t).m || {}).rpv || {}).v, attr: 'data-jt="' + esc(t.id) + '"' }));
+  const D1 = (abSiteOk('RB') ? EXPS.done || [] : []).map(t => ({ name: t.name, site: 'RB', end: t.end, win: t.status === 'shipped', label: t.status === 'shipped' ? '' : 'Kept control', rev: (v => v == null ? v : v * (t.reach == null ? 1 : t.reach))(((abRd(t).m || {}).rpv || {}).v), attr: 'data-jt="' + esc(t.id) + '"' }));
   const A = (abSiteOk('RB') ? EXPS.older : []).map((o, i) => ({ name: o.name, site: 'RB', end: o.end, win: o.status === 'shipped', label: o.status === 'shipped' ? '' : 'Kept control', rev: null, attr: 'data-told="' + i + '"' }));
   const B = sx.filter(x => abSiteOk(x.site)).map(x => ({ name: x.name, site: erSite(x.site), end: x.end, win: x.verdict === 'win', label: x.verdict === 'win' ? 'Search test' : x.verdict === 'loss' ? 'Clear loser' : 'Inconclusive', rev: null, href: SEXP.url }));
   const all = D1.concat(A, B).filter(x => x.end >= cut);
@@ -2088,11 +2088,11 @@ function ttc(t) {
 }
 // A/B table built around the exec questions (Sam, standup Oct 30): revenue per visitor, CVR, add to cart, AOV and engagement side by side,
 // each marked proven or not, plus how long it has run, the call, what's next and who decides. Color only when a result is proven (Mike, Oct 30).
-const ABK = [['rpv', 'Revenue per user', 'What each user in the test group spends on average.'], ['cvr', 'CVR', 'Share of visitors in the test who order. Some tests measure a narrower step (product page, cart or checkout); the hover names it.'], ['atc', 'Add to cart', 'Share of visitors in the test who add something to their cart.'], ['aov', 'AOV', 'Average order value: revenue ÷ orders. Not Amplitude\'s per-visitor "AOV".'], ['eng', 'Engagement', 'Only for tests built to change how people browse, like the nav.']];
+const ABK = [['rpv', 'Revenue per user', 'The change in what each visitor to the whole site spends: the test group vs control, scaled by how much of the site the test reaches.'], ['cvr', 'CVR', 'Share of visitors in the test who order. Some tests measure a narrower step (product page, cart or checkout); the hover names it.'], ['atc', 'Add to cart', 'Share of visitors in the test who add something to their cart.'], ['aov', 'AOV', 'Average order value: revenue ÷ orders. Not Amplitude\'s per-visitor "AOV".'], ['eng', 'Engagement', 'Only for tests built to change how people browse, like the nav.']];
 const ABO = ['rpv', 'cvr'];
 const abRd = t => (EXPS.reads || {})[t.id] || { goal: rpuOf(t) || t.kind === 'aov' ? 'rpv' : 'cvr', verdict: t.status === 'shipped' ? ['ship', 'Shipped'] : t.status === 'running' ? ['early', 'Running'] : ['none', 'Kept control'], next: t.call || '', m: { cvr: { v: t.cvr.rel, s: t.p != null && t.p < 0.05 ? 'sig' : 'ns', a: t.cvr.a, b: t.cvr.b, name: 'Sitewide CVR' }, rpv: rpuOf(t) ? { v: rpuOf(t).rel, s: 'nb', a: rpuOf(t).a, b: rpuOf(t).b, f: 'usd' } : null } };
 // One source for "which running test is most promising and what is its number" (Mike, Nov 5: the ticker said -0.0% while the table said +1.2% revenue per user). The A/B headline and the ticker both call this, so they cannot disagree.
-const rpvOfT = t => ((abRd(t).m || {}).rpv || {}).v;
+const rpvOfT = t => { const v = ((abRd(t).m || {}).rpv || {}).v; return v == null ? v : v * (t.reach == null ? 1 : t.reach); };
 const promisingOf = (live, skip) => live.filter(t => abRd(t).verdict[0] !== 'paused' && rpvOfT(t) != null && t !== skip).sort((p, q) => rpvOfT(q) - rpvOfT(p))[0];
 const abVal = (x, v) => x.f === 'usd' ? '$' + (v >= 10 ? v.toFixed(2) : v.toFixed(v < 1 ? 3 : 2)) : pct(v, v < 0.01 ? 3 : v < 0.1 ? 2 : 1);
 const abSure = x => x.s === 'sig' ? '✓ Significant' : x.s === 'nb' ? 'No error bar' : x.s === 'early' ? 'Too early' : x.c ? x.c + '% confidence' : 'Could be noise';
@@ -2113,6 +2113,9 @@ const abSig = t => { const r = abRd(t), g = abMet(t)[r.goal], nm = (g && g.name)
 };
 // One number cell (Mike, Nov 3 rebuild): the change alone, colored by direction, right-aligned; control → test lives in the hover.
 const abN = (x, name, key, chip) => !x || x.v == null ? '<span class="abn na" title="Not measured for this test">–</span>' : hint('<span class="abn ' + (x.v >= 0 ? 'b' : 'w') + (key ? ' abk1' : '') + (chip ? ' chip' : '') + '">' + sgn(x.v, 1) + '</span>', 'abm abnh', '<span class="nosrc"><b>' + esc(name) + '</b><br>' + (x.a != null && x.b != null ? abVal(x, x.a) + ' in control → ' + abVal(x, x.b) + ' in the test group (' + sgn(x.v, 1) + ').' : 'Test group vs control: ' + sgn(x.v, 1) + '.') + (x.s === 'nb' ? ' Amplitude gives no error bar for this one, so read it as a direction.' : '') + '</span>');
+// Whole-site revenue per user (Mike, Nov 6): the test group's revenue-per-user change only covers people who saw the test, so scale it by the test's reach (share of site orders from them), the same way as sitewide CVR impact. Desktop and mobile columns also take that device's share of the test's visitors, so the two add up to all users. share null = no device split to scale by.
+const abDevShare = (t, d) => { const D = abRd(t).dev || {}, n = k => ((D[k] || {}).n || []).reduce((s, x) => s + (x || 0), 0), tot = n('desktop') + n('mobile'); return tot ? n(d) / tot : null; };
+const abNr = (x, name, t, share, key, chip) => { if (!x || x.v == null || share === null) return abN(!x || x.v == null ? x : null, name, key, chip); const reach = t.reach * (share == null ? 1 : share), v = x.v * reach; return hint('<span class="abn ' + (v >= 0 ? 'b' : 'w') + (key ? ' abk1' : '') + (chip ? ' chip' : '') + '">' + sgn(v, 2) + '</span>', 'abm abnh', '<span class="nosrc"><b>' + esc(name) + ', whole site</b><br>Among people who saw the test: ' + (x.a != null && x.b != null ? abVal(x, x.a) + ' in control → ' + abVal(x, x.b) + ' in the test group (' + sgn(x.v, 1) + '). ' : sgn(x.v, 1) + '. ') + 'They make up about ' + Math.round(reach * 100) + '% of site revenue, so across every visitor on the site this is about ' + sgn(v, 2) + '.' + (x.s === 'nb' ? ' Amplitude gives no error bar for revenue.' : '') + '</span>'); };
 const abImpN = t => { const v = siteImp(t.cvr.rel, t.reach); return hint('<span class="abn ' + (v >= 0 ? 'b' : 'w') + '">' + sp(v, 1) + '</span>', 'abm abnh', '<span class="nosrc"><b>Sitewide CVR impact</b><br>The test group\'s CVR went ' + pct(t.cvr.a, t.cvr.a < 0.1 ? 2 : 1) + ' → ' + pct(t.cvr.b, t.cvr.b < 0.1 ? 2 : 1) + ' (' + sgn(t.cvr.rel, 1) + '). It reaches ' + Math.round(t.reach * 100) + '% of traffic, so on the whole site that is about ' + sp(v, 1) + '.</span>'); };
 const abDevOf = (t, d) => (((abRd(t).dev || {})[d] || {}).rpv);
 const abDay = t => t.status === 'running' ? '<span class="abday"><b>Day ' + testDays(t) + '</b><small>since ' + short(t.start) + '</small></span>' : '<span class="abday"><b>' + (Math.round((parse(t.end) - parse(t.start)) / DAY) + 1) + ' days</b><small>ended ' + short(t.end) + '</small></span>';
@@ -2124,7 +2127,7 @@ const abHead = sortable => {
   const c = (k, inner, num) => '<span class="abh' + (num ? ' num' : '') + '"' + (sortable ? ' role="button" tabindex="0" data-absort="' + k + '"' : '') + '>' + inner + (sortable && S.k === k ? '<i class="sa" aria-hidden="true">' + (S.dir > 0 ? '↑' : '↓') + '</i>' : '') + '</span>';
   return '<div class="tcols abcols">' + c('test', 'Test') + c('days', sortable ? 'Running' : 'Ran') + c('sig', hint('Stat sig', 'soft', tip('Stat sig', 'Is there 95% confidence the main metric moved, not noise?'))) +
     c('cvr', hint('<small class="rpul"><span class="lg">Sitewide</span><span class="sm">Sitewide</span></small>CVR impact', 'soft', tip('Sitewide CVR impact', 'The test group\'s CVR change, scaled by the share of traffic it reaches: what it would do to the whole site.')), true) + c('aov', hint('AOV', 'soft', tip('AOV', 'Average order value in the test group vs control.')), true) +
-    c('rpu', hint(rpuL + 'All users', 'soft', tip('Revenue per user, all users', 'Test group vs control. The main number for every test.')), true) + c('rpud', hint(rpuL + 'Desktop', 'soft', tip('Revenue per user, desktop', 'Test group vs control, desktop visitors only.')), true) + c('rpum', hint(rpuL + 'Mobile', 'soft', tip('Revenue per user, mobile', 'Test group vs control, mobile visitors only.')), true) + '</div>';
+    c('rpu', hint(rpuL + 'All users', 'soft', tip('Revenue per user, all users', 'Change in revenue per user for the whole site: test group vs control, scaled to every visitor on the site by the share of revenue the test reaches. The main number for every test.')), true) + c('rpud', hint(rpuL + 'Desktop', 'soft', tip('Revenue per user, desktop', 'Desktop part of the whole-site change in revenue per user: desktop test group vs control, scaled by reach and by desktop\'s share of the test\'s visitors.')), true) + c('rpum', hint(rpuL + 'Mobile', 'soft', tip('Revenue per user, mobile', 'Mobile part of the whole-site change in revenue per user: mobile test group vs control, scaled by reach and by mobile\'s share of the test\'s visitors.')), true) + '</div>';
 };
 // TeePublic header (Mike, Nov 5): TeePublic tests run in their own tools, so each test measures its own goal. No CVR impact, AOV or revenue columns: they can't be totaled across tests.
 // The row names the metric when we have it; the small top line on each header says what to expect, and the hover explains.
@@ -2177,8 +2180,8 @@ function abLeadCells(t, lead) {
   const mkx = (m, v) => m && v != null ? { v: v, a: m.a, b: m.a * (1 + v), f: m.f, s: m.s, name: m.name } : null, dv = d => (((D[d] || {}).vers || {})[n] || {}).rpv;
   const imp = c.cvr != null ? siteImp(c.cvr, t.reach) : null;
   return (imp == null ? '<span class="abn na">–</span>' : '<span class="abn ' + (imp >= 0 ? 'b' : 'w') + '">' + sp(imp, 1) + '</span>') +
-    abN(mkx(M.aov, c.aov), n + ': ' + ((M.aov || {}).name || 'AOV')) + abN(mkx(M.rpv, c.rpv), n + ': revenue per user, all users', true, true) +
-    abN(mkx((D.desktop || {}).rpv, dv('desktop')), n + ': revenue per user, desktop', false, true) + abN(mkx((D.mobile || {}).rpv, dv('mobile')), n + ': revenue per user, mobile', false, true);
+    abN(mkx(M.aov, c.aov), n + ': ' + ((M.aov || {}).name || 'AOV')) + abNr(mkx(M.rpv, c.rpv), n + ': revenue per user, all users', t, undefined, true, true) +
+    abNr(mkx((D.desktop || {}).rpv, dv('desktop')), n + ': revenue per user, desktop', t, abDevShare(t, 'desktop'), false, true) + abNr(mkx((D.mobile || {}).rpv, dv('mobile')), n + ': revenue per user, mobile', t, abDevShare(t, 'mobile'), false, true);
 }
 // One versions tag for both sites (Mike, Nov 5: TeePublic tests with several versions must show it like Redbubble's): "N versions" with a hover listing each version vs control.
 const verTag = (tot, list) => hint('<span class="rtag vtag"><svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path d="M8 2 1.5 5.5 8 9l6.5-3.5zM2.5 8.2 8 11.2l5.5-3M2.5 10.7 8 13.7l5.5-3" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round"/></svg>' + tot + ' versions</span>', 'abm abnh', '<span class="nosrc"><b>' + tot + ' versions, each vs control</b><ul class="abvl">' + list + '</ul></span>');
@@ -2193,7 +2196,7 @@ function testRow(t, shipped) {
   const fv = t.primary.name.indexOf('per') > -1 ? v => v.toFixed(3) : v => pct(v, v < 0.01 ? 3 : v < 0.05 ? 2 : 1);
   const lead = abLead(t);
   let h = '<div class="rowwrap"><div class="trow abrow" role="button" tabindex="0" aria-expanded="' + open + '" data-xrow="' + t.id + '"><span class="tname tnico"><span class="ge gico g-' + esc(testObj(t)) + '" aria-hidden="true">' + projIco({ t: t.name, obj: testObj(t) }) + '</span><b>' + esc(t.name) + '</b><span class="cap tmeta">' + sitePill(testSite(t)) + (lead ? abLeadNote(t, lead) : '') + '<span class="tloc">' + esc(t.where) + '</span></span></span>' +
-    abDay(t) + abSig(t) + (lead ? abLeadCells(t, lead) : abImpN(t) + abN(abMet(t).aov, (abMet(t).aov || {}).name || 'AOV') + abN(abMet(t).rpv, 'Revenue per user, all users', true, true) + abN(abDevOf(t, 'desktop'), 'Revenue per user, desktop', false, true) + abN(abDevOf(t, 'mobile'), 'Revenue per user, mobile', false, true)) + '</div>';
+    abDay(t) + abSig(t) + (lead ? abLeadCells(t, lead) : abImpN(t) + abN(abMet(t).aov, (abMet(t).aov || {}).name || 'AOV') + abNr(abMet(t).rpv, 'Revenue per user, all users', t, undefined, true, true) + abNr(abDevOf(t, 'desktop'), 'Revenue per user, desktop', t, abDevShare(t, 'desktop'), false, true) + abNr(abDevOf(t, 'mobile'), 'Revenue per user, mobile', t, abDevShare(t, 'mobile'), false, true)) + '</div>';
   return h + '</div>';
 }
 // One takeaway sentence for the tab: the running test that matters most, what is close to a call, and what was decided lately.
