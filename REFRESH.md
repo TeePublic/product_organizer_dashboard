@@ -130,3 +130,14 @@ The TeePublic and Redbubble CVR pages are far more the same than different. **Ev
 - **Before finishing any CVR change:** (1) name the other site's equivalent and apply it or say why not; (2) open both pages and compare the same section; (3) end the summary with a "Both sites:" line saying what was applied to each and what differs on purpose.
 - **Automated:** `npm run check` compares the two sites' datasets (same datasets, same fields, last year present on every TeePublic product) and fails on a gap.
 - **Same rule for the A/B tab:** RBO and TPO must show the same things where the data allows (versions tag, Recently shipped, Coming soon); a column that cannot exist on one site is named in the header, not left blank.
+
+## Recent wins: every win carries its own number (Mike, Nov 6)
+The cards on the Recent impact page read `result` and `rev` from each entry in `COMING.wins` (`data/roadmap-coming-soon.js`). This is part of every refresh, owned by the roadmap subagent. A dash on a card means this step was skipped, and `npm run check` fails for it.
+- **Add new wins:** every launch or test result posted in `#released`, the roadmap sheet or the Executive Roadmap Review since the last refresh becomes a `wins` entry.
+- **`result: [big, small]` on every win from the last 7 days.** Pick the first source that has a number:
+  - **Measured lift:** the A/B test result, for example `['+1.0% CVR', 'whole-site']`.
+  - **A number the Product Manager posted:** for example `['17% → 30%', 'sticker attach']`.
+  - **No number yet:** `['Live', 'launched']`. Put a note in small when one exists, for example `['Live', '+1% CVR early, not significant']`.
+- **`rev: { v, short, how, team }` when a revenue figure exists:** `v` is dollars a year, `short` the card text, `how` the source in one sentence. Set `team: true` when the figure comes from the launch post or the team (the page then says "Expected in the launch post, not measured" instead of "Claude's estimate"). Convert other currencies and say so in `how`. Never invent a figure: no source means no `rev`.
+- **Update existing wins:** when an A/B test or the Product Manager later posts a measured result, replace `['Live', ...]` with it and drop or replace `rev`.
+- **Say in the refresh summary** which wins got a new or changed `result`.

@@ -83,5 +83,18 @@ if (coming && srcs && Array.isArray(coming.teams)) {
   if (missing.length) warn(`${missing.length} roadmap items have no source entry: ${missing.slice(0, 8).join(' | ')}${missing.length > 8 ? ' ...' : ''}`);
   if (orphan.length) warn(`${orphan.length} source entries match no roadmap item: ${orphan.slice(0, 8).join(' | ')}${orphan.length > 8 ? ' ...' : ''}`);
 }
+// Every win from the last 7 days needs its own `result: [big, small]` (the number on the Recent impact cards). A missing one showed a dash on Nov 6.
+// `rev: { v, short, how, team }` is optional but must be complete when present.
+if (coming && Array.isArray(coming.wins)) {
+  const asOf = new Date((coming.asOf || get('D').asOf) + 'T00:00:00Z'), mon = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11 };
+  for (const w of coming.wins) {
+    const m = /^([A-Z][a-z]{2}) (\d{1,2})/.exec(w.when || ''); if (!m) continue;
+    const t = new Date(Date.UTC(asOf.getUTCFullYear(), mon[m[1]], +m[2])), recent = t >= asOf - 7 * 864e5;
+    if (recent && !(Array.isArray(w.result) && w.result[0])) fail(`wins: "${w.t}" (${w.when}) has no result: set result: ['+1.0% CVR', 'whole-site'] from the test, the Product Manager's posted number, or ['Live', 'launched']`);
+    if (w.rev && !(w.rev.v > 0 && w.rev.short && w.rev.how)) fail(`wins: "${w.t}" has an incomplete rev: it needs v (dollars a year), short and how`);
+  }
+  ok('recent wins carry a result');
+}
+
 console.log(failed ? '\nCHECK FAILED: do not commit.' : '\nCheck passed (warnings, if any, are worth a look).');
 process.exit(failed ? 1 : 0);
