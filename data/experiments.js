@@ -1,3 +1,14 @@
+// UX for each A/B test, from the Figma links on its Jira tickets (Mike, Nov 5). Keyed by test name; a test with no entry falls back to the UX of its matching Roadmap project.
+const TESTUX = {
+  'Sticker cross-sell in the cart': [{ url: 'https://www.figma.com/design/YCh6HwQEa0RoKiAA1cCzA1/C26--RB-Cart-Cross-Sell?node-id=150-6920', l: 'Figma: RB cart cross-sell', jira: 'DEAP-6266' }],
+  'Topics-first navigation': [{ url: 'https://www.figma.com/design/svUHn87QUsbfuuBKwKT8lS/C26--RB-Topic-First-Nav-UX?node-id=1013-163318', l: 'Figma: RB topic-first nav', jira: 'DEAP-4440' }],
+  'T-shirt style pills on product pages': [{ url: 'https://www.figma.com/design/bKJsE2Xk1ABnjyg0wpLDkv/C26--RB-PDP-T-Shirt-Style-Picker-UX?node-id=58-5130', l: 'Figma: RB t-shirt style picker', jira: 'DEAP-4917' }],
+  'Sale banner countdown timer': [{ url: 'https://www.figma.com/design/XDVlxJWnnHwV0qCHLkgOGX/C26--RBO-CVR-Improvements?node-id=393-26012', l: 'Figma: RB sale banner timer', jira: 'DEAP-4856' }],
+  'Product image first, all apparel': [{ url: 'https://www.figma.com/design/e9aTclyeZZKysbjGtWOQ6S/C26--RB-AB-Tests--Re-Runs-?node-id=104-6418', l: 'Figma: product first vs model first', jira: 'DEAP-3751' }],
+  'Express payments first in checkout': [{ url: 'https://www.figma.com/design/e9aTclyeZZKysbjGtWOQ6S/C26--RB-AB-Tests--Re-Runs-?node-id=5-1448', l: 'Figma: express pay prioritization', jira: 'DEAP-3694' }],
+  'Remove shipping options from cart': [{ url: 'https://www.figma.com/design/e9aTclyeZZKysbjGtWOQ6S/C26--RB-AB-Tests--Re-Runs-?node-id=107-6419', l: 'Figma: remove shipping options from cart', jira: 'DEAP-3778' }],
+  'Express pay first in checkout, version 2': [{ url: 'https://www.figma.com/design/e9aTclyeZZKysbjGtWOQ6S/C26--RB-AB-Tests--Re-Runs-?node-id=417-10207', l: 'Figma: express pay prioritization v2', jira: 'DEAP-5879' }]
+};
 // A/B tests from Amplitude Experiment (Redbubble project 774278), pulled Nov 5 2026, ~8:00 AM ET (Nov 4 the last complete day). Device splits (`dev`) and the secondary metrics marked as such in each call were last read Nov 4 and were not re-pulled Nov 5.
 // cvr = Sitewide CVR (h1f2lfvq, pageview to order in a day) among exposed users. reach = estimated share of all site orders
 // that come from users the test touches (exposed converters / site orders over the same days, with a 0.6 repeat-buyer factor

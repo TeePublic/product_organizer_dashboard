@@ -1597,7 +1597,10 @@ function trHeadline() {
   const L = (typeof SLACK !== 'undefined' ? SLACK : []).slice(0, 2), tn = (s, k) => hint(esc(/^(TeePublic|Redbubble|Dashery|Google|Amazon|Apple|USA|Black|Meta)\b/.test(s.title) || !k ? s.title : s.title.charAt(0).toLowerCase() + s.title.slice(1)), 'verd n2 hlink" data-say="' + SLACK.indexOf(s), '<b>' + esc(s.title) + '</b><br>' + esc(s.tldr || sents(s.body)[0] || '') + '<span class="segmore">Click for the full read →</span>');
   const csAll = typeof CS !== 'undefined' && CS.tp && CS.rb ? ['rb', 'tp'].flatMap(b => (CS[b].topics || []).map(t => Object.assign({ b }, t))) : [];
   const csTop = csAll.sort((a, z) => (a.level === 'high' ? 0 : 1) - (z.level === 'high' ? 0 : 1))[0];
-  const botFirst = L.length && /bot-squad/.test(L[0].channel || ''), h1 = L.length ? (botFirst ? 'Bot Squad update: ' : '') + tn(L[0], botFirst) + '.' : 'Nothing unusual in Slack lately.';
+  const botFirst = L.length && /bot-squad/.test(L[0].channel || '');
+  // The H1 is a one-sentence story of the What people are saying cards, with the takeaways highlighted (Mike, Nov 5); falls back to the first card's title.
+  const storyH = typeof SLACKSTORY !== 'undefined' && SLACKSTORY && SLACKSTORY.text ? SLACKSTORY.marks.reduce((h, m) => { const c = SLACK[m.say]; return h.replace(esc(m.t), hint(esc(m.t), 'verd ' + m.tone + ' hlink" data-say="' + m.say, c ? '<b>' + esc(c.title) + '</b><br>' + esc(c.tldr || sents(c.body)[0] || '') + '<span class="segmore">Click for the full read →</span>' : '')); }, esc(SLACKSTORY.text)) : null;
+  const h1 = storyH || (L.length ? (botFirst ? 'Bot Squad update: ' : '') + tn(L[0], botFirst) + '.' : 'Nothing unusual in Slack lately.');
   const hot = ((typeof TRENDS !== 'undefined' && TRENDS.tags) || []).filter(t => t[2] >= 2).sort((a, z) => z[2] - a[2]).slice(0, 1), lbl = t => t[0].split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ').replace(/^Wutang/, 'Wu-Tang');
   const sub = hot.length ? andJoin(hot.map(t => hint(esc(lbl(t)), 'verd b', '<b>' + esc(lbl(t)) + '</b><div class="gkv"><span class="gk">Orders, 24 hours</span><span class="gv">' + t[1] + '</span><span class="gk">vs its usual share</span><span class="gv">' + t[2].toFixed(1) + '×</span></div>') + ' designs are selling ' + t[2].toFixed(1) + '× usual')) + '.' : '';
   // Tags, design agency Oct 27: what the selling data covers (as a kind of day, not a date), where the talk comes from, and the customer service read. Nothing the sentence already says.
@@ -1610,22 +1613,39 @@ function trHeadline() {
 const erSite = s => /tee/i.test(s || '') ? 'TP' : /both/i.test(s || '') ? 'Both' : 'RB';
 const sitePill = code => '<span class="rtag sitepill"' + (code === 'RB' || code === 'TP' ? ' data-absite="' + code + '" role="button" tabindex="0"' : '') + '>' + siteDot(code) + '</span>';
 const erName = (name, team, site, note) => '<span class="tname tnico"><span class="ge gico g-CVR" aria-hidden="true">' + projIco({ t: name, obj: 'CVR' }) + '</span><b>' + esc(name) + '</b><span class="cap tmeta">' + sitePill(erSite(site)) + (note ? '<span class="tloc">' + esc(note) + '</span>' : '') + '</span></span>';
+// Recently shipped, condensed (Mike, Nov 5): wins on the left, everything that did not win (kept control, losers, inconclusive) on the right.
+// Each row is just the title, the end date and revenue per user; clicking opens the full read.
+function shipCols(items) {
+  const chip = v => v == null ? '<span class="faint">–</span>' : '<span class="chn ' + (v >= 0 ? 'b' : 'w') + '">' + sgn(v, 1) + '</span>';
+  const row = o => '<div class="rowwrap"><' + (o.href ? 'a href="' + esc(o.href) + '" target="_blank" rel="noopener"' : 'div role="button" tabindex="0" ' + o.attr) + ' class="srow2">' +
+    '<span class="tname tnico"><span class="ge gico g-CVR" aria-hidden="true">' + projIco({ t: o.name, obj: 'CVR' }) + '</span><b>' + esc(o.name) + '</b><span class="cap tmeta">' + sitePill(o.site) + (o.label ? '<span class="tloc">' + esc(o.label) + '</span>' : '') + '</span></span>' +
+    '<span class="sdate">' + short(o.end) + '</span><span class="srev">' + chip(o.rev) + '</span></' + (o.href ? 'a' : 'div') + '></div>';
+  const col = (title, tip, list) => '<div class="shipcol"><div class="shiph"><b>' + title + '</b><span class="cap">' + list.length + '</span></div><div class="shipcols2"><span>Test</span><span>Ended</span><span>Revenue per user</span></div>' + (list.length ? list.map(row).join('') : '<p class="cap shipnone">' + tip + '</p>') + '</div>';
+  const by = (a, z) => a.end < z.end ? 1 : -1, wins = items.filter(o => o.win).sort(by), rest = items.filter(o => !o.win).sort(by);
+  return '<div class="group"><div class="ghead"><h3>Recently shipped</h3><span class="sfacts">' + items.length + (items.length === 1 ? ' test' : ' tests') + '</span></div><div class="shipgrid">' + col('🏆 Wins', 'No wins in the last 60 days.', wins) + col('⏸️ Did not win', 'Nothing here in the last 60 days.', rest) + '</div></div>';
+}
 function tpShippedHtml() {
-  const cut = addDays(EXPS_AS_OF, -60), done = (typeof TPEXPS !== 'undefined' ? TPEXPS.done || [] : []).map((x, i) => ({ x, i })).filter(o => o.x.end >= cut).sort((p, q) => p.x.end < q.x.end ? 1 : -1);
-  return '<div class="group"><div class="ghead"><h3>Recently shipped</h3><span class="sfacts">' + done.length + (done.length === 1 ? ' test' : ' tests') + '</span></div>' + (done.length ? abHeadTP(false) + '<div class="rows">' + done.map(o => tpRow(o.x, o.i, true)).join('') + '</div>' : '<p class="cap">No TeePublic test has finished in the last 60 days. Tests move here when they end.</p>') + '</div>';
+  const cut = addDays(EXPS_AS_OF, -60), done = (typeof TPEXPS !== 'undefined' ? TPEXPS.done || [] : []).map((x, i) => ({ x, i })).filter(o => o.x.end >= cut);
+  if (!done.length) return '<div class="group"><div class="ghead"><h3>Recently shipped</h3><span class="sfacts">0 tests</span></div><p class="cap">No TeePublic test has finished in the last 60 days. Tests move here when they end.</p></div>';
+  return shipCols(done.map(o => ({ name: o.x.name, site: 'TP', end: o.x.end, win: (o.x.call && o.x.call[0] === 'win') || o.x.status === 'shipped', label: o.x.call ? o.x.call[1] : '', rev: typeof tpRevV === 'function' ? tpRevV(o.x) : null, attr: 'data-tpx="d' + o.i + '"' })));
 }
 function shippedHtml() {
   if (abSiteNow() === 'TP') return tpShippedHtml();
   const cut = addDays(EXPS_AS_OF, -60), sx = (typeof SEXP !== 'undefined' ? SEXP.items : []);
-  const dash = '<span class="abtbd"><b>TBD</b><small>not recorded</small></span>', tbd = '<span class="abst tbd">TBD</span>', dayC = d => '<span class="abday"><b>' + short(d) + '</b><small>ended</small></span>';
-  const D1 = (abSiteOk('RB') ? EXPS.done || [] : []).map(t => ({ end: t.end, html: testRow(t, true) }));
-  const A = (abSiteOk('RB') ? EXPS.older : []).map((o, i) => ({ end: o.end, html: '<div class="rowwrap"><div class="trow abrow" role="button" tabindex="0" data-told="' + i + '">' + erName(o.name, 'customer', 'Redbubble', o.status === 'shipped' ? '' : 'Kept control') + dayC(o.end) + tbd + '<span class="abna">Not recorded for this test</span></div></div>' }));
-  const B = sx.filter(x => abSiteOk(x.site)).map(x => ({ end: x.end, html: '<div class="rowwrap"><a class="trow abrow erow2" href="' + esc(SEXP.url) + '" target="_blank" rel="noopener">' + erName(x.name, 'search', x.site, x.verdict === 'win' ? 'Clear winner' : x.verdict === 'loss' ? 'Clear loser' : 'Inconclusive') + dayC(x.end) + tbd + '<span class="abna">In the Sigma search report ↗</span></a></div>' }));
-  const all = D1.concat(A, B).filter(x => x.end >= cut).sort((p, q) => p.end < q.end ? 1 : -1);
-  return all.length ? '<div class="group"><div class="ghead"><h3>Recently shipped</h3><span class="sfacts">' + all.length + (all.length === 1 ? ' test' : ' tests') + '</span></div>' + abHead(false) + '<div class="rows">' + all.map(x => x.html).join('') + '</div></div>' : '';
+  const D1 = (abSiteOk('RB') ? EXPS.done || [] : []).map(t => ({ name: t.name, site: 'RB', end: t.end, win: t.status === 'shipped', label: t.status === 'shipped' ? '' : 'Kept control', rev: ((abRd(t).m || {}).rpv || {}).v, attr: 'data-jt="' + esc(t.id) + '"' }));
+  const A = (abSiteOk('RB') ? EXPS.older : []).map((o, i) => ({ name: o.name, site: 'RB', end: o.end, win: o.status === 'shipped', label: o.status === 'shipped' ? '' : 'Kept control', rev: null, attr: 'data-told="' + i + '"' }));
+  const B = sx.filter(x => abSiteOk(x.site)).map(x => ({ name: x.name, site: erSite(x.site), end: x.end, win: x.verdict === 'win', label: x.verdict === 'win' ? 'Search test' : x.verdict === 'loss' ? 'Clear loser' : 'Inconclusive', rev: null, href: SEXP.url }));
+  const all = D1.concat(A, B).filter(x => x.end >= cut);
+  return all.length ? shipCols(all) : '';
+}
+// Coming soon: where the test sits on the Roadmap, as the phase bar plus its projected end date (Mike, Nov 5).
+function soonRoadmap(x) {
+  const k = typeof rmMatch === 'function' ? rmMatch(x.name) : null, it = k ? lbItem2(k) : null;
+  if (!it) return '<span class="erlt srm"><span class="cap">Not on the Roadmap yet</span></span>';
+  return '<span class="erlt srm">' + phaseBar(it.s) + '<small>' + esc(it.s || '') + ' · ends ' + esc(rng(it.eta || 'TBD')) + '</small></span>';
 }
 function soonHtml() {
-  return '<div class="group"><div class="ghead"><h3>Coming soon</h3><span class="sfacts">' + EXPS.soon.filter(x => abSiteOk(x.site)).length + ' queued</span></div><div class="tcols stc"><span>Test</span><span>Where</span><span>When</span><span>What it tests</span><span></span></div><div class="rows">' + EXPS.soon.map((x, i) => !abSiteOk(x.site) ? '' : '<div class="rowwrap"><div class="trow strow" role="button" tabindex="0" data-tsoon="' + i + '">' + erName(x.name, x.team || 'customer', x.site) + '<span class="erlt">' + esc(x.where) + '</span><span class="erlt">' + esc(x.when) + '</span><span class="erlt">' + esc(x.what) + '</span><span class="chev" aria-hidden="true">›</span></div></div>').join('') + '</div></div>';
+  return '<div class="group"><div class="ghead"><h3>Coming soon</h3><span class="sfacts">' + EXPS.soon.filter(x => abSiteOk(x.site)).length + ' queued</span></div><div class="tcols stc"><span>Test</span><span>Where</span><span>When</span><span>Roadmap</span><span>What it tests</span><span></span></div><div class="rows">' + EXPS.soon.map((x, i) => !abSiteOk(x.site) ? '' : '<div class="rowwrap"><div class="trow strow" role="button" tabindex="0" data-tsoon="' + i + '">' + erName(x.name, x.team || 'customer', x.site) + '<span class="erlt">' + esc(x.where) + '</span><span class="erlt">' + esc(x.when) + '</span>' + soonRoadmap(x) + '<span class="erlt">' + esc(x.what) + '</span><span class="chev" aria-hidden="true">›</span></div></div>').join('') + '</div></div>';
 }
 function searchTestsHtml() {
   if (typeof SEXP === 'undefined' || !SEXP.items.length) return '';
@@ -2132,7 +2152,7 @@ function testDetailModal(id) {
   const pill = '<span class="abv2 v-' + R.verdict[0] + '">' + esc(R.verdict[1]) + '</span>';
   const runTag = running ? 'Day ' + days + ', since ' + short(t.start) : days + ' days, ended ' + short(t.end);
   openModal('<div class="mhead"><h3 id="mtitle">' + esc(t.name) + '</h3></div><div class="mtags"><span class="rtag">' + siteDot(testSite(t)) + '</span><span class="rtag">' + esc(t.where) + '</span><span class="rtag">' + runTag + '</span>' + (running && more ? '<span class="rtag">Result in about ' + more + ' days</span>' : '') + pill + '</div>' +
-    '<div class="abdeep">' + what + results + '<div class="abfoot2"><span class="cap">Amplitude gives no error bar for revenue, so read revenue as a direction, not proof.</span>' + srcBtn('test:' + t.id) + '</div></div>');
+    '<div class="abdeep">' + what + uxBox(uxFor(t.name)) + results + '<div class="abfoot2"><span class="cap">Amplitude gives no error bar for revenue, so read revenue as a direction, not proof.</span>' + srcBtn('test:' + t.id) + '</div></div>');
 }
 // Tests with several versions show one row: the leading version vs control, with a note that others exist (Mike, Nov 4). The pop-up has control and every version.
 function abLead(t) {
@@ -2187,6 +2207,18 @@ function abFacts(list, live) {
   const f = live ? [list.length + ' running', 'longest: day ' + Math.max(...list.map(testDays))] : [sh + ' shipped', (list.length - sh) + ' kept control'];
   return '<span class="sfacts">' + f.map(x => '<span>' + esc(x) + '</span>').join('<span aria-hidden="true">·</span>') + '</span>';
 }
+/* UX for a test: its own Jira Figma links, else the UX of the Roadmap project it belongs to (Mike, Nov 5). Link plus a lazy Figma preview. */
+const figEmbed = u => /^https:\/\/www\.figma\.com\/(design|board|file)\//.test(u) ? u.replace('https://www.figma.com/', 'https://embed.figma.com/') + (u.indexOf('?') < 0 ? '?' : '&') + 'embed-host=share' : null;
+function uxFor(name) {
+  const own = typeof TESTUX !== 'undefined' && TESTUX[name]; if (own) return own;
+  const rm = typeof rmMatch === 'function' ? rmMatch(name) : null, it = rm ? lbItem2(rm) : null;
+  return (it && typeof UXL !== 'undefined' && UXL[it.t]) || [];
+}
+function uxBox(L) {
+  if (!L || !L.length) return '';
+  return '<section class="pbox uxbox"><h4 class="ph">🎨 UX</h4><ul class="uxlist">' + L.map(d => '<li><a class="uxl" href="' + esc(d.url) + '" target="_blank" rel="noopener">' + esc(d.l) + ' ↗</a>' + (d.jira ? ' <a class="cap" href="https://articore.atlassian.net/browse/' + esc(d.jira) + '" target="_blank" rel="noopener">' + esc(d.jira) + '</a>' : '') + '</li>').join('') + '</ul>' +
+    L.filter(d => figEmbed(d.url)).slice(0, 2).map(d => '<details class="uxprev"><summary>Preview: ' + esc(d.l.replace(/^(Figma|FigJam):\s*/, '')) + '</summary><iframe loading="lazy" src="' + esc(figEmbed(d.url)) + '" title="' + esc(d.l) + '" allowfullscreen></iframe><p class="cap">If this shows a Figma sign-in, open the link above while signed in.</p></details>').join('') + '</section>';
+}
 /* detail pop-ups for queued and earlier tests: the three facts first, then what it is and where to look */
 const rmMatch = name => { const w = name.toLowerCase().split(/\W+/).filter(x => x.length > 3); let best = null, bs = 1; COMING.teams.forEach(T => T.items.forEach((it, i) => { const t = it.t.toLowerCase(), sc = w.filter(x => t.indexOf(x) >= 0).length; if (sc > bs) { bs = sc; best = T.key + '|' + i; } })); return best; };
 function testModal(kind, i) {
@@ -2196,13 +2228,14 @@ function testModal(kind, i) {
     return openModal('<div class="mhead"><h3 id="mtitle">' + x.e + ' ' + esc(x.name) + '</h3></div>' +
       '<div class="mfacts">' + fact('Expected start', esc(x.when)) + fact('Status', 'Queued', 'Not live in Amplitude Experiment yet') + fact('Where', esc(x.where), esc(x.site)) + '</div>' +
       '<div class="pbox"><h4 class="ph">🧪 What it tests</h4><p>' + esc(x.what) + '</p></div>' +
+      uxBox(uxFor(x.name)) +
       (rm ? '<div class="pbox"><h4 class="ph">🗺️ On the Roadmap</h4><p>This test is part of <b>' + esc(lbItem2(rm).t) + '</b>.</p><button type="button" class="actbtn" data-lbm2="' + rm + '">See it on the Roadmap</button></div>' : '') +
       (x.refs && x.refs.length ? '<div class="pbox"><h4 class="ph">🔗 Links</h4>' + refsHtml(x.refs) + '</div>' : ''));
   }
   const o = EXPS.older[+i], wu = typeof WU !== 'undefined' && WU[o.name];
   return openModal('<div class="mhead"><h3 id="mtitle">' + testE(o.name) + ' ' + esc(o.name) + '</h3></div><div class="mtags"><span class="rtag">Redbubble</span></div>' +
     '<div class="mfacts">' + fact('Ended', short(o.end)) + fact('Decision', o.status === 'shipped' ? 'Shipped' : 'Kept control') + fact('Impact', o.status === 'shipped' ? 'Positive' : 'No measurable impact') + '</div>' +
-    '<div class="pbox"><h4 class="ph">📝 What happened</h4>' + (wu && wu[1] ? '<p>' + esc(wu[1]) + '</p>' : '') + '<p>' + esc(o.note) + '</p></div>' +
+    uxBox(uxFor(o.name)) + '<div class="pbox"><h4 class="ph">📝 What happened</h4>' + (wu && wu[1] ? '<p>' + esc(wu[1]) + '</p>' : '') + '<p>' + esc(o.note) + '</p></div>' +
     '<div class="pbox"><h4 class="ph">🔗 Links</h4><p><a href="' + esc(o.url) + '" target="_blank" rel="noopener">Open the test in Amplitude Experiment ↗</a></p>' + (wu && /^https?:/.test(wu[0]) ? '<p><a href="' + esc(wu[0]) + '" target="_blank" rel="noopener">Read the write-up in Confluence ↗</a></p>' : '') + '</div>');
 }
 // RBO or TPO, never both (Mike, Nov 5): the two sites measure tests differently, so each gets its own table and columns. RBO is the default.
@@ -2267,7 +2300,7 @@ function tpDetailModal(i) {
     const c = x.control, r2 = ['<tr class="ctlrow"><td><b>Control</b><small>baseline</small></td><td>' + int(c.u != null ? c.u : c.p) + '</td>' + cell(c.atc, 'p') + cell(c.conv, 'p') + cell(c.rpu, 'usd') + cell(c.aov, 'usd') + '</tr>'].concat(x.variants.map(v => '<tr><td><b>' + esc(v.n) + '</b><small>vs control</small></td><td>' + int(v.u != null ? v.u : v.p) + '</td>' + cell(v.atc, 'p', v.atcRel, v.atcConf) + cell(v.conv, 'p', v.rel, v.conf) + cell(v.rpu, 'usd', v.rpuRel) + cell(v.aov, 'usd', v.aovRel) + '</tr>'));
     tbl = '<table class="abt tpv"><thead><tr><th>Version</th><th>Users</th><th>Add to cart</th><th>PDP CVR</th><th>Revenue per user</th><th>Order value</th></tr></thead><tbody>' + r2.join('') + '</tbody></table><p class="cap tpcap">Revenue per user is total order revenue ÷ users in the version, counting orders on days the user viewed the test page. Order value is that revenue ÷ orders. Neither has an error bar in Amplitude, so read them as a direction.</p>';
   }
-  openModal('<span class="tipsrc" hidden></span><div class="mhead"><h3 id="mtitle">' + esc(x.name) + '</h3></div><div class="mtags"><span class="rtag">' + siteDot('TP') + '</span><span class="rtag">' + esc(x.where) + '</span><span class="rtag">Day ' + tpDays(x) + ', since ' + short(x.start) + '</span><span class="abv2 v-' + tpVerdict(x)[0] + '">' + tpVerdict(x)[1] + '</span></div><div class="abwhat2"><h4 class="ph">🧪 About this test</h4><p>' + (amp ? 'Read from Amplitude on ' + short(TPEXPS.asOf) + ', covering ' + short(x.start) + ' to ' + short(x.through) + '. <b>PDP CVR</b> is the share of product-page viewers in the test who order within 24 hours: CVR for people who saw the product page, not sitewide. The numbers are not bot-filtered: the bot cohorts exist only in the Redbubble project.' : 'Read from the Split dashboard on ' + short(TPEXPS.asOf) + '. Split reports each test\'s own conversion goal, so these rates are not comparable across tests and none of them is sitewide CVR.') + '</p></div>' + tbl + '<div class="abfoot2"><a class="srclink" href="' + esc(amp ? x.url : TPEXPS.url) + '" target="_blank" rel="noopener">Open in ' + (amp ? 'Amplitude' : 'Split') + '\u00a0↗</a></div>');
+  openModal('<span class="tipsrc" hidden></span><div class="mhead"><h3 id="mtitle">' + esc(x.name) + '</h3></div><div class="mtags"><span class="rtag">' + siteDot('TP') + '</span><span class="rtag">' + esc(x.where) + '</span><span class="rtag">Day ' + tpDays(x) + ', since ' + short(x.start) + '</span><span class="abv2 v-' + tpVerdict(x)[0] + '">' + tpVerdict(x)[1] + '</span></div><div class="abwhat2"><h4 class="ph">🧪 About this test</h4><p>' + (amp ? 'Read from Amplitude on ' + short(TPEXPS.asOf) + ', covering ' + short(x.start) + ' to ' + short(x.through) + '. <b>PDP CVR</b> is the share of product-page viewers in the test who order within 24 hours: CVR for people who saw the product page, not sitewide. The numbers are not bot-filtered: the bot cohorts exist only in the Redbubble project.' : 'Read from the Split dashboard on ' + short(TPEXPS.asOf) + '. Split reports each test\'s own conversion goal, so these rates are not comparable across tests and none of them is sitewide CVR.') + '</p></div>' + uxBox(uxFor(x.name)) + tbl + '<div class="abfoot2"><a class="srclink" href="' + esc(amp ? x.url : TPEXPS.url) + '" target="_blank" rel="noopener">Open in ' + (amp ? 'Amplitude' : 'Split') + '\u00a0↗</a></div>');
 }
 function testsHtml() {
   const f = abSiteNow();
@@ -2278,10 +2311,10 @@ function testsHtml() {
   const rows = rb.concat(tp).sort((p, q) => { const x = p[key], y = q[key]; if (x == null && y == null) return 0; if (x == null) return 1; if (y == null) return -1; return (typeof x === 'string' ? x.localeCompare(y) : x - y) * S.dir; });
   const facts = rows.length ? '<span class="sfacts"><span>' + rows.length + ' running</span><span aria-hidden="true">·</span><span>longest: day ' + Math.max(...rows.map(r => r.n)) + '</span></span>' : '';
   const seg = '<div class="abfilter"><span class="lbl">Site</span><div class="segs" role="group" aria-label="Site">' + [['RB', 'RBO'], ['TP', 'TPO']].map(o => '<button type="button" data-absite="' + o[0] + '" aria-pressed="' + (f === o[0]) + '">' + o[1] + '</button>').join('') + '</div></div>';
-  return '<section class="sview abview"><div class="vhead vhl">' + abHeadline() + '</div>' +
+  return '<section class="sview abview">' +
     '<div class="group trun"><div class="ghead"><h3>Running</h3>' + facts + seg + '</div>' + abHeadSort() + '<div class="rows">' + (rows.length ? rows.map(r => r.html).join('') : '<p class="cap">No tests running here right now.</p>') + '</div></div>' +
-    shippedHtml() +
-    (EXPS.soon && EXPS.soon.some(x => abSiteOk(x.site)) ? soonHtml() : '') + '</section>';
+    (EXPS.soon && EXPS.soon.some(x => abSiteOk(x.site)) ? soonHtml() : '') +
+    shippedHtml() + '</section>';
 }
 
 /* ---------- Coming soon: what each product team is working on, what's next, and what moved ---------- */
@@ -2763,12 +2796,12 @@ function impactHtml() {
   ['sites', 'teams', 'goals', 'pms'].forEach(k => { if (!Array.isArray(state[k])) state[k] = []; });
   const L0 = impactList(), fOk = it => (!state.sites.length || state.sites.indexOf(it.site) >= 0 || it.site === 'Both') && (!state.teams.length || state.teams.indexOf(it.team) >= 0 || state.teams.indexOf(PARENT(it.team)) >= 0) && (!state.goals.length || state.goals.indexOf(it.obj) >= 0) && (!state.pms.length || state.pms.indexOf(pmOf(it.t, it.team)) >= 0);
   const L = L0, cnt = k => L.filter(x => x.out === k).length, decided = L.filter(x => x.out !== 'measuring');
-  const wins = L.filter(x => x.out === 'win'), recent = wins.filter(x => { const t = etaDate(x.when); return t && t >= parse(D.asOf) - 6 * DAY; }), pool = recent.length ? recent : wins, best = pool.slice().sort((a, z) => ((revEst(z) || {}).v || 0) - ((revEst(a) || {}).v || 0))[0], bestLbl0 = 'Biggest recent win', wu = L.filter(x => WU[x.t]).length;
+  const wins = L.filter(x => x.out === 'win'), recent = wins.filter(x => { const t = etaDate(x.when); return t && t >= parse(D.asOf) - 6 * DAY; }), pool = recent.length ? recent : wins, best = pool.slice().sort((a, z) => ((revEst(z) || {}).v || 0) - ((revEst(a) || {}).v || 0))[0], bestLbl0 = 'Biggest win this week', wu = L.filter(x => WU[x.t]).length;
   const teams = [...new Set(L.map(x => x.team))];
   const card = (e, k, big, sub, cls, at) => '<' + (at ? 'button type="button" ' + at : 'div') + ' class="ist ' + (cls || '') + '"><span class="istk">' + e + ' ' + k + '</span><b>' + big + '</b><span class="cap">' + sub + '</span>' + (at ? '<span class="istgo">Details →</span></button>' : '</div>');
   // The biggest win leads in gold; the next three wins sit beside it as equals. Ranked by Claude's annual revenue estimate, then recency.
   // Top row: wins from the last 30 days only, rolling (Mike, Oct 26: a Sep 8 win was too old to headline). Fewer than four means fewer cards.
-  const win30 = wins.filter(x => { const t = etaDate(x.when); return t && t >= parse(D.asOf) - 30 * DAY; });
+  const inWeek = x => { const t = etaDate(x.when); return t && t >= parse(D.asOf) - 7 * DAY; }, win30 = wins.filter(inWeek); // last 7 days, not 30 (Mike, Nov 5: the page did not feel current)
   const ranked = win30.slice().sort((a, z) => ((revEst(z) || {}).v || 0) - ((revEst(a) || {}).v || 0) || (etaDate(z.when) || 0) - (etaDate(a.when) || 0));
   const wcard = (w, gold) => { const sh = IMPSH[w.t] || ['', ''], rv = revEst(w); return '<button type="button" class="wcard' + (gold ? ' gold' : '') + '" data-imp="' + L.indexOf(w) + '">' + (gold ? '<span class="wck">🏆 ' + esc(bestLbl) + '</span>' : '') + '<span class="wct"><span aria-hidden="true">' + w.e + '</span> ' + esc(ucf(w.t.replace(/^Bug fix: /, ''))) + '</span><span class="wcn">' + esc(sh[0] || 'Win') + (sh[1] ? ' <small>' + esc(sh[1]) + '</small>' : '') + '</span><span class="cap">' + (rv ? rv.short + ' · ' : '') + esc(w.when) + (w.site ? ' · ' + esc(SITEN(w.site)) : '') + '</span></button>'; };
   // The gold card is always the biggest win on the page (Mike, Oct 23: a smaller "this week" win in gold next to bigger ones read as wrong).
@@ -2788,9 +2821,10 @@ function impactHtml() {
     '<span class="lbimp">' + (revEst(it) ? hint(revEst(it).short, 'ce', '<b>🤖 Claude\'s estimate, not the team\'s</b><br>' + esc(revEst(it).how)) + flagBtn(it) : '<span class="faint">–</span>') + '</span>' +
     '<span class="lbeta">' + esc(it.when) + (WU[it.t] ? ' <span class="goldb" title="Has a results write-up">🏅</span>' : '') + '</span><span class="chev" aria-hidden="true">›</span></div>'; }).join('');
   // A sentence instead of a title, with context tags above it, like every other page (Mike, Oct 27).
+  const flatWk = L.filter(x => (x.out === 'flat' || x.out === 'loss') && inWeek(x)).length;
   const lw = lead ? esc(midCase(ucf(lead.t.replace(/^Bug fix: /, '')))) : '';
-  const ihead = '<p class="verdict">' + (lead ? 'We shipped ' + win30.length + ' win' + (win30.length === 1 ? '' : 's') + ' in the last 30 days, led by ' + hint(lw, 'verd b', '<b>' + esc(lead.t) + '</b><br>' + esc(lead.imp ? String(lead.imp).replace(/<[^>]+>/g, '') : '')) + '.' : 'Nothing shipped in the last 30 days has a measured win yet.') + '</p>' +
-    '<p class="sulead">' + [cnt('measuring') ? cnt('measuring') + ' more ' + (cnt('measuring') === 1 ? 'is' : 'are') + ' still being measured' : '', cnt('flat') + cnt('loss') ? (cnt('flat') + cnt('loss')) + ' showed no change or missed' : ''].filter(Boolean).join(', and ').replace(/^./, c => c.toUpperCase()) + (cnt('measuring') + cnt('flat') + cnt('loss') ? '.' : '') + '</p>';
+  const ihead = '<p class="verdict">' + (lead ? 'We shipped ' + win30.length + ' win' + (win30.length === 1 ? '' : 's') + ' in the last week, led by ' + hint(lw, 'verd b', '<b>' + esc(lead.t) + '</b><br>' + esc(lead.imp ? String(lead.imp).replace(/<[^>]+>/g, '') : '')) + '.' : 'Nothing shipped in the last week has a measured win yet.') + '</p>' +
+    '<p class="sulead">' + [cnt('measuring') ? cnt('measuring') + ' more ' + (cnt('measuring') === 1 ? 'is' : 'are') + ' still being measured' : '', flatWk ? flatWk + ' showed no change or missed' : ''].filter(Boolean).join(', and ').replace(/^./, c => c.toUpperCase()) + (cnt('measuring') + flatWk ? '.' : '') + '</p>';
   return '<section class="sview"><div class="vhead vhl">' + ihead + '</div>' +
     summary +
     panel('📦', 'Shipped and decided', 'Wins first, then still measuring, then no change or misses.', impFilters(L0) + '<div class="lbt"><div class="itbl">' + head + (rows || '<p class="cap" style="padding:16px">Nothing shipped matches these filters.</p>') + '</div></div>', 'p-imp') + '</section>';
@@ -3141,7 +3175,7 @@ function comingHtml() {
     return '<div class="rmend">' + dd('sort', '<svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><path d="M5 2.5v11M2.5 11 5 13.5 7.5 11M11 13.5v-11M8.5 5 11 2.5 13.5 5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>', 'Sort by <b>' + (SO.find(o => o[0] === cur) || SO[0])[1].toLowerCase() + '</b>', SO.map(o => '<button type="button" role="menuitemradio" aria-checked="' + (o[0] === cur) + '" data-tsortpick="' + o[0] + '"><span class="ddck rad' + (o[0] === cur ? ' on' : '') + '" aria-hidden="true"></span>' + o[1] + '</button>').join('') + '<p class="cap ddnote">No start dates are tracked yet, so there is no start-date sort.</p>').replace('<div class="dd">', '<div class="dd ddsort">'); })() + '<div class="vtog" role="group" aria-label="View"><button type="button" data-rmview="gantt" aria-pressed="' + !!state.rmGantt + '"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2.5 4h6M5 8h7.5M3.5 12h5"/></svg>Timeline</button><button type="button" data-rmview="list" aria-pressed="' + !state.rmGantt + '"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M5.5 4h8M5.5 8h8M5.5 12h8"/><circle cx="2.6" cy="4" r=".6"/><circle cx="2.6" cy="8" r=".6"/><circle cx="2.6" cy="12" r=".6"/></svg>List</button></div></div>' +
     '<div class="fpills">' + TS.map(x => { const t = TL.find(y => y[0] === x) || [x, x, '']; return '<span class="fpill tt-' + x + '">' + (t[2] ? t[2] + ' ' : '') + esc(t[1].replace('↳ ', '')) + '<button type="button" data-tmsel="' + x + '" aria-label="Remove ' + esc(t[1]) + '">✕</button></span>'; }).join('') + VS.map(v => '<span class="fpill v ' + VL[v][2] + '">' + esc(VL[v][0]) + '<button type="button" data-vsel="' + v + '" aria-label="Remove ' + esc(VL[v][0]) + '">✕</button></span>').join('') + GS.map(o => '<span class="fpill g">' + (OBJE[o] || '') + ' ' + esc(OBJN(o)) + '<button type="button" data-gsel="' + o + '" aria-label="Remove ' + esc(OBJN(o)) + '">✕</button></span>').join('') + SS.map(x => '<span class="fpill g">' + siteDot(x) + '<button type="button" data-ssel="' + esc(x) + '" aria-label="Remove ' + esc(SITEN(x)) + '">✕</button></span>').join('') + PS.map(x => '<span class="fpill g">👤 ' + esc(x) + '<button type="button" data-psel="' + esc(x) + '" aria-label="Remove ' + esc(x) + '">✕</button></span>').join('') +
     (TS.length || VS.length || GS.length || SS.length || PS.length ? '<button type="button" class="linkbtn" data-fclear2="1">Clear all</button>' : '') + '</div></div>';
-  return '<section class="sview"><div class="vhead rmvh vhl">' + rmHeadline() + '</div>' + tools + (S && S.k !== 'eta' ? '<p class="cap rmsorted">Sorted by ' + ({ t: 'project', s: 'status', eta: 'launch date', imp: 'impact', c: 'confidence' })[S.k] + '. <button type="button" class="linkbtn" data-tsort="">Group by objective again</button></p>' : '') +
+  return '<section class="sview">' + tools + (S && S.k !== 'eta' ? '<p class="cap rmsorted">Sorted by ' + ({ t: 'project', s: 'status', eta: 'launch date', imp: 'impact', c: 'confidence' })[S.k] + '. <button type="button" class="linkbtn" data-tsort="">Group by objective again</button></p>' : '') +
     (state.rmGantt ? ganttHtml(now.concat(next), all, it => mineT(it) && qOk(it)) + '</section>' : '' +
     sec('🏁', 'In Progress', now.length, head + body(now), facts(now, 'now')) +
     sec('🗓️', 'Not Started Yet', next.length, head + body(next), facts(next, 'next')) +
