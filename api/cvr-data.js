@@ -17,10 +17,10 @@ function overlay(s) {
   var meta = { id: ${Number(s.id)}, asOf: ${JSON.stringify(s.asOf)}, createdAt: ${JSON.stringify(s.createdAt)}, applied: false };
   window.__cvrSnapshot = meta;
   try {
-    var names = ['D', 'L', 'MAX', 'R', 'ORD'];
+    var names = ['D', 'L', 'MAX', 'STD', 'R', 'ORD'];
     if (!names.every(function (n) { return S[n] && typeof S[n] === 'object'; })) { meta.skipped = 'incomplete snapshot'; return; }
     if (typeof D === 'undefined' || !D.asOf || String(D.asOf) > meta.asOf) { meta.skipped = 'data files are newer'; return; }
-    var targets = { D: D, L: L, MAX: MAX, R: R, ORD: ORD };
+    var targets = { D: D, L: L, MAX: MAX, STD: STD, R: R, ORD: ORD };
     names.forEach(function (n) {
       var t = targets[n];
       Object.keys(t).forEach(function (k) { delete t[k]; });
