@@ -17,11 +17,12 @@ export default async function handler(req, res, deps) {
   const wantStore = req.method === 'POST' && storeOn;
   if (wantStore && req.headers['sec-fetch-site'] && req.headers['sec-fetch-site'] !== 'same-origin') return send(403, { ok: false, error: 'Saving can only be started from the dashboard itself.' });
   try {
-    const report = await runRefresh({ mode: wantStore ? 'store' : 'dry', sql: deps?.sql ?? (url ? neon(url) : null), dir: deps?.dir ?? path.join(process.cwd(), 'data'), ...(deps?.run ?? {}) });
+    const report = await runRefresh({ mode: wantStore ? 'store' : 'dry', who: wantStore ? 'button' : 'dry run', sql: deps?.sql ?? (url ? neon(url) : null), dir: deps?.dir ?? path.join(process.cwd(), 'data'), ...(deps?.run ?? {}) });
+    console.log('[refresh] report ' + JSON.stringify(report).slice(0, 14000)); // so the finished report can be read in the Vercel logs, not only in the browser tab
     if (req.method === 'POST' && !storeOn) report.note = `${report.note ?? ''} Saving is switched off (REFRESH_STORE_ENABLED is not 1), so this was a dry run.`.trim();
     return send(report.refused ? 409 : 200, report);
   } catch (e) {
     console.error('refresh-cvr failed:', e.message);
     return send(500, { ok: false, error: e.message });
   }
-} 
+}
