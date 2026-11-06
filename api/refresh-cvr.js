@@ -24,4 +24,4 @@ export default async function handler(req, res, deps) {
     console.error('refresh-cvr failed:', e.message);
     return send(500, { ok: false, error: e.message });
   }
-}
+} 
