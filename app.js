@@ -2762,7 +2762,7 @@ const REVEST = {
   'Bug fix: men\'s tee images back in the Shopping feed': ['tp', 0.1, 0.045, 'men\'s images convert about 10% better, on roughly 30% of T-shirt listings in Shopping, which drive about 15% of TeePublic revenue']
 };
 const revEst = it => { const c = REVEST[it.t]; if (!c) return null; const base = annual(c[0]), v = base * c[1] * c[2]; return { v, short: '+' + fmtY(v) + '/yr est.', how: 'Assumes ' + c[3] + '. ' + BR[c[0]].name + ' revenue runs at about ' + fmtY(base) + ' a year (last 28 days, annualized), so the estimate is about ' + fmtY(v) + ' a year. Rough, for comparison only.' }; };
-const impShort = it => IMPSH[it.t] || (it.test && it.rel != null ? [sgn(it.rel, 1), it.metric] : it.out === 'measuring' ? ['Measuring', ''] : it.out === 'flat' ? ['No change', ''] : ['–', '']);
+const impShort = it => IMPSH[it.t] || (it.test && it.rel != null ? [sgn(it.rel, 1), it.metric] : it.out === 'measuring' ? ['Measuring', ''] : it.out === 'flat' ? ['No change', ''] : it.out === 'win' ? ['Live', 'launched'] : ['–', '']);
 function impactList() {
   const W = (COMING.wins || []).map(w => Object.assign({ out: w.out || (/^measuring|watching/i.test(w.imp) ? 'measuring' : 'win') }, w)), ids = new Set([].concat(...W.map(w => (w.refs || []).map(r => r.test).filter(Boolean))));
   const T = EXPS.done.map(t => ({ e: testE(t.name), t: t.name, team: 'customer', site: 'RB', when: short(t.end), out: t.status === 'shipped' ? 'win' : t.cvr.rel < -0.002 ? 'loss' : 'flat', imp: (t.status === 'shipped' ? 'Shipped. ' : 'Kept control. ') + esc(t.primary.name) + ' ' + sgn(t.primary.rel, 1) + ' in the test', src: 'Amplitude Experiment', refs: [{ test: t.id, l: 'The test' }], test: true, rel: t.primary.rel, metric: t.primary.name }));
@@ -2833,7 +2833,7 @@ function impactHtml() {
   const lead = ranked[0], others = ranked.filter(w => w !== lead).slice(0, 3);
   const bestLbl = lead && recent.indexOf(lead) >= 0 ? 'Biggest win this week' : bestLbl0;
   // Same four-card row as before (Mike, Oct 22): only the content changed, biggest win first in gold, then the next three wins.
-  const res = w => esc((IMPSH[w.t] || ['–'])[0]), meta = w => [revEst(w) ? revEst(w).short : '', esc(w.when || ''), w.site ? SITEN(w.site) : ''].filter(Boolean).join(' · ');
+  const res = w => esc(impShort(w)[0]), meta = w => [revEst(w) ? revEst(w).short : '', esc(w.when || ''), w.site ? SITEN(w.site) : ''].filter(Boolean).join(' · ');
   const summary = lead ? '<div class="isum">' + card('🏆', bestLbl, res(lead), esc(ucf(lead.t.replace(/^Bug fix: /, ''))) + ' · ' + meta(lead), 'gold', 'data-imp="' + L.indexOf(lead) + '"') +
     others.map(w => card(w.e, esc(ucf(w.t.replace(/^Bug fix: /, ''))), res(w), meta(w), 'good', 'data-imp="' + L.indexOf(w) + '"')).join('') + '</div>' : '';
   const head = '<div class="ihead"><span>Shipped</span><span>Site, team and Product Manager</span><span>Result</span><span>Impact</span><span>' + hint('Est. revenue / yr ⓘ', 'soft', '<b>Projected annual revenue impact</b><br>Claude\'s estimate: the measured lift × the share of revenue it touches × that site\'s revenue run rate. Click a row to see the math, the source and any write-up.') + '</span><span>When</span><span></span></div>';
