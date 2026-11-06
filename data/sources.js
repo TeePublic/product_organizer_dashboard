@@ -1745,7 +1745,7 @@ const SRCS = {
    "url": "https://articore.atlassian.net/browse/DEAP-5726",
    "who": "Amelia Cacchione",
    "date": "2026-10-26",
-   "what": "In Code Review since Oct 15; on Oct 26 Marketing signed off on the images and the team kept soft cases in the feed"
+   "what": "In Code Review since Oct 15; on Oct 26 Marketing signed off on the images and the team kept soft cases in the feed. Moved to In QA, read from the DE board on Nov 6. The roadmap sheet differs (In Dev, On Track since Nov 6)"
   },
   "s_sheet": {
    "kind": "sheet",
@@ -1886,7 +1886,7 @@ const SRCS = {
    "who": "Dustin Chen",
    "date": "2026-11-02",
    "url": "https://articore.atlassian.net/browse/DEAP-6499",
-   "what": "Nov 2 comments on both feed tickets: cost of goods received, image backfill strategy confirmed, shipping comparison QA running; both are In Development",
+   "what": "Both feed tickets (DEAP-6499 and DEAP-6613) are Approved, read from the DE board on Nov 6 (In Development on Nov 4). Nov 2 comments: cost of goods received, image backfill strategy confirmed, shipping comparison QA running. The roadmap sheet differs (In Dev)",
    "say": "Dustin Chen commented on DEAP-6499 and DEAP-6613 on Nov 2 that cost of goods arrived, the image backfill plan is confirmed and shipping comparison QA is running."
   },
   "eta": {
@@ -2549,7 +2549,7 @@ const SRCS = {
    "where": "Jira DEAP-6604 children",
    "url": "https://articore.atlassian.net/browse/DEAP-6611",
    "date": "2026-11-05",
-   "what": "Nov 5: DEAP-6611 (mark all as read), DEAP-6973 (hide rich text editor) and DEAP-6725 (unread indicator) are all Code Review; DEAP-6824 (clear old notifications) is Backlog"
+   "what": "Nov 6, 12:21 PM ET: DEAP-6611 (mark all as read), DEAP-6724 (unread tab), DEAP-6973 (hide rich text editor) and DEAP-6725 (unread indicator research) are Released; DEAP-6824 (clear old notifications) is Code Review. The sheet row still says In Dev, so the status shown is the sheet's"
   },
   "s_sheet": {
    "kind": "sheet",
@@ -4448,7 +4448,7 @@ const SRCS = {
    "where": "Roadmap sheet, Active Work tab, Est. Launch Date column, row 6",
    "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A6",
    "date": "2026-11-04",
-   "what": "Launch Sep 22 (phase Jul 15 to Aug 22), already passed, so shown as TBD. Slack differs: Nov 4 AU target, now waiting on a fulfillment partner test-order fix for postcards"
+   "what": "Launch Sep 22 (phase Jul 15 to Aug 22), already passed, so shown as TBD. Slack differs: the launch was announced in #released on Nov 5 (project channel Nov 4), so the sheet row (still In Dev on Nov 6) is out of date until the Product Manager updates it"
   },
   "s_latest": {
    "kind": "slack",
@@ -5265,7 +5265,7 @@ const SRCS = {
    "where": "Jira DEAP-6809, DE board (DEAP board 580, DE Sprint 22)",
    "url": "https://articore.atlassian.net/browse/DEAP-6809",
    "date": "2026-11-04",
-   "what": "DEAP-6809 status In Development, read from the DE board on Nov 4. Replaces \"Planned\"."
+   "what": "DEAP-6809 status In QA, read from the DE board on Nov 6 (In Development on Nov 4). The roadmap sheet has no separate row for this on the Nov 6 12:22 PM read (see New canvases in feed (pre-peak))."
   },
   "eta": {
    "kind": "jira",
