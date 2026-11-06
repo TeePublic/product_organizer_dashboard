@@ -4015,3 +4015,7 @@ details.pbox.prov > summary { cursor: pointer; list-style: none; } details.pbox.
 .srm small { font-size: 11.5px; color: var(--muted); }
 @media (min-width: 761px) and (max-width: 1240px) { :root:not(#z):not(#y) .stc, :root:not(#z):not(#y) .strow { grid-template-columns: minmax(150px, 1fr) 70px 110px 150px minmax(120px, 1.2fr) 14px; gap: 0 10px; } }
 @media (max-width: 760px) { :root:not(#z):not(#y) .strow { grid-template-columns: 1fr; gap: 6px; } }
+
+/* Stat sig cell: the status plus the confidence and time to 95% (Nov 5) */
+.abstw { display: grid; gap: 2px; }
+.absub { font-size: 11.5px; line-height: 1.25; color: var(--muted); font-weight: 500; }
