@@ -72,18 +72,43 @@
     (lines || []).slice(0, 18).forEach(function (l) { var p = document.createElement('div'); p.textContent = l; p.setAttribute('style', 'margin-top:4px;white-space:pre-wrap;word-break:break-word'); panel.appendChild(p); });
     panel.style.display = 'block';
   }
+  // A refresh now happens in rounds. Each round is one short call to the server, which says how far it got.
+  // This keeps calling until the server says it is done (or failed), pausing when Amplitude is slow. Progress is saved
+  // on the server, so closing the page or a dropped connection never loses finished work: clicking again continues.
+  var wait = function (s) { return (window.__cvrWait ? window.__cvrWait(s) : s * 1000); };
+  function readJson(r) { return r.json().catch(function () { return { ok: false, errors: ['The server did not send a readable answer (status ' + r.status + ').'] }; }); }
+  function stopWith(title, lines, good) { show(title, lines, good); idle(); }
+  var state = null;
+  function step() {
+    fetch('/api/refresh-cvr' + (state.runId ? '?run=' + state.runId : ''), { method: 'POST', headers: { Accept: 'application/json' } })
+      .then(readJson)
+      .then(function (rep) {
+        state.netFails = 0;
+        if (rep.runId) state.runId = rep.runId;
+        if (rep.refused) return stopWith(rep.refused === 'busy' ? 'Someone else is refreshing right now' : 'Too soon since the last refresh', rep.errors, false);
+        if (rep.status === 'running') {
+          var d = rep.progress ? rep.progress.done : 0, t = rep.progress ? rep.progress.total : 0;
+          state.still = d > state.lastDone ? 0 : state.still + 1; state.lastDone = d;
+          if (rep.waitSeconds >= 300) return stopWith('Paused: Amplitude\'s hourly limit is used up', [d + ' of ' + t + ' done and saved. Click again in a while to continue.'], false);
+          if (state.still >= 4) return stopWith('Amplitude is slow right now', [d + ' of ' + t + ' done and saved. Click again later to continue.'], false);
+          btn.textContent = inHeader ? 'Refreshing ' + d + '/' + t + '...' : 'Refreshing... ' + d + ' of ' + t + '. Please stay on this page.';
+          show('Working: ' + d + ' of ' + t + ' done', [rep.pausedBecause ? 'Amplitude is answering slowly (' + rep.pausedBecause + '). Continuing automatically.' : 'Continuing...'], true);
+          return void setTimeout(step, wait(Math.max(1, rep.waitSeconds || 2)));
+        }
+        if (rep.ok && rep.stored) { show('Refreshed through ' + rep.window.end, ['Reloading the page...'], true); return void setTimeout(function () { (window.__cvrReload || function () { location.reload(); })(); }, 1200); }
+        if (rep.ok) return stopWith('Checked Amplitude: nothing was saved', ['Would bring the data through ' + rep.window.end + ' (' + rep.window.newDays + ' new day(s)).', rep.note || 'Dry run.'], true);
+        stopWith('Not refreshed', (rep.errors && rep.errors.length ? rep.errors : [rep.error || rep.note || 'Something went wrong.']).concat(['Nothing on the page was changed.']), false);
+      })
+      .catch(function (e) {
+        state.netFails++;
+        if (state.netFails <= 3) return void setTimeout(step, wait(5));
+        stopWith('Not refreshed', ['Could not reach the server: ' + e.message, state.runId ? 'Progress is saved. Click again to continue.' : 'Nothing on the page was changed.'], false);
+      });
+  }
   idle();
   btn.addEventListener('click', function () {
-    btn.disabled = true; btn.textContent = inHeader ? 'Refreshing... about a minute' : 'Refreshing... this takes about a minute. Please stay on this page.'; panel.style.display = 'none';
-    fetch('/api/refresh-cvr', { method: 'POST', headers: { Accept: 'application/json' } })
-      .then(function (r) { return r.json().catch(function () { return { ok: false, errors: ['The server did not send a readable answer (status ' + r.status + ').'] }; }); })
-      .then(function (rep) {
-        if (rep.refused) show(rep.refused === 'busy' ? 'Someone else is refreshing right now' : 'Too soon since the last refresh', rep.errors, false);
-        else if (rep.ok && rep.stored) { show('Refreshed through ' + rep.window.end, ['Reloading the page...'], true); setTimeout(function () { (window.__cvrReload || function () { location.reload(); })(); }, 1200); return; }
-        else if (rep.ok) show('Checked Amplitude: nothing was saved', ['Would bring the data through ' + rep.window.end + ' (' + rep.window.newDays + ' new day(s)).', rep.note || 'Dry run.'], true);
-        else show('Not refreshed', (rep.errors && rep.errors.length ? rep.errors : [rep.error || rep.note || 'Something went wrong.']).concat(['Nothing on the page was changed.']), false);
-      })
-      .catch(function (e) { show('Not refreshed', ['Could not reach the server: ' + e.message, 'Nothing on the page was changed.'], false); })
-      .then(function () { idle(); });
+    btn.disabled = true; btn.textContent = inHeader ? 'Refreshing...' : 'Refreshing... Please stay on this page.'; panel.style.display = 'none';
+    state = { runId: null, lastDone: -1, still: 0, netFails: 0 };
+    step();
   });
 })();
