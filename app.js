@@ -2071,6 +2071,14 @@ const TEST_TEAM = { Oliver: 'customer', Allison: 'customer', Jon: 'customer', Ja
 const testTeam = t => t.team || (Object.keys(TEST_TEAM).find(n => (t.owners || '').indexOf(n) >= 0) ? TEST_TEAM[Object.keys(TEST_TEAM).find(n => (t.owners || '').indexOf(n) >= 0)] : 'customer');
 // Rough time to 95% confidence if the effect holds: z grows with the square root of sample, so days scale with (1.96 / z)².
 const qz = q => { const u = Math.sqrt(-2 * Math.log(q)); return u - (2.515517 + 0.802853 * u + 0.010328 * u * u) / (1 + 1.432788 * u + 0.189269 * u * u + 0.001308 * u * u * u); };
+// Stat sig, as a number and a time (Mike, Nov 5: "that's an important number"): the confidence reached and about how long until 95%, if the effect holds.
+// Days needed scale with 1/z², z from the confidence so far; the same rule as ttc().
+function sigNote(c, days, running, lab) {
+  if (c == null) return '';
+  if (c >= 95) return '<small class="absub">' + c + '% confidence</small>';
+  const z = qz(Math.max(0.0001, (1 - c / 100) / 2)), more = z >= 0.15 && days ? Math.round(days * Math.pow(1.96 / z, 2) - days) : null;
+  return '<small class="absub">' + c + '% confidence' + (lab ? ' on ' + esc(lab) : '') + (running ? (more == null ? ' · too small to reach 95%' : more > 90 ? ' · months from 95%' : ' · ~' + Math.max(1, more) + ' more day' + (more === 1 ? '' : 's') + ' to 95%') : '') + '</small>';
+}
 function ttc(t) {
   if (t.status !== 'running' || t.p == null) return '';
   if (conf(t) >= 95) return 'Ready to call';
@@ -2098,7 +2106,8 @@ function abCell(t, k) {
 }
 const abSig = t => { const r = abRd(t), g = abMet(t)[r.goal], nm = (g && g.name) || ABK.find(z => z[0] === r.goal)[1];
   const o = !g ? ['na', '–', '', ''] : g.s === 'sig' ? ['yes', 'Yes', '95%+ confidence', 'At least 95% confidence of a true difference.'] : g.s === 'early' ? ['early', 'Too early', 'few days of data', 'Not enough days to say anything yet.'] : g.s === 'nb' ? ['nb', 'Can\'t tell', 'no error bar', 'Amplitude gives no error bar for this metric.'] : g.c ? ['not', 'Not yet', g.c + '% confidence', 'Needs 95% before we call it.'] : ['not', 'Not yet', 'could be noise', 'Under 95% confidence, so it could still be noise.'];
-  return '<span class="abst ' + o[0] + '">' + o[1] + '</span>';
+  const c = g && (g.s === 'sig' ? (g.c || 95) : g.c) || null;
+  return '<span class="abstw"><span class="abst ' + o[0] + '">' + o[1] + '</span>' + (g && g.s !== 'early' && g.s !== 'nb' ? sigNote(c, testDays(t), t.status === 'running') : t.p != null && t.primary ? sigNote(conf(t), testDays(t), t.status === 'running', t.primary.name.toLowerCase()) : t.status === 'running' ? '<small class="absub">no confidence read yet</small>' : '') + '</span>';
 };
 // One number cell (Mike, Nov 3 rebuild): the change alone, colored by direction, right-aligned; control → test lives in the hover.
 const abN = (x, name, key, chip) => !x || x.v == null ? '<span class="abn na" title="Not measured for this test">–</span>' : hint('<span class="abn ' + (x.v >= 0 ? 'b' : 'w') + (key ? ' abk1' : '') + (chip ? ' chip' : '') + '">' + sgn(x.v, 1) + '</span>', 'abm abnh', '<span class="nosrc"><b>' + esc(name) + '</b><br>' + (x.a != null && x.b != null ? abVal(x, x.a) + ' in control → ' + abVal(x, x.b) + ' in the test group (' + sgn(x.v, 1) + ').' : 'Test group vs control: ' + sgn(x.v, 1) + '.') + (x.s === 'nb' ? ' Amplitude gives no error bar for this one, so read it as a direction.' : '') + '</span>');
@@ -2239,7 +2248,14 @@ function testModal(kind, i) {
     '<div class="pbox"><h4 class="ph">🔗 Links</h4><p><a href="' + esc(o.url) + '" target="_blank" rel="noopener">Open the test in Amplitude Experiment ↗</a></p>' + (wu && /^https?:/.test(wu[0]) ? '<p><a href="' + esc(wu[0]) + '" target="_blank" rel="noopener">Read the write-up in Confluence ↗</a></p>' : '') + '</div>');
 }
 // RBO or TPO, never both (Mike, Nov 5): the two sites measure tests differently, so each gets its own table and columns. RBO is the default.
-const abSiteNow = () => state.abSite === 'TP' ? 'TP' : 'RB';
+// The page opens on whichever site has more green right now (Mike, Nov 5): running tests reading positive on revenue per user, plus wins shipped in the last 60 days. A tie opens RBO. Once someone picks a site, theirs sticks.
+function abGreen() {
+  const cut = addDays(EXPS_AS_OF, -60);
+  const rb = (EXPS.live || []).filter(t => ((((abRd(t).m || {}).rpv) || {}).v || 0) > 0).length + (EXPS.done || []).filter(t => t.status === 'shipped' && t.end >= cut).length + (EXPS.older || []).filter(o => o.status === 'shipped' && o.end >= cut).length;
+  const tp = typeof TPEXPS === 'undefined' ? 0 : TPEXPS.items.filter(x => { const v = typeof tpRevV === 'function' ? tpRevV(x) : null; return v != null && v > 0; }).length + (TPEXPS.done || []).filter(x => x.end >= cut && ((x.call && x.call[0] === 'win') || x.status === 'shipped')).length;
+  return { rb, tp, site: tp > rb ? 'TP' : 'RB' };
+}
+const abSiteNow = () => state.abSite === 'TP' || state.abSite === 'RB' ? state.abSite : abGreen().site;
 const abSiteOk = s => { const c = /dashery|^da$/i.test(s || '') ? 'DA' : /tee|^tp$/i.test(s || '') ? 'TP' : /both/i.test(s || '') ? 'B' : 'RB'; return c === 'B' || c === abSiteNow(); };
 const tpDays = x => Math.round((parse(EXPS_AS_OF) - parse(x.start)) / DAY) + 1;
 // The Beam test is read from Statsig, not Split: no control counts, just each version's change per metric with a margin. Its row shows Cart CVR (Beam is a conversion test).
@@ -2268,7 +2284,7 @@ function tpRev(x) {
 const tpRevV = x => { const v = tpLeadV(x); if (!v) return null; if (x.statsig && x.statsig.filt) { const f = x.statsig.filt; return (v.n === 'Version A' ? f.aRps : f.bRps) / f.cRps - 1; } if (x.statsig) { const m = x.statsig.metrics.find(q => /total revenue/i.test(q.name)); return m ? (v.n === 'Version A' ? m.a : m.b) : null; } return v.rpuRel != null ? v.rpuRel : null; };
 function tpRow(x, i, done) {
   const best = x.variants.reduce((m, v) => Math.max(m, v.conf || 0), 0);
-  const chip = best >= 95 ? '<span class="abst yes">Yes</span>' : '<span class="abst">' + (best >= 80 ? 'Not yet · ' + best + '%' : 'Not yet') + '</span>';
+  const chip = '<span class="abstw">' + (best >= 95 ? '<span class="abst yes">Yes</span>' : '<span class="abst">Not yet</span>') + (best > 0 ? sigNote(best, tpDays(x), !done) : '<small class="absub">no read yet</small>') + '</span>';
   const mn = tpMetric(x), met = mn ? hint('<span class="abmet"><b>' + esc(mn) + '</b></span>', 'abm abnh abl', '<span class="nosrc"><b>' + esc(mn) + '</b><br>' + esc(x.metricNote || (x.statsig ? 'Share of cart visitors who order, read from Statsig. Beam is a conversion test.' : x.goal) || '') + '</span>') : hint('<span class="abmet na">Not defined</span>', 'abm abnh abl', '<span class="nosrc"><b>Metric not defined</b><br>This test is read from Split, which does not say what it measures. Ask Jon or Mike.</span>');
   return '<div class="rowwrap"><div class="trow abrow tpg" role="button" tabindex="0" data-tpx="' + (done ? 'd' : '') + i + '"><span class="tname tnico"><span class="ge gico g-CVR" aria-hidden="true">' + projIco({ t: x.name, obj: 'CVR' }) + '</span><b>' + esc(x.name) + '</b><span class="cap tmeta">' + sitePill('TP') + tpVerTag(x) + '<span class="tloc">' + esc(x.where) + '</span></span></span>' + (done ? '<span class="abday"><b>' + (Math.round((parse(x.end) - parse(x.start)) / DAY) + 1) + ' days</b><small>ended ' + short(x.end) + '</small></span>' : '<span class="abday"><b>Day ' + tpDays(x) + '</b><small>since ' + short(x.start) + '</small></span>') + chip + met + tpChange(x) + tpRev(x) + '</div></div>';
 }
