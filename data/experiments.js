@@ -9,7 +9,7 @@ const TESTUX = {
   'Remove shipping options from cart': [{ url: 'https://www.figma.com/design/e9aTclyeZZKysbjGtWOQ6S/C26--RB-AB-Tests--Re-Runs-?node-id=107-6419', l: 'Figma: remove shipping options from cart', jira: 'DEAP-3778' }],
   'Express pay first in checkout, version 2': [{ url: 'https://www.figma.com/design/e9aTclyeZZKysbjGtWOQ6S/C26--RB-AB-Tests--Re-Runs-?node-id=417-10207', l: 'Figma: express pay prioritization v2', jira: 'DEAP-5879' }]
 };
-// A/B tests from Amplitude Experiment (Redbubble project 774278), pulled Nov 7 2026, ~7:30 AM ET (Nov 6 the last complete day). Every metric and the device splits (`dev`) were re-pulled Nov 7. TeePublic project 499673 has no experiment changed in the last 60 days (only three old test or empty entries, last edited Jun 11).
+// A/B tests from Amplitude Experiment (Redbubble project 774278), pulled Nov 7 2026, ~7:30 AM ET (Nov 6 the last complete day); rechecked ~1 PM ET Nov 7: running-test revenue per user unchanged through Nov 6, Beam filtered artifact (last updated Nov 6 6:00 AM ET) and Statsig unchanged, Beam portal and Split need a sign-in so those entries are kept. Every metric and the device splits (`dev`) were re-pulled Nov 7. TeePublic project 499673 has no experiment changed in the last 60 days (only three old test or empty entries, last edited Jun 11).
 // cvr = Sitewide CVR (h1f2lfvq, pageview to order in a day) among exposed users. reach = estimated share of all site orders
 // that come from users the test touches (exposed converters / site orders over the same days, with a 0.6 repeat-buyer factor
 // calibrated on the two site-wide tests, capped at 100%). site = cvr lift x reach = what the variant does to whole-site CVR.
