@@ -1615,7 +1615,7 @@ const erName = (name, team, site, note) => '<span class="tname tnico"><span clas
 // Recently shipped, condensed (Mike, Nov 5): wins on the left, everything that did not win (kept control, losers, inconclusive) on the right.
 // Each row is just the title, the end date and revenue per user; clicking opens the full read.
 function shipCols(items) {
-  const chip = v => v == null ? '<span class="faint">–</span>' : '<span class="chn ' + (v >= 0 ? 'b' : 'w') + '">' + sgn(v, 1) + '</span>';
+  const chip = v => v == null ? '<span class="faint">–</span>' : '<span class="abn ' + (v >= 0 ? 'b' : 'w') + ' abk1 chip">' + sgn(v, 1) + '</span>';
   const row = o => '<div class="rowwrap"><' + (o.href ? 'a href="' + esc(o.href) + '" target="_blank" rel="noopener"' : 'div role="button" tabindex="0" ' + o.attr) + ' class="srow2">' +
     '<span class="tname tnico"><span class="ge gico g-CVR" aria-hidden="true">' + projIco({ t: o.name, obj: 'CVR' }) + '</span><b>' + esc(o.name) + '</b><span class="cap tmeta">' + sitePill(o.site) + (o.label ? '<span class="tloc">' + esc(o.label) + '</span>' : '') + '</span></span>' +
     '<span class="sdate">' + short(o.end) + '</span><span class="srev">' + chip(o.rev) + '</span></' + (o.href ? 'a' : 'div') + '></div>';

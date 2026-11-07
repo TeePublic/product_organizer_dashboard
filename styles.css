@@ -4001,7 +4001,8 @@ details.pbox.prov > summary { cursor: pointer; list-style: none; } details.pbox.
 .shipgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
 .shipcol { min-width: 0; }
 .shiph { display: flex; align-items: baseline; gap: 8px; padding: 6px 2px; font-size: 14px; }
-.shipcols2, .srow2 { display: grid; grid-template-columns: minmax(0, 1fr) 62px 96px; gap: 0 12px; align-items: center; }
+.shipcols2, .srow2 { display: grid; grid-template-columns: minmax(0, 1fr) 64px 112px; gap: 0 18px; align-items: center; }
+.shipcols2 > span:last-child { text-align: right; }
 .shipcols2 { padding: 0 14px 6px; font-size: 12px; font-weight: 600; color: var(--muted); }
 .srow2 { padding: 10px 14px; border: 1px solid var(--line, rgba(128,128,128,.25)); border-radius: 10px; margin-bottom: 6px; cursor: pointer; text-decoration: none; color: inherit; background: var(--surface); }
 .srow2:hover, .srow2:focus-visible { border-color: var(--ctl); }
