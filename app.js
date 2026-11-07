@@ -2229,7 +2229,7 @@ function uxFor(name) {
   return (it && typeof UXL !== 'undefined' && UXL[it.t]) || [];
 }
 function uxBox(L) {
-  if (!L || !L.length) return '';
+  if (!L || !L.length) return '<section class="pbox uxbox"><h4 class="ph">🎨 UX</h4><p class="cap">No UX link yet. A test only shows one once its Figma link is added (from the Jira ticket or the Product Manager); until then this box stays here so the gap is visible.</p></section>'; // every test shows the UX box (Mike, Nov 7)
   return '<section class="pbox uxbox"><h4 class="ph">🎨 UX</h4><ul class="uxlist">' + L.map(d => '<li><a class="uxl" href="' + esc(d.url) + '" target="_blank" rel="noopener">' + esc(d.l) + ' ↗</a>' + (d.jira ? ' <a class="cap" href="https://articore.atlassian.net/browse/' + esc(d.jira) + '" target="_blank" rel="noopener">' + esc(d.jira) + '</a>' : '') + '</li>').join('') + '</ul>' +
     L.filter(d => figEmbed(d.url)).slice(0, 2).map(d => '<details class="uxprev"><summary>Preview: ' + esc(d.l.replace(/^(Figma|FigJam):\s*/, '')) + '</summary><iframe loading="lazy" src="' + esc(figEmbed(d.url)) + '" title="' + esc(d.l) + '" allowfullscreen></iframe><p class="cap">If this shows a Figma sign-in, open the link above while signed in.</p></details>').join('') + '</section>';
 }
