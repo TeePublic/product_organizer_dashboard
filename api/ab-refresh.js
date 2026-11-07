@@ -1,5 +1,7 @@
-// STEP 5 (dry run): builds what the A/B tab's snapshot WOULD contain from the Amplitude Analytics API (Redbubble key pair) and shows it.
-// It saves nothing yet (saving and the Refresh button come in step 6). Read-only, production only (behind the Okta sign-in), keys never printed.
+// The A/B tab's refresh. Builds the snapshot from the Amplitude Analytics API (Redbubble key pair), the same way refresh-cvr.js is used:
+//   GET                                   = dry run: pulls, builds in memory, reports, saves nothing
+//   POST (from the dashboard itself) and AB_STORE_ENABLED=1 = saves the snapshot to Neon (table ab_snapshots), with a lock and a cooldown
+// Production only (behind the Okta sign-in), keys never printed. POST with AB_STORE_ENABLED unset behaves as a dry run and says so.
 //
 // How a test's numbers are produced (the method verified in steps 4b/4c on the cart test): users are tagged with their variant through the
 // user property "[Experiment] <flag key>". Exposed = unique exposure events per variant, buyers = unique order_completed users, revenue and
@@ -7,7 +9,10 @@
 // reliable to about half a point and levels are approximate. Significance is NOT computed: verdicts stay with Amplitude (hand-updated).
 //
 // Add a test by adding one entry below. `showLevels: false` is for tests whose counts are known not to match (see step 4f).
+import { neon } from '@neondatabase/serverless';
+
 const BASE = 'https://amplitude.com/api/2';
+const dbUrl = process.env.DATABASE_URL || process.env.POSTGRES_URL;
 
 const MANIFEST = {
   '1580138': {
@@ -65,14 +70,17 @@ export default async function handler(req, res, deps) {
 }
 
 async function run(req, res, deps) {
-  if (req.method !== 'GET') return send(res, 405, { error: 'GET only in step 5 (dry run)' });
+  if (req.method !== 'GET' && req.method !== 'POST') return send(res, 405, { ok: false, error: 'Use GET for a dry run.' });
   const env = deps?.env ?? process.env;
   if (env.VERCEL_ENV !== 'production') return send(res, 403, { error: 'Production only' });
   const key = env.AMPLITUDE_RB_API_KEY, secret = env.AMPLITUDE_RB_SECRET_KEY;
   if (!key || !secret) return send(res, 200, { keysPresent: { AMPLITUDE_RB_API_KEY: !!key, AMPLITUDE_RB_SECRET_KEY: !!secret }, error: 'a key is missing for this environment' });
 
   const q = req.query || {};
-  if (q.mode && q.mode !== 'dry') return send(res, 501, { error: 'only mode=dry exists in step 5; saving arrives in step 6' });
+  const storeOn = env.AB_STORE_ENABLED === '1';
+  const wantStore = storeOn && req.method === 'POST';
+  if (wantStore && req.headers?.['sec-fetch-site'] && req.headers['sec-fetch-site'] !== 'same-origin') return send(res, 403, { ok: false, error: 'Saving can only be started from the dashboard itself.' });
+  if (wantStore && q.end) return send(res, 400, { ok: false, error: 'end can only be set on a dry run; a saved refresh always ends on the last full day.' });
   const now = deps?.now ? deps.now() : new Date();
   const yesterday = ymd(new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - 1)));
   const end = String(q.end || yesterday);
@@ -80,6 +88,19 @@ async function run(req, res, deps) {
   const only = q.test ? String(q.test) : null;
   if (only && !MANIFEST[only]) return send(res, 400, { error: 'unknown test', known: Object.keys(MANIFEST) });
 
+  // Saving: take the lock and respect the cooldown BEFORE spending any Amplitude queries.
+  const sql = deps?.sql ?? (dbUrl ? neon(dbUrl) : null);
+  const cooldownMin = Number(env.AB_COOLDOWN_MIN || 5); let locked = false;
+  const release = async () => { if (locked && sql) { try { await sql`UPDATE ab_refresh_lock SET started_at = NULL WHERE id = 1`; } catch { /* the lock expires on its own after 3 minutes */ } locked = false; } };
+  if (wantStore) {
+    if (!sql) return send(res, 500, { ok: false, error: 'no database configured' });
+    const recent = await sql`SELECT id, created_at::text AS created_at FROM ab_snapshots WHERE created_at > now() - make_interval(mins => ${cooldownMin}::int) ORDER BY created_at DESC LIMIT 1`;
+    if (recent.length) return send(res, 409, { ok: false, refused: true, error: `A snapshot was saved less than ${cooldownMin} minutes ago (id ${recent[0].id}). Try again later.` });
+    const got = await sql`UPDATE ab_refresh_lock SET started_at = now(), started_by = ${'button'} WHERE id = 1 AND (started_at IS NULL OR started_at < now() - interval '3 minutes') RETURNING id`;
+    if (!got.length) return send(res, 409, { ok: false, refused: true, error: 'A refresh is already running.' });
+    locked = true;
+  }
+  try {
   const started = Date.now(); const fetchFn = deps?.fetch ?? fetch; const auth = 'Basic ' + Buffer.from(`${key}:${secret}`).toString('base64');
   const callMs = deps?.callMs ?? 20000, retryWait = deps?.retryWait ?? 1500, budgetMs = deps?.budgetMs ?? 50000;
 
@@ -141,9 +162,15 @@ async function run(req, res, deps) {
     if (chk && chk.end === end) perTest[id].regressionVsExperimentScreen = Object.fromEntries(others.map((v) => [v.key, { rpuLift: r4(lift('rpu', v)), experimentRpuLift: chk.rpuLift[v.key], aovLift: r4(lift('aov', v)), experimentAovLift: chk.aovLift[v.key] }]));
   }
 
-  return send(res, 200, {
-    mode: 'dry', asOf: iso(end), timing: { totalMs: Date.now() - started, calls: plan.length, concurrency: 2 },
-    wouldSave: { asOf: iso(end), tests },
-    skipped, errors, perTest,
-  });
+  const report = { ok: true, mode: wantStore ? 'store' : 'dry', asOf: iso(end), timing: { totalMs: Date.now() - started, calls: plan.length, concurrency: 2 }, wouldSave: { asOf: iso(end), tests }, skipped, errors, perTest };
+  if (req.method === 'POST' && !storeOn) report.note = 'Saving is switched off (AB_STORE_ENABLED is not 1), so this was a dry run.';
+  if (wantStore) {
+    if (!Object.keys(tests).length) { report.ok = false; report.saved = null; report.error = 'Nothing to save: no test pulled successfully.'; console.log('[ab-refresh] ' + JSON.stringify(report).slice(0, 14000)); return send(res, 502, report); }
+    const note = `button · tests: ${Object.keys(tests).join(',')} · errors: ${Object.keys(errors).length ? Object.keys(errors).join(',') : 'none'}`;
+    const row = await sql`INSERT INTO ab_snapshots (as_of, payload, note) VALUES (${iso(end)}::date, ${JSON.stringify({ asOf: iso(end), tests })}::jsonb, ${note}) RETURNING id, created_at::text AS created_at`;
+    report.saved = { id: row[0].id, createdAt: row[0].created_at };
+  }
+  console.log('[ab-refresh] ' + JSON.stringify(report).slice(0, 14000));
+  return send(res, 200, report);
+  } finally { await release(); }
 }

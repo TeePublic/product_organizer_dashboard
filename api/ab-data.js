@@ -1,7 +1,8 @@
 // Serves the latest A/B (Redbubble, Amplitude Experiment) snapshot from Neon as a small script. index.html loads it AFTER
 // experiments.js and BEFORE app.js, so app.js sees the fresh numbers without being edited. It only ever writes the numeric
-// fields listed in TEST_KEYS / READ_KEYS onto tests that already exist in experiments.js, matched by id. Names, hypotheses,
-// calls, owners, dates and links stay exactly as written in the file. If there is no snapshot, the database is slow or down,
+// fields listed in TEST_KEYS / READ_KEYS onto tests that already exist in experiments.js, matched by id, and patches the a / b / rel numbers
+// of existing secondary rows by name (secPatch). Names, hypotheses, calls, owners, dates, links, notes and verdict flags (sig, p) stay exactly as
+// written in the file. If there is no snapshot, the database is slow or down,
 // or the file is newer, it does nothing and the page uses experiments.js exactly as before.
 import { neon } from '@neondatabase/serverless';
 
@@ -22,7 +23,7 @@ function overlay(s) {
     if (!S || typeof S.tests !== 'object' || S.tests === null) { meta.skipped = 'incomplete snapshot'; return; }
     if (typeof EXPS === 'undefined') { meta.skipped = 'EXPS missing'; return; }
     if (typeof EXPS.asOfISO === 'string' && EXPS.asOfISO > meta.asOf) { meta.skipped = 'data file is newer'; return; }
-    var TEST_KEYS = ['n', 'cvr', 'primary', 'sec', 'variants', 'reach', 'p', 'sig'];
+    var TEST_KEYS = ['n', 'cvr', 'primary', 'variants', 'src'];
     var READ_KEYS = ['dev', 'm'];
     var lists = [EXPS.live || [], EXPS.done || []];
     var ops = [], tests = [], unmatched = [];
@@ -33,13 +34,25 @@ function overlay(s) {
       TEST_KEYS.forEach(function (k) { if (S.tests[id][k] !== undefined) ops.push([found, k, S.tests[id][k]]); });
       tests.push(id);
     });
+    var secPatched = [];
+    Object.keys(S.tests).forEach(function (id) {
+      var patch = S.tests[id] && S.tests[id].secPatch; var found = null;
+      lists.forEach(function (l) { l.forEach(function (t) { if (String(t.id) === id) found = t; }); });
+      if (!found || !patch || typeof patch !== 'object' || !Array.isArray(found.sec)) return;
+      Object.keys(patch).forEach(function (rowName) {
+        found.sec.forEach(function (row) {
+          if (row && row.name === rowName) ['a', 'b', 'rel'].forEach(function (k) { if (typeof patch[rowName][k] === 'number') ops.push([row, k, patch[rowName][k]]); });
+          if (row && row.name === rowName) secPatched.push(id + ':' + rowName);
+        });
+      });
+    });
     Object.keys(S.reads || {}).forEach(function (id) {
       var r = EXPS.reads && EXPS.reads[id];
       if (!r) { if (unmatched.indexOf(id) < 0) unmatched.push(id); return; }
       READ_KEYS.forEach(function (k) { if (S.reads[id][k] !== undefined) ops.push([r, k, S.reads[id][k]]); });
     });
     ops.forEach(function (o) { o[0][o[1]] = o[2]; });
-    meta.applied = true; meta.tests = tests; meta.unmatched = unmatched;
+    meta.applied = true; meta.tests = tests; meta.unmatched = unmatched; meta.secPatched = secPatched;
   } catch (e) { meta.skipped = 'error: ' + e.message; }
 })();
 `;
