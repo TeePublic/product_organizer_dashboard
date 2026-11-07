@@ -5929,6 +5929,21 @@ const SRCS = {
    "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A153",
    "what": "Goal: blank on the sheet"
   }
+ },
+ "Home page swimlanes: sticker icons and tile count": {
+  "origin": {
+   "kind": "slack",
+   "where": "Slack post by Allison Cassara asking Jeff Cooper to review TeePublic PR 17731",
+   "what": "Allison opened a small pull request to update the sticker icons and the number of tiles in the Home page swimlanes for logged-in users; Jon Tan and Karl Fleener agreed it makes sense for content engagement",
+   "who": "Allison Cassara",
+   "date": "2026-11-06"
+  },
+  "pm": {
+   "kind": "slack",
+   "where": "Same Slack thread, Nov 7 reply",
+   "url": "https://app.amplitude.com/analytics/tpub/chart/edtp03z8",
+   "what": "Related Amplitude chart: TeePublic Home Swimlane Conversion, pageview to add to cart"
+  }
  }
 };
 /* CVR Pacer v6. Everything is computed in the page from the snapshots in D (overall, payments), L (slices), R (revenue), AP (Apple Pay entry), SLACK and TOPS. */
