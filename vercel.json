@@ -3,6 +3,6 @@
   "headers": [
     { "source": "/(.*)", "headers": [{ "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }] }
   ],
-  "functions": { "api/refresh-cvr.js": { "includeFiles": "data/**" } }
+  "functions": { "api/refresh-cvr.js": { "includeFiles": "data/**" }, "api/ab-verify-funnel.js": { "maxDuration": 60 } }
   
 }
