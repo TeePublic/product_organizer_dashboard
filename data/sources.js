@@ -1669,10 +1669,10 @@ const SRCS = {
    "kind": "jira",
    "where": "Jira DEAP-6256, released, comment",
    "who": "Will Soupcoff",
-   "date": "2026-11-02",
+   "date": "2026-11-07",
    "url": "https://articore.atlassian.net/browse/DEAP-6256",
-   "what": "Shopper email on cart and wishlist events (signed-in accounts only) went to production Oct 30; follow-ups merged Nov 2 and the ticket was released; masking on the event tables (DEAP-6873) is next sprint",
-   "say": "Will Soupcoff closed Jira DEAP-6256 on Nov 2 with a comment that email on cart and wishlist events went to production Oct 30, with masking planned for next sprint."
+   "what": "Jira DE board (read Nov 7): epic DEAP-2805 is In Development, due Nov 20; the email masking ticket DEAP-6873 is in Code Review and DEAP-6256 (email on cart and wishlist events) is Released. The sheet row is now titled Simon AI: Rudderstack events and reads Impact Analysis, Shipped, which differs; the board wins for Data Engineering status",
+   "say": "Jira shows the Rudderstack events epic (DEAP-2805) still In Development and due Nov 20, with the email masking ticket in Code Review, while the roadmap sheet now reads Shipped."
   },
   "eta": {
    "kind": "jira",
@@ -2287,12 +2287,11 @@ const SRCS = {
    "what": "Ticket is scoped to Redbubble; the sheet row lists Redbubble and TeePublic"
   },
   "s": {
-   "kind": "slack",
-   "where": "#it-fuld-martech",
-   "who": "Nishant Chauhan",
-   "date": "2026-10-27",
-   "url": "https://grid-articore.enterprise.slack.com/archives/C0B0DG0MGQ5/p1793106175840559",
-   "what": "New GRIN SDK is set up on both sites and a TeePublic test sale reached GRIN, still marked Unverified; Redbubble end-to-end check waits on a valid affiliate link"
+   "kind": "jira",
+   "where": "Jira DEAP-6042, status",
+   "url": "https://articore.atlassian.net/browse/DEAP-6042",
+   "date": "2026-11-07",
+   "what": "DEAP-6042 (add the TeePublic GRIN affiliate tracking tag to Redbubble for the holiday influencer campaign) reads Released; last changed Oct 23. The sheet row GRIN Creator Affiliates Platform has no status"
   },
   "start": {
    "kind": "jira",
@@ -2301,6 +2300,13 @@ const SRCS = {
    "date": "2026-09-29",
    "url": "https://articore.atlassian.net/browse/DEAP-6042",
    "what": "Moved to In Development on Sep 29, In QA Oct 12, Released Oct 23"
+  },
+  "eta": {
+   "kind": "jira",
+   "where": "Jira DEAP-6042, status change",
+   "url": "https://articore.atlassian.net/browse/DEAP-6042",
+   "date": "2026-10-23",
+   "what": "Released; the ticket was last changed Oct 23"
   }
  },
  "Meta tracking follow-ups": {
@@ -5197,8 +5203,8 @@ const SRCS = {
    "kind": "jira",
    "where": "Jira DEAP-2807, DE board (DEAP board 580, DE Sprint 22)",
    "url": "https://articore.atlassian.net/browse/DEAP-2807",
-   "date": "2026-11-04",
-   "what": "Epic DEAP-2807 status In Development, read from the DE board on Nov 4. Replaces \"Launched\"."
+   "date": "2026-11-07",
+   "what": "Jira DE board (read Nov 7): epic DEAP-2807 is In Development, due Nov 11; DEAP-6539 (restore country on checkout opt-ins) is In QA and flagged as awaiting stakeholder validation since Nov 5. The sheet row Simon AI: User pref and consent reads In Dev, On Track with no dates"
   }
  },
  "Ranking test for 3+ word queries": {
@@ -5262,10 +5268,11 @@ const SRCS = {
   },
   "s": {
    "kind": "jira",
-   "where": "Jira DEAP-6809, DE board (DEAP board 580, DE Sprint 22)",
+   "where": "Jira DEAP-6809 (DE board, DE Sprint 22), plus Slack note",
    "url": "https://articore.atlassian.net/browse/DEAP-6809",
-   "date": "2026-11-04",
-   "what": "DEAP-6809 status In QA, read from the DE board on Nov 6 (In Development on Nov 4). The roadmap sheet has no separate row for this on the Nov 6 12:22 PM read (see New canvases in feed (pre-peak))."
+   "date": "2026-11-07",
+   "what": "DEAP-6809 reads In QA, due Nov 20 (read Nov 7). In #temp-rbo-trucker-hat-line-extension on Nov 6 at 12:30 PM ET the team said the trucker hat was released in the offsite feeds and flows through over the weekend. Jira is shown for status because Slack no longer sets it; the two differ",
+   "say": "The team said in #temp-rbo-trucker-hat-line-extension on Nov 6 that the trucker hat is released in the offsite feeds, while Jira DEAP-6809 still reads In QA."
   },
   "eta": {
    "kind": "jira",
@@ -5880,6 +5887,47 @@ const SRCS = {
    "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A65",
    "date": "2026-11-03",
    "what": "Row \"Peak Surcharge on Checkout\", PLC, TPO, Not Started, On Track, phase Oct 29 to Nov 16, launch Nov 18"
+  }
+ },
+ "Social Proof Badges (trending, best seller) on SRPs": {
+  "origin": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, row 153",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A153",
+   "what": "Row \"Social Proof Badges (trending, best seller) on SRPs\": title only, with no team, brand, status or launch date",
+   "who": "",
+   "date": "2026-11-07",
+   "say": "The roadmap sheet's Active Work tab has a new row \"Social Proof Badges (trending, best seller) on SRPs\" with only a title (read Nov 7, sheet edited Nov 6 at 4:30 PM ET)."
+  },
+  "team": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Team column, row 153",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A153",
+   "what": "Team: blank on the sheet; placed in Tiger team beside the neighboring badge rows (Product Manager to confirm)"
+  },
+  "site": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Brand column, row 153",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A153",
+   "what": "Brand: blank on the sheet; shown as TeePublic because the product page badge tests ran there (Product Manager to confirm)"
+  },
+  "s": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Status column, row 153",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A153",
+   "what": "Not Started (status blank)"
+  },
+  "eta": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, Est. Launch Date column, row 153",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A153",
+   "what": "No launch date listed"
+  },
+  "obj": {
+   "kind": "sheet",
+   "where": "Roadmap sheet, Active Work tab, OKR and Pillar column, row 153",
+   "url": "https://docs.google.com/spreadsheets/d/1fbxp4eAXZe1JNmhxsiDJTeSRhOdAOeblmOiVbU0yNkU/edit#gid=579410268&range=A153",
+   "what": "Goal: blank on the sheet"
   }
  }
 };
