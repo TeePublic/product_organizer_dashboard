@@ -1,5 +1,7 @@
 // UX for each A/B test, from the Figma links on its Jira tickets (Mike, Nov 5). Keyed by test name; a test with no entry falls back to the UX of its matching Roadmap project.
 const TESTUX = {
+  'Thank-you page layout on mobile': [{ url: 'https://www.figma.com/board/Ct5bQR5d5fEjN4ZnCPYqII/TY-upsell?node-id=0-1', l: 'FigJam: TY upsell UX flows (Jeff Cooper)', jira: 'DEAP-6558' }],
+  'Beam conversion test': [{ url: 'https://www.figma.com/design/44RqUFuronG2pfy3mnm6hs/Teepublic-10-9?node-id=2024-2901', l: 'Figma: Beam placement mocks (from Beam, Oct 9)' }, { url: 'https://www.figma.com/design/44RqUFuronG2pfy3mnm6hs/Teepublic-10-9?node-id=2024-4901', l: 'Figma: Beam cart placements, Group A' }],
   'Home page swimlanes (logged-in)': [{ url: 'https://www.figma.com/design/85UaiCNSqRlS7X5wTNjLkV/CC25---Home---Personalized-Swimlane?node-id=40-14789', l: 'Figma: Home personalized swimlanes', jira: 'DEAP-840' }],
   'Sticker cross-sell in the cart': [{ url: 'https://www.figma.com/design/YCh6HwQEa0RoKiAA1cCzA1/C26--RB-Cart-Cross-Sell?node-id=150-6920', l: 'Figma: RB cart cross-sell', jira: 'DEAP-6266' }],
   'Topics-first navigation': [{ url: 'https://www.figma.com/design/svUHn87QUsbfuuBKwKT8lS/C26--RB-Topic-First-Nav-UX?node-id=1013-163318', l: 'Figma: RB topic-first nav', jira: 'DEAP-4440' }],
