@@ -58,10 +58,10 @@ async function run(req, res, deps) {
   const plan = []; // [label, path, pairs]
   for (const n of Object.keys(REF_WINDOWS)) plan.push([`window:${n}`, ...funnel(n === '30' ? FULL_END : dayEnd(+n), +n * 86400)]);
   const full = (label, s) => plan.push([label, ...funnel(FULL_END, 30 * 86400, s)]);
-  full('bot>=30', seg('gp:cf_bot_score', 'greater or equal', ['30']));
-  full('bot>=70', seg('gp:cf_bot_score', 'greater or equal', ['70']));
-  full('bot>=90', seg('gp:cf_bot_score', 'greater or equal', ['90']));
-  full('bot:none', seg('gp:cf_bot_score', 'is', ['(none)']));
+  full('bot>=30', seg('gp:cloudflare_bot_score', 'greater or equal', ['30']));
+  full('bot>=70', seg('gp:cloudflare_bot_score', 'greater or equal', ['70']));
+  full('bot>=90', seg('gp:cloudflare_bot_score', 'greater or equal', ['90']));
+  full('bot:none', seg('gp:cloudflare_bot_score', 'is', ['(none)']));
   full('userid:set', seg('user_id', 'is not', ['(none)']));
   full('userid:none', seg('user_id', 'is', ['(none)']));
 
