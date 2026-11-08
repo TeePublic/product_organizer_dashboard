@@ -26,6 +26,11 @@ const MANIFEST = {
     devices: { prop: 'gp:cloudflare_device_type', values: { desktop: 'desktop', mobile: 'mobile' } },
   },
   '1569370': {
+    // SWITCHED OFF (dry run, Nov 8): the Analytics API cannot reproduce this test. Exposed users came out 3.2x the Experiment screen (bots that pass the
+    // bot-score-30 gate on product pages), the two arms are inflated unequally, revenue per user and CVR lifts were off by 1 to 1.5 points, and the
+    // add-to-cart lift came out -2.9% against Experiment's -27.7%. Its numbers stay hand-entered. Remove `skip` to run it again (it still runs when
+    // asked for directly with ?test=1569370, for checking).
+    skip: 'Analytics API counts do not match the Experiment screen for this test (bot traffic on product pages); numbers stay hand-entered',
     flag: 'rb-pdp-style-picker', name: 'T-shirt style pills on product pages', start: '20261027', showLevels: true,
     variants: [{ key: 'control' }, { key: 'treatment', label: 'Style pills' }], // one treatment: the page keeps no per-version table for it
     primary: { name: 'Revenue per user', metric: 'rpu' },
@@ -103,6 +108,7 @@ async function run(req, res, deps) {
   const key = env.AMPLITUDE_RB_API_KEY, secret = env.AMPLITUDE_RB_SECRET_KEY;
   if (!key || !secret) return send(res, 200, { keysPresent: { AMPLITUDE_RB_API_KEY: !!key, AMPLITUDE_RB_SECRET_KEY: !!secret }, error: 'a key is missing for this environment' });
 
+  const MAN = deps?.manifest ?? MANIFEST;
   const q = req.query || {};
   const storeOn = env.AB_STORE_ENABLED === '1';
   const wantStore = storeOn && req.method === 'POST';
@@ -113,7 +119,7 @@ async function run(req, res, deps) {
   const end = String(q.end || yesterday);
   if (!/^\d{8}$/.test(end)) return send(res, 400, { error: 'end must be YYYYMMDD' });
   const only = q.test ? String(q.test) : null;
-  if (only && !MANIFEST[only]) return send(res, 400, { error: 'unknown test', known: Object.keys(MANIFEST) });
+  if (only && !MAN[only]) return send(res, 400, { error: 'unknown test', known: Object.keys(MAN) });
 
   // Saving: take the lock and respect the cooldown BEFORE spending any Amplitude queries.
   const sql = deps?.sql ?? (dbUrl ? neon(dbUrl) : null);
@@ -131,11 +137,11 @@ async function run(req, res, deps) {
   const started = Date.now(); const fetchFn = deps?.fetch ?? fetch; const auth = 'Basic ' + Buffer.from(`${key}:${secret}`).toString('base64');
   const callMs = deps?.callMs ?? 20000, retryWait = deps?.retryWait ?? 1500, budgetMs = deps?.budgetMs ?? 150000;
 
-  const ids = only ? [only] : Object.keys(MANIFEST);
+  const ids = only ? [only] : Object.keys(MAN).filter((k) => !MAN[k].skip);
+  const skipped = {}; if (!only) for (const k of Object.keys(MAN)) if (MAN[k].skip) skipped[k] = 'switched off: ' + MAN[k].skip;
   const plan = []; // { id, scope, kind, vkey, path, pairs }
-  const skipped = {};
   for (const id of ids) {
-    const t = MANIFEST[id];
+    const t = MAN[id];
     if (end < t.start) { skipped[id] = `window not started (starts ${iso(t.start)})`; continue; }
     const scopes = [{ key: 'all', cond: null }].concat(Object.entries(t.devices?.values || {}).map(([k, val]) => ({ key: k, cond: { prop: t.devices.prop, op: 'is', values: [val] } })));
     const ev = (event_type, extra = {}) => JSON.stringify({ event_type, ...extra });
@@ -156,7 +162,7 @@ async function run(req, res, deps) {
   const tests = {}; const readsOut = {}; const perTest = {}; const errors = {}; const pulledAt = (deps?.now ? deps.now() : new Date()).toISOString();
   for (const id of ids) {
     if (skipped[id]) continue;
-    const t = MANIFEST[id]; const mine = plan.map((p, i) => ({ p, r: results[i] })).filter((x) => x.p.id === id);
+    const t = MAN[id]; const mine = plan.map((p, i) => ({ p, r: results[i] })).filter((x) => x.p.id === id);
     const failed = mine.filter((x) => x.r.status !== 200);
     perTest[id] = { calls: mine.length, retries: mine.reduce((s, x) => s + (x.r.retries || 0), 0), slowestMs: Math.max(0, ...mine.map((x) => x.r.ms)) };
     if (failed.length) { errors[id] = failed.map((x) => ({ call: `${x.p.scope}:${x.p.kind}${x.p.vkey ? ':' + x.p.vkey : ''}`, status: x.r.status, message: x.r.message })); continue; }

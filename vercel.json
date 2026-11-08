@@ -5,7 +5,6 @@
   ],
   "functions": {
     "api/refresh-cvr.js": { "includeFiles": "data/**" },
-    "api/ab-verify-funnel.js": { "maxDuration": 60 },
-    "api/ab-refresh.js": { "maxDuration": 30 }
+    "api/ab-refresh.js": { "maxDuration": 300 }
   }
 }
