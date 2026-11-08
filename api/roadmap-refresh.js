@@ -5,7 +5,6 @@
 //   Authorization: Bearer $CRON_SECRET (Vercel cron) = saves too, when saving is switched on. The cron call needs the exemption in middleware.js.
 // Saving needs ROADMAP_STORE_ENABLED=1. Every successful pull is saved, so a snapshot's time is when the sheet was last read (the page shows it). A failed pull never replaces the last good snapshot.
 import { neon } from '@neondatabase/serverless';
-import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
@@ -70,9 +69,8 @@ export default async function handler(req, res, deps = {}) {
 
   try {
     const payload = JSON.stringify({ rows: rows.map });
-    const hash = crypto.createHash('sha256').update(payload).digest('hex');
-    await sql`CREATE TABLE IF NOT EXISTS roadmap_snapshots (id bigserial PRIMARY KEY, created_at timestamptz NOT NULL DEFAULT now(), hash text NOT NULL, payload jsonb NOT NULL)`;
-    const ins = await sql`INSERT INTO roadmap_snapshots (hash, payload) VALUES (${hash}, ${payload}::jsonb) RETURNING id`;
+    await sql`CREATE TABLE IF NOT EXISTS roadmap_snapshots (id bigserial PRIMARY KEY, created_at timestamptz NOT NULL DEFAULT now(), payload jsonb NOT NULL)`;
+    const ins = await sql`INSERT INTO roadmap_snapshots (payload) VALUES (${payload}::jsonb) RETURNING id`;
     await sql`DELETE FROM roadmap_snapshots WHERE id NOT IN (SELECT id FROM roadmap_snapshots ORDER BY created_at DESC LIMIT ${KEEP})`;
     console.log('[roadmap-refresh] saved snapshot ' + ins[0].id + ' by ' + report.who + '; sheet rows ' + report.sheetRows + '; board items that would change ' + (report.board.itemsThatWouldChange ?? 'n/a')); // readable in the Vercel logs after a cron run
     return send(200, { ...report, stored: true, snapshotId: Number(ins[0].id) });
