@@ -21,7 +21,15 @@ const MANIFEST = {
     // The first non-control variant fills the main a/b columns, as it does on the page today.
     variants: [{ key: 'control' }, { key: 'cross-sell', label: 'Cross-sell, all badges' }, { key: 'cross-sell-trimmed-badges', label: 'Cross-sell, fewer badges' }],
     primary: { name: 'Revenue per user', metric: 'rpu' },
-    // The page's rows draw desktop and mobile from the user property below (values to confirm in the dry run; see deviceCoverage).
+    metrics: ['rpv', 'cvr', 'aov'], // the page's names: revenue per user, CVR, add-to-cart rate (atc), AOV. Only the ones the page shows for this test.
+    // The page's rows draw desktop and mobile from the user property below (checked in the dry run; see deviceCoverage).
+    devices: { prop: 'gp:cloudflare_device_type', values: { desktop: 'desktop', mobile: 'mobile' } },
+  },
+  '1569370': {
+    flag: 'rb-pdp-style-picker', name: 'T-shirt style pills on product pages', start: '20261027', showLevels: true,
+    variants: [{ key: 'control' }, { key: 'treatment', label: 'Style pills' }], // one treatment: the page keeps no per-version table for it
+    primary: { name: 'Revenue per user', metric: 'rpu' },
+    metrics: ['rpv', 'cvr', 'atc', 'aov'],
     devices: { prop: 'gp:cloudflare_device_type', values: { desktop: 'desktop', mobile: 'mobile' } },
   },
 };
@@ -29,12 +37,26 @@ const MANIFEST = {
 // What the Experiment screen reported for 1580138 through Nov 6, used only as a regression check against the verified method.
 const CHECK = { '1580138': { end: '20261106', rpuLift: { 'cross-sell': 0.0060250, 'cross-sell-trimmed-badges': 0.0118916 }, aovLift: { 'cross-sell': 0.0052866, 'cross-sell-trimmed-badges': 0.0163855 } } };
 
+// The same kind of check for the pills test: what the Experiment analysis reported through Nov 7 (cumulative, read through the Amplitude connector).
+// Its CVR here is the PDP CVR metric (product-page view, then an order within a day); the page itself shows Sitewide CVR, so those two can differ a little.
+const CHECK2 = {
+  '1569370': {
+    end: '20261107', source: 'Experiment analysis, Oct 27 to Nov 7 (cumulative). CVR reference = PDP CVR (page view of a product page, then an order within a day); the page shows Sitewide CVR.',
+    counts: { control: { exposed: 561642, revenue: 608339.77, orders: 12800, atcUsers: 27421, pdpConverters: 11998 }, treatment: { exposed: 577920, revenue: 630392.32, orders: 12737, atcUsers: 20413, pdpConverters: 12025 } },
+    lifts: { treatment: { rpv: 0.007063, atc: -0.276539, cvr: -0.02598, aov: 0.041376 } },
+  },
+};
+
 // What the page showed for the desktop / mobile split (Experiment screen, read by Mike through Nov 5): control's device share, and the first
 // variant's lift per device. The dry run lines the API's device numbers up against these as a sanity check only.
-const CHECK_DEV = { '1580138': { desktop: { share: 0.3104, rpv: -0.0201, cvr: 0.0091, aov: -0.0311 }, mobile: { share: 0.6896, rpv: 0.0197, cvr: -0.0014, aov: 0.0206 } } };
+const CHECK_DEV = {
+  '1580138': { desktop: { share: 0.3104, rpv: -0.0201, cvr: 0.0091, aov: -0.0311 }, mobile: { share: 0.6896, rpv: 0.0197, cvr: -0.0014, aov: 0.0206 } },
+  '1569370': { desktop: { share: 0.7558, rpv: -0.0342, atc: -0.2405, cvr: -0.0336, aov: 0.0287 }, mobile: { share: 0.2442, rpv: 0.0461, atc: -0.2289, cvr: 0.0102, aov: 0.0386 } },
+};
 
 const send = (res, code, body) => { res.setHeader('Cache-Control', 'no-store'); res.setHeader('Content-Type', 'application/json; charset=utf-8'); return res.status(code).send(JSON.stringify(body, null, 2)); };
 const sum = (a) => (Array.isArray(a) ? a : []).reduce((x, y) => x + (Number(y) || 0), 0);
+const pct = (v, r) => (typeof v === 'number' && typeof r === 'number' && r !== 0 ? +((v / r - 1) * 100).toFixed(2) : null);
 const rel = (v, c) => (typeof v === 'number' && typeof c === 'number' && c !== 0 ? v / c - 1 : null);
 const r4 = (x) => (typeof x === 'number' ? +x.toFixed(6) : null);
 const ymd = (d) => `${d.getUTCFullYear()}${String(d.getUTCMonth() + 1).padStart(2, '0')}${String(d.getUTCDate()).padStart(2, '0')}`;
@@ -96,18 +118,18 @@ async function run(req, res, deps) {
   // Saving: take the lock and respect the cooldown BEFORE spending any Amplitude queries.
   const sql = deps?.sql ?? (dbUrl ? neon(dbUrl) : null);
   const cooldownMin = Number(env.AB_COOLDOWN_MIN || 5); let locked = false;
-  const release = async () => { if (locked && sql) { try { await sql`UPDATE ab_refresh_lock SET started_at = NULL WHERE id = 1`; } catch { /* the lock expires on its own after 3 minutes */ } locked = false; } };
+  const release = async () => { if (locked && sql) { try { await sql`UPDATE ab_refresh_lock SET started_at = NULL WHERE id = 1`; } catch { /* the lock expires on its own after 5 minutes */ } locked = false; } };
   if (wantStore) {
     if (!sql) return send(res, 500, { ok: false, error: 'no database configured' });
     const recent = await sql`SELECT id, created_at::text AS created_at FROM ab_snapshots WHERE created_at > now() - make_interval(mins => ${cooldownMin}::int) ORDER BY created_at DESC LIMIT 1`;
     if (recent.length) return send(res, 409, { ok: false, refused: true, error: `A snapshot was saved less than ${cooldownMin} minutes ago (id ${recent[0].id}). Try again later.` });
-    const got = await sql`UPDATE ab_refresh_lock SET started_at = now(), started_by = ${'button'} WHERE id = 1 AND (started_at IS NULL OR started_at < now() - interval '3 minutes') RETURNING id`;
+    const got = await sql`UPDATE ab_refresh_lock SET started_at = now(), started_by = ${'button'} WHERE id = 1 AND (started_at IS NULL OR started_at < now() - interval '5 minutes') RETURNING id`;
     if (!got.length) return send(res, 409, { ok: false, refused: true, error: 'A refresh is already running.' });
     locked = true;
   }
   try {
   const started = Date.now(); const fetchFn = deps?.fetch ?? fetch; const auth = 'Basic ' + Buffer.from(`${key}:${secret}`).toString('base64');
-  const callMs = deps?.callMs ?? 20000, retryWait = deps?.retryWait ?? 1500, budgetMs = deps?.budgetMs ?? 50000;
+  const callMs = deps?.callMs ?? 20000, retryWait = deps?.retryWait ?? 1500, budgetMs = deps?.budgetMs ?? 150000;
 
   const ids = only ? [only] : Object.keys(MANIFEST);
   const plan = []; // { id, scope, kind, vkey, path, pairs }
@@ -124,6 +146,7 @@ async function run(req, res, deps) {
         plan.push({ id, scope: sc.key, kind: 'revenue', vkey: v.key, path: '/events/segmentation', pairs: [['e', ev('order_completed', { group_by: [{ type: 'event', value: 'transaction_amount_usd' }] })], ['m', 'sums'], ['i', '1'], ['start', t.start], ['end', end], ['s', seg(v.key)]] });
         plan.push({ id, scope: sc.key, kind: 'orders', vkey: v.key, path: '/events/segmentation', pairs: [['e', ev('order_completed')], ['m', 'totals'], ['i', '1'], ['start', t.start], ['end', end], ['s', seg(v.key)]] });
         plan.push({ id, scope: sc.key, kind: 'buyers', vkey: v.key, path: '/events/segmentation', pairs: [['e', ev('order_completed')], ['m', 'uniques'], ['i', '30'], ['start', t.start], ['end', end], ['s', seg(v.key)]] });
+        if ((t.metrics || []).includes('atc')) plan.push({ id, scope: sc.key, kind: 'atc', vkey: v.key, path: '/events/segmentation', pairs: [['e', ev('product_added')], ['m', 'uniques'], ['i', '30'], ['start', t.start], ['end', end], ['s', seg(v.key)]] });
       }
     }
   }
@@ -147,7 +170,8 @@ async function run(req, res, deps) {
       const raw = {};
       for (const v of t.variants) {
         const rev = sum(get(sc, 'revenue', v.key).json?.data?.series?.[0]), ord = sum(get(sc, 'orders', v.key).json?.data?.series?.[0]), buy = sum(get(sc, 'buyers', v.key).json?.data?.series?.[0]), exp = exposed[v.key] ?? null;
-        raw[v.key] = { exposed: exp, buyers: buy, orders: ord, revenue: +rev.toFixed(2), cvr: exp ? buy / exp : null, rpu: exp ? rev / exp : null, aov: ord ? rev / ord : null };
+        const atcU = (t.metrics || []).includes('atc') ? sum(get(sc, 'atc', v.key).json?.data?.series?.[0]) : null;
+        raw[v.key] = { exposed: exp, buyers: buy, orders: ord, revenue: +rev.toFixed(2), atcUsers: atcU, cvr: exp ? buy / exp : null, rpu: exp ? rev / exp : null, aov: ord ? rev / ord : null, atc: exp && atcU != null ? atcU / exp : null };
       }
       if (t.variants.some((v) => !raw[v.key].exposed)) { bad = `${sc}: a variant has no exposed users in the response`; break; }
       rawByScope[sc] = raw;
@@ -156,8 +180,8 @@ async function run(req, res, deps) {
 
     const others = t.variants.slice(1); const first = others[0]; const ctrl = t.variants[0].key;
     // The page's names for the metrics: rpv = revenue per user, cvr, aov.
-    const MAP = { rpv: 'rpu', cvr: 'cvr', aov: 'aov' };
-    const lifts = (raw, v) => ({ rpv: r4(rel(raw[v.key].rpu, raw[ctrl].rpu)), cvr: r4(rel(raw[v.key].cvr, raw[ctrl].cvr)), aov: r4(rel(raw[v.key].aov, raw[ctrl].aov)) });
+    const MAPALL = { rpv: 'rpu', cvr: 'cvr', atc: 'atc', aov: 'aov' }; const MAP = Object.fromEntries((t.metrics || ['rpv', 'cvr', 'aov']).map((k) => [k, MAPALL[k]]));
+    const lifts = (raw, v) => Object.fromEntries(Object.entries(MAP).map(([pk, rk]) => [pk, r4(rel(raw[v.key][rk], raw[ctrl][rk]))]));
     const metricCols = (raw) => Object.fromEntries(Object.entries(MAP).map(([pk, rk]) => [pk, t.showLevels ? { v: r4(rel(raw[first.key][rk], raw[ctrl][rk])), a: r4(raw[ctrl][rk]), b: r4(raw[first.key][rk]) } : { v: r4(rel(raw[first.key][rk], raw[ctrl][rk])) }]));
     const all = rawByScope.all; const cvrCol = metricCols(all).cvr; const prim = metricCols(all)[t.primary.metric === 'rpu' ? 'rpv' : t.primary.metric];
     tests[id] = {
@@ -169,11 +193,12 @@ async function run(req, res, deps) {
         note: 'Counts run a few percent above the Experiment screen, equally on every variant. Verdicts and significance come from Amplitude Experiment and are updated by hand.',
       },
     };
-    const reads = { m: metricCols(all), vrows: others.map((v) => [v.label, lifts(all, v)]) };
+    const reads = { m: metricCols(all) }; const several = others.length > 1; // a per-version table exists on the page only for tests with several versions
+    if (several) reads.vrows = others.map((v) => [v.label, lifts(all, v)]);
     const dev = {};
     for (const d of Object.keys(t.devices?.values || {})) {
       const raw = rawByScope[d]; if (!raw) continue;
-      dev[d] = { n: [raw[ctrl].exposed, raw[first.key].exposed], ...metricCols(raw), vers: Object.fromEntries(others.map((v) => [v.label, lifts(raw, v)])) };
+      dev[d] = { n: [raw[ctrl].exposed, raw[first.key].exposed], ...metricCols(raw), ...(several ? { vers: Object.fromEntries(others.map((v) => [v.label, lifts(raw, v)])) } : {}) };
     }
     if (Object.keys(dev).length) reads.dev = dev;
     readsOut[id] = reads;
@@ -182,7 +207,18 @@ async function run(req, res, deps) {
     if (t.devices) {
       perTest[id].deviceCoverage = Object.fromEntries(t.variants.map((v) => [v.key, r4((Object.keys(t.devices.values).reduce((s, d) => s + (rawByScope[d]?.[v.key]?.exposed || 0), 0)) / all[v.key].exposed)]));
       const cd = CHECK_DEV[id];
-      if (cd) perTest[id].deviceSanityVsFile = Object.fromEntries(Object.keys(t.devices.values).map((d) => [d, { controlShare: r4(rawByScope[d][ctrl].exposed / all[ctrl].exposed), fileShare: cd[d]?.share, rpvLift: dev[d].vers[first.label].rpv, fileRpvLift: cd[d]?.rpv, cvrLift: dev[d].vers[first.label].cvr, fileCvrLift: cd[d]?.cvr, aovLift: dev[d].vers[first.label].aov, fileAovLift: cd[d]?.aov }]));
+      if (cd) perTest[id].deviceSanityVsFile = Object.fromEntries(Object.keys(t.devices.values).map((d) => {
+        const dl = lifts(rawByScope[d], first); const row = { controlShare: r4(rawByScope[d][ctrl].exposed / all[ctrl].exposed), fileShare: cd[d]?.share };
+        for (const m of Object.keys(MAP)) if (cd[d]?.[m] !== undefined) { row[`${m}Lift`] = dl[m]; row[`file_${m}Lift`] = cd[d][m]; }
+        return [d, row];
+      }));
+    }
+    const c2 = CHECK2[id];
+    if (c2 && c2.end === end) {
+      const countsDiffPct = {}, liftCompare = {};
+      for (const v of t.variants) { const r = all[v.key], ref = c2.counts[v.key]; if (ref) countsDiffPct[v.key] = { exposedPct: pct(r.exposed, ref.exposed), revenuePct: pct(r.revenue, ref.revenue), ordersPct: pct(r.orders, ref.orders), atcUsersPct: pct(r.atcUsers, ref.atcUsers), buyersVsPdpConvertersPct: pct(r.buyers, ref.pdpConverters) }; }
+      for (const v of others) { const l = lifts(all, v); liftCompare[v.key] = Object.fromEntries(Object.keys(MAP).map((m) => [m, { ours: l[m], experiment: c2.lifts[v.key]?.[m] }])); }
+      perTest[id].referenceCheck = { source: c2.source, countsDiffPct, liftCompare };
     }
     const chk = CHECK[id];
     if (chk && chk.end === end) perTest[id].regressionVsExperimentScreen = Object.fromEntries(others.map((v) => [v.key, { rpuLift: lifts(all, v).rpv, experimentRpuLift: chk.rpuLift[v.key], aovLift: lifts(all, v).aov, experimentAovLift: chk.aovLift[v.key] }]));
