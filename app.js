@@ -6,8 +6,8 @@ const MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','
 // Newer news beats the sheet (Mike, Oct 27): a status or launch date posted in a project channel, sprint metrics channel or Jira
 // after the sheet was synced replaces the sheet's value. The sheet's value is kept as sheetS / sheetEta for the pop-up.
 if (typeof LATEST !== 'undefined' && typeof COMING !== 'undefined') COMING.teams.forEach(tm => (tm.items || []).forEach(it => { const L = LATEST[it.t]; if (!L) return;
-  if (L.s && L.s !== it.s) { it.sheetS = it.s; it.s = L.s; } if (L.eta && L.eta !== it.eta) { it.sheetEta = it.eta; it.eta = L.eta; } }));
-const parse = s => Date.parse(s + 'T00:00:00Z');
+  if (L.s && L.s !== it.s) { it.sheetS = it.s; it.s = L.s; } }));
+  const parse = s => Date.parse(s + 'T00:00:00Z');
 const iso = t => new Date(t).toISOString().slice(0, 10);
 // Lowercase for mid-sentence use, but keep acronyms, months and site names as written: "in QA", not "in qa" (Mike, Oct 26).
 const lcx = t => String(t || '').toLowerCase().replace(/\b(qa|cvr|aov|usa|uk|seo|api|pdp|ux|ui|ai|sms|sku)\b/g, m => m.toUpperCase()).replace(/\bios\b/g, 'iOS').replace(/\ba\/b\b/g, 'A/B')
