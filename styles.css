@@ -3988,3 +3988,27 @@ details.pbox.prov > summary { cursor: pointer; list-style: none; } details.pbox.
 #srail .srgrp.sep, #srail:hover .srgrp.sep, #srail:focus-within .srgrp.sep { height: 27px; margin: 8px 0 0; padding: 14px 10px 2px; border-top: 1px solid var(--line); }
 /* The open (hover) rail sets its labels about 2px lower than the always-open wide rail, so its divider-to-heading space is 2px more to match. */
 @media (min-width: 761px) and (max-width: 1660px) { #srail .srgrp.sep, #srail:hover .srgrp.sep, #srail:focus-within .srgrp.sep { height: 29px; padding-top: 16px; } }
+
+/* Recently shipped, two columns (Nov 5) */
+.shipgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
+.shipcol { min-width: 0; }
+.shiph { display: flex; align-items: baseline; gap: 8px; padding: 6px 2px; font-size: 14px; }
+.shipcols2, .srow2 { display: grid; grid-template-columns: minmax(0, 1fr) 64px 112px; gap: 0 18px; align-items: center; }
+.shipcols2 > span:last-child { text-align: right; }
+.shipcols2 { padding: 0 14px 6px; font-size: 12px; font-weight: 600; color: var(--muted); }
+.srow2 { padding: 10px 14px; border: 1px solid var(--line, rgba(128,128,128,.25)); border-radius: 10px; margin-bottom: 6px; cursor: pointer; text-decoration: none; color: inherit; background: var(--surface); }
+.srow2:hover, .srow2:focus-visible { border-color: var(--ctl); }
+.srow2 .sdate { font-size: 12.5px; color: var(--muted); }
+.srow2 .srev { text-align: right; }
+.shipnone { padding: 10px 14px; }
+@media (max-width: 900px) { .shipgrid { grid-template-columns: 1fr; } }
+/* Coming soon: roadmap column */
+:root:not(#z):not(#y) .stc, :root:not(#z):not(#y) .strow { grid-template-columns: minmax(220px, 1.2fr) 110px 170px 190px minmax(200px, 1.6fr) 18px; gap: 0 14px; }
+.srm { display: grid; gap: 4px; }
+.srm small { font-size: 11.5px; color: var(--muted); }
+@media (min-width: 761px) and (max-width: 1240px) { :root:not(#z):not(#y) .stc, :root:not(#z):not(#y) .strow { grid-template-columns: minmax(150px, 1fr) 70px 110px 150px minmax(120px, 1.2fr) 14px; gap: 0 10px; } }
+@media (max-width: 760px) { :root:not(#z):not(#y) .strow { grid-template-columns: 1fr; gap: 6px; } }
+
+/* Stat sig cell: the status plus the confidence and time to 95% (Nov 5) */
+.abstw { display: grid; gap: 2px; }
+.absub { font-size: 11.5px; line-height: 1.25; color: var(--muted); font-weight: 500; }
