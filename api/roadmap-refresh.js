@@ -3,7 +3,7 @@
 //   GET                      = dry run: reads the sheet, reports what the pull found and what it WOULD change on the board; saves nothing
 //   POST, saving switched on = saves a snapshot (from the dashboard only)
 //   Authorization: Bearer $CRON_SECRET (Vercel cron) = saves too, when saving is switched on. The cron call needs the exemption in middleware.js.
-// Saving needs ROADMAP_STORE_ENABLED=1. An unchanged sheet saves nothing, and a failed pull never replaces the last good snapshot.
+// Saving needs ROADMAP_STORE_ENABLED=1. Every successful pull is saved, so a snapshot's time is when the sheet was last read (the page shows it). A failed pull never replaces the last good snapshot.
 import { neon } from '@neondatabase/serverless';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
@@ -72,8 +72,6 @@ export default async function handler(req, res, deps = {}) {
     const payload = JSON.stringify({ rows: rows.map });
     const hash = crypto.createHash('sha256').update(payload).digest('hex');
     await sql`CREATE TABLE IF NOT EXISTS roadmap_snapshots (id bigserial PRIMARY KEY, created_at timestamptz NOT NULL DEFAULT now(), hash text NOT NULL, payload jsonb NOT NULL)`;
-    const last = await sql`SELECT hash FROM roadmap_snapshots ORDER BY created_at DESC LIMIT 1`;
-    if (last[0]?.hash === hash) return send(200, { ...report, stored: false, unchanged: true });
     const ins = await sql`INSERT INTO roadmap_snapshots (hash, payload) VALUES (${hash}, ${payload}::jsonb) RETURNING id`;
     await sql`DELETE FROM roadmap_snapshots WHERE id NOT IN (SELECT id FROM roadmap_snapshots ORDER BY created_at DESC LIMIT ${KEEP})`;
     return send(200, { ...report, stored: true, snapshotId: Number(ins[0].id) });

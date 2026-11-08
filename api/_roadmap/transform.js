@@ -64,6 +64,9 @@ export function buildRows(values) {
   return out;
 }
 
+// Fields the sheet is allowed to change on the board. Add 's' and 'imp' back here when ready.
+export const PATCH_FIELDS = ['eta'];
+
 const jiraOf = (item) => String(item.link || '').match(/[A-Z][A-Z0-9]+-\d+/)?.[0] ?? null;
 
 // Join board items to sheet rows: sheet key -> unique Jira key -> title. Returns patches + a reconcile report.
@@ -78,6 +81,7 @@ export function buildPatches(rows, coming) {
     if (row.s && row.s !== item.s) p.s = row.s;
     if (row.eta && row.eta !== item.eta) p.eta = row.eta;
     if (item.impSrc === 'Roadmap sheet estimate' && row.imp && row.imp !== item.imp) p.imp = row.imp;
+    for (const k of Object.keys(p)) if (!PATCH_FIELDS.includes(k)) delete p[k];
     if (Object.keys(p).length) {
       patches[`${team.key}|${item.t}`] = p;
       changes.push({ item: `${team.key}|${item.t}`, sheetRow: name, from: { s: item.s, eta: item.eta, imp: item.imp }, to: p });
