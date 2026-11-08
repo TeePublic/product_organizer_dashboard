@@ -2549,8 +2549,8 @@ function lbHead2() {
 // Burn-down: work left against the time left before launch, so a team can see the pace it needs.
 const MONI = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11 };
 function etaDate(eta) {
-  const e = eta || '', m = e.match(/(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\w* (\d{1,2})/);
-  if (m) return Date.UTC(2026, MONI[m[1]], +m[2]);
+  const e = eta || '', m = e.match(/(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\w* (\d{1,2})(?:, (20\d\d))?/);
+  if (m) return Date.UTC(+(m[3] || 2026), MONI[m[1]], +m[2]);
   if (/this week/i.test(e)) { const t = parse(D.asOf); return t + (5 - new Date(t).getUTCDay() + 7) % 7 * DAY + DAY; }
   if (/end of oct/i.test(e)) return Date.UTC(2026, 9, 31);
   return null;

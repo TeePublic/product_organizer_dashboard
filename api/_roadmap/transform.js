@@ -31,8 +31,9 @@ export function findColumns(headerRow) {
 }
 
 const serialToDate = (n) => new Date(Date.UTC(1899, 11, 30) + Math.round(n) * 864e5);
-export function fmtDate(v) {
-  if (typeof v === 'number') { const d = serialToDate(v); return `${MON[d.getUTCMonth()]} ${d.getUTCDate()}`; }
+export function fmtDate(v, thisYear = new Date().getUTCFullYear()) {
+  // Dates in another year keep the year ("Mar 31, 2027"), so they cannot be mistaken for a date this year.
+  if (typeof v === 'number') { const d = serialToDate(v); return `${MON[d.getUTCMonth()]} ${d.getUTCDate()}${d.getUTCFullYear() === thisYear ? '' : ', ' + d.getUTCFullYear()}`; }
   const t = String(v ?? '').trim();
   return PLACEHOLDER.test(t) ? null : t;           // text such as "Q4 '27" passes through unchanged
 }
