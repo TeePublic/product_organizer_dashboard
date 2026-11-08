@@ -1,6 +1,7 @@
 # Refreshing the dashboard data
 
 The page is static: it shows whatever is in `data/` at deploy time. Updating it means changing those files and pushing to `master`.
+The one exception on the Roadmap tab is each project's launch date, which the page patches at load from the latest snapshot of the sheet (see "Roadmap launch dates come from the sheet").
 Vercel redeploys automatically (about a minute). Shared features (ticks, topics, flags) live in the database and are not affected.
 Mike pushes straight to `master`: there is no pull request or approval step.
 
@@ -8,7 +9,7 @@ Mike pushes straight to `master`: there is no pull request or approval step.
 
 | File | Datasets | Comes from | Notes |
 |---|---|---|---|
-| `data/roadmap-coming-soon.js` | `COMING` (teams and their items), `COMING_PREV`, `ROADMAP_REVIEW`, `TEAM_MEETINGS`, `PEOPLE`, `SHOUTS`, `TESTTALK`, `SELLCALL`, `VIBE`, `CS`, `VEL`, `DATES`, `HOURLY`, `RELN` | Roadmap sheet (Active Work tabs), Jira DEAP, Slack, calendar, meeting notes | Main file Mike touches. Header comments say how each dataset is refreshed |
+| `data/roadmap-coming-soon.js` | `COMING` (teams and their items), `COMING_PREV`, `ROADMAP_REVIEW`, `TEAM_MEETINGS`, `PEOPLE`, `SHOUTS`, `TESTTALK`, `SELLCALL`, `VIBE`, `CS`, `VEL`, `DATES`, `HOURLY`, `RELN` | Roadmap sheet (Active Work tabs), Jira DEAP, Slack, calendar, meeting notes | Main file Mike touches. Header comments say how each dataset is refreshed. For projects on the sheet, `eta` is only a fallback: the sheet's launch date replaces it at load |
 | `data/sources.js` | `SRCS`: for each roadmap item, where each field came from (Jira key, Slack thread, sheet row) | Same as above | One entry per roadmap item title. Keys must match `COMING` item titles exactly |
 | `data/cvr-pacer-snapshot.js`, `data/cvr-ledger.js`, `data/max-bot-filter-and-products.js` | `D`, `L`, `MAX`, `UXL`, `PROD`... | Amplitude dashboards | Header comment names the dashboard and date pulled |
 | `data/orders-slack-standups.js` | `ORD`, revenue, standup notes | Amplitude order_completed, Slack | |
@@ -16,6 +17,15 @@ Mike pushes straight to `master`: there is no pull request or approval step.
 
 For data, edit the existing file and keep its shape: change values, keep every field name, do not rename fields or change the file structure.
 `app.js` reads these datasets by name, so renaming or restructuring a dataset can break the page, even when `npm run check` passes.
+
+## Roadmap launch dates come from the sheet (Jay, Nov 8)
+The Launch column on the Roadmap tab is no longer refreshed by hand or by Claude. A Vercel job (`api/roadmap-refresh.js`) reads the Active Work tab twice a day (about 7:40 AM and 3:40 PM ET) and saves a snapshot in the database. The page patches each project's `eta` from the newest snapshot when it loads. Nothing to commit or push, and the Roadmap tab shows when the sheet was last pulled.
+- **What the sheet sets:** only `eta`, taken from the sheet's Est. Launch Date (Phase End ETA when that is blank). Status, impact, descriptions, goals and everything else stay as they are in `data/roadmap-coming-soon.js`. Text dates such as "By CF" or "HOLD" show as written, and a date in another year keeps its year ("Mar 31, 2027").
+- **Which sheet row a project matches:** the item's `sheet:` field (the exact Project Name in column A), else the Jira key in its `link`, else its title. If a project is renamed on the sheet, update `sheet:` on the item, or its date stops updating. Do not rename item titles to match the sheet.
+- **Order of precedence (for now):** the sheet's date replaces the file's `eta`, and a newer entry in `LATEST` (a Slack or Jira update) still replaces the sheet's date. The `eta` in the file is only a fallback for projects that are not on the sheet or have no date there.
+- **On a refresh:** do not research or hand-edit `eta` for projects on the sheet. If a date is wrong, fix it on the sheet.
+- **Check it:** while signed in, open `/api/roadmap-refresh` in the browser. It is a dry run that lists the projects whose dates would change and the ones with no matching sheet row (`unmatched`). In the browser console, `window.__roadmapDiff` shows what the page changed.
+- **If it looks wrong:** ask Jay or Tom to switch `APPLY` off in `roadmap-apply.js`. The page then shows the dates in the file again.
 
 ## Dates to update on every refresh
 - `COMING.asOf`, `D.asOf`, `PROD.asOf` and the pull date in each file's header comment.
@@ -61,6 +71,8 @@ For data, edit the existing file and keep its shape: change values, keep every f
 ## Automatic refreshes
 One scheduled task refreshes the whole board once a day at 8:00 AM ET (Mike, Nov 3). The 2:30 PM and 4:30 PM runs and the Tuesday pre-review run are retired. Each run checks every source, runs `npm run check`, and **commits to `master` locally. It never pushes.** You get a notification; open GitHub Desktop and click **Push origin**. A run stops without committing if you have uncommitted changes in this folder (it will not touch your work), and the computer has to be awake and the Claude app open for a run to happen. If GitHub Desktop shows nothing to push, the run did not commit: look at the Refresh log in `work/projects/cvr-pacer.md` in the AI Mike folder.
 
+Roadmap launch dates are not part of that task. They are pulled from the sheet on Vercel, so they update even when the computer is off and there is nothing to push.
+
 ## Each refresh (by hand)
 1. In GitHub Desktop, click Fetch origin, then Pull if it offers one, so you start from the latest version.
 2. Paste the prompt below into Claude with the folder open.
@@ -71,6 +83,7 @@ One scheduled task refreshes the whole board once a day at 8:00 AM ET (Mike, Nov
 ## Prompt for Claude (paste with the repo folder open)
 > Read REFRESH.md. I may ask for data updates, UI changes, or both.
 > - Data: edit the files in `data/`, keeping every field name and structure exactly as it is now. Update the as-of dates and header comments. Keep to the shareable-only rule.
+> - Roadmap launch dates (`eta`) for projects on the Active Work tab come from the sheet automatically. Do not research or edit them; fix the date on the sheet instead.
 > - UI: you may edit `app.js`, `styles.css` and `index.html`. Make small targeted edits, keep the existing code style, and tell me which files you touched.
 > - Never touch the files listed under "Do not edit" in REFRESH.md.
 > - Save tokens: do not read or print whole files. Use grep, or a short node snippet, to look at only the part you need, and change things with targeted edits rather than rewriting a file.
@@ -86,6 +99,7 @@ If Node is not installed on your computer, `npm run check` will not run. Tell Cl
 ## Do not edit
 - `middleware.js`, `lib/auth.js`, anything under `api/auth/` (Okta sign-in, managed separately).
 - `runtime-shim.js`, `api/docs.js`, `schema.sql`, `migrations/` and `vercel.json` (shared features and database).
+- `roadmap-apply.js`, `api/roadmap-refresh.js`, `api/roadmap-data.js`, `api/roadmap-check.js` and everything under `api/_roadmap/` (the sheet pull for Roadmap launch dates, managed by Jay).
 - Everything else, including `app.js`, `styles.css` and `data/`, is fine to change.
 
 ## If something looks wrong
