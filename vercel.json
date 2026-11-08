@@ -5,6 +5,10 @@
   ],
   "functions": {
     "api/refresh-cvr.js": { "includeFiles": "data/**" },
+    "api/roadmap-refresh.js": { "includeFiles": "data/**" },
     "api/ab-refresh.js": { "maxDuration": 300 }
-  }
+  },
+  "crons": [
+    { "path": "/api/roadmap-refresh", "schedule": "40 12,20 * * *" }
+  ]
 }

@@ -9,10 +9,14 @@ export default async function middleware(request) {
   // Dormant until Okta env vars exist
   if (!authConfigured()) return next()
 
+  const url = new URL(request.url)
+
+  // Vercel cron for the roadmap pull: only this path, only with the exact secret
+  const secret = process.env.CRON_SECRET
+  if (secret && url.pathname === '/api/roadmap-refresh' && request.headers.get('authorization') === `Bearer ${secret}`) return next()
+
   const token = getCookie(request.headers.get('cookie'), SESSION_COOKIE)
   if (token && (await verifyToken(token))) return next()
-
-    const url = new URL(request.url)
 
   // Background API calls get a 401 the page can react to, not a redirect
   if (url.pathname.startsWith('/api/')) {
