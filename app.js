@@ -2109,7 +2109,7 @@ function abCell(t, k) {
 const abSig = t => { const r = abRd(t), g = abMet(t)[r.goal], nm = (g && g.name) || ABK.find(z => z[0] === r.goal)[1];
   const o = !g ? ['na', '–', '', ''] : g.s === 'sig' ? ['yes', 'Yes', '95%+ confidence', 'At least 95% confidence of a true difference.'] : g.s === 'early' ? ['early', 'Too early', 'few days of data', 'Not enough days to say anything yet.'] : g.s === 'nb' ? ['nb', 'Can\'t tell', 'no error bar', 'Amplitude gives no error bar for this metric.'] : g.c ? ['not', 'Not yet', g.c + '% confidence', 'Needs 95% before we call it.'] : ['not', 'Not yet', 'could be noise', 'Under 95% confidence, so it could still be noise.'];
   const c = g && (g.s === 'sig' ? (g.c || 95) : g.c) || null;
-  return '<span class="abstw"><span class="abst ' + o[0] + '">' + o[1] + '</span>' + (g && g.s !== 'early' && g.s !== 'nb' ? sigNote(c, testDays(t), t.status === 'running') : t.p != null && t.primary ? sigNote(conf(t), testDays(t), t.status === 'running', t.primary.name.toLowerCase()) : t.status === 'running' ? '<small class="absub">no confidence read yet</small>' : '') + '</span>';
+  return '<span class="abstw"><span class="abst ' + o[0] + '">' + o[1] + '</span>' + (g && g.s !== 'early' && g.s !== 'nb' ? sigNote(c, testDays(t), t.status === 'running') : t.p != null && t.primary ? sigNote(conf(t), testDays(t), t.status === 'running', t.primary.name.toLowerCase()) : t.sigWhy ? '<small class="absub">' + esc(t.sigWhy) + '</small>' : t.status === 'running' ? '<small class="absub">no confidence read yet</small>' : '') + '</span>';
 };
 // One number cell (Mike, Nov 3 rebuild): the change alone, colored by direction, right-aligned; control → test lives in the hover.
 const abN = (x, name, key, chip) => !x || x.v == null ? '<span class="abn na" title="Not measured for this test">–</span>' : hint('<span class="abn ' + (x.v >= 0 ? 'b' : 'w') + (key ? ' abk1' : '') + (chip ? ' chip' : '') + '">' + sgn(x.v, 1) + '</span>', 'abm abnh', '<span class="nosrc"><b>' + esc(name) + '</b><br>' + (x.a != null && x.b != null ? abVal(x, x.a) + ' in control → ' + abVal(x, x.b) + ' in the test group (' + sgn(x.v, 1) + ').' : 'Test group vs control: ' + sgn(x.v, 1) + '.') + (x.s === 'nb' ? ' Amplitude gives no error bar for this one, so read it as a direction.' : '') + '</span>');
@@ -2166,7 +2166,7 @@ function testDetailModal(id) {
   const pill = '<span class="abv2 v-' + R.verdict[0] + '">' + esc(R.verdict[1]) + '</span>';
   const runTag = running ? 'Day ' + days + ', since ' + short(t.start) : days + ' days, ended ' + short(t.end);
   openModal('<div class="mhead"><h3 id="mtitle">' + esc(t.name) + '</h3></div><div class="mtags"><span class="rtag">' + siteDot(testSite(t)) + '</span><span class="rtag">' + esc(t.where) + '</span><span class="rtag">' + runTag + '</span>' + (running && more ? '<span class="rtag">Result in about ' + more + ' days</span>' : '') + pill + '</div>' +
-    '<div class="abdeep">' + what + uxBox(uxFor(t.name)) + results + '<div class="abfoot2"><span class="cap">Amplitude gives no error bar for revenue, so read revenue as a direction, not proof.</span>' + srcBtn('test:' + t.id) + '</div></div>');
+    '<div class="abdeep">' + what + results + '<div class="abfoot2"><span class="cap">Amplitude gives no error bar for revenue, so read revenue as a direction, not proof.</span>' + srcBtn('test:' + t.id) + '</div></div>');
 }
 // Tests with several versions show one row: the leading version vs control, with a note that others exist (Mike, Nov 4). The pop-up has control and every version.
 function abLead(t) {
@@ -2221,18 +2221,6 @@ function abFacts(list, live) {
   const f = live ? [list.length + ' running', 'longest: day ' + Math.max(...list.map(testDays))] : [sh + ' shipped', (list.length - sh) + ' kept control'];
   return '<span class="sfacts">' + f.map(x => '<span>' + esc(x) + '</span>').join('<span aria-hidden="true">·</span>') + '</span>';
 }
-/* UX for a test: its own Jira Figma links, else the UX of the Roadmap project it belongs to (Mike, Nov 5). Link plus a lazy Figma preview. */
-const figEmbed = u => /^https:\/\/www\.figma\.com\/(design|board|file)\//.test(u) ? u.replace('https://www.figma.com/', 'https://embed.figma.com/') + (u.indexOf('?') < 0 ? '?' : '&') + 'embed-host=share' : null;
-function uxFor(name) {
-  const own = typeof TESTUX !== 'undefined' && TESTUX[name]; if (own) return own;
-  const rm = typeof rmMatch === 'function' ? rmMatch(name) : null, it = rm ? lbItem2(rm) : null;
-  return (it && typeof UXL !== 'undefined' && UXL[it.t]) || [];
-}
-function uxBox(L) {
-  if (!L || !L.length) return '<section class="pbox uxbox"><h4 class="ph">🎨 UX</h4><p class="cap">No UX link yet. A test only shows one once its Figma link is added (from the Jira ticket or the Product Manager); until then this box stays here so the gap is visible.</p></section>'; // every test shows the UX box (Mike, Nov 7)
-  return '<section class="pbox uxbox"><h4 class="ph">🎨 UX</h4><ul class="uxlist">' + L.map(d => '<li><a class="uxl" href="' + esc(d.url) + '" target="_blank" rel="noopener">' + esc(d.l) + ' ↗</a>' + (d.jira ? ' <a class="cap" href="https://articore.atlassian.net/browse/' + esc(d.jira) + '" target="_blank" rel="noopener">' + esc(d.jira) + '</a>' : '') + '</li>').join('') + '</ul>' +
-    L.filter(d => figEmbed(d.url)).slice(0, 2).map(d => '<details class="uxprev"><summary>Preview: ' + esc(d.l.replace(/^(Figma|FigJam):\s*/, '')) + '</summary><iframe loading="lazy" src="' + esc(figEmbed(d.url)) + '" title="' + esc(d.l) + '" allowfullscreen></iframe><p class="cap">If this shows a Figma sign-in, open the link above while signed in.</p></details>').join('') + '</section>';
-}
 /* detail pop-ups for queued and earlier tests: the three facts first, then what it is and where to look */
 const rmMatch = name => { const w = name.toLowerCase().split(/\W+/).filter(x => x.length > 3); let best = null, bs = 1; COMING.teams.forEach(T => T.items.forEach((it, i) => { const t = it.t.toLowerCase(), sc = w.filter(x => t.indexOf(x) >= 0).length; if (sc > bs) { bs = sc; best = T.key + '|' + i; } })); return best; };
 function testModal(kind, i) {
@@ -2242,14 +2230,13 @@ function testModal(kind, i) {
     return openModal('<div class="mhead"><h3 id="mtitle">' + x.e + ' ' + esc(x.name) + '</h3></div>' +
       '<div class="mfacts">' + fact('Expected start', esc(x.when)) + fact('Status', 'Queued', 'Not live in Amplitude Experiment yet') + fact('Where', esc(x.where), esc(x.site)) + '</div>' +
       '<div class="pbox"><h4 class="ph">🧪 What it tests</h4><p>' + esc(x.what) + '</p></div>' +
-      uxBox(uxFor(x.name)) +
       (rm ? '<div class="pbox"><h4 class="ph">🗺️ On the Roadmap</h4><p>This test is part of <b>' + esc(lbItem2(rm).t) + '</b>.</p><button type="button" class="actbtn" data-lbm2="' + rm + '">See it on the Roadmap</button></div>' : '') +
       (x.refs && x.refs.length ? '<div class="pbox"><h4 class="ph">🔗 Links</h4>' + refsHtml(x.refs) + '</div>' : ''));
   }
   const o = EXPS.older[+i], wu = typeof WU !== 'undefined' && WU[o.name];
   return openModal('<div class="mhead"><h3 id="mtitle">' + testE(o.name) + ' ' + esc(o.name) + '</h3></div><div class="mtags"><span class="rtag">Redbubble</span></div>' +
     '<div class="mfacts">' + fact('Ended', short(o.end)) + fact('Decision', o.status === 'shipped' ? 'Shipped' : 'Kept control') + fact('Impact', o.status === 'shipped' ? 'Positive' : 'No measurable impact') + '</div>' +
-    uxBox(uxFor(o.name)) + '<div class="pbox"><h4 class="ph">📝 What happened</h4>' + (wu && wu[1] ? '<p>' + esc(wu[1]) + '</p>' : '') + '<p>' + esc(o.note) + '</p></div>' +
+    '<div class="pbox"><h4 class="ph">📝 What happened</h4>' + (wu && wu[1] ? '<p>' + esc(wu[1]) + '</p>' : '') + '<p>' + esc(o.note) + '</p></div>' +
     '<div class="pbox"><h4 class="ph">🔗 Links</h4><p><a href="' + esc(o.url) + '" target="_blank" rel="noopener">Open the test in Amplitude Experiment ↗</a></p>' + (wu && /^https?:/.test(wu[0]) ? '<p><a href="' + esc(wu[0]) + '" target="_blank" rel="noopener">Read the write-up in Confluence ↗</a></p>' : '') + '</div>');
 }
 // RBO or TPO, never both (Mike, Nov 5): the two sites measure tests differently, so each gets its own table and columns. RBO is the default.
@@ -2291,9 +2278,25 @@ function tpRev(x) {
 // Whole-site revenue per user (Mike, Nov 6): a test's revenue-per-user change only covers people who saw it, so it is scaled to every site visitor. Extra revenue = (version minus control revenue per user) x everyone who saw any version (Split); as a share of all site revenue for the same days (Amplitude), it is the change in revenue per site visitor.
 const tpSite = (x, v) => { if (!x.site || v.rpu == null || x.control.rpu == null || x.control.u == null) return null; const tot = x.control.u + x.variants.reduce((s, w) => s + (w.u || 0), 0), d = (v.rpu - x.control.rpu) * tot, base = x.site.rev / x.site.users; return { rel: d / x.site.rev, usd: d, tot, base, after: base + d / x.site.users }; };
 const tpRevV = x => { const v = tpLeadV(x); if (!v) return null; if (x.statsig && x.statsig.filt) { const f = x.statsig.filt; return v.n === 'Version A' ? f.aRel : f.bRel; } if (x.statsig) { const m = x.statsig.metrics.find(q => /total revenue/i.test(q.name)); return m ? (v.n === 'Version A' ? m.a : m.b) : null; } const ss = tpSite(x, v); return ss ? ss.rel : v.rpuRel != null ? v.rpuRel : null; };
+// Confidence for a TeePublic test (Mike, Nov 7): the source's own number when it gives one (Split or Amplitude), else a two-sided test on the counts
+// (conversion rates and people per version vs control), else Beam's published margin of error (change ± margin at 90%). Best version wins.
+const normCdf = z => { const t = 1 / (1 + 0.2316419 * Math.abs(z)), d = 0.3989423 * Math.exp(-z * z / 2), p = d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274)))); return z > 0 ? 1 - p : p; };
+const confZ = z => Math.max(0, Math.min(99, Math.floor((1 - 2 * (1 - normCdf(Math.abs(z)))) * 100)));
+function tpConf(x) {
+  const given = (x.variants || []).reduce((m, v) => Math.max(m, v.conf || 0), 0);
+  if (given > 0) return { c: given, lab: '' };
+  const k = x.control;
+  if (k && k.conv != null && k.p) {
+    const cs = (x.variants || []).filter(v => v.conv != null && v.p).map(v => { const p0 = k.conv, p1 = v.conv, pp = (p0 * k.p + p1 * v.p) / (k.p + v.p), se = Math.sqrt(pp * (1 - pp) * (1 / k.p + 1 / v.p)); return se > 0 ? confZ((p1 - p0) / se) : 0; });
+    if (cs.length) return { c: Math.max(...cs), lab: x.metric ? x.metric.toLowerCase() : '' };
+  }
+  const f = x.statsig && x.statsig.filt;
+  if (f && f.aw && f.bw) return { c: Math.max(confZ(f.aRel / (f.aw / 1.645)), confZ(f.bRel / (f.bw / 1.645))), lab: 'filtered revenue per session' };
+  return { c: null, lab: '' };
+}
 function tpRow(x, i, done) {
-  const best = x.variants.reduce((m, v) => Math.max(m, v.conf || 0), 0);
-  const chip = '<span class="abstw">' + (best >= 95 ? '<span class="abst yes">Yes</span>' : '<span class="abst">Not yet</span>') + (best > 0 ? sigNote(best, tpDays(x), !done) : '<small class="absub">no read yet</small>') + '</span>';
+  const sg = tpConf(x), best = sg.c;
+  const chip = '<span class="abstw">' + (best >= 95 ? '<span class="abst yes">Yes</span>' : '<span class="abst">Not yet</span>') + (best != null ? sigNote(best, tpDays(x), !done, sg.lab) : '<small class="absub">no read yet</small>') + '</span>';
   const mn = tpMetric(x), met = mn ? hint('<span class="abmet"><b>' + esc(mn) + '</b></span>', 'abm abnh abl', '<span class="nosrc"><b>' + esc(mn) + '</b><br>' + esc(x.metricNote || (x.statsig ? 'Share of cart visitors who order, read from Statsig. Beam is a conversion test.' : x.goal) || '') + '</span>') : hint('<span class="abmet na">Not defined</span>', 'abm abnh abl', '<span class="nosrc"><b>Metric not defined</b><br>This test is read from Split, which does not say what it measures. Ask Jon or Mike.</span>');
   return '<div class="rowwrap"><div class="trow abrow tpg" role="button" tabindex="0" data-tpx="' + (done ? 'd' : '') + i + '"><span class="tname tnico"><span class="ge gico g-CVR" aria-hidden="true">' + projIco({ t: x.name, obj: 'CVR' }) + '</span><b>' + esc(x.name) + '</b><span class="cap tmeta">' + sitePill('TP') + tpVerTag(x) + '<span class="tloc">' + esc(x.where) + '</span></span></span>' + (done ? '<span class="abday"><b>' + (Math.round((parse(x.end) - parse(x.start)) / DAY) + 1) + ' days</b><small>ended ' + short(x.end) + '</small></span>' : '<span class="abday"><b>Day ' + tpDays(x) + '</b><small>since ' + short(x.start) + '</small></span>') + chip + met + tpChange(x) + tpRev(x) + '</div></div>';
 }
@@ -2325,7 +2328,7 @@ function tpDetailModal(i) {
     const c = x.control, r2 = ['<tr class="ctlrow"><td><b>Control</b><small>baseline</small></td><td>' + int(c.u != null ? c.u : c.p) + '</td>' + cell(c.atc, 'p') + cell(c.conv, 'p') + cell(c.rpu, 'usd') + cell(c.aov, 'usd') + '</tr>'].concat(x.variants.map(v => '<tr><td><b>' + esc(v.n) + '</b><small>vs control</small></td><td>' + int(v.u != null ? v.u : v.p) + '</td>' + cell(v.atc, 'p', v.atcRel, v.atcConf) + cell(v.conv, 'p', v.rel, v.conf) + cell(v.rpu, 'usd', v.rpuRel) + cell(v.aov, 'usd', v.aovRel) + '</tr>'));
     tbl = '<table class="abt tpv"><thead><tr><th>Version</th><th>Users</th><th>Add to cart</th><th>PDP CVR</th><th>Revenue per user</th><th>Order value</th></tr></thead><tbody>' + r2.join('') + '</tbody></table><p class="cap tpcap">Revenue per user is total order revenue ÷ users in the version, counting orders on days the user viewed the test page. Order value is that revenue ÷ orders. Neither has an error bar in Amplitude, so read them as a direction.</p>';
   }
-  openModal('<span class="tipsrc" hidden></span><div class="mhead"><h3 id="mtitle">' + esc(x.name) + '</h3></div><div class="mtags"><span class="rtag">' + siteDot('TP') + '</span><span class="rtag">' + esc(x.where) + '</span><span class="rtag">Day ' + tpDays(x) + ', since ' + short(x.start) + '</span><span class="abv2 v-' + tpVerdict(x)[0] + '">' + tpVerdict(x)[1] + '</span></div><div class="abwhat2"><h4 class="ph">🧪 About this test</h4><p>' + (amp ? 'Read from Amplitude on ' + short(TPEXPS.asOf) + ', covering ' + short(x.start) + ' to ' + short(x.through) + '. <b>PDP CVR</b> is the share of product-page viewers in the test who order within 24 hours: CVR for people who saw the product page, not sitewide. The numbers are not bot-filtered: the bot cohorts exist only in the Redbubble project.' : 'Read from the Split dashboard on ' + short(TPEXPS.asOf) + '. Split reports each test\'s own conversion goal, so these rates are not comparable across tests and none of them is sitewide CVR.') + '</p></div>' + uxBox(uxFor(x.name)) + tbl + '<div class="abfoot2"><a class="srclink" href="' + esc(amp ? x.url : TPEXPS.url) + '" target="_blank" rel="noopener">Open in ' + (amp ? 'Amplitude' : 'Split') + '\u00a0↗</a></div>');
+  openModal('<span class="tipsrc" hidden></span><div class="mhead"><h3 id="mtitle">' + esc(x.name) + '</h3></div><div class="mtags"><span class="rtag">' + siteDot('TP') + '</span><span class="rtag">' + esc(x.where) + '</span><span class="rtag">Day ' + tpDays(x) + ', since ' + short(x.start) + '</span><span class="abv2 v-' + tpVerdict(x)[0] + '">' + tpVerdict(x)[1] + '</span></div><div class="abwhat2"><h4 class="ph">🧪 About this test</h4><p>' + (amp ? 'Read from Amplitude on ' + short(TPEXPS.asOf) + ', covering ' + short(x.start) + ' to ' + short(x.through) + '. <b>PDP CVR</b> is the share of product-page viewers in the test who order within 24 hours: CVR for people who saw the product page, not sitewide. The numbers are not bot-filtered: the bot cohorts exist only in the Redbubble project.' : 'Read from the Split dashboard on ' + short(TPEXPS.asOf) + '. Split reports each test\'s own conversion goal, so these rates are not comparable across tests and none of them is sitewide CVR.') + '</p></div>' + tbl + '<div class="abfoot2"><a class="srclink" href="' + esc(amp ? x.url : TPEXPS.url) + '" target="_blank" rel="noopener">Open in ' + (amp ? 'Amplitude' : 'Split') + '\u00a0↗</a></div>');
 }
 function testsHtml() {
   const f = abSiteNow();
