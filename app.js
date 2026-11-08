@@ -2046,7 +2046,7 @@ function scoreHtml(b) {
 }
 
 /* ---------- A/B tests: its own page, because it is a weekly decision review, not the daily pulse ---------- */
-const EXPS_AS_OF = '2026-11-02';
+const EXPS_AS_OF = (window.__abSnapshot && window.__abSnapshot.applied && window.__abSnapshot.asOf) || (typeof EXPS !== 'undefined' && EXPS.asOfISO) || '2026-11-02'; // last full day of the data: the refreshed snapshot's date, else the data file's, else the old fixed date
 const testDays = t => Math.round((parse(EXPS_AS_OF) - parse(t.start)) / DAY) + 1;
 const siteImp = (rel, reach) => rel * reach;
 // Where a test's whole-site number comes from, for every hover that shows one.
@@ -2340,7 +2340,7 @@ function testsHtml() {
   const facts = rows.length ? '<span class="sfacts"><span>' + rows.length + ' running</span><span aria-hidden="true">·</span><span>longest: day ' + Math.max(...rows.map(r => r.n)) + '</span></span>' : '';
   const seg = '<div class="abfilter"><span class="lbl">Site</span><div class="segs" role="group" aria-label="Site">' + [['RB', 'RBO'], ['TP', 'TPO']].map(o => '<button type="button" data-absite="' + o[0] + '" aria-pressed="' + (f === o[0]) + '">' + o[1] + '</button>').join('') + '</div></div>';
   return '<section class="sview abview">' +
-    '<div class="group trun"><div class="ghead"><h3>Running</h3>' + facts + seg + '</div>' + abHeadSort() + '<div class="rows">' + (rows.length ? rows.map(r => r.html).join('') : '<p class="cap">No tests running here right now.</p>') + '</div></div>' +
+    '<div class="group trun"><div class="ghead"><h3>Running</h3>' + facts + seg + '</div>' + (typeof abSrcLine === 'function' ? abSrcLine() : '') + abHeadSort() + '<div class="rows">' + (rows.length ? rows.map(r => r.html).join('') : '<p class="cap">No tests running here right now.</p>') + '</div></div>' +
     (EXPS.soon && EXPS.soon.some(x => abSiteOk(x.site)) ? soonHtml() : '') +
     shippedHtml() + '</section>';
 }
@@ -2660,14 +2660,14 @@ const provBox = rows => '<div class="pbox prov"><h4 class="ph">🔎 Where this c
 function testProv(t) {
   const R = (typeof SRCS !== 'undefined' && SRCS[t.name]) || {}, pick = (k, d) => R[k] ? provLnk(R[k].from || R[k].where || 'Source', R[k].url) : d, amp = provLnk('Amplitude Experiment', t.url), tm = testTeam(t), tk = COMING.teams.find(x => x.key === tm) || {}, pm = pmOf(t.name, tm), site = testSite(t);
   return provBox([
-    ['🧪 The test', esc(t.name), pick('origin', 'Running or decided in ' + amp + (t.id ? ' (experiment ' + esc(t.id) + ')' : '') + ', read ' + esc(short(EXPS_AS_OF)))],
+    ['🧪 The test', esc(t.name), pick('origin', (typeof abSrcText === 'function' && abSrcText(t, 'origin')) || 'Running or decided in ' + amp + (t.id ? ' (experiment ' + esc(t.id) + ')' : '') + ', read ' + esc(short(EXPS_AS_OF)))],
     ['👥 Team', esc(tk.name || TEAMS(tm) || '–'), pick('team', 'Worked out from the test\'s owners in ' + amp + ', matched to the team they work on')],
     ['👤 Product Manager', esc(pm || 'Not listed'), pick('pm', (typeof PEOPLE !== 'undefined' && PEOPLE[t.name] && PEOPLE[t.name].pm) ? 'Listed for this test in Jira or the roadmap sheet' : 'Not listed for this test, so this is the Product Manager who owns most of ' + esc(tk.name || 'that team') + '\'s roadmap')],
     ['🌐 Site', esc(SITEN(site)), pick('site', 'The Amplitude project the test runs in (' + (site === 'TP' ? 'TeePublic' : 'Redbubble') + ')')],
     ['📅 Dates', esc(short(t.start)) + (t.end ? ' to ' + esc(short(t.end)) : ', still running'), pick('dates', 'Start and end dates in ' + amp)],
-    t.primary ? ['🎯 Primary metric', esc(t.primary.name) + ' ' + sp(t.primary.rel, 1), pick('primary', 'The test\'s primary metric in ' + amp + ', test vs control')] : null,
-    ['🌍 Whole-site impact', sp(siteImp(t.cvr.rel, t.reach)), pick('site_imp', 'Calculated: the CVR lift for people in the test × the share of site traffic the test reaches (' + Math.round((t.reach || 1) * 100) + '%), both from ' + amp)],
-    ['📏 Confidence', t.p == null ? 'Not available' : conf(t) + '%', pick('conf', t.p == null ? 'Amplitude Experiment has no significance reading for this test yet' : 'From the significance (p-value) ' + amp + ' reports for the primary comparison')],
+    t.primary ? ['🎯 Primary metric', esc(t.primary.name) + ' ' + sp(t.primary.rel, 1), pick('primary', (typeof abSrcText === 'function' && abSrcText(t, 'primary')) || 'The test\'s primary metric in ' + amp + ', test vs control')] : null,
+    ['🌍 Whole-site impact', sp(siteImp(t.cvr.rel, t.reach)), pick('site_imp', (typeof abSrcText === 'function' && abSrcText(t, 'site_imp')) || 'Calculated: the CVR lift for people in the test × the share of site traffic the test reaches (' + Math.round((t.reach || 1) * 100) + '%), both from ' + amp)],
+    ['📏 Confidence', t.p == null ? 'Not available' : conf(t) + '%', pick('conf', (typeof abSrcText === 'function' && abSrcText(t, 'conf')) || (t.p == null ? 'Amplitude Experiment has no significance reading for this test yet' : 'From the significance (p-value) ' + amp + ' reports for the primary comparison'))],
     t.call ? ['📣 The call', '', pick('call', 'Claude\'s read of the numbers above; the team makes the decision')] : null
   ]);
 }

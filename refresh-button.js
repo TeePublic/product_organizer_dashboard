@@ -1,10 +1,13 @@
-// Two small things on the same line as "Last refreshed ..." in the top-right of the header:
+// Small things on the same line as "Last refreshed ..." in the top-right of the header:
 //  1. For everyone, once a saved CVR refresh is in use:  "CVR refreshed Fri Nov 6, 11:42 AM ET"  (when the button last ran successfully).
-//  2. Only when the address ends with ?refresh=1:  a "Refresh now" link that asks the server to pull fresh CVR numbers from Amplitude.
+//  1b. For everyone, once a saved A/B refresh is in use:  "A/B refreshed Sat Nov 7, 3:48 PM ET".
+//  2. Only when the address ends with ?refresh=1:  a "Refresh now" link that asks the server to pull fresh numbers from Amplitude:
+//     first the A/B tab (one short call to /api/ab-refresh), then the CVR numbers (rounds, as before). A problem with one never stops the other.
 // If the "Last refreshed" line is not on the page, the link floats bottom-left and the stamp is skipped. Loaded after app.js.
 (function () {
   var wantBtn = new URLSearchParams(location.search).get('refresh') === '1';
   var snap = window.__cvrSnapshot; // set by /api/cvr-data when a saved refresh is being shown
+  var abSnap = window.__abSnapshot; // set by /api/ab-data when a saved A/B refresh is being shown
   function fmt(s) {
     var iso = String(s).replace(' ', 'T').replace(/([+-]\d\d)$/, '$1:00').replace(/(\.\d{3})\d+/, '$1');
     var d = new Date(iso); if (isNaN(d.getTime())) return null;
@@ -12,7 +15,8 @@
     return p.weekday + ' ' + p.month + ' ' + p.day + ', ' + p.hour + ':' + p.minute + ' ' + p.dayPeriod + ' ET';
   }
   var when = snap && snap.applied && snap.createdAt ? fmt(snap.createdAt) : null;
-  if (!wantBtn && !when) return;
+  var abWhen = abSnap && abSnap.applied && abSnap.createdAt ? fmt(abSnap.createdAt) : null;
+  if (!wantBtn && !when && !abWhen) return;
 
   var dark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
   var fg = dark ? '#e8e8e8' : '#1a1a1a', bg = dark ? '#1f1f23' : '#ffffff', line = dark ? '#3a3a42' : '#cfcfd6', accent = dark ? '#a5b4fc' : '#4f46e5';
@@ -42,6 +46,13 @@
       st.title = 'The CVR numbers (all three bot filters, revenue, orders and payments) were last refreshed from Amplitude at this time and run through ' + (snap.asOf || 'the latest finished day') + '. The rest of the page refreshes on its own schedule.';
       row.appendChild(dot()); row.appendChild(st);
     }
+    if (abWhen && !row.querySelector('[data-ab-stamp]')) {
+      var sa = document.createElement('span');
+      sa.setAttribute('data-ab-stamp', '1'); sa.setAttribute('style', 'font-size:12px;color:var(--muted,#6b7280)');
+      sa.textContent = 'A/B refreshed ' + abWhen;
+      sa.title = 'The A/B Testing numbers for the tests named on that tab were last refreshed from the Amplitude Analytics API at this time and run through ' + (abSnap.asOf || 'the latest finished day') + ' (approximate). Verdicts and confidence are entered by hand.';
+      row.appendChild(dot()); row.appendChild(sa);
+    }
     if (wantBtn && !row.contains(btn)) { row.appendChild(dot()); row.appendChild(btn); }
     return true;
   }
@@ -64,12 +75,12 @@
   }
 
   function asOf() { return (typeof D !== 'undefined' && D.asOf) || 'unknown'; }
-  function idle() { btn.disabled = false; btn.textContent = inHeader ? 'Refresh now' : 'Refresh data (now through ' + asOf() + ')'; btn.title = 'Pull fresh numbers from Amplitude. The data now runs through ' + asOf() + '.'; }
+  function idle() { btn.disabled = false; btn.textContent = inHeader ? 'Refresh now' : 'Refresh data (now through ' + asOf() + ')'; btn.title = 'Pull fresh numbers from Amplitude: the A/B Testing tab and the CVR numbers. The CVR data now runs through ' + asOf() + '.'; }
   function show(title, lines, good) {
     panel.textContent = '';
     var h = document.createElement('div'); h.textContent = title; h.setAttribute('style', 'font-weight:600;color:' + (good ? '#15803d' : '#b91c1c'));
     panel.appendChild(h);
-    (lines || []).slice(0, 18).forEach(function (l) { var p = document.createElement('div'); p.textContent = l; p.setAttribute('style', 'margin-top:4px;white-space:pre-wrap;word-break:break-word'); panel.appendChild(p); });
+    (lines || []).concat((state && state.abLines) || []).slice(0, 18).forEach(function (l) { var p = document.createElement('div'); p.textContent = l; p.setAttribute('style', 'margin-top:4px;white-space:pre-wrap;word-break:break-word'); panel.appendChild(p); });
     panel.style.display = 'block';
   }
   // A refresh now happens in rounds. Each round is one short call to the server, which says how far it got.
@@ -77,8 +88,23 @@
   // on the server, so closing the page or a dropped connection never loses finished work: clicking again continues.
   var wait = function (s) { return (window.__cvrWait ? window.__cvrWait(s) : s * 1000); };
   function readJson(r) { return r.json().catch(function () { return { ok: false, errors: ['The server did not send a readable answer (status ' + r.status + ').'] }; }); }
-  function stopWith(title, lines, good) { show(title, lines, good); idle(); }
+  function stopWith(title, lines, good) { if (state && state.abSaved) state.abLines = state.abLines.concat(['Reload the page to see the A/B tab update.']); show(title, lines, good); idle(); }
   var state = null;
+  // The A/B tab first: one POST, no rounds. Whatever happens here is only noted for the panel; the CVR refresh always goes on after it.
+  function runAb() {
+    btn.textContent = inHeader ? 'Refreshing A/B...' : 'Refreshing the A/B tab... Please stay on this page.';
+    return fetch('/api/ab-refresh', { method: 'POST', headers: { Accept: 'application/json' } })
+      .then(readJson)
+      .then(function (rep) {
+        var bad = rep && rep.errors && !Array.isArray(rep.errors) ? Object.keys(rep.errors) : [];
+        if (rep.refused) state.abLines = ['A/B tab not refreshed: ' + (rep.error || 'refused') + ' It was left as it was.'];
+        else if (rep.saved) { state.abSaved = true; state.abLines = ['A/B tab refreshed through ' + rep.asOf + ' (approximate, from the Amplitude Analytics API).']; }
+        else if (rep.ok) state.abLines = ['A/B tab: checked Amplitude, nothing saved. ' + (rep.note || 'Dry run.')];
+        else state.abLines = ['A/B tab not refreshed: ' + (rep.error || (rep.errors && rep.errors[0]) || 'something went wrong') + ' It was left as it was.'];
+        if (bad.length) state.abLines.push('Not pulled this time, kept as they were: test ' + bad.join(', ') + '.');
+      })
+      .catch(function (e) { state.abLines = ['A/B tab not refreshed: could not reach the server (' + e.message + ').']; });
+  }
   function step() {
     fetch('/api/refresh-cvr' + (state.runId ? '?run=' + state.runId : ''), { method: 'POST', headers: { Accept: 'application/json' } })
       .then(readJson)
@@ -108,7 +134,7 @@
   idle();
   btn.addEventListener('click', function () {
     btn.disabled = true; btn.textContent = inHeader ? 'Refreshing...' : 'Refreshing... Please stay on this page.'; panel.style.display = 'none';
-    state = { runId: null, lastDone: -1, still: 0, netFails: 0 };
-    step();
+    state = { runId: null, lastDone: -1, still: 0, netFails: 0, abLines: [], abSaved: false };
+    runAb().then(step);
   });
 })();
