@@ -1,10 +1,9 @@
 // Browser side. Load right after /api/roadmap-data and before app.js (plain <script> tags).
 // Always records what the sheet WOULD change in window.__roadmapDiff (open the console to read it).
-// Changes the board, and shows the "pulled from the sheet" note, only when APPLY is true.
+// Changes the board, and sets the "pulled from the sheet" note, only when APPLY is true.
 (function () {
   const APPLY = false; // flip after reviewing window.__roadmapDiff or the dry run from /api/roadmap-refresh
   const FIELDS = ['eta']; // fields the sheet may change on the board; add 's' and 'imp' later (the note below follows this list)
-  const NOTE_ID = 'roadmap-sheet-note'; // an empty <p id="roadmap-sheet-note" hidden></p> placed where the note should appear
   const snap = window.__roadmapSnapshot;
   if (!snap || !snap.rows || typeof COMING === 'undefined') return;
   const jiraOf = (x) => ((x && x.link) || '').match(/[A-Z][A-Z0-9]+-\d+/);
@@ -32,12 +31,11 @@
       .formatToParts(d).forEach((x) => { q[x.type] = x.value; });
     return `${q.weekday} ${q.month} ${q.day}, ${q.hour}:${q.minute} ${q.dayPeriod} ET`;
   }
-  function showNote() {
-    const el = document.getElementById(NOTE_ID), when = pulledAt(snap.createdAt);
-    if (!el || !when) return;
-    const names = { eta: 'launch dates (ETAs)', s: 'status', imp: 'impact estimates' };
-    el.textContent = `Refreshed automatically from the Product Org Dashboard sheet: ${FIELDS.map((f) => names[f] || f).join(', ')}. Pulled ${when}. Everything else on this page is curated by hand.`;
-    el.hidden = false;
-  }
-  if (APPLY) { if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', showNote); else showNote(); }
+  // The page draws this line itself (comingHtml in app.js reads window.__roadmapNote), so it survives every redraw.
+  // It is set only when APPLY is true, because only then is the page actually using the sheet.
+  const names = { eta: 'launch dates', s: 'status', imp: 'impact estimates' };
+  const when = pulledAt(snap.createdAt);
+  window.__roadmapNote = APPLY && when
+    ? `Refreshed automatically from the Product Org Dashboard sheet: ${FIELDS.map((f) => names[f] || f).join(', ')} (newer project updates can override them). Pulled ${when}. Everything else on this page is curated by hand.`
+    : null;
 })();
