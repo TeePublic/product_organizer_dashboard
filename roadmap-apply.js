@@ -2,7 +2,7 @@
 // Always records what the sheet WOULD change in window.__roadmapDiff (open the console to read it).
 // Changes the board, and sets the "pulled from the sheet" note, only when APPLY is true.
 (function () {
-  const APPLY = false; // flip after reviewing window.__roadmapDiff or the dry run from /api/roadmap-refresh
+  const APPLY = trueS; // flip after reviewing window.__roadmapDiff or the dry run from /api/roadmap-refresh
   const FIELDS = ['eta']; // fields the sheet may change on the board; add 's' and 'imp' later (the note below follows this list)
   const snap = window.__roadmapSnapshot;
   if (!snap || !snap.rows || typeof COMING === 'undefined') return;
