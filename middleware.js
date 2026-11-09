@@ -5,8 +5,8 @@ export const config = {
   matcher: ['/((?!api/auth|favicon.ico).*)'],
 }
 
-// Vercel cron jobs that call us without a login: the roadmap pull and the CVR refresh
-const CRON_PATHS = ['/api/roadmap-refresh', '/api/refresh-cvr']
+// Vercel cron jobs that call us without a login: the roadmap pull, the CVR refresh and the A/B refresh
+const CRON_PATHS = ['/api/roadmap-refresh', '/api/refresh-cvr', '/api/ab-refresh']
 
 export default async function middleware(request) {
   // Dormant until Okta env vars exist

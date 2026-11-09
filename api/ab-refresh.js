@@ -1,6 +1,8 @@
 // The A/B tab's refresh. Builds the snapshot from the Amplitude Analytics API (Redbubble key pair), the same way refresh-cvr.js is used:
 //   GET                                   = dry run: pulls, builds in memory, reports, saves nothing
 //   POST (from the dashboard itself) and AB_STORE_ENABLED=1 = saves the snapshot to Neon (table ab_snapshots), with a lock and a cooldown
+//   Authorization: Bearer $CRON_SECRET (the Vercel cron) and AB_STORE_ENABLED=1 = saves too. A cron call never starts a refresh if a snapshot
+//   was saved in the last hour (AB_CRON_COOLDOWN_MIN), so a manual click just before it is not repeated. The cron needs the exemption in middleware.js.
 // Production only (behind the Okta sign-in), keys never printed. POST with AB_STORE_ENABLED unset behaves as a dry run and says so.
 //
 // How a test's numbers are produced (the method verified in steps 4b/4c on the cart test): users are tagged with their variant through the
@@ -110,9 +112,11 @@ async function run(req, res, deps) {
 
   const MAN = deps?.manifest ?? MANIFEST;
   const q = req.query || {};
+  const cronSecret = env.CRON_SECRET; const isCron = !!cronSecret && req.headers?.authorization === `Bearer ${cronSecret}`;
+  const who = isCron ? 'cron' : 'button';
   const storeOn = env.AB_STORE_ENABLED === '1';
-  const wantStore = storeOn && req.method === 'POST';
-  if (wantStore && req.headers?.['sec-fetch-site'] && req.headers['sec-fetch-site'] !== 'same-origin') return send(res, 403, { ok: false, error: 'Saving can only be started from the dashboard itself.' });
+  const wantStore = storeOn && (isCron || req.method === 'POST');
+  if (wantStore && !isCron && req.headers?.['sec-fetch-site'] && req.headers['sec-fetch-site'] !== 'same-origin') return send(res, 403, { ok: false, error: 'Saving can only be started from the dashboard itself.' });
   if (wantStore && q.end) return send(res, 400, { ok: false, error: 'end can only be set on a dry run; a saved refresh always ends on the last full day.' });
   const now = deps?.now ? deps.now() : new Date();
   const yesterday = ymd(new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - 1)));
@@ -123,13 +127,13 @@ async function run(req, res, deps) {
 
   // Saving: take the lock and respect the cooldown BEFORE spending any Amplitude queries.
   const sql = deps?.sql ?? (dbUrl ? neon(dbUrl) : null);
-  const cooldownMin = Number(env.AB_COOLDOWN_MIN || 5); let locked = false;
+  const cooldownMin = Number(isCron ? (env.AB_CRON_COOLDOWN_MIN || 60) : (env.AB_COOLDOWN_MIN || 5)); let locked = false;
   const release = async () => { if (locked && sql) { try { await sql`UPDATE ab_refresh_lock SET started_at = NULL WHERE id = 1`; } catch { /* the lock expires on its own after 5 minutes */ } locked = false; } };
   if (wantStore) {
     if (!sql) return send(res, 500, { ok: false, error: 'no database configured' });
     const recent = await sql`SELECT id, created_at::text AS created_at FROM ab_snapshots WHERE created_at > now() - make_interval(mins => ${cooldownMin}::int) ORDER BY created_at DESC LIMIT 1`;
     if (recent.length) return send(res, 409, { ok: false, refused: true, error: `A snapshot was saved less than ${cooldownMin} minutes ago (id ${recent[0].id}). Try again later.` });
-    const got = await sql`UPDATE ab_refresh_lock SET started_at = now(), started_by = ${'button'} WHERE id = 1 AND (started_at IS NULL OR started_at < now() - interval '5 minutes') RETURNING id`;
+    const got = await sql`UPDATE ab_refresh_lock SET started_at = now(), started_by = ${who} WHERE id = 1 AND (started_at IS NULL OR started_at < now() - interval '5 minutes') RETURNING id`;
     if (!got.length) return send(res, 409, { ok: false, refused: true, error: 'A refresh is already running.' });
     locked = true;
   }
@@ -234,7 +238,7 @@ async function run(req, res, deps) {
   if (req.method === 'POST' && !storeOn) report.note = 'Saving is switched off (AB_STORE_ENABLED is not 1), so this was a dry run.';
   if (wantStore) {
     if (!Object.keys(tests).length) { report.ok = false; report.saved = null; report.error = 'Nothing to save: no test pulled successfully.'; console.log('[ab-refresh] ' + JSON.stringify(report).slice(0, 14000)); return send(res, 502, report); }
-    const note = `button · tests: ${Object.keys(tests).join(',')} · errors: ${Object.keys(errors).length ? Object.keys(errors).join(',') : 'none'}`;
+    const note = `${who} · tests: ${Object.keys(tests).join(',')} · errors: ${Object.keys(errors).length ? Object.keys(errors).join(',') : 'none'}`;
     const row = await sql`INSERT INTO ab_snapshots (as_of, payload, note) VALUES (${iso(end)}::date, ${JSON.stringify({ asOf: iso(end), tests, reads: readsOut })}::jsonb, ${note}) RETURNING id, created_at::text AS created_at`;
     report.saved = { id: row[0].id, createdAt: row[0].created_at };
   }
