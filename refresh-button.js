@@ -1,6 +1,6 @@
 // The CVR refresh note and link, right next to the sale pill on the CVR pages (Redbubble and TeePublic), where people already look
 // to see which day they are viewing. After a saved refresh:
-//     Refreshed automatically from Amplitude. Pulled Mon Nov 9, 11:42 AM ET, through Sun Nov 8.   Refresh CVR
+//     Refreshed automatically from Amplitude. Pulled Mon Nov 9, 11:42 AM ET, through Sun Nov 8.   Refresh data
 // It shows only on the CVR pages; the Roadmap and A/B tests tabs have their own notes.
 // It also adds one line under the By product heading saying what that section covers, because By product is NOT part of the
 // automatic Amplitude refresh (Mike's Claude updates it once a day) and can end a day or two before the CVR numbers. Loaded after app.js.
@@ -29,17 +29,18 @@
 
   // ---- the pieces (created once, so a running refresh survives the page redrawing around them) ----
   function el(tag, attrs, style) { var e = document.createElement(tag); for (var k in attrs) e.setAttribute(k, attrs[k]); if (style) e.setAttribute('style', style); return e; }
-  var note = el('span', { 'data-cvr-note': '1' }, 'display:inline-flex;align-items:center;flex-wrap:wrap;gap:4px 10px;margin:4px 0 4px 12px;font-size:12.5px;line-height:1.4;color:var(--muted,#6b7280);vertical-align:middle');
+  var note = el('span', { 'data-cvr-note': '1' }, 'display:inline-flex;align-items:center;margin:8px 0 0;vertical-align:middle');
   var txt = el('span', { 'data-cvr-stamp': '1', title: scope }); txt.textContent = message;
   var btn = el('button', { type: 'button', 'data-cvr-btn': '1', class: 'cvr-refresh-btn' }, '');
   note.appendChild(btn); // the stamp text now lives in the hover on the top-right "Last refreshed" (Mike, Nov 9)
-  var wrap = el('div', { 'data-cvr-panel': '1' }, 'display:none;flex:0 0 100%;width:100%;margin:4px 0 8px');
+  var wrap = el('div', { 'data-cvr-panel': '1' }, 'display:none;flex:0 0 100%;width:100%;margin:8px 0 0;text-align:left');
   var card = el('div', { 'data-cvr-card': '1' }, 'max-width:560px;border:1px solid var(--line-2,#cfcfd6);background:var(--surface,#fff);color:var(--ink,#1a1a1a);border-radius:10px;padding:10px 12px;font-size:13px;line-height:1.45;box-shadow:0 2px 8px rgba(0,0,0,.12)');
   wrap.appendChild(card);
 
   // ---- put it next to the sale pill. The page redraws this area when the day, site or tab changes, so this runs again after every redraw ----
-  var ANCHORS = ['.vsalew .vsale', '.dayline .tag', '[aria-label="Day under review"] .tag'];
-  var HOSTS = ['.vsalew', '.dayline', '[aria-label="Day under review"]'];
+  // Top right, in the stack under the Bot filter (Mike, Nov 9). Falls back to the old spot beside the sale pill if that stack is missing.
+  var ANCHORS = ['.dtop .bfwrap', '.vsalew .vsale', '.dayline .tag', '[aria-label="Day under review"] .tag'];
+  var HOSTS = ['.dtop', '.vsalew', '.dayline', '[aria-label="Day under review"]'];
   function first(list) { for (var i = 0; i < list.length; i++) { var f = document.querySelector(list[i]); if (f) return f; } return null; }
   function place() {
     var a = first(ANCHORS);
@@ -70,7 +71,7 @@
   new MutationObserver(later).observe(document.body, { childList: true, subtree: true });
 
   // ---- the button ----
-  function idle() { btn.disabled = false; btn.textContent = '↻ Refresh CVR'; btn.title = 'Refresh the CVR numbers from Amplitude: both sites, all three bot filters, revenue, orders and payments. It does not change the roadmap or anything else. Takes a minute or two. The CVR data now runs through ' + (fmtDay(asOf()) || 'the latest finished day') + '.'; }
+  function idle() { btn.disabled = false; btn.textContent = '↻ Refresh data'; btn.title = 'Refresh the CVR numbers from Amplitude: both sites, all three bot filters, revenue, orders and payments. It does not change the roadmap or anything else. Takes a minute or two. The CVR data now runs through ' + (fmtDay(asOf()) || 'the latest finished day') + '.'; }
   function show(title, lines, good) {
     card.textContent = '';
     var h = el('div', {}, 'font-weight:600;color:' + (good ? '#15803d' : '#b91c1c')); h.textContent = title; card.appendChild(h);
