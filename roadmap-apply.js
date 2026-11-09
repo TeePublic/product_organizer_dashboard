@@ -13,6 +13,11 @@
   const jiraOf = (x) => ((x && x.link) || '').match(/[A-Z][A-Z0-9]+-\d+/);
   const byJira = {};
   Object.entries(snap.rows).forEach(([n, r]) => { if (r.jira) (byJira[r.jira] = byJira[r.jira] || []).push(n); });
+  function isoET(createdAt) {
+    const d = new Date(String(createdAt).replace(' ', 'T').replace(/([+-]\d\d)$/, '$1:00'));
+    return isNaN(d) ? null : new Intl.DateTimeFormat('en-CA', { timeZone: 'America/New_York' }).format(d);
+  }
+  const pulledOn = isoET(snap.createdAt);
   // Matching never needs a Jira link: sheet key, then Jira key (when unique), then exact title, then title ignoring case and punctuation (when unique).
   const norm = (x) => String(x || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
   const byNorm = {};
@@ -26,6 +31,8 @@
     if (!name) { unmatchedItems.push([team, item]); unmatched.push(team.key + ' | ' + item.t + ' | ' + (item.s || '') + ' | ' + (item.eta || '') + ' | ' + ((item.link || '').replace(/.*browse\//, '') || '-')); return; }
     const row = snap.rows[name], p = {};
     // The Jira link comes from the sheet row only. No link there means the card says to ask the PM, never a link Jira or Slack found.
+    if (APPLY) item.sheetSrc = { on: pulledOn, phase: row.phase || null, status: row.status || null, jira: row.jira || null,
+      s: FIELDS.indexOf('s') >= 0 && !!row.s, eta: FIELDS.indexOf('eta') >= 0 && row.eta ? String(row.eta) : null, noJira: !row.jira, note: row.jira ? null : NO_JIRA_NOTE };
     if (row.jira) { if (APPLY) { item.link = JIRA_BASE + row.jira; item.noJira = false; delete item.jiraNote; } }
     else { noJira.push(team.key + ' | ' + item.t); if (APPLY) { if (isJiraLink(item.link)) delete item.link; item.noJira = true; item.jiraNote = NO_JIRA_NOTE; } }
     if (row.s && row.s !== item.s) p.s = row.s;

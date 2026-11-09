@@ -17,9 +17,9 @@ const IDS = {
     tp: { cvr: 't50lzd6f', sess: 'ebr0nnlc', chCvr: 'qhto4t7e', chSess: 'j2b9hj77', devCvr: '6u97stef', devSess: 'vro9klf8', atc: 'jbpkevmk', fc: '4pmgjkdy', cc: 'r72vauky', gUS: 'd45gja14', gCA: 'o82am7t0', gAU: 'uwl6mwt2', gEU: 'g4cj9vi7', geo3: 'v5smbr37', geoEU: 'oz5kf11y', pay: '5fvpbsdb' },
     rb: { cvr: 'hv3jdftd', sess: 'rb9kh9uz', chCvr: 'bjjgl1uu', chSess: 'gb97mum4', devCvr: 'ucllwnls', devSess: 'onzi2ij9', atc: 'ir369hds', fc: 'o6krg9lp', cc: 'nhhy4cjn', gUS: 'ti3044dw', gCA: 'qvklmiq4', gAU: '7z0c5rjm', gEU: 'pycd0esz', geo3: '79ww2qlz', geoEU: 'd6oq45gw' },
   },
-  max: { // no region charts on this dashboard: the 16 Maximum region series come from separate queries
-    tp: { cvr: 'sij6sjzl', sess: 'nxqyfr5s', chCvr: 'bkyp384a', chSess: 'irxdsgxg', devCvr: 'idhqxu31', devSess: 'ut6dmgl3', atc: 'bov1b5rq', fc: 'sydsccj1', cc: '00ez5hda' },
-    rb: { cvr: 'eotq1vlp', sess: 'e6iym0kj', chCvr: 'a3ptpewu', chSess: 'h4yxkna9', devCvr: 'zgfkixsf', devSess: '142c9aqp', atc: 'dcciy910', fc: '37yoz8p3', cc: '7h271vlc' },
+  max: { // region charts added by Mike on 2026-11-07 (TeePublic Europe = GB; Redbubble Europe = GB + DE + FR, scraper JA4 excluded)
+    tp: { cvr: 'sij6sjzl', sess: 'nxqyfr5s', chCvr: 'bkyp384a', chSess: 'irxdsgxg', devCvr: 'idhqxu31', devSess: 'ut6dmgl3', atc: 'bov1b5rq', fc: 'sydsccj1', cc: '00ez5hda', gUS: 'i5ypmeih', gCA: '7xf9k119', gAU: 'rwmysnde', gEU: 'hvv9sb3c', geo3: 'tcqrlq8u', geoEU: 'wnpv5uu7' },
+    rb: { cvr: 'eotq1vlp', sess: 'e6iym0kj', chCvr: 'a3ptpewu', chSess: 'h4yxkna9', devCvr: 'zgfkixsf', devSess: '142c9aqp', atc: 'dcciy910', fc: '37yoz8p3', cc: '7h271vlc', gUS: '5cxeanpf', gCA: 'g184msvl', gAU: '4o6vvmlq', gEU: 'sp4pudmk', geo3: '0oaro53e', geoEU: 'caxl62yg' },
   },
   mod: { // matched to the Strong dashboard by position (it is a clone); the dry run checks every chart against the stored numbers
     tp: { cvr: 'qmmqr11h', sess: 'iofuutuj', chCvr: 'pzujnrms', chSess: 'kqp8touz', gUS: 'x8dwvuwd', gCA: 'hkmgaxbl', gAU: 'k689jd2w', gEU: '82z900np', geo3: 'x0ha2872', geoEU: '7qr3a8gs', devCvr: 'xrz3clve', devSess: '5082z1hf', atc: '831g3x0p', fc: '1xebu7m4', cc: 'bq3agyy3' },
