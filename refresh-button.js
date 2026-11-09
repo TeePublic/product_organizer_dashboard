@@ -1,6 +1,7 @@
-// The CVR refresh note and link, right next to the sale pill on the CVR pages (Redbubble and TeePublic), where people already look
-// to see which day they are viewing. After a saved refresh:
-//     Refreshed automatically from Amplitude. Pulled Mon Nov 9, 11:42 AM ET, through Sun Nov 8.   Refresh data
+// The "Refresh data" button on the CVR pages (Redbubble and TeePublic), top right under the Bot filter. Its hover says when the CVR numbers
+// were last pulled from Amplitude and which day they run through, and whether a click would change anything. To stop people from clicking
+// it over and over: when the numbers are already current and were pulled in the last 4 hours, a click explains that instead of calling the
+// server (with a small "Refresh anyway" link), and the server itself allows one saved refresh an hour for everyone.
 // It shows only on the CVR pages; the Roadmap and A/B tests tabs have their own notes.
 // It also adds one line under the By product heading saying what that section covers, because By product is NOT part of the
 // automatic Amplitude refresh (Mike's Claude updates it once a day) and can end a day or two before the CVR numbers. Loaded after app.js.
@@ -21,18 +22,35 @@
     return p.weekday + ' ' + p.month + ' ' + p.day;
   }
   function asOf() { return (typeof D !== 'undefined' && D.asOf) || null; }
-  var when = snap && snap.applied && snap.createdAt ? fmtTime(snap.createdAt) : null;
+  var now = function () { return window.__cvrNow ? window.__cvrNow() : new Date(); }; // (the hook is only for tests)
+  function parseTime(s) { var d = new Date(String(s).replace(' ', 'T').replace(/([+-]\d\d)$/, '$1:00').replace(/(\.\d{3})\d+/, '$1')); return isNaN(d.getTime()) ? null : d; }
+  var pulled = snap && snap.applied && snap.createdAt ? parseTime(snap.createdAt) : null;       // when the saved refresh was made
+  var when = pulled ? fmtTime(snap.createdAt) : null;
   var through = snap && snap.applied ? fmtDay(snap.asOf) : null;
-  var message = when ? 'Refreshed automatically from Amplitude. Pulled ' + when + (through ? ', through ' + through : '') + '.'
-    : 'CVR numbers run through ' + (fmtDay(asOf()) || 'the latest finished day') + '.';
-  var scope = 'The CVR numbers (CVR and sessions, the channel, device, funnel and region breakdowns, revenue, orders and payments, in all three bot filters) are refreshed from Amplitude. By product, hourly and the other panels are updated by hand.';
+  function ago(d) { var m = Math.max(0, Math.round((now() - d) / 60000)); if (m < 60) return m + (m === 1 ? ' minute ago' : ' minutes ago'); var h = Math.floor(m / 60); if (h < 48) return h + (h === 1 ? ' hour ago' : ' hours ago'); return Math.floor(h / 24) + ' days ago'; }
+  // The newest day both sites have finished (TeePublic cuts days in Eastern time, Redbubble in Pacific, and a day needs 5 hours to settle), the same rule the server uses.
+  function addDays(iso, n) { var m = iso.split('-'); return new Date(Date.UTC(+m[0], +m[1] - 1, +m[2]) + n * 864e5).toISOString().slice(0, 10); }
+  function dateIn(tz, d) { return new Intl.DateTimeFormat('en-CA', { timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit' }).format(d); }
+  function lastComplete(tz) { return addDays(dateIn(tz, new Date(now().getTime() - 5 * 3600e3)), -1); }
+  function newestFullDay() { var a = lastComplete('America/New_York'), b = lastComplete('America/Los_Angeles'); return a < b ? a : b; }
+  var RECENT_HOURS = 4;
+  function current() { var have = asOf(); return !!(have && have >= newestFullDay()); }        // is the newest complete day already in?
+  function softLocked() { return !!(pulled && current() && now() - pulled < RECENT_HOURS * 3600e3); } // current AND pulled recently: a click would change nothing
+  function hover() {
+    var lines = [when ? 'CVR numbers last pulled from Amplitude: ' + when + (through ? ', through ' + through : '') + ' (' + ago(pulled) + ').'
+      : 'CVR numbers run through ' + (fmtDay(asOf()) || 'the latest finished day') + '. No automatic pull has been saved yet.'];
+    lines.push(current() ? 'Already up to date: the newest complete day (' + fmtDay(newestFullDay()) + ') is in.' : 'A newer complete day is available (' + fmtDay(newestFullDay()) + ').');
+    lines.push('It also refreshes by itself every morning around 8:30 AM ET, so you rarely need this button.');
+    lines.push('A refresh takes 3 to 4 minutes and is limited to one an hour for everyone.');
+    lines.push('CVR pages only: the roadmap, A/B tests and By product refresh separately.');
+    return lines.join('\n');
+  }
 
   // ---- the pieces (created once, so a running refresh survives the page redrawing around them) ----
   function el(tag, attrs, style) { var e = document.createElement(tag); for (var k in attrs) e.setAttribute(k, attrs[k]); if (style) e.setAttribute('style', style); return e; }
   var note = el('span', { 'data-cvr-note': '1' }, 'display:inline-flex;align-items:center;margin:8px 0 0;vertical-align:middle');
-  var txt = el('span', { 'data-cvr-stamp': '1', title: scope }); txt.textContent = message;
   var btn = el('button', { type: 'button', 'data-cvr-btn': '1', class: 'cvr-refresh-btn' }, '');
-  note.appendChild(btn); // the stamp text now lives in the hover on the top-right "Last refreshed" (Mike, Nov 9)
+  note.appendChild(btn); // the "last pulled" wording lives in this button's hover (Mike, Nov 9)
   var wrap = el('div', { 'data-cvr-panel': '1' }, 'display:none;flex:0 0 100%;width:100%;margin:8px 0 0;text-align:left');
   var card = el('div', { 'data-cvr-card': '1' }, 'max-width:560px;border:1px solid var(--line-2,#cfcfd6);background:var(--surface,#fff);color:var(--ink,#1a1a1a);border-radius:10px;padding:10px 12px;font-size:13px;line-height:1.45;box-shadow:0 2px 8px rgba(0,0,0,.12)');
   wrap.appendChild(card);
@@ -71,7 +89,10 @@
   new MutationObserver(later).observe(document.body, { childList: true, subtree: true });
 
   // ---- the button ----
-  function idle() { btn.disabled = false; btn.textContent = '↻ Refresh data'; btn.title = 'Refresh the CVR numbers from Amplitude: both sites, all three bot filters, revenue, orders and payments. It does not change the roadmap or anything else. Takes a minute or two. The CVR data now runs through ' + (fmtDay(asOf()) || 'the latest finished day') + '.'; }
+  function idle() {
+    btn.disabled = false; btn.textContent = '\u21bb Refresh data'; btn.title = hover();
+    var locked = softLocked(); btn.setAttribute('aria-disabled', locked ? 'true' : 'false'); btn.style.opacity = locked ? '.6' : ''; btn.style.cursor = locked ? 'default' : '';
+  }
   function show(title, lines, good) {
     card.textContent = '';
     var h = el('div', {}, 'font-weight:600;color:' + (good ? '#15803d' : '#b91c1c')); h.textContent = title; card.appendChild(h);
@@ -113,9 +134,22 @@
       });
   }
   idle();
-  btn.addEventListener('click', function () {
-    btn.disabled = true; btn.textContent = 'Refreshing...'; wrap.style.display = 'none';
+  function start() {
+    btn.disabled = true; btn.textContent = 'Refreshing...'; btn.removeAttribute('title'); wrap.style.display = 'none';
     state = { runId: null, lastDone: -1, still: 0, netFails: 0 };
     step();
+  }
+  btn.addEventListener('mouseenter', function () { if (!btn.disabled && btn.textContent.indexOf('Refreshing') !== 0) idle(); }); // keep "x minutes ago" and "up to date" current while the page stays open
+  btn.addEventListener('click', function () {
+    if (btn.disabled) return;
+    if (softLocked()) {
+      show('Already up to date', ['The CVR numbers were pulled ' + when + ' (' + ago(pulled) + ') and run through ' + (through || fmtDay(asOf())) + ', the newest complete day.', 'They also refresh by themselves every morning around 8:30 AM ET, so there is nothing new to fetch right now.'], true);
+      var again = el('button', { type: 'button', 'data-cvr-anyway': '1' }, 'margin-top:8px;cursor:pointer;border:0;background:none;color:var(--accent,#4f46e5);padding:0;font:inherit;font-size:12.5px;text-decoration:underline');
+      again.textContent = 'Refresh anyway (limited to one an hour)';
+      again.addEventListener('click', function () { start(); });
+      card.appendChild(again);
+      return;
+    }
+    start();
   });
 })();
