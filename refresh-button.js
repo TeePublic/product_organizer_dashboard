@@ -1,7 +1,9 @@
 // The CVR refresh note and link, right next to the sale pill on the CVR pages (Redbubble and TeePublic), where people already look
 // to see which day they are viewing. After a saved refresh:
 //     Refreshed automatically from Amplitude. Pulled Mon Nov 9, 11:42 AM ET, through Sun Nov 8.   Refresh CVR
-// It shows only on the CVR pages; the Roadmap and A/B tests tabs have their own notes. Loaded after app.js.
+// It shows only on the CVR pages; the Roadmap and A/B tests tabs have their own notes.
+// It also adds one line under the By product heading saying what that section covers, because By product is NOT part of the
+// automatic Amplitude refresh (Mike's Claude updates it once a day) and can end a day or two before the CVR numbers. Loaded after app.js.
 (function () {
   var snap = window.__cvrSnapshot; // set by /api/cvr-data when a saved refresh is being shown
 
@@ -49,9 +51,22 @@
     if (h) { if (note.parentNode !== h) { h.appendChild(note); h.appendChild(wrap); } return; }
     if (note.parentNode) { note.parentNode.removeChild(note); if (wrap.parentNode) wrap.parentNode.removeChild(wrap); } // not on a CVR page
   }
+  // ---- By product: say what it covers. It comes from Mike's Claude, not the automatic refresh, so it can end before the CVR numbers do ----
+  var pnote = el('p', { 'data-prod-note': '1' }, 'margin:2px 0 10px;font-size:12.5px;line-height:1.45;color:var(--muted,#6b7280)');
+  function productNote() {
+    var g = document.getElementById('g-product');
+    if (!g || typeof PROD === 'undefined' || !PROD) { if (pnote.parentNode) pnote.parentNode.removeChild(pnote); return; }
+    var ends = ['tp', 'rb'].map(function (b) { var d = PROD[b] && PROD[b].dates; return d && d.length ? d[d.length - 1] : null; }).filter(Boolean).sort();
+    var through = ends[0] || PROD.asOf, shown = fmtDay(through), site = asOf();
+    if (!shown) { if (pnote.parentNode) pnote.parentNode.removeChild(pnote); return; }
+    var text = 'By product is updated once a day by Mike\u2019s Claude, not by the automatic Amplitude refresh. It runs through ' + shown + '.' + (site && through < site ? ' Until it is extended, the newest day or two show No value.' : '');
+    if (pnote.textContent !== text) pnote.textContent = text;
+    var head = g.querySelector('.ghead');
+    if (head) { if (head.nextSibling !== pnote) g.insertBefore(pnote, head.nextSibling); } else if (pnote.parentNode !== g) g.insertBefore(pnote, g.firstChild);
+  }
   var queued = 0;
-  function later() { if (queued) return; queued = (window.requestAnimationFrame || window.setTimeout)(function () { queued = 0; place(); }); }
-  place();
+  function later() { if (queued) return; queued = (window.requestAnimationFrame || window.setTimeout)(function () { queued = 0; place(); productNote(); }); }
+  place(); productNote();
   new MutationObserver(later).observe(document.body, { childList: true, subtree: true });
 
   // ---- the button ----
@@ -82,7 +97,8 @@
           if (rep.waitSeconds >= 300) return stopWith('Paused: Amplitude\'s hourly limit is used up', [d + ' of ' + t + ' done and saved. Click again in a while to continue.'], false);
           if (state.still >= 4) return stopWith('Amplitude is slow right now', [d + ' of ' + t + ' done and saved. Click again later to continue.'], false);
           btn.textContent = 'Refreshing ' + d + '/' + t + '...';
-          show('Working: ' + d + ' of ' + t + ' done', [rep.pausedBecause ? 'Amplitude is answering slowly (' + rep.pausedBecause + '). Continuing automatically. Please stay on this page.' : 'Please stay on this page.'], true);
+          var slow = rep.pausedBecause && !/^(time )?budget/.test(rep.pausedBecause); // a round that just used up its 30 seconds is normal
+          show('Working: ' + d + ' of ' + t + ' done', [slow ? 'Amplitude is answering slowly (' + rep.pausedBecause + '). Continuing automatically. Please stay on this page.' : 'Continuing automatically. Please stay on this page.'], true);
           return void setTimeout(step, wait(Math.max(1, rep.waitSeconds || 2)));
         }
         if (rep.ok && rep.stored) { show('Refreshed through ' + rep.window.end, ['Reloading the page...'], true); return void setTimeout(function () { (window.__cvrReload || function () { location.reload(); })(); }, 1200); }

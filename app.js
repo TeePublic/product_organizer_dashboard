@@ -3,10 +3,7 @@ const DAY = 86400000;
 const WD = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 const WDL = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 const MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-// Newer news beats the sheet (Mike, Oct 27): a status or launch date posted in a project channel, sprint metrics channel or Jira
-// after the sheet was synced replaces the sheet's value. The sheet's value is kept as sheetS / sheetEta for the pop-up.
-if (typeof LATEST !== 'undefined' && typeof COMING !== 'undefined') COMING.teams.forEach(tm => (tm.items || []).forEach(it => { const L = LATEST[it.t]; if (!L) return;
-  if (L.s && L.s !== it.s) { it.sheetS = it.s; it.s = L.s; } }));
+// The roadmap's status and launch date come from the Product Org Dashboard sheet (roadmap-apply.js, Nov 9). Slack and Jira no longer change them.
   const parse = s => Date.parse(s + 'T00:00:00Z');
 const iso = t => new Date(t).toISOString().slice(0, 10);
 // Lowercase for mid-sentence use, but keep acronyms, months and site names as written: "in QA", not "in qa" (Mike, Oct 26).
@@ -2696,23 +2693,25 @@ function provHtml(it, LT, P) {
       (x.who && k !== 'sheet' ? ' · ' + (k === 'slack' || k === 'metrics' ? 'posted by ' : k === 'jira' ? 'changed by ' : '') + '<b>' + esc(x.who) + '</b>' : '') + (x.date ? ' · ' + esc(short(x.date)) : '') +
       (x.what ? '<br><span class="pvw">' + (k === 'slack' || k === 'meeting' ? 'What they said, in short: ' : 'What it shows: ') + esc(x.what) + '</span>' : '') + '</span>'; };
   const sheet = () => ({ kind: 'sheet', where: 'Active Work tab', url: SHEET_URL });
+  const SR = it.sheetSrc; // set by roadmap-apply.js when this card matches a row on the sheet
+  const sheetAt = what => Object.assign(sheet(), { date: SR && SR.on, what });
   const ltSrc = () => { if (!LT) return null; const m = (LT.src || '').match(/^(Slack|Jira)\s+(.*)$/i), k = m ? m[1].toLowerCase() : /Roadmap Review|standup/i.test(LT.src) ? 'meeting' : /DEAP-/.test(LT.src) ? 'jira' : 'slack'; return { kind: k, where: m ? m[2] : LT.src, date: LT.date, url: LT.url, what: LT.text, who: LT.who }; };
   const notFound = { kind: 'none', where: 'Not found in the roadmap sheet, Jira or the project\'s Slack channels' };
   const pm = pmOf(it.t, it.team), hasPm = typeof PEOPLE !== 'undefined' && PEOPLE[it.t] && PEOPLE[it.t].pm;
   const st = (DT.startSrc || '').match(/(DEAP-\d+)/), B = typeof BURN !== 'undefined' && BURN[it.t], v = teamVel(it.team), c = confOf(it), ce = cest(it);
-  const statusSrc = R.s || (it.sheetS ? ltSrc() : sheet());
+  const statusSrc = SR && SR.s ? sheetAt('Phase: ' + (SR.phase || 'not set') + '; Status: ' + (SR.status || 'not set')) : (R.s || (it.sheetS ? ltSrc() : sheet()));
   const SW = typeof SWOPE !== 'undefined' && (SWOPE[it.team] || SWOPE[PARENT(it.team)]);
   const WATCHRE = /slipp|slipped|\bslips?\b|delayed|\bdelay\b|behind schedule|pushed (back|out)|moved (out|back)|at risk|\bblocked\b|waiting on|carried over|won't make|will miss|missed (the |its )?(date|deadline)/i, upd0 = (LT && LT.text) || UPD[it.t] || '';
   const trig = c.k === 'warn' ? (upd0.split(/(?<=[.!?])\s/).find(x => WATCHRE.test(x)) || '') : '', word = trig ? (trig.match(WATCHRE) || [''])[0] : '';
   const rule = { ok: 'On track means nothing in its sources says it\'s late or blocked, and its launch date is before the Nov 20 freeze.', warn: trig ? 'Watch, because its latest update says: "' + trig + '"' : 'Watch: its latest update says it\'s slipping, delayed or blocked.', bad: 'At risk: ' + (c.why[0] || ''), none: 'No date yet: no launch date in the sources.', live: 'Launched.' }[c.k] || '';
   const rows = [
-    ['Why it\'s on the roadmap', it.inj ? 'Added since the Oct 13 roadmap review' : 'On the roadmap sheet', R.origin || (it.inj ? notFound : sheet())],
+    ['Why it\'s on the roadmap', it.inj ? 'Added since the Oct 13 roadmap review' : 'On the roadmap sheet', SR ? sheetAt(SR.noJira ? SR.note : 'Row on the sheet, linked to Jira ' + SR.jira) : (R.origin || (it.inj ? notFound : sheet()))],
     ['Product Manager', pm || 'Not listed', R.pm || (hasPm ? notFound : { kind: 'calc', where: 'None listed for this project, so this shows who owns most of ' + tn + '\'s roadmap' }), R.pm_also],
     ['Team', tn, R.team || sheet()],
     ['Goal', OBJN(it.obj) || 'None set', R.obj || sheet()],
     ['Site', SITEN(it.site) || 'Both', R.site || sheet()],
-    ['Status', it.s || 'TBD', statusSrc, R.s_sheet || (it.sheetS ? Object.assign(sheet(), { what: 'Still says ' + it.sheetS }) : null)],
-    ['Launch date', rng(it.eta) || 'TBD', R.eta || (it.sheetEta ? ltSrc() : sheet()), R.eta_sheet || (it.sheetEta ? Object.assign(sheet(), { what: 'Still says ' + it.sheetEta }) : null)],
+    ['Status', it.s || 'TBD', statusSrc, SR && SR.s ? null : (R.s_sheet || (it.sheetS ? Object.assign(sheet(), { what: 'Still says ' + it.sheetS }) : null))],
+    ['Launch date', rng(it.eta) || 'TBD', SR && SR.eta ? sheetAt('Launch date on the sheet: ' + SR.eta) : (R.eta || (it.sheetEta ? ltSrc() : sheet())), SR && SR.eta ? null : (R.eta_sheet || (it.sheetEta ? Object.assign(sheet(), { what: 'Still says ' + it.sheetEta }) : null))],
     DT.start ? ['Work started', short(DT.start), R.start || (st ? { kind: 'jira', where: st[1], url: JU(st[1]), what: 'The first ticket moved to In Progress on ' + short(DT.start) } : { kind: 'jira', where: DT.startSrc || '' })] : null,
     ['Confidence', c.l, { kind: 'calc', where: rule }, c.k === 'live' ? null : c.k === 'warn' && trig && LT ? Object.assign(ltSrc(), { pre: 'Based on', what: null }) : /points left/.test(c.why[0] || '') && B ? { pre: 'Based on', kind: 'jira', where: B.epic + ', points left on its tickets', url: JU(B.epic), date: B.asOf, what: (B.total - B.done) + ' of ' + B.total + ' points left, against the team pace below' } : Object.assign({}, statusSrc || {}, { pre: 'Based on' })],
     v && SW ? ['Team pace', 'About ' + Math.round(v.wk * 2) + ' points a sprint', { kind: 'metrics', where: '#team-deap-metrics-' + ({ customer: 'customer', plc: 'plc', de: 'data-engineering', dashery: 'dashery', search: 'search', artist: 'artist' }[PARENT(it.team) || it.team] || it.team), who: 'Matt Swope', date: SW.date, url: SW.link, what: SW.sprint + ': ' + (SW.summary || '').split(/(?<=[.!?])\s/)[0] }] : null,
@@ -3645,8 +3644,8 @@ function render() {
   if (!$('#brand').innerHTML) $('#brand').innerHTML = '<svg class="slogo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="40" height="40" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#14202e"/><rect x="7" y="17" width="4.6" height="8" rx="1.6" fill="#34465a"/><rect x="13.7" y="12" width="4.6" height="13" rx="1.6" fill="#34465a"/><rect x="20.4" y="7" width="4.6" height="18" rx="1.6" fill="#4fd18b"/></svg>' + '<span class="bstack"><span class="beyebrow">Articore</span><span class="btitle">Product Org Dashboard</span></span>';
   $('#meta').innerHTML = 
     (TKOFF ? '<button type="button" class="tkshow" data-act="ticker" title="Show the headline ticker"><span class="tkdot" aria-hidden="true"></span>Show today\'s headlines</button>' : '');
-  $('#meta').insertAdjacentHTML('beforeend', '<span class="util' + (CDTOP ? ' quiet' : '') + '">' + '<div class="about"><button type="button" class="linkbtn" id="aboutbtn" aria-haspopup="true" aria-expanded="false">' + '<svg class="abico" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><ellipse cx="8" cy="3.6" rx="5.5" ry="2.1" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M2.5 3.6v8.8c0 1.2 2.5 2.1 5.5 2.1s5.5-.9 5.5-2.1V3.6M2.5 8c0 1.2 2.5 2.1 5.5 2.1s5.5-.9 5.5-2.1" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>About this data' + ' <span aria-hidden="true">▾</span></button><div class="amenu" id="amenu" hidden role="menu">' + srcMenu(cvr) + '</div></div>' + (CDTOP || '') + hint('↻ <span class="rfll">Last refreshed </span><b>' + esc(REFRESH.last) + '</b>', 'rfl rflnav', '<b class="tiph nosrc">How often this page refreshes</b><ul class="hul nrul"><li>🔄 <b>Once a day:</b> about 8:00 AM ET, the whole board</li><li>🌅 <b>Each refresh:</b> yesterday\'s full numbers, overnight Slack, tests and the roadmap</li><li>📅 <b>Numbers cover full days:</b> the CVR pages show yesterday at the latest</li></ul>') /* how often it refreshes, on hover (Mike, Oct 28) */  + '</span>')
-  tickCD(); // fill the countdown tiles right away, so it never flashes empty between tab clicks (Mike, Oct 27)
+    $('#meta').insertAdjacentHTML('beforeend', '<span class="util' + (CDTOP ? ' quiet' : '') + '">' + '<div class="about"><button type="button" class="linkbtn" id="aboutbtn" aria-haspopup="true" aria-expanded="false">' + '<svg class="abico" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><ellipse cx="8" cy="3.6" rx="5.5" ry="2.1" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M2.5 3.6v8.8c0 1.2 2.5 2.1 5.5 2.1s5.5-.9 5.5-2.1V3.6M2.5 8c0 1.2 2.5 2.1 5.5 2.1s5.5-.9 5.5-2.1" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>About this data' + ' <span aria-hidden="true">▾</span></button><div class="amenu" id="amenu" hidden role="menu">' + srcMenu(cvr) + '</div></div>' + (CDTOP || '') + hint('↻ <span class="rfll">Last refreshed by Mike’s Claude </span><b>' + esc(REFRESH.last) + '</b>', 'rfl rflnav', '<b class="tiph nosrc">How this page refreshes</b><ul class="hul nrul"><li>🤖 <b>Mike’s Claude, once a day (about 8:00 AM ET):</b> the hand-curated panels: By product, Apple Pay, hourly, Trending, incidents and wins</li><li>📈 <b>CVR numbers:</b> pulled from Amplitude automatically at about 8:30 AM ET, or any time with Refresh CVR next to the sale pill</li><li>🗺️ <b>Roadmap tab:</b> pulled from the sheet at about 7:40 AM and 3:40 PM ET</li><li>🧪 <b>A/B tests:</b> refreshed from Amplitude with the refresh button on that tab</li><li>📅 <b>Numbers cover full days:</b> the CVR pages show yesterday at the latest</li></ul>') /* how often it refreshes, on hover (Mike, Oct 28) */  + '</span>')
+    tickCD(); // fill the countdown tiles right away, so it never flashes empty between tab clicks (Mike, Oct 27)
   const main = $('#main');
   if (state.view !== 'daily') { HINTS = []; hideHint(); main.innerHTML = state.view === 'tests' ? testsHtml() : state.view === 'impact' ? impactHtml() : state.view === 'soon' ? comingHtml() : state.view === 'trending' ? trendingHtml() : standupHtml(); return; }
   if (b === 'ds') { HINTS = []; hideHint(); main.innerHTML = dasheryHtml(); return; }
