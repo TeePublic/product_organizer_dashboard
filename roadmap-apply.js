@@ -2,19 +2,32 @@
 // Always records what the sheet WOULD change in window.__roadmapDiff (open the console to read it).
 // Changes the board, and sets the "pulled from the sheet" note, only when APPLY is true.
 (function () {
-  const APPLY = true; // flip after reviewing window.__roadmapDiff or the dry run from /api/roadmap-refresh
-  const FIELDS = ['eta']; // fields the sheet may change on the board; add 's' and 'imp' later (the note below follows this list)
+  const APPLY = true;  // the sheet drives the fields below; set to false to show the data file as written
+  const FIELDS = ['eta', 's']; // fields the sheet changes on the board: launch date and status (the note below follows this list)
+  const DROP_UNMATCHED = false; // true removes board items that have no row on the sheet (Jira-only or tracker-only cards). Read window.__roadmapUnmatched first.
+  const JIRA_BASE = 'https://articore.atlassian.net/browse/';
+  const NO_JIRA_NOTE = 'No Jira ticket is linked on the sheet row yet. Reach out to the PM.'; // shown where the card's source is drawn
+  const MIN_SHEET_ROWS = 20;    // safety: never drop anything if the snapshot has fewer rows than this (a bad or empty pull)
   const snap = window.__roadmapSnapshot;
   if (!snap || !snap.rows || typeof COMING === 'undefined') return;
   const jiraOf = (x) => ((x && x.link) || '').match(/[A-Z][A-Z0-9]+-\d+/);
   const byJira = {};
   Object.entries(snap.rows).forEach(([n, r]) => { if (r.jira) (byJira[r.jira] = byJira[r.jira] || []).push(n); });
-  const diff = [];
+  // Matching never needs a Jira link: sheet key, then Jira key (when unique), then exact title, then title ignoring case and punctuation (when unique).
+  const norm = (x) => String(x || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+  const byNorm = {};
+  Object.keys(snap.rows).forEach((n) => { (byNorm[norm(n)] = byNorm[norm(n)] || []).push(n); });
+  const normMatch = (x) => { const k = byNorm[norm(x)]; return k && k.length === 1 ? k[0] : null; };
+  const isJiraLink = (u) => /atlassian\.net\/browse\//.test(u || '');
+  const diff = [], unmatched = [], unmatchedItems = [], noJira = [];
   COMING.teams.forEach((team) => team.items.forEach((item) => {
     const j = jiraOf(item), jn = j && byJira[j[0]] && byJira[j[0]].length === 1 ? byJira[j[0]][0] : null;
-    const name = [item.sheet && item.sheet.trim(), jn, item.t].find((n) => n && snap.rows[n]);
-    if (!name) return;
+    const name = [item.sheet && item.sheet.trim(), jn, item.t, item.sheet && normMatch(item.sheet), normMatch(item.t)].find((n) => n && snap.rows[n]);
+    if (!name) { unmatchedItems.push([team, item]); unmatched.push(team.key + ' | ' + item.t + ' | ' + (item.s || '') + ' | ' + (item.eta || '') + ' | ' + ((item.link || '').replace(/.*browse\//, '') || '-')); return; }
     const row = snap.rows[name], p = {};
+    // The Jira link comes from the sheet row only. No link there means the card says to ask the PM, never a link Jira or Slack found.
+    if (row.jira) { if (APPLY) { item.link = JIRA_BASE + row.jira; item.noJira = false; delete item.jiraNote; } }
+    else { noJira.push(team.key + ' | ' + item.t); if (APPLY) { if (isJiraLink(item.link)) delete item.link; item.noJira = true; item.jiraNote = NO_JIRA_NOTE; } }
     if (row.s && row.s !== item.s) p.s = row.s;
     if (row.eta && row.eta !== item.eta) p.eta = row.eta;
     if (item.impSrc === 'Roadmap sheet estimate' && row.imp && row.imp !== item.imp) p.imp = row.imp;
@@ -22,6 +35,15 @@
     if (Object.keys(p).length) { diff.push({ item: team.key + '|' + item.t, from: { s: item.s, eta: item.eta, imp: item.imp }, to: p }); if (APPLY) Object.assign(item, p); }
   }));
   window.__roadmapDiff = diff;
+  window.__roadmapNoJira = noJira; // cards on the sheet whose row has no Jira link yet: "team | title"
+  window.__roadmapUnmatched = unmatched; // board cards with no row on the sheet: "team | title | status | launch | Jira key"
+  if (APPLY && DROP_UNMATCHED) {
+    if (Object.keys(snap.rows).length < MIN_SHEET_ROWS) window.__roadmapDropSkipped = 'snapshot has only ' + Object.keys(snap.rows).length + ' rows';
+    else {
+      const gone = new Set(unmatchedItems.map((x) => x[1]));
+      COMING.teams.forEach((team) => { team.items = team.items.filter((it) => !gone.has(it)); });
+    }
+  }
 
   // "Pulled Sun Nov 8, 1:13 PM ET", in the same style as the A/B page note.
   function pulledAt(createdAt) {
