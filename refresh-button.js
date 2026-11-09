@@ -31,8 +31,8 @@
   function el(tag, attrs, style) { var e = document.createElement(tag); for (var k in attrs) e.setAttribute(k, attrs[k]); if (style) e.setAttribute('style', style); return e; }
   var note = el('span', { 'data-cvr-note': '1' }, 'display:inline-flex;align-items:center;flex-wrap:wrap;gap:4px 10px;margin:4px 0 4px 12px;font-size:12.5px;line-height:1.4;color:var(--muted,#6b7280);vertical-align:middle');
   var txt = el('span', { 'data-cvr-stamp': '1', title: scope }); txt.textContent = message;
-  var btn = el('button', { type: 'button', 'data-cvr-btn': '1' }, 'cursor:pointer;border:0;background:none;color:var(--accent,#4f46e5);padding:0;font:inherit;font-weight:600;text-decoration:underline');
-  note.appendChild(txt); note.appendChild(btn);
+  var btn = el('button', { type: 'button', 'data-cvr-btn': '1', class: 'cvr-refresh-btn' }, '');
+  note.appendChild(btn); // the stamp text now lives in the hover on the top-right "Last refreshed" (Mike, Nov 9)
   var wrap = el('div', { 'data-cvr-panel': '1' }, 'display:none;flex:0 0 100%;width:100%;margin:4px 0 8px');
   var card = el('div', { 'data-cvr-card': '1' }, 'max-width:560px;border:1px solid var(--line-2,#cfcfd6);background:var(--surface,#fff);color:var(--ink,#1a1a1a);border-radius:10px;padding:10px 12px;font-size:13px;line-height:1.45;box-shadow:0 2px 8px rgba(0,0,0,.12)');
   wrap.appendChild(card);
@@ -70,7 +70,7 @@
   new MutationObserver(later).observe(document.body, { childList: true, subtree: true });
 
   // ---- the button ----
-  function idle() { btn.disabled = false; btn.textContent = 'Refresh CVR'; btn.title = 'Refresh the CVR numbers from Amplitude: both sites, all three bot filters, revenue, orders and payments. It does not change the roadmap or anything else. Takes a minute or two. The CVR data now runs through ' + (fmtDay(asOf()) || 'the latest finished day') + '.'; }
+  function idle() { btn.disabled = false; btn.textContent = '↻ Refresh CVR'; btn.title = 'Refresh the CVR numbers from Amplitude: both sites, all three bot filters, revenue, orders and payments. It does not change the roadmap or anything else. Takes a minute or two. The CVR data now runs through ' + (fmtDay(asOf()) || 'the latest finished day') + '.'; }
   function show(title, lines, good) {
     card.textContent = '';
     var h = el('div', {}, 'font-weight:600;color:' + (good ? '#15803d' : '#b91c1c')); h.textContent = title; card.appendChild(h);
