@@ -9,6 +9,9 @@
     "api/ab-refresh.js": { "maxDuration": 300 }
   },
   "crons": [
-    { "path": "/api/roadmap-refresh", "schedule": "40 12,20 * * *" }
+    { "path": "/api/roadmap-refresh", "schedule": "40 12,20 * * *" },
+    { "path": "/api/refresh-cvr?c=1", "schedule": "30 13 * * *" },
+    { "path": "/api/refresh-cvr?c=2", "schedule": "40 13 * * *" },
+    { "path": "/api/refresh-cvr?c=3", "schedule": "50 13 * * *" }
   ]
 }

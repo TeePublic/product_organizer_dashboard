@@ -5,15 +5,18 @@ export const config = {
   matcher: ['/((?!api/auth|favicon.ico).*)'],
 }
 
+// Vercel cron jobs that call us without a login: the roadmap pull and the CVR refresh
+const CRON_PATHS = ['/api/roadmap-refresh', '/api/refresh-cvr']
+
 export default async function middleware(request) {
   // Dormant until Okta env vars exist
   if (!authConfigured()) return next()
 
   const url = new URL(request.url)
 
-  // Vercel cron for the roadmap pull: only this path, only with the exact secret
+  // Vercel cron jobs (roadmap pull, CVR refresh): only these paths, only with the exact secret
   const secret = process.env.CRON_SECRET
-  if (secret && url.pathname === '/api/roadmap-refresh' && request.headers.get('authorization') === `Bearer ${secret}`) return next()
+  if (secret && CRON_PATHS.includes(url.pathname) && request.headers.get('authorization') === `Bearer ${secret}`) return next()
 
   const token = getCookie(request.headers.get('cookie'), SESSION_COOKIE)
   if (token && (await verifyToken(token))) return next()
