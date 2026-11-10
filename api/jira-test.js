@@ -1,5 +1,11 @@
 // api/jira-test.js  (throwaway; delete after testing)
 const MCP = 'https://mcp.atlassian.com/v2/mcp';
+const CONNECTOR = 'jira/product-organizer-jira';
+const SCOPES = ['search:jira:agent-interface'];
+
+// Try this first. If you want to test the shortcut, swap 'dashboard-jira'
+// for your Slack member ID (starts with U) and redeploy.
+const subject = { type: 'user', id: 'dashboard-jira' };
 
 async function rpc(token, body, sessionId) {
   const r = await fetch(MCP, {
@@ -15,21 +21,19 @@ async function rpc(token, body, sessionId) {
   const text = await r.text();
   let json = null;
   try {
-    const dataLine = text.split('\n').find(l => l.startsWith('data:'));
-    json = JSON.parse(dataLine ? dataLine.slice(5).trim() : text);
+    const d = text.split('\n').find(l => l.startsWith('data:'));
+    json = JSON.parse(d ? d.slice(5).trim() : text);
   } catch (_) {}
   return { status: r.status, sessionId: r.headers.get('mcp-session-id'), json, raw: text.slice(0, 300) };
 }
 
 export default async function handler(req, res) {
   const out = {};
+  let m;
   try {
-    const { getToken } = await import('@vercel/connect');
-    const token = await getToken('jira/product-organizer-jira', {
-    subject: { type: 'app' },
-    scopes: ['search:jira:agent-interface'],
-    });
-    out.tokenReceived = !!token;
+    m = await import('@vercel/connect');
+    const token = await m.getToken(CONNECTOR, { subject, scopes: SCOPES });
+    out.tokenReceived = true;
 
     const init = await rpc(token, {
       jsonrpc: '2.0', id: 1, method: 'initialize',
@@ -48,11 +52,24 @@ export default async function handler(req, res) {
       },
     }, init.sessionId);
     out.callStatus = call.status;
-    const txt = call.json?.result?.content?.[0]?.text;
     out.isError = call.json?.result?.isError || !!call.json?.error;
-    out.sample = (txt || call.raw || '').slice(0, 800);
+    out.sample = (call.json?.result?.content?.[0]?.text || call.raw || '').slice(0, 800);
   } catch (e) {
-    out.error = String(e && e.message || e).slice(0, 300);
+    const needsConsent = e && (e.name === 'UserAuthorizationRequiredError' || e.name === 'NoValidTokenError');
+    if (m && needsConsent) {
+      try {
+        const { url } = await m.startAuthorization(
+          CONNECTOR,
+          { subject, scopes: SCOPES },
+          { callbackUrl: `https://${req.headers.host}/api/jira-test` },
+        );
+        out.authorizeUrl = url;
+      } catch (e2) {
+        out.authError = String(e2 && e2.message || e2).slice(0, 300);
+      }
+    } else {
+      out.error = String(e && e.message || e).slice(0, 300);
+    }
   }
   res.status(200).json(out);
 }
