@@ -66,9 +66,9 @@ export default async function handler(req, res, deps = {}) {
 
   try {
     const payload = JSON.stringify({ epics: pulled.results });
-    await sql`CREATE TABLE IF NOT EXISTS jira_progress_snapshots (id bigserial PRIMARY KEY, created_at timestamptz NOT NULL DEFAULT now(), payload jsonb NOT NULL)`;
-    const ins = await sql`INSERT INTO jira_progress_snapshots (payload) VALUES (${payload}::jsonb) RETURNING id`;
-    await sql`DELETE FROM jira_progress_snapshots WHERE id NOT IN (SELECT id FROM jira_progress_snapshots ORDER BY created_at DESC LIMIT ${KEEP})`;
+    await sql`CREATE TABLE IF NOT EXISTS roadmap_jira_progress_snapshots (id bigserial PRIMARY KEY, created_at timestamptz NOT NULL DEFAULT now(), payload jsonb NOT NULL)`;
+    const ins = await sql`INSERT INTO roadmap_jira_progress_snapshots (payload) VALUES (${payload}::jsonb) RETURNING id`;
+    await sql`DELETE FROM roadmap_jira_progress_snapshots WHERE id NOT IN (SELECT id FROM roadmap_jira_progress_snapshots ORDER BY created_at DESC LIMIT ${KEEP})`;
     console.log('[jira-progress] saved snapshot ' + ins[0].id + ' by ' + report.who + '; epics ' + report.pulled + '; cards that would change ' + report.wouldChange);
     return send(200, { ...report, stored: true, snapshotId: Number(ins[0].id) });
   } catch (e) {
