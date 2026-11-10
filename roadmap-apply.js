@@ -4,7 +4,7 @@
 (function () {
   const APPLY = true;  // the sheet drives the fields below; set to false to show the data file as written
   const FIELDS = ['eta', 's']; // fields the sheet changes on the board: launch date and status (the note below follows this list)
-  const HIDE_TITLES = ['Feed fixes', 'Analytics data for the pricing test']; // cards to hide by title (Jira-only or tracker-only, not on the sheet); matched ignoring case and punctuation
+  const HIDE_TITLES = ['Feed fixes', 'Analytics data for the pricing test', 'Search cluster migration']; // cards to hide by title (Jira-only or tracker-only, not on the sheet); matched ignoring case and punctuation
   const DROP_UNMATCHED = false; // true removes board items that have no row on the sheet (Jira-only or tracker-only cards). Read window.__roadmapUnmatched first.
   const JIRA_BASE = 'https://articore.atlassian.net/browse/';
   const NO_JIRA_NOTE = 'No Jira ticket is linked on the sheet row yet. Reach out to the PM.'; // shown where the card's source is drawn
