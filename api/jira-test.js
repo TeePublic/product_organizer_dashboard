@@ -1,5 +1,5 @@
-// api/jira-test.js
-module.exports = async function handler(req, res) {
+// api/jira-test.js  (delete after testing)
+export default async function handler(req, res) {
   const out = {};
   try {
     const { getToken } = await import('@vercel/connect');
@@ -13,4 +13,4 @@ module.exports = async function handler(req, res) {
     out.error = String(e && e.message || e).slice(0, 300);
   }
   res.status(200).json(out);
-};
+}
