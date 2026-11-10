@@ -53,7 +53,8 @@ export default async function handler(req, res, deps = {}) {
   const changed = [], same = [];
   for (const [k, now] of Object.entries(pulled.results)) {
     const old = epics[k];
-    const row = { epic: k, cards: old.titles, onCardNow: `${old.pts[0]} of ${old.pts[1]} ${old.unit}`, fromJira: `${now.done} of ${now.total} ${now.unit}`, children: now.children };
+    const row = { epic: k, cards: old.titles, onCardNow: `${old.pts[0]} of ${old.pts[1]} ${old.unit}`, fromJira: `${now.done} of ${now.total} ${now.unit}`, kind: now.kind,
+      ...(now.kind === 'epic' ? { tickets: now.children, withPoints: now.pointed, droppedNotCounted: now.skipped } : {}) };
     (old.pts[0] === now.done && old.pts[1] === now.total && old.unit === now.unit ? same : changed).push(row);
   }
   const failed = pulled.errors;

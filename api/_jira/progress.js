@@ -1,4 +1,4 @@
-// Reads Jira through the Vercel Connect Jira connector (Atlassian MCP server) and works out each epic's progress.
+// Reads Jira through the Vercel Connect Jira connector (Atlassian MCP server) and works out each card's progress.
 // Plain code, no AI. Used by /api/jira-progress-refresh. The underscore folder keeps this from becoming an endpoint.
 const MCP = 'https://mcp.atlassian.com/v2/mcp';
 const CONNECTOR = 'jira/product-organizer-jira';
@@ -6,9 +6,13 @@ const CLOUD = 'articore.atlassian.net';
 const POINTS = 'customfield_10032'; // "Story Points" on this site
 const KEY = /^[A-Z][A-Z0-9]+-\d+$/;
 
+// Two judgment calls, easy to change here:
+const POINT_COVERAGE = 0.75; // an epic counts story points only when at least this share of its tickets carry points; otherwise it counts tickets
+const NOT_COUNTED = /^(discarded|won'?t do|cancel+ed|duplicate|rejected)$/i; // dropped tickets are left out of both the done and the total
+
 export const epicKey = (link) => (String(link || '').match(/\b([A-Z][A-Z0-9]+-\d+)\b/) || [])[1] || null;
 
-// The epics behind the cards that already show a progress bar: every board or team card that has pts and a Jira link.
+// The Jira items behind the cards that already show a progress bar: every board or team card that has pts and a Jira link.
 export function epicsFromBoard(coming) {
   const cards = [...(coming?.board || []), ...(coming?.teams || []).flatMap((t) => t.items || [])];
   const out = {};
@@ -21,19 +25,29 @@ export function epicsFromBoard(coming) {
   return out;
 }
 
-// One epic's children -> done / total. Story points when the epic has any; otherwise ticket counts.
+const r1 = (n) => Math.round(n * 10) / 10;
+const pointsOf = (f) => Number(f?.customFields?.['Story Points']?.value ?? f?.[POINTS]) || 0;
+const isDone = (f) => f?.status?.statusCategory?.name === 'Done';
+
+// An epic's children -> done / total. Story points when most tickets carry them; otherwise ticket counts.
 export function summarize(issues) {
-  let pts = 0, donePts = 0, done = 0;
-  for (const i of issues) {
-    const f = i.fields || {};
-    const raw = f.customFields?.['Story Points']?.value ?? f[POINTS];
-    const sp = Number(raw) || 0;
-    const isDone = f.status?.statusCategory?.name === 'Done';
-    pts += sp; if (isDone) { donePts += sp; done += 1; }
+  const live = issues.filter((i) => !NOT_COUNTED.test(i.fields?.status?.name || ''));
+  let pts = 0, donePts = 0, done = 0, pointed = 0;
+  for (const i of live) {
+    const sp = pointsOf(i.fields);
+    pts += sp; if (sp > 0) pointed++;
+    if (isDone(i.fields)) { done++; donePts += sp; }
   }
-  const r = (n) => Math.round(n * 10) / 10;
-  return pts > 0 ? { done: r(donePts), total: r(pts), unit: 'points', children: issues.length }
-    : { done, total: issues.length, unit: 'issues', children: issues.length };
+  const base = { kind: 'epic', children: live.length, pointed, skipped: issues.length - live.length };
+  return pts > 0 && live.length && pointed / live.length >= POINT_COVERAGE
+    ? { done: r1(donePts), total: r1(pts), unit: 'points', ...base }
+    : { done, total: live.length, unit: 'issues', ...base };
+}
+
+// A card that points at a single ticket (story, task or bug), not an epic: its own points and its own status.
+export function ticketSummary(f) {
+  const pts = pointsOf(f), d = isDone(f);
+  return pts > 0 ? { done: d ? pts : 0, total: pts, unit: 'points', kind: 'ticket' } : { done: d ? 1 : 0, total: 1, unit: 'issues', kind: 'ticket' };
 }
 
 async function rpc(fetchImpl, token, body, sessionId) {
@@ -67,28 +81,41 @@ export async function openSession({ getToken, subjectId, fetchImpl = fetch }) {
   };
 }
 
-export async function fetchEpic(session, key) {
-  if (!KEY.test(key)) throw new Error('not a Jira key: ' + key);
+async function search(session, jql, fields) {
   const issues = [];
   let next;
   for (let page = 0; page < 10; page++) {
-    const res = await session.call('searchJiraIssuesUsingJql', { cloudId: CLOUD, jql: `parent = ${key}`, maxResults: 100, fields: ['status', POINTS], ...(next ? { nextPageToken: next } : {}) });
+    const res = await session.call('searchJiraIssuesUsingJql', { cloudId: CLOUD, jql, maxResults: 100, fields, ...(next ? { nextPageToken: next } : {}) });
     const d = res.data ?? res;
     issues.push(...(d.issues || []));
     next = d.nextPageToken;
     if (d.isLast !== false || !next) break;
   }
-  return summarize(issues);
+  return issues;
 }
 
-// Four epics at a time. One failed epic is reported by key and does not stop the others.
+// Pulls every key. One lookup says which keys are epics and which are single tickets; epics then get their children read, four at a time.
+// One failed key is reported by key and does not stop the others.
 export async function pullAll(session, keys, concurrency = 4) {
   const results = {}, errors = {};
-  const queue = [...keys];
+  for (const k of keys) if (!KEY.test(k)) { errors[k] = 'not a Jira key'; }
+  const ok = keys.filter((k) => !errors[k]);
+  if (!ok.length) return { results, errors };
+  let items = {};
+  try {
+    for (const i of await search(session, `key in (${ok.join(', ')})`, ['issuetype', 'status', POINTS])) items[i.key] = i;
+  } catch (e) { for (const k of ok) errors[k] = e.message; return { results, errors }; }
+  const queue = [];
+  for (const k of ok) {
+    const it = items[k];
+    if (!it) errors[k] = 'Jira did not return this ticket (deleted, or no access)';
+    else if (it.fields?.issuetype?.name === 'Epic') queue.push(k);
+    else results[k] = ticketSummary(it.fields);
+  }
   await Promise.all(Array.from({ length: Math.min(concurrency, queue.length) }, async () => {
     while (queue.length) {
       const k = queue.shift();
-      try { results[k] = await fetchEpic(session, k); } catch (e) { errors[k] = e.message; }
+      try { results[k] = summarize(await search(session, `parent = ${k}`, ['status', POINTS])); } catch (e) { errors[k] = e.message; }
     }
   }));
   return { results, errors };
