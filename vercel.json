@@ -13,6 +13,7 @@
     { "path": "/api/refresh-cvr?c=1", "schedule": "30 13 * * *" },
     { "path": "/api/refresh-cvr?c=2", "schedule": "40 13 * * *" },
     { "path": "/api/refresh-cvr?c=3", "schedule": "50 13 * * *" },
-    { "path": "/api/ab-refresh", "schedule": "0 13 * * *" }
+    { "path": "/api/ab-refresh", "schedule": "0 13 * * *" },
+    { "path": "/api/jira-progress-refresh", "schedule": "20 11 * * *" }
   ]
 }
