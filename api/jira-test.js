@@ -1,7 +1,7 @@
 // api/jira-test.js  (throwaway; delete after testing)
 const MCP = 'https://mcp.atlassian.com/v2/mcp';
 const CONNECTOR = 'jira/product-organizer-jira';
-const SCOPES = ['search:jira:agent-interface'];
+const SCOPES = undefined;
 
 // Try this first. If you want to test the shortcut, swap 'dashboard-jira'
 // for your Slack member ID (starts with U) and redeploy.
