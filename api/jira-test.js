@@ -25,7 +25,10 @@ export default async function handler(req, res) {
   const out = {};
   try {
     const { getToken } = await import('@vercel/connect');
-    const token = await getToken('jira/product-organizer-jira', { subject: { type: 'app' } });
+    const token = await getToken('jira/product-organizer-jira', {
+    subject: { type: 'app' },
+    scopes: ['search:jira:agent-interface'],
+    });
     out.tokenReceived = !!token;
 
     const init = await rpc(token, {
