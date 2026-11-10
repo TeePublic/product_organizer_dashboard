@@ -90,12 +90,21 @@
 
   // ---- the button ----
   function idle() {
-    btn.disabled = false; btn.textContent = '\u21bb Refresh data'; btn.title = hover();
+    btn.disabled = false; btn.textContent = '\u21bb Refresh Amplitude data'; btn.title = hover();
     var locked = softLocked(); btn.setAttribute('aria-disabled', locked ? 'true' : 'false'); btn.style.opacity = locked ? '.6' : ''; btn.style.cursor = locked ? 'default' : '';
   }
+  // The message card can always be closed: the x, the Escape key, or a click anywhere outside it (Mike, Nov 10: it would not go away).
+  // Closing it during a running refresh only hides the progress card; the button still shows the count and the refresh carries on.
+  var userClosed = false;
+  function closeCard() { if (wrap.style.display !== 'none') { wrap.style.display = 'none'; userClosed = true; } }
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeCard(); });
+  document.addEventListener('click', function (e) { if (wrap.style.display !== 'none' && !wrap.contains(e.target) && !note.contains(e.target)) closeCard(); });
   function show(title, lines, good) {
     card.textContent = '';
-    var h = el('div', {}, 'font-weight:600;color:' + (good ? '#15803d' : '#b91c1c')); h.textContent = title; card.appendChild(h);
+    var head = el('div', {}, 'display:flex;justify-content:space-between;align-items:flex-start;gap:12px');
+    var h = el('div', {}, 'font-weight:600;color:' + (good ? '#15803d' : '#b91c1c')); h.textContent = title; head.appendChild(h);
+    var x = el('button', { type: 'button', 'data-cvr-close': '1', 'aria-label': 'Close this message' }, 'cursor:pointer;border:0;background:none;color:var(--muted,#6b7280);font-size:20px;line-height:1;padding:0 2px;margin:-2px -2px 0 0');
+    x.textContent = '×'; x.addEventListener('click', closeCard); head.appendChild(x); card.appendChild(head);
     (lines || []).slice(0, 18).forEach(function (l) { var p = el('div', {}, 'margin-top:4px;white-space:pre-wrap;word-break:break-word'); p.textContent = l; card.appendChild(p); });
     wrap.style.display = 'block';
   }
@@ -120,7 +129,7 @@
           if (state.still >= 4) return stopWith('Amplitude is slow right now', [d + ' of ' + t + ' done and saved. Click again later to continue.'], false);
           btn.textContent = 'Refreshing ' + d + '/' + t + '...';
           var slow = rep.pausedBecause && !/^(time )?budget/.test(rep.pausedBecause); // a round that just used up its 30 seconds is normal
-          show('Working: ' + d + ' of ' + t + ' done', [slow ? 'Amplitude is answering slowly (' + rep.pausedBecause + '). Continuing automatically. Please stay on this page.' : 'Continuing automatically. Please stay on this page.'], true);
+          if (!userClosed) show('Working: ' + d + ' of ' + t + ' done', [slow ? 'Amplitude is answering slowly (' + rep.pausedBecause + '). Continuing automatically. Please stay on this page.' : 'Continuing automatically. Please stay on this page.'], true);
           return void setTimeout(step, wait(Math.max(1, rep.waitSeconds || 2)));
         }
         if (rep.ok && rep.stored) { show('Refreshed through ' + rep.window.end, ['Reloading the page...'], true); return void setTimeout(function () { (window.__cvrReload || function () { location.reload(); })(); }, 1200); }
@@ -135,7 +144,7 @@
   }
   idle();
   function start() {
-    btn.disabled = true; btn.textContent = 'Refreshing...'; btn.removeAttribute('title'); wrap.style.display = 'none';
+    btn.disabled = true; btn.textContent = 'Refreshing...'; btn.removeAttribute('title'); wrap.style.display = 'none'; userClosed = false;
     state = { runId: null, lastDone: -1, still: 0, netFails: 0 };
     step();
   }
@@ -143,7 +152,7 @@
   btn.addEventListener('click', function () {
     if (btn.disabled) return;
     if (softLocked()) {
-      show('Already up to date', ['The CVR numbers were pulled ' + when + ' (' + ago(pulled) + ') and run through ' + (through || fmtDay(asOf())) + ', the newest complete day.', 'They also refresh by themselves every morning around 8:30 AM ET, so there is nothing new to fetch right now.'], true);
+      show('Already up to date', ['The CVR numbers were pulled ' + when + ' (' + ago(pulled) + ') and run through ' + (through || fmtDay(asOf())) + ', the newest complete day.', 'They also refresh by themselves every morning around 8:30 AM ET, so there is nothing new to fetch right now.', 'This button only refreshes the Amplitude CVR numbers. The "Last refreshed" date at the top right is a different clock: ' + ((typeof REFRESH !== 'undefined' && REFRESH && REFRESH.last) ? REFRESH.last : 'the last hand update') + ' is when Claude last updated the hand-curated panels (roadmap, A/B tests, By product).'], true);
       var again = el('button', { type: 'button', 'data-cvr-anyway': '1' }, 'margin-top:8px;cursor:pointer;border:0;background:none;color:var(--accent,#4f46e5);padding:0;font:inherit;font-size:12.5px;text-decoration:underline');
       again.textContent = 'Refresh anyway (limited to one an hour)';
       again.addEventListener('click', function () { start(); });
