@@ -3,7 +3,7 @@
 The page is static: it shows whatever is in `data/` at deploy time. Updating it means changing those files and pushing to `master`.
 There are two exceptions. On the Roadmap tab, each project's status, launch date and Jira link are patched at load from the latest snapshot of the sheet (see "The Roadmap tab comes from the sheet"). And the CVR numbers (CVR, sessions, the channel, device, funnel and region breakdowns, revenue, orders and payments) are refreshed from Amplitude by a Vercel job and applied at load from the latest snapshot (see "The CVR numbers come from Amplitude automatically").
 Vercel redeploys automatically (about a minute). Shared features (ticks, topics, flags) live in the database and are not affected.
-Mike pushes straight to `master`: there is no pull request or approval step.
+Mike pushes straight to `master`: there is no pull request or approval step. Jay and Tom push to `master` too, so every run (by hand or scheduled) must first bring in the latest `master` by rebasing, never by merging (see "Branch rules").
 
 ## What each file holds
 
@@ -89,17 +89,17 @@ The CVR pages' main numbers are no longer refreshed by Claude. A Vercel job (`ap
 - For a UI change, name the part of the page (for example "the scorecard header") so Claude can grep for it.
 
 ## Automatic refreshes
-One scheduled task refreshes the whole board once a day at 8:00 AM ET (Mike, Nov 3). The 2:30 PM and 4:30 PM runs and the Tuesday pre-review run are retired. Each run checks every source except the Roadmap tab and the automatically refreshed CVR numbers, runs `npm run check`, and **commits to `master` locally. It never pushes.** You get a notification; open GitHub Desktop and click **Push origin**. A run stops without committing if you have uncommitted changes in this folder (it will not touch your work), and the computer has to be awake and the Claude app open for a run to happen. If GitHub Desktop shows nothing to push, the run did not commit: look at the Refresh log in `work/projects/cvr-pacer.md` in the AI Mike folder.
+One scheduled task refreshes the whole board once a day at 8:00 AM ET (Mike, Nov 3). The 2:30 PM and 4:30 PM runs and the Tuesday pre-review run are retired. Each run checks every source except the Roadmap tab and the automatically refreshed CVR numbers, runs `npm run check`, and **commits to `master` locally. It never pushes.** You get a notification; open GitHub Desktop and click **Push origin**. A run starts by fetching and rebasing onto the latest `master` (see "Branch rules"). It stops without committing if you have uncommitted changes in this folder (it will not touch your work) or if the rebase hits a conflict (it aborts the rebase and tells you which files conflict). The computer has to be awake and the Claude app open for a run to happen. If GitHub Desktop shows nothing to push, the run did not commit: look at the Refresh log in `work/projects/cvr-pacer.md` in the AI Mike folder.
 
 The Roadmap tab (status, launch dates and Jira links) is not part of that task. It is pulled from the sheet on Vercel, so it updates even when the computer is off and there is nothing to push.
 
 The CVR numbers (`D`, `L`, `MAX`, `STD`, `R`, `ORD`) are not part of that task either (see "The CVR numbers come from Amplitude automatically"). They are pulled from Amplitude on Vercel at about 8:30 AM ET and whenever someone clicks Refresh data, so they update even when the computer is off. The 8:00 AM task still refreshes `PROD`, `AP`, `HOURLY` and the rest, and extends `PROD` to the last complete day.
 
 ## Each refresh (by hand)
-1. In GitHub Desktop, click Fetch origin, then Pull if it offers one, so you start from the latest version.
+1. In GitHub Desktop, click Fetch origin, then Pull if it offers one, so you start from the latest version. If Desktop asks whether to merge or rebase, choose rebase.
 2. Paste the prompt below into Claude with the folder open.
 3. When Claude is done, read its summary. It should say which files changed and the check result.
-4. In GitHub Desktop you will see the changed files. Type a short message (for example "Refresh Nov 4"), click Commit to master, then Push origin. The site updates in about a minute.
+4. In GitHub Desktop you will see the changed files. Type a short message (for example "Refresh Nov 4"), click Commit to master. Before you Push origin, click Fetch origin once more: if it says there is something to pull, Pull first (choose rebase if asked), ask Claude to run `npm run check` again, then Push origin. Never click Merge. The site updates in about a minute.
 5. Open the site and look at it. You will be asked to sign in with Okta first. If you pushed a bad update, see "If something looks wrong".
 
 ## Prompt for Claude (paste with the repo folder open)
@@ -109,6 +109,7 @@ The CVR numbers (`D`, `L`, `MAX`, `STD`, `R`, `ORD`) are not part of that task e
 > - CVR numbers: `D`, `L`, `MAX`, `STD`, `R` and `ORD` are refreshed automatically from Amplitude, always (switched on permanently Nov 9). Do not read Amplitude for them, do not edit them, and never change `D.asOf`, whatever the page shows. Still extend `PROD` to the last complete day.
 > - UI: you may edit `app.js`, `styles.css` and `index.html`. Make small targeted edits, keep the existing code style, and tell me which files you touched.
 > - Never touch the files listed under "Do not edit" in REFRESH.md.
+> - Git: follow "Branch rules" in REFRESH.md. Before changing anything, fetch and `git pull --rebase origin master`. Fetch again right before committing and rebase if master moved. Never create merge commits, never force-push, and stop and tell me if there is a conflict or I have uncommitted changes.
 > - Save tokens: do not read or print whole files. Use grep, or a short node snippet, to look at only the part you need, and change things with targeted edits rather than rewriting a file.
 > Then run `npm run check`, fix any FAIL, and tell me in plain language what changed, which items still have no source link, and whether the check passed. Do not commit or push if anything fails.
 
@@ -116,9 +117,15 @@ If Node is not installed on your computer, `npm run check` will not run. Tell Cl
 
 ## Branch rules (read before committing)
 - Always work on `master`. Before any commit, run `git branch --show-current` and confirm it prints `master`. If it doesn't, stop and tell the user.
-- Run `git pull origin master` before making changes, so you start from the latest version.
+- **Always start from the latest `master`, and keep the history a straight line (Jay, Nov 10).** Jay, Tom and Mike's Claude all push straight to `master`, so pushes cross. On Nov 10 that produced a run of "Merge branch 'master' of ..." commits. Every Claude run follows these steps:
+  1. **Once per clone,** run `git config pull.rebase true`, so a pull never creates a merge commit.
+  2. **Before changing anything,** run `git fetch origin`, then `git pull --rebase origin master`. Never run a plain `git pull`, `git pull origin master` without `--rebase`, or `git merge`.
+  3. **If there are uncommitted changes in the folder, stop and tell the user.** Do not stash, `--autostash`, reset or discard anything: the user's work is never touched.
+  4. **Right before committing,** run `git fetch origin` and `git rev-list --left-right --count origin/master...HEAD`. The first number must be `0` (nothing new on `master`). If it is not, run `git pull --rebase origin master` and run `npm run check` again, because someone else's change has landed. Do the same again before any push the user asks for.
+  5. **If the rebase stops on a conflict,** run `git rebase --abort`, change nothing else, and tell the user which files conflict. Do not resolve it by deleting files, taking one side wholesale, or re-making the change by hand.
+  6. **No merge commits on `master`.** Never create a commit whose message starts with "Merge branch".
 - Never check out, commit to, merge, or push to the `okta-auth` branch.
-- Never force-push, and never rewrite history.
+- Never force-push, and never rewrite history that is already on `origin` (no `--amend` or rebase on pushed commits, no `reset --hard` to an older commit). Rebasing your own commits that have not been pushed yet, as in step 2 and 4, is fine.
 ## Do not edit
 - `middleware.js`, `lib/auth.js`, anything under `api/auth/` (Okta sign-in, managed separately).
 - `runtime-shim.js`, `api/docs.js`, `schema.sql`, `migrations/` and `vercel.json` (shared features and database).
@@ -131,6 +138,8 @@ If Node is not installed on your computer, `npm run check` will not run. Tell Cl
 
 ## If something looks wrong
 - **GitHub emailed you "Check dashboard data failed":** the last update has a problem. Ask Claude to read the failed check and fix it, then commit and push again. The site may be showing the broken version until you do.
+- **Push origin is rejected, or GitHub Desktop says your branch has diverged (two pushes crossed):** do not force-push and do not click Merge. Click Fetch origin, Pull (rebase), run `npm run check` again, then Push origin. If it reports a conflict, stop and ask Jay or Tom.
+- **Vercel shows "Build Failed: One or more integration resources failed to provision for this deployment" (Nov 10):** the build never started, so your data or code change is not the cause. Do not revert, push an empty commit, or re-push to retry. On Nov 10 production deployments failed this way at the step "Create database branch for deployment" (the Neon integration). Production branching was turned off in Vercel (Storage, productOrgDashboard_db, Projects, product_org_dashboard, Update Project Connection, "Create Database Branch For Deployment": Production unticked, Preview still ticked) and the failed deployment was redeployed successfully. If it happens again, tell Jay or Tom. Do not change Vercel or Neon settings.
 - **The site looks wrong or empty:** in GitHub Desktop, open History, right-click your last commit, choose Revert Changes in Commit, then Push origin. That puts the previous data back.
 - **Fastest rollback:** someone with Vercel access (Jay or Tom) can open the project's Deployments tab and promote the previous deployment. That restores the last good version immediately.
 - **The CVR numbers look wrong or stuck:** do not hand-edit them. Tell Jay or Tom: they can delete the newest snapshot in the database (the page goes back to the previous snapshot or the files), run `/api/refresh-cvr` while signed in for a dry run, and read the Vercel logs.
