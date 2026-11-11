@@ -3231,6 +3231,7 @@ function comingHtml() {
   const VIEWS = { live: isLaunched, chg: it => liveChg(it, prev).length > 0, risk: it => confOf(it).k === 'bad', launch: it => /launch|ready to ship|this week/i.test((it.s || '') + ' ' + (it.eta || '')) && !stuck(it.s) };
   const VS = state.views.filter(v => VIEWS[v]), vk = VS.length ? VS.join(',') : null, keepV = it => VS.length ? VS.some(v => (v === 'live' || !isLaunched(it)) && VIEWS[v](it)) : !isLaunched(it);
   const now = mine.filter(it => STAGE(it) !== 'next').filter(keepV), next = mine.filter(it => STAGE(it) === 'next').filter(keepV);
+  const launched = !vk ? allItems().filter(it => (STAGE(it) === 'live' || isLaunched(it)) && !LATE(it)).filter(mineT).filter(qOk) : []; // Live cards, shown in their own section so every sheet row has a place
   const later = !vk ? postList().filter(mineT).filter(qOk).concat(allItems().filter(LATE).filter(mineT).filter(qOk)) : [];
   const tests = vk || GS.length ? [] : [].concat((EXPS.live || []).map(t => [t, 'live']), (EXPS.done || []).map(t => [t, 'done'])).filter(x => inT(testTeam(x[0]))).filter(x => qOk({ t: x[0].name, d: x[0].where, team: testTeam(x[0]) }));
   const pill = (cls, t) => '<span class="rtag ' + cls + '">' + t + '</span>';
@@ -3289,7 +3290,8 @@ function comingHtml() {
     sec('🗓️', 'Not Started Yet', next.length, head + body(next), facts(next, 'next')) +
     sec('🧪', 'Experiments', tests.length, '<div class="rmhead"><span></span><span>Test</span><span>Site</span><span>Status</span><span>Confidence</span><span>Whole-site impact</span><span></span></div>' + tests.map(trow).join('')) +
     (later.length ? '<section class="sec2 tmsec"><div class="shead"><div><h2>⏭️ Next Half <span class="tmcount">' + later.length + '</span></h2><p class="cap">Queued for after the Nov 20 code freeze. Not committed yet.</p></div><button type="button" class="btn sm" data-rmwide="1">' + (wide ? 'Hide' : 'Show ' + later.length + ' projects') + '</button></div>' + (wide ? '<div class="pbody">' + head + body(later) + '</div>' : '') + '</section>' : '') +
-    (!now.length && !next.length && !tests.length && !later.length ? '<p class="cap empty1">Nothing matches.</p>' : '') + '</section>');
+    (launched.length ? '<section class="sec2 tmsec"><div class="shead"><div><h2>🚀 Launched <span class="tmcount">' + launched.length + '</span></h2><p class="cap">Marked Live (or Shipped / Done) on the roadmap sheet.</p></div><button type="button" class="btn sm" data-rmlive="1">' + (state.rmLive ? 'Hide' : 'Show ' + launched.length + ' projects') + '</button></div>' + (state.rmLive ? '<div class="pbody">' + head + body(launched) + '</div>' : '') + '</section>' : '') +
+    (!now.length && !next.length && !tests.length && !later.length && !launched.length ? '<p class="cap empty1">Nothing matches.</p>' : '') + '</section>');
 }
 // Customer service: only topics that are above normal; otherwise say plainly that all is quiet.
 function dasheryHtml() {
@@ -3761,6 +3763,7 @@ document.addEventListener('click', ev => {
   if (!t.closest('.ddmenu')) { state.ddOpen = null; document.querySelectorAll('.ddmenu').forEach(x => { x.hidden = true; }); }
   if (t.closest('[data-qopen]')) { state.qOpen = true; renderKeep(); const n = document.querySelector('[data-fq]'); if (n) n.focus(); return; }
   if (t.closest('[data-qclose]')) { state.qOpen = false; state.q = ''; return renderKeep(); }
+  if (t.closest('[data-rmlive]')) { state.rmLive = !state.rmLive; return renderKeep(); }
   if (t.closest('[data-rmwide]')) { state.rmScope = state.rmScope === 'all' ? 'now' : 'all'; return renderKeep(); }
   const ak = t.closest('[data-ack]'); if (ak) { ev.stopPropagation(); hideHint(); if (!canAck()) return; const prev = typeof COMING_PREV !== 'undefined' ? COMING_PREV : null, it = [].concat(...COMING.teams.map(x => x.items || [])).find(x => x.t === ak.dataset.ack); if (!it || !prev) return; const id = ackId(it.t), doc = { t: it.t, sig: chgSig(it, prev), on: !isRev(it, prev), at: Date.now(), by: RT.me }; ACK[id] = doc; renderKeep(); RT.db.collection('acks').doc(id).set(doc).catch(() => { delete ACK[id]; renderKeep(); }); return; }
   const gfd = t.closest('[data-gfold]'); if (gfd) { state.gOpen = state.gOpen || {}; state.gOpen[gfd.dataset.gfold] = gfd.getAttribute('aria-expanded') !== 'true'; return renderKeep(); }
