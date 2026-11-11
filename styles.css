@@ -4102,3 +4102,20 @@ details.pbox.prov > summary { cursor: pointer; list-style: none; } details.pbox.
 .bm-bt i.cost { background: var(--ink); }
 .bm-bar b { text-align: right; font-size: 15px; }
 @media (max-width: 640px) { .bm-eq { grid-template-columns: 1fr; } .bm-op { justify-self: center; } .bm-bar { grid-template-columns: 92px 1fr 52px; gap: 8px; } }
+
+
+/* Timeline date labels sit on a solid chip above the Today, freeze and Black Friday lines, so the lines never run through the text (Jay, Nov 10) */
+.glbl { padding: 1px 6px; border-radius: 4px; background: color-mix(in srgb, var(--surface) 94%, transparent); z-index: 3; }
+
+/* Undated projects (Jay, Nov 10): the same row as a dated project, with a status pill and "No date" where the bar would be */
+.gnod { background: transparent !important; box-shadow: none !important; border-radius: 0 !important; border-top: 1px dashed var(--line-2); margin: 12px 0 8px !important; padding: 12px 0 4px !important; gap: 0 !important; }
+.gnodh { padding: 0 8px 6px; }
+.gnodh b { font: 700 12.5px var(--body) !important; text-transform: uppercase; letter-spacing: .05em; color: var(--muted) !important; }
+.gnod .ugrp { display: block; }
+.gnod .ugrp + .ugrp { border-top: 0; padding-top: 4px; }
+.gnod .ugt { display: block; padding: 14px 8px 8px; font: 700 16px var(--display); color: var(--ink); }
+.urows .grow:nth-child(even) { background: color-mix(in srgb, var(--ink) 5%, transparent); }
+.urows .grow .gtrack { display: flex; align-items: center; }
+.ueta { font-size: 12.5px; color: var(--muted); padding-left: 10px; }
+.gpill.gstat { cursor: default; }
+.gpill.gstat:hover { border-color: var(--line); color: var(--muted); background: var(--surface); }

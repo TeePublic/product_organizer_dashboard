@@ -1533,7 +1533,9 @@ function undatedPool(keep) {
   const notStarted = it => DT(it).notStarted || STAGE(it) === 'next';
   // A soft target like "Before peak" rides along on the chip, so "no launch date" doesn't read as "no plan" (Data Engineering lead, Oct 27).
   const chip = it => '<button type="button" class="gchip" data-lbm2="' + it.ref + '"><span aria-hidden="true">' + it.e + '</span>' + esc(it.t) + (it.eta && !/^(tbd|paused)$/i.test(it.eta) ? '<span class="gchd">' + esc(it.eta) + '</span>' : '') + '</button>';
-  const byTeam = a => MEETS.map(m => [m, a.filter(it => teamKey(it.team) === m[0])]).filter(g => g[1].length).map(([m, l]) => '<div class="ugrp"><span class="ugt">' + ((COMING.teams.find(t => t.key === m[0]) || {}).icon || '') + ' ' + esc(m[1]) + '</span><div class="gcw"><div class="gchips clamp">' + l.map(chip).join('') + '</div><button type="button" class="linkbtn gmore" data-gmore="1" hidden>See more</button></div></div>').join('');
+  // Projects with no date the timeline can draw are listed as plain rows (name, site, status, the date text from the sheet), so none look missing.
+  const urow = it => '<div class="grow urow" role="button" tabindex="0" data-lbm2="' + it.ref + '"><span class="gname"><span class="ge gico g-' + esc(it.obj || 'x') + '" aria-hidden="true">' + projIco(it) + '</span><span class="gnt"><b class="gtl"><span class="gtx">' + esc(it.t) + '</span></b><span class="gmeta">' + (it.site ? '<button type="button" class="gpill gsite" data-ssel="' + esc(it.site) + '" title="Show only ' + esc(SITEN(it.site)) + '">' + siteDot(it.site) + '</button>' : '') + '<span class="gpill gstat">' + esc(it.s || 'TBD') + '</span></span></span></span><span class="gtrack"><span class="ueta">' + (it.eta && !/^(tbd)$/i.test(it.eta) ? esc(it.eta) : 'No date') + '</span></span></div>';
+  const byTeam = (a, solo) => MEETS.map(m => [m, a.filter(it => teamKey(it.team) === m[0])]).filter(g => g[1].length).map(([m, l]) => '<div class="ugrp">' + (solo ? '' : '<span class="ugt">' + ((COMING.teams.find(t => t.key === m[0]) || {}).icon || '') + ' ' + esc(m[1]) + '</span>') + '<div class="urows">' + l.map(urow).join('') + '</div></div>').join('');
   const sec = (t, sub, a) => a.length ? '<section class="sec2 tmsec usec"><div class="ushead"><h2>' + t + ' <span class="ggn">' + a.length + '</span></h2><p class="cap">' + sub + '</p></div><div class="ubody">' + byTeam(a) + '</div></section>' : '';
   return { pool, notStarted, byTeam };
   return sec('🚧 In progress, launching later', 'No firm launch date yet: being built, but no date in Jira or the roadmap sheet. Following the filters above.', pool.filter(it => !notStarted(it))) + sec('🚀 Just getting started', 'No firm launch date yet: in discovery, sizing or not started.', pool.filter(notStarted));
@@ -2427,9 +2429,14 @@ const PROG = it => {
   const [a, z] = it.pts, p = z ? Math.round(a / z * 100) : 0, iss = it.ptsUnit === 'issues';
   return { p, short: p + '%', sub: a + ' of ' + z + (iss ? ' tickets' : ' pts'), long: iss ? a + ' of ' + z + ' Jira tickets done. This epic has no story points, so progress counts tickets.' : a + ' of ' + z + ' story points done in Jira. Points are the team\'s effort estimate, so this is share of the work, not share of tickets.' };
 };
-const OBJS = ['CVR', 'AOV', 'Revenue', 'Retention', 'Traffic', 'Ops', 'Compliance', 'Data'];
+// The goals come from the data: the sheet's Pillar on each roadmap card, plus whatever the curated lists use. The original eight keep their order and emoji; any other goal shows with no emoji.
+const OBJS = (() => {
+  const base = ['CVR', 'AOV', 'Revenue', 'Retention', 'Traffic', 'Ops', 'Compliance', 'Data'], seen = new Set(), add = it => { if (it && it.obj) seen.add(it.obj); };
+  COMING.teams.forEach(t => t.items.forEach(add)); [COMING.board, COMING.post, COMING.wins].forEach(l => (l || []).forEach(add));
+  return base.filter(o => seen.has(o)).concat([...seen].filter(o => base.indexOf(o) < 0));
+})();
 const OBJN = o => o === 'Data' ? 'Data foundation' : o;
-const OBJE = { CVR: '🎯', AOV: '🛒', Revenue: '💵', Retention: '🔁', Traffic: '🚦', Ops: '⚙️', Compliance: '⚖️', Data: '🧮' };
+const OBJE = new Proxy({ CVR: '🎯', AOV: '🛒', Revenue: '💵', Retention: '🔁', Traffic: '🚦', Ops: '⚙️', Compliance: '⚖️', Data: '🧮' }, { get: (t, k) => (k in t ? t[k] : '') });
 const STAGE = it => { const x = (it.s || '').toLowerCase(); return /launched|results|^live$/.test(x) && !/test/.test((it.t || '').toLowerCase()) ? 'live' : /dev|qa|review|launching|flight|ready to ship|block|delay|live|paus/.test(x) ? 'flight' : 'next'; };
 const STAGEN = { flight: '🛠️ In flight', next: '⏭️ Up next', live: '🚀 Launched' };
 const keep = it => (state.obj === 'all' || it.obj === state.obj) && (state.stage === 'all' || STAGE(it) === state.stage);
@@ -2529,7 +2536,7 @@ const UPD = {
 if (typeof LATEST !== 'undefined') Object.keys(LATEST).forEach(t => { UPD[t] = LATEST[t].text; });
 const siteDot = x => !x ? '<span class="faint">–</span>' : x === 'Both' ? '<i style="background:var(--tp)"></i><i style="background:var(--rb)"></i>RBO + TPO' : x === 'Dashery' ? '<i style="background:var(--ds)"></i>Dashery' : '<i style="background:var(--' + (x === 'TP' ? 'tp' : 'rb') + ')"></i>' + SITEN(x);
 const PHASES = ['Discovery', 'Sizing', 'Building', 'Testing', 'Launching', 'Live'];
-const phaseIx = st => { const x = (st || '').toLowerCase(); return /discovery/.test(x) ? 0 : /scop|siz|plan|next sprint|ready for dev/.test(x) ? 1 : /qa|review/.test(x) ? 3 : /launch|ready to ship/.test(x) ? 4 : /^live$|launched/.test(x) ? 5 : 2; };
+const phaseIx = st => { const x = (st || '').toLowerCase(); return /^not set$/.test(x) ? -1 : /discovery/.test(x) ? 0 : /scop|siz|plan|next sprint|ready for dev/.test(x) ? 1 : /qa|review/.test(x) ? 3 : /launch|ready to ship/.test(x) ? 4 : /^live$|launched/.test(x) ? 5 : 2; };
 const phaseBar = st => { const k = phaseIx(st), bad = STC(st) === 'blocked'; return '<span class="phb' + (bad ? ' bad' : '') + '" title="' + PHASES.map((p, i) => (i === k ? '▸ ' : '') + p).join(' · ') + '"><span class="phs">' + PHASES.map((p, i) => '<i class="' + (i <= k ? 'on' : '') + '"></i>').join('') + '</span><span class="phl">' + esc(st) + '</span></span>'; };
 const LATE = it => /2027|Q1|Jan /.test(it.eta || '');
 // Who may reorder each team: its Product Manager(s) and director, plus Mike everywhere. Names resolve to ids at view time.
@@ -2707,8 +2714,8 @@ function lbModal2(ref) {
   const cD = chg.find(x => x.k === 'date'), cP = chg.find(x => x.k === 'phase' || x.k === 'blocked');
   const facts = '<div class="mfacts">' + fact('Estimated launch', esc(rng(it.eta)), cD ? 'Was ' + esc(rng(cD.was)) + ' at the ' + esc(prev.asOf.replace(/^the /, '')) + (it.why ? '. ' + esc(it.why) : '') : '', cD ? 'chg' : '') +
     fact('Estimated impact', imp ? esc(imp) : ce ? '<span class="ceval">' + ce.short + '</span>' : /^(Ops|Data|Compliance)$/.test(it.obj || '') ? 'No direct revenue' : 'Not sized yet', imp ? 'From ' + esc(it.impSrc || 'the roadmap sheet') : ce ? 'Claude\'s estimate. ' + esc(ce.how) : '') +
-    fact('Status', stuck(it.s) ? esc(it.s) : STEPS[k], (cP && cP.k === 'phase' ? 'Was ' + esc(lcx(cP.txt.split(' → ')[0].replace(/^\S+ /, ''))) + '. ' : '') + (stuck(it.s) ? 'Was ' + lcx(STEPS[k]) : k < 6 ? 'Next: ' + STEPS[k + 1] : ''), cP ? 'chg' : stuck(it.s) ? 'bad' : k === 6 ? 'good' : '') + '</div>';
-  const steps = '<ol class="mstep" aria-label="Progress">' + STEPS.map((p, i) => '<li class="' + (i < k ? 'd' : i === k ? 'c' + (stuck(it.s) ? ' bad' : '') : '') + '">' + (i === k && stuck(it.s) && k !== 6 ? hint('!', 'dot dhint', '<b>' + esc(c.l) + ' at ' + esc(lcx(p)) + '</b><br>' + c.why.map(esc).join('<br>')) : '<span class="dot" aria-hidden="true">' + (i < k || (i === k && k === 6) ? '✓' : '') + '</span>') + '<span class="lb">' + p + '</span></li>').join('') + '</ol>';
+    fact('Status', stuck(it.s) ? esc(it.s) : noStat(it.s) ? 'Not Set' : STEPS[k], (cP && cP.k === 'phase' ? 'Was ' + esc(lcx(cP.txt.split(' → ')[0].replace(/^\S+ /, ''))) + '. ' : '') + (stuck(it.s) ? 'Was ' + lcx(STEPS[k]) : k < 6 && !noStat(it.s) ? 'Next: ' + STEPS[k + 1] : ''), cP ? 'chg' : stuck(it.s) ? 'bad' : k === 6 ? 'good' : '') + '</div>';
+  const steps = '<ol class="mstep" aria-label="Progress">' + STEPS.map((p, i) => '<li class="' + (noStat(it.s) ? '' : i < k ? 'd' : i === k ? 'c' + (stuck(it.s) ? ' bad' : '') : '') + '">' + (i === k && stuck(it.s) && k !== 6 ? hint('!', 'dot dhint', '<b>' + esc(c.l) + ' at ' + esc(lcx(p)) + '</b><br>' + c.why.map(esc).join('<br>')) : '<span class="dot" aria-hidden="true">' + (i < k || (i === k && k === 6) ? '✓' : '') + '</span>') + '<span class="lb">' + p + '</span></li>').join('') + '</ol>';
   const tags = '<div class="mtags">' + (it.site ? '<span class="rtag">' + siteDot(it.site) + '</span>' : '') + (it.inj ? '<span class="rtag inj">Injected' + (it.for ? ': displaced ' + esc(it.for) : '') + '</span>' : '') + chg.map(x => chgTag(it, x, prev)).join('') + '</div>';
   const conf = '<div class="pbox mconf ' + c.k + '"><h4 class="ph">' + (c.k === 'bad' ? '🔴' : c.k === 'warn' ? '🟡' : c.k === 'live' ? '🟢' : '⚪') + ' Launch confidence: ' + c.l + '</h4>' + (c.why.filter(w => !LT || w !== LT.text).map(w => '<p>' + esc(w) + '</p>').join('') || '<p>Based on the latest update below.</p>') + '</div>';
   const who = [['Product Manager', P.pm], ['Tech lead', P.lead], ['Engineers', (P.eng || []).join(', ')], ['Looped in', (P.looped || []).join(', ')], ['Exec sponsor', P.sponsor]].filter(x => x[1]);
@@ -2967,12 +2974,13 @@ const impCell = it => { const p = IMPS[it.t] || it.imp; return p ? hint(esc(p), 
 const impVal = it => { const c = cest(it), s = String(IMPS[it.t] || it.imp || (c ? c.short : '')), m = s.match(/([\d.]+)\s*([KkMm])/); if (!m) return -1; const v = parseFloat(m[1]) * (/m/i.test(m[2]) ? 1e6 : 1e3); return /month/i.test(s) ? v * 12 : v; };
 // Seven steps from idea to live. The status cell shows where a project is now and what comes next.
 const STEPS = ['Discovery', 'Sizing', 'Coding', 'Review', 'QA', 'Launch', 'Live'];
-const stepIx = st => { const x = (st || '').toLowerCase(); return /discovery|research/.test(x) ? 0 : /scop|siz|plan|ready for dev|next sprint|tdd/.test(x) ? 1 : /review/.test(x) ? 3 : /qa|uat|test/.test(x) && !/^live/.test(x) ? 4 : /launching|ready to ship|launch/.test(x) && !/launched/.test(x) ? 5 : /^live|launched|done/.test(x) ? 6 : 2; };
+const stepIx = st => { const x = (st || '').toLowerCase(); return noStat(x) ? 0 : /discovery|research/.test(x) ? 0 : /scop|siz|plan|ready for dev|next sprint|tdd/.test(x) ? 1 : /review/.test(x) ? 3 : /qa|uat|test/.test(x) && !/^live/.test(x) ? 4 : /launching|ready to ship|launch/.test(x) && !/launched/.test(x) ? 5 : /^live|launched|done/.test(x) ? 6 : 2; };
 const stuck = st => /block|delay|paus/i.test(st || '');
+const noStat = st => /^not set$/i.test(st || ''); // a sheet row with a blank phase and status
 function stepCell(it) {
   const k = stepIx(it.s), bad = stuck(it.s), why = UPD[it.t] || it.why || '';
-  const dots = '<span class="stp" aria-hidden="true">' + STEPS.map((p, i) => '<i class="' + (i < k ? 'd' : i === k ? 'c' + (bad ? ' bad' : '') : '') + '"></i>').join('') + '</span>';
-  const now = bad ? esc(it.s) : STEPS[k], next = k < 6 && !bad ? STEPS[k + 1] : '';
+  const ns = noStat(it.s), dots = '<span class="stp" aria-hidden="true">' + STEPS.map((p, i) => '<i class="' + (ns ? '' : i < k ? 'd' : i === k ? 'c' + (bad ? ' bad' : '') : '') + '"></i>').join('') + '</span>';
+  const now = ns ? 'Not Set' : bad ? esc(it.s) : STEPS[k], next = k < 6 && !bad && !ns ? STEPS[k + 1] : '';
   return hint(dots + '<span class="stt' + (bad ? ' bad' : k === 6 ? ' live' : '') + '"><b>' + now + '</b>' + (next ? '<small>Next: ' + next + '</small>' : bad ? '<small>was ' + STEPS[k] + '</small>' : '') + '</span>', 'stcell',
     '<b>' + esc(it.s || 'TBD') + '</b><br>' + STEPS.map((p, i) => i === k ? '<b>▸ ' + p + '</b>' : p).join(' → ') + (bad && why ? '<br><br><b>Why:</b> ' + esc(why) : ''));
 }
@@ -3103,7 +3111,7 @@ function gTip(it, e, live, pj, sd) {
     row('Team', esc(TEAMS(it.team))) + (who ? row('Product Manager', esc(who)) : '') + (mini ? row('Burn-down', '<span class="gburn">' + mini + '</span>') : '') + '</div><span class="segmore">Click for the full project →</span>' + (it.ref ? '<div class="tipsrcw"><button type="button" class="srcbtn tipsrc" data-srcbox="rm:' + esc(it.ref) + '">ⓘ Sources: where every fact on this project comes from →</button></div>' : '') /* same sources as the full box (Mike, Oct 28) */ + '</div>';
 }
 function ganttHtml(list, all, keep) {
-  const today = parse(D.asOf) + DAY, w0 = today - 7 * DAY, start = w0 - ((new Date(w0).getUTCDay() + 6) % 7) * DAY, end = Date.UTC(2026, 11, 1), span = end - start, /* through Black Friday week, so the next six weeks fill the width (Mike, Oct 27) */ x = t => Math.max(0, Math.min(100, (t - start) / span * 100));
+  const today = parse(D.asOf) + DAY, w0 = today - 7 * DAY, start = w0 - ((new Date(w0).getUTCDay() + 6) % 7) * DAY, end = Math.max(Date.UTC(2026, 11, 1), Math.min(Math.max(0, ...list.map(it => etaDate(it.eta) || 0)) + 7 * DAY, Date.UTC(2027, 0, 31))) /* ends at the latest launch in view (at least Dec 1) so later dates do not pile up at the right edge */, span = end - start, /* through Black Friday week, so the next six weeks fill the width (Mike, Oct 27) */ x = t => Math.max(0, Math.min(100, (t - start) / span * 100));
   const rv = typeof ROADMAP_REVIEW !== 'undefined' ? ROADMAP_REVIEW.last : null; let nx = rv; while (nx && parse(nx) < today) nx = addDays(nx, 14);
   const marks = [[today, 'Today', 'now'], nx ? [parse(nx), 'Exec Roadmap Review', 'rev'] : null, [FREEZE, 'Code freeze', 'frz'], [Date.UTC(2026, 10, 27), 'Black Friday', 'bf']].filter(Boolean);
   const weeks = []; for (let t = start; t <= end; t += 7 * DAY) weeks.push(t);
@@ -3139,7 +3147,7 @@ function ganttHtml(list, all, keep) {
     : G === 'goal' ? OBJS.concat(['']).map(o => [[o || 'other', o ? OBJN(o) : 'Other', ''], srt(dated.filter(d => inObj(d[0], o)))])
     : STG.map(g => [[g[0], g[1], g[2]], srt(dated.filter(g[3]))])).filter(g => g[1].length || UND(g[0][0]).length);
   // The undated block: last in its section, hatched so it reads as "not on the timeline", with the reason in words.
-  const nod = k => { const a = UND(k); return a.length ? '<div class="gnod"><div class="gnodh"><b>🗓️ No launch date yet</b><span class="ggn">' + a.length + '</span><span class="cap">Not enough in Jira or the roadmap sheet to put on the timeline.</span></div>' + U.byTeam(a) + '</div>' : ''; };
+  const nod = k => { const a = UND(k); return a.length ? '<div class="gnod"><div class="gnodh"><b>No launch date yet</b><span class="ggn">' + a.length + '</span><span class="cap">Not enough in Jira or the roadmap sheet to put on the timeline.</span></div>' + U.byTeam(a, G === 'team') + '</div>' : ''; };
   const MTIP = { now: 'Today. Everything left of this line is the past.', rev: 'The next Executive Roadmap Review. Changes since the last one show as yellow tags.', frz: 'Code freeze: nothing new ships after this until after peak.', bf: 'Black Friday, the biggest sales day of the year.' };
   // Flags close together (Today and the review are a day apart) sit side by side instead of on top of each other.
   const near = (i, j) => marks[j] && Math.abs(x(marks[i][0]) - x(marks[j][0])) < 7;
@@ -3225,6 +3233,7 @@ function comingHtml() {
   const VIEWS = { live: isLaunched, chg: it => liveChg(it, prev).length > 0, risk: it => confOf(it).k === 'bad', launch: it => /launch|ready to ship|this week/i.test((it.s || '') + ' ' + (it.eta || '')) && !stuck(it.s) };
   const VS = state.views.filter(v => VIEWS[v]), vk = VS.length ? VS.join(',') : null, keepV = it => VS.length ? VS.some(v => (v === 'live' || !isLaunched(it)) && VIEWS[v](it)) : !isLaunched(it);
   const now = mine.filter(it => STAGE(it) !== 'next').filter(keepV), next = mine.filter(it => STAGE(it) === 'next').filter(keepV);
+  const launched = !vk ? allItems().filter(it => (STAGE(it) === 'live' || isLaunched(it)) && !LATE(it)).filter(mineT).filter(qOk) : []; // Live cards, shown in their own section so every sheet row has a place
   const later = !vk ? postList().filter(mineT).filter(qOk).concat(allItems().filter(LATE).filter(mineT).filter(qOk)) : [];
   const tests = vk || GS.length ? [] : [].concat((EXPS.live || []).map(t => [t, 'live']), (EXPS.done || []).map(t => [t, 'done'])).filter(x => inT(testTeam(x[0]))).filter(x => qOk({ t: x[0].name, d: x[0].where, team: testTeam(x[0]) }));
   const pill = (cls, t) => '<span class="rtag ' + cls + '">' + t + '</span>';
@@ -3283,7 +3292,8 @@ function comingHtml() {
     sec('🗓️', 'Not Started Yet', next.length, head + body(next), facts(next, 'next')) +
     sec('🧪', 'Experiments', tests.length, '<div class="rmhead"><span></span><span>Test</span><span>Site</span><span>Status</span><span>Confidence</span><span>Whole-site impact</span><span></span></div>' + tests.map(trow).join('')) +
     (later.length ? '<section class="sec2 tmsec"><div class="shead"><div><h2>⏭️ Next Half <span class="tmcount">' + later.length + '</span></h2><p class="cap">Queued for after the Nov 20 code freeze. Not committed yet.</p></div><button type="button" class="btn sm" data-rmwide="1">' + (wide ? 'Hide' : 'Show ' + later.length + ' projects') + '</button></div>' + (wide ? '<div class="pbody">' + head + body(later) + '</div>' : '') + '</section>' : '') +
-    (!now.length && !next.length && !tests.length && !later.length ? '<p class="cap empty1">Nothing matches.</p>' : '') + '</section>');
+    (launched.length ? '<section class="sec2 tmsec"><div class="shead"><div><h2>🚀 Launched <span class="tmcount">' + launched.length + '</span></h2><p class="cap">Marked Live (or Shipped / Done) on the roadmap sheet.</p></div><button type="button" class="btn sm" data-rmlive="1">' + (state.rmLive ? 'Hide' : 'Show ' + launched.length + ' projects') + '</button></div>' + (state.rmLive ? '<div class="pbody">' + head + body(launched) + '</div>' : '') + '</section>' : '') +
+    (!now.length && !next.length && !tests.length && !later.length && !launched.length ? '<p class="cap empty1">Nothing matches.</p>' : '') + '</section>');
 }
 // Customer service: only topics that are above normal; otherwise say plainly that all is quiet.
 function dasheryHtml() {
@@ -3755,6 +3765,7 @@ document.addEventListener('click', ev => {
   if (!t.closest('.ddmenu')) { state.ddOpen = null; document.querySelectorAll('.ddmenu').forEach(x => { x.hidden = true; }); }
   if (t.closest('[data-qopen]')) { state.qOpen = true; renderKeep(); const n = document.querySelector('[data-fq]'); if (n) n.focus(); return; }
   if (t.closest('[data-qclose]')) { state.qOpen = false; state.q = ''; return renderKeep(); }
+  if (t.closest('[data-rmlive]')) { state.rmLive = !state.rmLive; return renderKeep(); }
   if (t.closest('[data-rmwide]')) { state.rmScope = state.rmScope === 'all' ? 'now' : 'all'; return renderKeep(); }
   const ak = t.closest('[data-ack]'); if (ak) { ev.stopPropagation(); hideHint(); if (!canAck()) return; const prev = typeof COMING_PREV !== 'undefined' ? COMING_PREV : null, it = [].concat(...COMING.teams.map(x => x.items || [])).find(x => x.t === ak.dataset.ack); if (!it || !prev) return; const id = ackId(it.t), doc = { t: it.t, sig: chgSig(it, prev), on: !isRev(it, prev), at: Date.now(), by: RT.me }; ACK[id] = doc; renderKeep(); RT.db.collection('acks').doc(id).set(doc).catch(() => { delete ACK[id]; renderKeep(); }); return; }
   const gfd = t.closest('[data-gfold]'); if (gfd) { state.gOpen = state.gOpen || {}; state.gOpen[gfd.dataset.gfold] = gfd.getAttribute('aria-expanded') !== 'true'; return renderKeep(); }

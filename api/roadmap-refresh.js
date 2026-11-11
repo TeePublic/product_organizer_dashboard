@@ -1,15 +1,13 @@
 // Pulls the Active Work tab from the sheet (plain code, no AI) and saves it as a roadmap snapshot in Neon.
+// The snapshot holds one record per filled sheet row (name, team, brand, goal, PM, phase dates, status, launch date, Jira). The page builds its cards from it.
 // /api/roadmap-data serves the newest snapshot to the page. Same switches as refresh-cvr:
-//   GET                      = dry run: reads the sheet, reports what the pull found and what it WOULD change on the board; saves nothing
+//   GET                      = dry run: reads the sheet and reports what the pull found (row counts, rows with no status, rows hidden until a team is set); saves nothing
 //   POST, saving switched on = saves a snapshot (from the dashboard only)
 //   Authorization: Bearer $CRON_SECRET (Vercel cron) = saves too, when saving is switched on. The cron call needs the exemption in middleware.js.
 // Saving needs ROADMAP_STORE_ENABLED=1. Every successful pull is saved, so a snapshot's time is when the sheet was last read (the page shows it). A failed pull never replaces the last good snapshot.
 import { neon } from '@neondatabase/serverless';
-import fs from 'node:fs';
-import path from 'node:path';
-import vm from 'node:vm';
 import { parseCreds, getToken, readTab } from './_roadmap/sheet.js';
-import { buildRows, buildPatches } from './_roadmap/transform.js';
+import { buildRows, summarize } from './_roadmap/transform.js';
 
 export const config = { maxDuration: 60 };
 const url = process.env.DATABASE_URL || process.env.POSTGRES_URL;
@@ -21,12 +19,6 @@ function explain(e) {
   if (e.status === 404) return 'Google cannot find that spreadsheet. Check ROADMAP_SHEET_ID.';
   if (e.status === 'no-tab') return `${e.message}. Check ROADMAP_SHEET_GID.`;
   return e.message;
-}
-
-// The curated board file, read only to report what the sheet would change. If it cannot be read, the pull still works.
-function loadComing(dir) {
-  try { return vm.runInNewContext(fs.readFileSync(path.join(dir, 'roadmap-coming-soon.js'), 'utf8') + '\n;COMING', {}, { timeout: 2000 }); }
-  catch { return null; }
 }
 
 export default async function handler(req, res, deps = {}) {
@@ -50,29 +42,26 @@ export default async function handler(req, res, deps = {}) {
   try {
     const token = await getToken(parseCreds(env.GOOGLE_SERVICE_ACCOUNT_JSON), deps.fetchImpl);
     const { title, values } = await readTab({ token, sheetId: env.ROADMAP_SHEET_ID, gid: env.ROADMAP_SHEET_GID, fetchImpl: deps.fetchImpl });
-    rows = { title, map: buildRows(values) };
+    rows = { title, list: buildRows(values) };
   } catch (e) {
     console.error('[roadmap-refresh] pull failed:', e.message);
     return send(200, { ok: false, stored: false, error: explain(e), note: 'The last saved snapshot is unchanged.' });
   }
 
-  const coming = loadComing(deps.dir ?? path.join(process.cwd(), 'data'));
-  const diff = coming ? buildPatches(rows.map, coming) : null;
+  const sheet = summarize(rows.list);
   const report = {
     ok: true, mode: wantStore ? 'store' : 'dry', who: isCron ? 'cron' : wantStore ? 'button' : 'dry run',
-    tab: { gid: env.ROADMAP_SHEET_GID, title: rows.title }, sheetRows: Object.keys(rows.map).length,
-    board: diff ? { itemsThatWouldChange: diff.changes.length, itemsWithNoSheetRow: diff.unmatched.length, sheetRowsNotOnBoard: diff.notOnBoard.length,
-      changes: diff.changes.slice(0, 40), unmatched: diff.unmatched.slice(0, 100) } : 'board file not readable here; skipped',
+    tab: { gid: env.ROADMAP_SHEET_GID, title: rows.title }, sheetRows: rows.list.length, sheet,
   };
   if (!storeOn && req.method === 'POST') report.note = 'Saving is switched off (ROADMAP_STORE_ENABLED is not 1), so this was a dry run.';
   if (!wantStore) return send(200, report);
 
   try {
-    const payload = JSON.stringify({ rows: rows.map });
+    const payload = JSON.stringify({ v: 2, rows: rows.list }); // v2: an array of row records (v1 was a map by project name)
     await sql`CREATE TABLE IF NOT EXISTS roadmap_snapshots (id bigserial PRIMARY KEY, created_at timestamptz NOT NULL DEFAULT now(), payload jsonb NOT NULL)`;
     const ins = await sql`INSERT INTO roadmap_snapshots (payload) VALUES (${payload}::jsonb) RETURNING id`;
     await sql`DELETE FROM roadmap_snapshots WHERE id NOT IN (SELECT id FROM roadmap_snapshots ORDER BY created_at DESC LIMIT ${KEEP})`;
-    console.log('[roadmap-refresh] saved snapshot ' + ins[0].id + ' by ' + report.who + '; sheet rows ' + report.sheetRows + '; board items that would change ' + (report.board.itemsThatWouldChange ?? 'n/a')); // readable in the Vercel logs after a cron run
+    console.log('[roadmap-refresh] saved snapshot ' + ins[0].id + ' by ' + report.who + '; sheet rows ' + report.sheetRows + '; cards on page ' + sheet.cardsOnPage + '; hidden until a team is set ' + sheet.hiddenUntilAssigned.length + '; no status ' + sheet.noStatus); // readable in the Vercel logs after a cron run
     return send(200, { ...report, stored: true, snapshotId: Number(ins[0].id) });
   } catch (e) {
     console.error('[roadmap-refresh] save failed:', e.message);
