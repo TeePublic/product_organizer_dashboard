@@ -12,6 +12,7 @@ import { buildRows, summarize } from './_roadmap/transform.js';
 export const config = { maxDuration: 60 };
 const url = process.env.DATABASE_URL || process.env.POSTGRES_URL;
 const KEEP = 60; // snapshots kept (about a month at two pulls a day)
+const MIN_GAP_MIN = 60; // the button saves at most one pull an hour (same as the Amplitude button) for everyone (each save is a snapshot, and only the last KEEP are kept)
 
 function explain(e) {
   if (e.status === 403 && /has not been used|disabled/i.test(e.message)) return 'The Google Sheets API is switched off in the Cloud project that owns this service account.';
@@ -38,6 +39,13 @@ export default async function handler(req, res, deps = {}) {
   const sql = deps.sql ?? (url ? neon(url) : null);
   if (wantStore && !sql) return send(500, { ok: false, error: 'Saving needs the database, which is not configured.' });
 
+  if (wantStore && !isCron) {
+    try { // a pull saved in the last few minutes already holds the sheet as it is now: say so without reading the sheet again
+      const last = await sql`SELECT created_at FROM roadmap_snapshots ORDER BY created_at DESC LIMIT 1`;
+      const at = last[0] && (last[0].created_at instanceof Date ? last[0].created_at : new Date(String(last[0].created_at).replace(' ', 'T').replace(/([+-]\d\d)$/, '$1:00')));
+      if (at && !isNaN(at) && Date.now() - at.getTime() < MIN_GAP_MIN * 60000) return send(200, { ok: true, mode: 'store', who: 'button', stored: false, refused: 'recent', lastPulled: last[0].created_at, note: `The sheet was already pulled in the last hour.` });
+    } catch (e) { /* no table yet: the first save creates it */ }
+  }
   let rows;
   try {
     const token = await getToken(parseCreds(env.GOOGLE_SERVICE_ACCOUNT_JSON), deps.fetchImpl);

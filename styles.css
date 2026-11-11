@@ -4123,3 +4123,8 @@ details.pbox.prov > summary { cursor: pointer; list-style: none; } details.pbox.
 /* Refresh button reuses the page's .hint tooltip; keep it a clean pill, always a pointer (Mike, Nov 11) */
 .cvr-refresh-btn.hint { cursor: pointer; text-decoration: none; padding: 4px 11px; margin: 0; border-radius: 999px; background: var(--surface); }
 .cvr-refresh-btn.hint:hover:not(:disabled), .cvr-refresh-btn.hint:focus-visible { background: var(--sunk, #f2f2f6); border-color: var(--ink-3, #9a9aa8); text-decoration: none; }
+
+/* Roadmap "Refresh from sheet" button (Jay, Nov 11): beside the "Built from the sheet" note, smaller than the CVR page button */
+.rmrefreshrow { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; }
+.rmrefreshrow .rmsheetnote { margin: 0; flex: 1 1 420px; }
+.cvr-refresh-btn.rmrefresh { padding: 5px 12px; font-size: 12.5px; flex: none; }
