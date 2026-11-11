@@ -49,7 +49,8 @@
   // ---- the pieces (created once, so a running refresh survives the page redrawing around them) ----
   function el(tag, attrs, style) { var e = document.createElement(tag); for (var k in attrs) e.setAttribute(k, attrs[k]); if (style) e.setAttribute('style', style); return e; }
   var note = el('span', { 'data-cvr-note': '1' }, 'display:inline-flex;align-items:center;margin:8px 0 0;vertical-align:middle');
-  var btn = el('button', { type: 'button', 'data-cvr-btn': '1', class: 'cvr-refresh-btn' }, '');
+  // Uses the page's own hover box (class hint + data-pop) so it looks and behaves like every other tip, not the browser's grey tooltip (Mike, Nov 11).
+  var btn = el('button', { type: 'button', 'data-cvr-btn': '1', 'data-pop': 'cvrrefresh', class: 'cvr-refresh-btn hint' }, '');
   note.appendChild(btn); // the "last pulled" wording lives in this button's hover (Mike, Nov 9)
   var wrap = el('div', { 'data-cvr-panel': '1' }, 'display:none;flex:0 0 100%;width:100%;margin:8px 0 0;text-align:left');
   var card = el('div', { 'data-cvr-card': '1' }, 'max-width:560px;border:1px solid var(--line-2,#cfcfd6);background:var(--surface,#fff);color:var(--ink,#1a1a1a);border-radius:10px;padding:10px 12px;font-size:13px;line-height:1.45;box-shadow:0 2px 8px rgba(0,0,0,.12)');
@@ -89,9 +90,12 @@
   new MutationObserver(later).observe(document.body, { childList: true, subtree: true });
 
   // ---- the button ----
+  function hoverTip() {
+    try { if (typeof POPS !== 'undefined') Object.defineProperty(POPS, 'cvrrefresh', { configurable: true, get: function () { var esc = function (t) { return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;'); }; var L = hover().split('\n'); return '<b class="tiph nosrc">Refresh Amplitude data</b><ul class="hul nrul">' + L.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>'; } }); } catch (e) {}
+  }
   function idle() {
-    btn.disabled = false; btn.textContent = '\u21bb Refresh Amplitude data'; btn.title = hover();
-    var locked = softLocked(); btn.setAttribute('aria-disabled', locked ? 'true' : 'false'); btn.style.opacity = locked ? '.6' : ''; btn.style.cursor = locked ? 'default' : '';
+    btn.disabled = false; btn.textContent = '\u21bb Refresh Amplitude data'; btn.removeAttribute('title'); hoverTip();
+    var locked = softLocked(); btn.setAttribute('aria-disabled', locked ? 'true' : 'false'); btn.style.opacity = locked ? '.75' : ''; /* stays a normal pointer button: clicking when current just explains why nothing changed */
   }
   // The message card can always be closed: the x, the Escape key, or a click anywhere outside it (Mike, Nov 10: it would not go away).
   // Closing it during a running refresh only hides the progress card; the button still shows the count and the refresh carries on.
