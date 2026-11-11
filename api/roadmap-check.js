@@ -1,12 +1,12 @@
 // Read-only check: can the dashboard read the Active Work tab, and are the columns where we expect them?
 // Stores nothing, changes nothing. Sits behind the same sign-in as the rest of the dashboard.
 import { parseCreds, getToken, readTab } from './_roadmap/sheet.js';
+import { HEADERS } from './_roadmap/transform.js';
 
 export const config = { maxDuration: 30 };
 
 // Matched on whitespace-collapsed header text, by prefix, because the headers carry instructions on later lines.
-const WANT = { name: 'project name', roi: 'estimated roi', phase: 'current phase', status: 'status',
-  phaseEnd: 'phase end eta', launch: 'est. launch date', jira: 'jira' };
+const WANT = HEADERS; // the same list the pull uses, so this check can never drift from it
 const norm = (s) => String(s ?? '').replace(/\s+/g, ' ').trim().toLowerCase();
 const letter = (i) => String.fromCharCode(65 + i);
 const JIRA = /[A-Z][A-Z0-9]+-\d+/;

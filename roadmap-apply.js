@@ -1,62 +1,79 @@
 // Browser side. Load right after /api/roadmap-data and before app.js (plain <script> tags).
-// Always records what the sheet WOULD change in window.__roadmapDiff (open the console to read it).
-// Changes the board, and sets the "pulled from the sheet" note, only when APPLY is true.
+// The sheet decides which cards exist: every filled Active Work row becomes one card, in sheet order, under the team the row names.
+// There is no matching by title or Jira key any more. A row added to the sheet appears at the next pull; a row removed from the sheet disappears.
+// data/roadmap-coming-soon.js still supplies the team headings and, where a card's sheet name is exactly the old card's `sheet:` (or title), its text.
+// What the page did before is recorded in window.__roadmapDiff (open the console to read it): cards added, cards removed, and status or date changes.
 (function () {
-  const APPLY = true;  // the sheet drives the fields below; set to false to show the data file as written
-  const FIELDS = ['eta', 's']; // fields the sheet changes on the board: launch date and status (the note below follows this list)
-  const HIDE_TITLES = ['Feed fixes', 'Analytics data for the pricing test', 'Search cluster migration']; // cards to hide by title (Jira-only or tracker-only, not on the sheet); matched ignoring case and punctuation
-  const DROP_UNMATCHED = false; // true removes board items that have no row on the sheet (Jira-only or tracker-only cards). Read window.__roadmapUnmatched first.
+  const APPLY = true;       // false shows the data file exactly as written (the old board)
+  const KEEP_TEXT = true;   // carry the hand-written description (d), why, tags and Jira progress (pts) from the old card with the same sheet name
   const JIRA_BASE = 'https://articore.atlassian.net/browse/';
   const NO_JIRA_NOTE = 'No Jira ticket is linked on the sheet row yet. Reach out to the PM.'; // shown where the card's source is drawn
-  const MIN_SHEET_ROWS = 20;    // safety: never drop anything if the snapshot has fewer rows than this (a bad or empty pull)
+  const NO_STATUS = 'Not Set'; // rows with a blank phase and status
+  const MIN_SHEET_ROWS = 20;         // safety: never rebuild the board from a snapshot with fewer rows than this (a bad or empty pull)
   const snap = window.__roadmapSnapshot;
-  if (!snap || !snap.rows || typeof COMING === 'undefined') return;
+  if (!snap || typeof COMING === 'undefined') return;
+  // Only the v2 snapshot (an array of row records) can build the board. An older snapshot leaves the data file's board as it is.
+  if (!Array.isArray(snap.rows)) { window.__roadmapSkipped = 'snapshot is the old format; the data file board is shown'; return; }
+  if (snap.rows.length < MIN_SHEET_ROWS) { window.__roadmapSkipped = 'snapshot has only ' + snap.rows.length + ' rows'; return; }
+
   const jiraOf = (x) => ((x && x.link) || '').match(/[A-Z][A-Z0-9]+-\d+/);
-  const byJira = {};
-  Object.entries(snap.rows).forEach(([n, r]) => { if (r.jira) (byJira[r.jira] = byJira[r.jira] || []).push(n); });
   function isoET(createdAt) {
     const d = new Date(String(createdAt).replace(' ', 'T').replace(/([+-]\d\d)$/, '$1:00'));
     return isNaN(d) ? null : new Intl.DateTimeFormat('en-CA', { timeZone: 'America/New_York' }).format(d);
   }
   const pulledOn = isoET(snap.createdAt);
-  // Matching never needs a Jira link: sheet key, then Jira key (when unique), then exact title, then title ignoring case and punctuation (when unique).
-  const norm = (x) => String(x || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
-  const byNorm = {};
-  Object.keys(snap.rows).forEach((n) => { (byNorm[norm(n)] = byNorm[norm(n)] || []).push(n); });
-  const normMatch = (x) => { const k = byNorm[norm(x)]; return k && k.length === 1 ? k[0] : null; };
-  const isJiraLink = (u) => /atlassian\.net\/browse\//.test(u || '');
-  const diff = [], unmatched = [], unmatchedItems = [], noJira = [];
-  COMING.teams.forEach((team) => team.items.forEach((item) => {
-    const j = jiraOf(item), jn = j && byJira[j[0]] && byJira[j[0]].length === 1 ? byJira[j[0]][0] : null;
-    const name = [item.sheet && item.sheet.trim(), jn, item.t, item.sheet && normMatch(item.sheet), normMatch(item.t)].find((n) => n && snap.rows[n]);
-    if (!name) { unmatchedItems.push([team, item]); unmatched.push(team.key + ' | ' + item.t + ' | ' + (item.s || '') + ' | ' + (item.eta || '') + ' | ' + ((item.link || '').replace(/.*browse\//, '') || '-')); return; }
-    const row = snap.rows[name], p = {};
-    // The Jira link comes from the sheet row only. No link there means the card says to ask the PM, never a link Jira or Slack found.
-    if (APPLY) item.sheetSrc = { on: pulledOn, phase: row.phase || null, status: row.status || null, jira: row.jira || null,
-      s: FIELDS.indexOf('s') >= 0 && !!row.s, eta: FIELDS.indexOf('eta') >= 0 && row.eta ? String(row.eta) : null, noJira: !row.jira, note: row.jira ? null : NO_JIRA_NOTE };
-    if (row.jira) { if (APPLY) { item.link = JIRA_BASE + row.jira; item.noJira = false; delete item.jiraNote; } }
-    else { noJira.push(team.key + ' | ' + item.t); if (APPLY) { if (isJiraLink(item.link)) delete item.link; item.noJira = true; item.jiraNote = NO_JIRA_NOTE; } }
-    if (row.s && row.s !== item.s) p.s = row.s;
-    if (row.eta && row.eta !== item.eta) p.eta = row.eta;
-    if (item.impSrc === 'Roadmap sheet estimate' && row.imp && row.imp !== item.imp) p.imp = row.imp;
-    Object.keys(p).forEach((k) => { if (FIELDS.indexOf(k) < 0) delete p[k]; });
-    if (Object.keys(p).length) { diff.push({ item: team.key + '|' + item.t, from: { s: item.s, eta: item.eta, imp: item.imp }, to: p }); if (APPLY) Object.assign(item, p); }
-  }));
-  window.__roadmapDiff = diff;
-  window.__roadmapHidden = [];
-  if (APPLY && HIDE_TITLES.length) {
-    const hide = HIDE_TITLES.map(norm);
-    COMING.teams.forEach((team) => { team.items = team.items.filter((it) => { const gone = hide.indexOf(norm(it.t)) >= 0; if (gone) window.__roadmapHidden.push(team.key + ' | ' + it.t); return !gone; }); });
+
+  // The old board, read once: text and a before-picture for the diff. Keyed by the exact sheet name (or the exact title when a card has no sheet name).
+  const oldKey = (it) => String(it.sheet || it.t || '').trim();
+  const old = {};
+  COMING.teams.forEach((team) => team.items.forEach((it) => { old[oldKey(it)] = { team: team.key, it }; }));
+
+  const teams = {}; COMING.teams.forEach((t) => { teams[t.key] = t; });
+  // Infrastructure has rows on the sheet but no heading in the data file; this is the heading app.js used when it created one.
+  if (!teams.infra && snap.rows.some((r) => r.teamKey === 'infra')) {
+    teams.infra = { key: 'infra', name: 'Infrastructure', icon: '🏗️', tagline: 'Platform and tooling consolidation across the sites.', items: [] };
+    COMING.teams.push(teams.infra);
   }
-  window.__roadmapNoJira = noJira; // cards on the sheet whose row has no Jira link yet: "team | title"
-  window.__roadmapUnmatched = unmatched; // board cards with no row on the sheet: "team | title | status | launch | Jira key"
-  if (APPLY && DROP_UNMATCHED) {
-    if (Object.keys(snap.rows).length < MIN_SHEET_ROWS) window.__roadmapDropSkipped = 'snapshot has only ' + Object.keys(snap.rows).length + ' rows';
-    else {
-      const gone = new Set(unmatchedItems.map((x) => x[1]));
-      COMING.teams.forEach((team) => { team.items = team.items.filter((it) => !gone.has(it)); });
+  const fresh = {}; Object.keys(teams).forEach((k) => { fresh[k] = []; });
+  const added = [], changed = [], hidden = [], noJira = [], seen = new Set();
+  let withText = 0, noStatus = 0;
+
+  snap.rows.forEach((r) => {
+    if (!r.teamKey || !teams[r.teamKey]) { hidden.push('row ' + r.row + ' | ' + (r.team || '(no team)') + ' | ' + r.name); return; } // hidden until a team is set on the sheet
+    const prev = old[String(r.name).trim()];
+    seen.add(String(r.name).trim());
+    const it = {
+      t: r.name, sheet: r.name, e: '', obj: r.pillar || '', site: r.site || '', s: r.s || NO_STATUS, eta: r.eta || '',
+      sheetRow: r.row,
+    };
+    if (!r.s) noStatus++;
+    if (r.imp) { it.imp = r.imp; it.impSrc = 'Roadmap sheet estimate'; }
+    // The Jira link comes from the sheet row only. No link there means the card says to ask the PM.
+    if (r.jira) it.link = JIRA_BASE + r.jira;
+    else { it.noJira = true; it.jiraNote = NO_JIRA_NOTE; noJira.push(teams[r.teamKey].key + ' | ' + r.name); }
+    if (KEEP_TEXT && prev) {
+      const o = prev.it; let any = false;
+      ['d', 'why', 'tags'].forEach((k) => { if (o[k] != null && o[k] !== '') { it[k] = o[k]; any = true; } });
+      // Progress points belong to the Jira epic they were read from: keep them only while the sheet row still points at that epic.
+      const oj = jiraOf(o);
+      if (o.pts && oj && r.jira && oj[0] === r.jira) { it.pts = o.pts; if (o.ptsUnit) it.ptsUnit = o.ptsUnit; }
+      if (any) withText++;
     }
-  }
+    it.sheetSrc = { on: pulledOn, phase: r.phase, status: r.status, jira: r.jira || null, s: !!r.s, eta: r.eta || null, noJira: !r.jira, note: r.jira ? null : NO_JIRA_NOTE,
+      row: r.row, team: r.team, brand: r.brand, okr: r.okr, goal: r.goal, pm: r.pm, phaseStart: r.phaseStart, phaseEnd: r.phaseEnd, phaseUpdated: r.phaseUpdated };
+    fresh[r.teamKey].push(it);
+    // The sheet's PM column is the card's Product Manager (the PM filter and the pop-up read it from PEOPLE, keyed by title).
+    if (APPLY && r.pm && typeof PEOPLE !== 'undefined') PEOPLE[r.name] = Object.assign({}, PEOPLE[r.name], { pm: r.pm });
+    if (!prev) added.push(r.teamKey + ' | ' + r.name);
+    else if (prev.it.s !== it.s || (prev.it.eta || '') !== it.eta || prev.team !== r.teamKey) changed.push({ item: r.teamKey + ' | ' + r.name, from: { team: prev.team, s: prev.it.s, eta: prev.it.eta }, to: { team: r.teamKey, s: it.s, eta: it.eta } });
+  });
+  const removed = Object.keys(old).filter((k) => !seen.has(k)).map((k) => old[k].team + ' | ' + old[k].it.t);
+
+  window.__roadmapDiff = { added, removed, changed };   // what the sheet changed against the data file's board
+  window.__roadmapHidden = hidden;                      // sheet rows kept off the page until a team is set: "row | team | name"
+  window.__roadmapNoJira = noJira;                      // cards whose sheet row has no Jira link yet: "team | title"
+  window.__roadmapBuilt = { sheetRows: snap.rows.length, cards: snap.rows.length - hidden.length, hiddenUntilTeamSet: hidden.length, noStatus, noJira: noJira.length, withHandWrittenText: withText };
+  if (APPLY) Object.keys(teams).forEach((k) => { teams[k].items = fresh[k]; });
 
   // "Pulled Sun Nov 8, 1:13 PM ET", in the same style as the A/B page note.
   function pulledAt(createdAt) {
@@ -67,10 +84,8 @@
     return `${q.weekday} ${q.month} ${q.day}, ${q.hour}:${q.minute} ${q.dayPeriod} ET`;
   }
   // The page draws this line itself (comingHtml in app.js reads window.__roadmapNote), so it survives every redraw.
-  // It is set only when APPLY is true, because only then is the page actually using the sheet.
-  const names = { eta: 'launch dates', s: 'status', imp: 'impact estimates' };
   const when = pulledAt(snap.createdAt);
   window.__roadmapNote = APPLY && when
-    ? `Refreshed automatically from the Product Org Dashboard sheet: ${FIELDS.map((f) => names[f] || f).join(', ')}. Pulled ${when}. Everything else on this page is curated by hand.`
+    ? `Built from the Product Org Dashboard sheet: every project row, with its team, brand, goal, status and launch date. Pulled ${when}. Project descriptions are written by hand and may lag the sheet.`
     : null;
 })();

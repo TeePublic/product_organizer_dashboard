@@ -2427,9 +2427,14 @@ const PROG = it => {
   const [a, z] = it.pts, p = z ? Math.round(a / z * 100) : 0, iss = it.ptsUnit === 'issues';
   return { p, short: p + '%', sub: a + ' of ' + z + (iss ? ' tickets' : ' pts'), long: iss ? a + ' of ' + z + ' Jira tickets done. This epic has no story points, so progress counts tickets.' : a + ' of ' + z + ' story points done in Jira. Points are the team\'s effort estimate, so this is share of the work, not share of tickets.' };
 };
-const OBJS = ['CVR', 'AOV', 'Revenue', 'Retention', 'Traffic', 'Ops', 'Compliance', 'Data'];
+// The goals come from the data: the sheet's Pillar on each roadmap card, plus whatever the curated lists use. The original eight keep their order and emoji; any other goal shows with no emoji.
+const OBJS = (() => {
+  const base = ['CVR', 'AOV', 'Revenue', 'Retention', 'Traffic', 'Ops', 'Compliance', 'Data'], seen = new Set(), add = it => { if (it && it.obj) seen.add(it.obj); };
+  COMING.teams.forEach(t => t.items.forEach(add)); [COMING.board, COMING.post, COMING.wins].forEach(l => (l || []).forEach(add));
+  return base.filter(o => seen.has(o)).concat([...seen].filter(o => base.indexOf(o) < 0));
+})();
 const OBJN = o => o === 'Data' ? 'Data foundation' : o;
-const OBJE = { CVR: '🎯', AOV: '🛒', Revenue: '💵', Retention: '🔁', Traffic: '🚦', Ops: '⚙️', Compliance: '⚖️', Data: '🧮' };
+const OBJE = new Proxy({ CVR: '🎯', AOV: '🛒', Revenue: '💵', Retention: '🔁', Traffic: '🚦', Ops: '⚙️', Compliance: '⚖️', Data: '🧮' }, { get: (t, k) => (k in t ? t[k] : '') });
 const STAGE = it => { const x = (it.s || '').toLowerCase(); return /launched|results|^live$/.test(x) && !/test/.test((it.t || '').toLowerCase()) ? 'live' : /dev|qa|review|launching|flight|ready to ship|block|delay|live|paus/.test(x) ? 'flight' : 'next'; };
 const STAGEN = { flight: '🛠️ In flight', next: '⏭️ Up next', live: '🚀 Launched' };
 const keep = it => (state.obj === 'all' || it.obj === state.obj) && (state.stage === 'all' || STAGE(it) === state.stage);
@@ -2529,7 +2534,7 @@ const UPD = {
 if (typeof LATEST !== 'undefined') Object.keys(LATEST).forEach(t => { UPD[t] = LATEST[t].text; });
 const siteDot = x => !x ? '<span class="faint">–</span>' : x === 'Both' ? '<i style="background:var(--tp)"></i><i style="background:var(--rb)"></i>RBO + TPO' : x === 'Dashery' ? '<i style="background:var(--ds)"></i>Dashery' : '<i style="background:var(--' + (x === 'TP' ? 'tp' : 'rb') + ')"></i>' + SITEN(x);
 const PHASES = ['Discovery', 'Sizing', 'Building', 'Testing', 'Launching', 'Live'];
-const phaseIx = st => { const x = (st || '').toLowerCase(); return /discovery/.test(x) ? 0 : /scop|siz|plan|next sprint|ready for dev/.test(x) ? 1 : /qa|review/.test(x) ? 3 : /launch|ready to ship/.test(x) ? 4 : /^live$|launched/.test(x) ? 5 : 2; };
+const phaseIx = st => { const x = (st || '').toLowerCase(); return /^not set$/.test(x) ? -1 : /discovery/.test(x) ? 0 : /scop|siz|plan|next sprint|ready for dev/.test(x) ? 1 : /qa|review/.test(x) ? 3 : /launch|ready to ship/.test(x) ? 4 : /^live$|launched/.test(x) ? 5 : 2; };
 const phaseBar = st => { const k = phaseIx(st), bad = STC(st) === 'blocked'; return '<span class="phb' + (bad ? ' bad' : '') + '" title="' + PHASES.map((p, i) => (i === k ? '▸ ' : '') + p).join(' · ') + '"><span class="phs">' + PHASES.map((p, i) => '<i class="' + (i <= k ? 'on' : '') + '"></i>').join('') + '</span><span class="phl">' + esc(st) + '</span></span>'; };
 const LATE = it => /2027|Q1|Jan /.test(it.eta || '');
 // Who may reorder each team: its Product Manager(s) and director, plus Mike everywhere. Names resolve to ids at view time.
@@ -2707,8 +2712,8 @@ function lbModal2(ref) {
   const cD = chg.find(x => x.k === 'date'), cP = chg.find(x => x.k === 'phase' || x.k === 'blocked');
   const facts = '<div class="mfacts">' + fact('Estimated launch', esc(rng(it.eta)), cD ? 'Was ' + esc(rng(cD.was)) + ' at the ' + esc(prev.asOf.replace(/^the /, '')) + (it.why ? '. ' + esc(it.why) : '') : '', cD ? 'chg' : '') +
     fact('Estimated impact', imp ? esc(imp) : ce ? '<span class="ceval">' + ce.short + '</span>' : /^(Ops|Data|Compliance)$/.test(it.obj || '') ? 'No direct revenue' : 'Not sized yet', imp ? 'From ' + esc(it.impSrc || 'the roadmap sheet') : ce ? 'Claude\'s estimate. ' + esc(ce.how) : '') +
-    fact('Status', stuck(it.s) ? esc(it.s) : STEPS[k], (cP && cP.k === 'phase' ? 'Was ' + esc(lcx(cP.txt.split(' → ')[0].replace(/^\S+ /, ''))) + '. ' : '') + (stuck(it.s) ? 'Was ' + lcx(STEPS[k]) : k < 6 ? 'Next: ' + STEPS[k + 1] : ''), cP ? 'chg' : stuck(it.s) ? 'bad' : k === 6 ? 'good' : '') + '</div>';
-  const steps = '<ol class="mstep" aria-label="Progress">' + STEPS.map((p, i) => '<li class="' + (i < k ? 'd' : i === k ? 'c' + (stuck(it.s) ? ' bad' : '') : '') + '">' + (i === k && stuck(it.s) && k !== 6 ? hint('!', 'dot dhint', '<b>' + esc(c.l) + ' at ' + esc(lcx(p)) + '</b><br>' + c.why.map(esc).join('<br>')) : '<span class="dot" aria-hidden="true">' + (i < k || (i === k && k === 6) ? '✓' : '') + '</span>') + '<span class="lb">' + p + '</span></li>').join('') + '</ol>';
+    fact('Status', stuck(it.s) ? esc(it.s) : noStat(it.s) ? 'Not Set' : STEPS[k], (cP && cP.k === 'phase' ? 'Was ' + esc(lcx(cP.txt.split(' → ')[0].replace(/^\S+ /, ''))) + '. ' : '') + (stuck(it.s) ? 'Was ' + lcx(STEPS[k]) : k < 6 && !noStat(it.s) ? 'Next: ' + STEPS[k + 1] : ''), cP ? 'chg' : stuck(it.s) ? 'bad' : k === 6 ? 'good' : '') + '</div>';
+  const steps = '<ol class="mstep" aria-label="Progress">' + STEPS.map((p, i) => '<li class="' + (noStat(it.s) ? '' : i < k ? 'd' : i === k ? 'c' + (stuck(it.s) ? ' bad' : '') : '') + '">' + (i === k && stuck(it.s) && k !== 6 ? hint('!', 'dot dhint', '<b>' + esc(c.l) + ' at ' + esc(lcx(p)) + '</b><br>' + c.why.map(esc).join('<br>')) : '<span class="dot" aria-hidden="true">' + (i < k || (i === k && k === 6) ? '✓' : '') + '</span>') + '<span class="lb">' + p + '</span></li>').join('') + '</ol>';
   const tags = '<div class="mtags">' + (it.site ? '<span class="rtag">' + siteDot(it.site) + '</span>' : '') + (it.inj ? '<span class="rtag inj">Injected' + (it.for ? ': displaced ' + esc(it.for) : '') + '</span>' : '') + chg.map(x => chgTag(it, x, prev)).join('') + '</div>';
   const conf = '<div class="pbox mconf ' + c.k + '"><h4 class="ph">' + (c.k === 'bad' ? '🔴' : c.k === 'warn' ? '🟡' : c.k === 'live' ? '🟢' : '⚪') + ' Launch confidence: ' + c.l + '</h4>' + (c.why.filter(w => !LT || w !== LT.text).map(w => '<p>' + esc(w) + '</p>').join('') || '<p>Based on the latest update below.</p>') + '</div>';
   const who = [['Product Manager', P.pm], ['Tech lead', P.lead], ['Engineers', (P.eng || []).join(', ')], ['Looped in', (P.looped || []).join(', ')], ['Exec sponsor', P.sponsor]].filter(x => x[1]);
@@ -2967,12 +2972,13 @@ const impCell = it => { const p = IMPS[it.t] || it.imp; return p ? hint(esc(p), 
 const impVal = it => { const c = cest(it), s = String(IMPS[it.t] || it.imp || (c ? c.short : '')), m = s.match(/([\d.]+)\s*([KkMm])/); if (!m) return -1; const v = parseFloat(m[1]) * (/m/i.test(m[2]) ? 1e6 : 1e3); return /month/i.test(s) ? v * 12 : v; };
 // Seven steps from idea to live. The status cell shows where a project is now and what comes next.
 const STEPS = ['Discovery', 'Sizing', 'Coding', 'Review', 'QA', 'Launch', 'Live'];
-const stepIx = st => { const x = (st || '').toLowerCase(); return /discovery|research/.test(x) ? 0 : /scop|siz|plan|ready for dev|next sprint|tdd/.test(x) ? 1 : /review/.test(x) ? 3 : /qa|uat|test/.test(x) && !/^live/.test(x) ? 4 : /launching|ready to ship|launch/.test(x) && !/launched/.test(x) ? 5 : /^live|launched|done/.test(x) ? 6 : 2; };
+const stepIx = st => { const x = (st || '').toLowerCase(); return noStat(x) ? 0 : /discovery|research/.test(x) ? 0 : /scop|siz|plan|ready for dev|next sprint|tdd/.test(x) ? 1 : /review/.test(x) ? 3 : /qa|uat|test/.test(x) && !/^live/.test(x) ? 4 : /launching|ready to ship|launch/.test(x) && !/launched/.test(x) ? 5 : /^live|launched|done/.test(x) ? 6 : 2; };
 const stuck = st => /block|delay|paus/i.test(st || '');
+const noStat = st => /^not set$/i.test(st || ''); // a sheet row with a blank phase and status
 function stepCell(it) {
   const k = stepIx(it.s), bad = stuck(it.s), why = UPD[it.t] || it.why || '';
-  const dots = '<span class="stp" aria-hidden="true">' + STEPS.map((p, i) => '<i class="' + (i < k ? 'd' : i === k ? 'c' + (bad ? ' bad' : '') : '') + '"></i>').join('') + '</span>';
-  const now = bad ? esc(it.s) : STEPS[k], next = k < 6 && !bad ? STEPS[k + 1] : '';
+  const ns = noStat(it.s), dots = '<span class="stp" aria-hidden="true">' + STEPS.map((p, i) => '<i class="' + (ns ? '' : i < k ? 'd' : i === k ? 'c' + (bad ? ' bad' : '') : '') + '"></i>').join('') + '</span>';
+  const now = ns ? 'Not Set' : bad ? esc(it.s) : STEPS[k], next = k < 6 && !bad && !ns ? STEPS[k + 1] : '';
   return hint(dots + '<span class="stt' + (bad ? ' bad' : k === 6 ? ' live' : '') + '"><b>' + now + '</b>' + (next ? '<small>Next: ' + next + '</small>' : bad ? '<small>was ' + STEPS[k] + '</small>' : '') + '</span>', 'stcell',
     '<b>' + esc(it.s || 'TBD') + '</b><br>' + STEPS.map((p, i) => i === k ? '<b>▸ ' + p + '</b>' : p).join(' → ') + (bad && why ? '<br><br><b>Why:</b> ' + esc(why) : ''));
 }

@@ -687,6 +687,7 @@ a.top:hover { transform: translateY(-2px); } a.top:hover b { text-decoration: un
 .lbname { display: flex; gap: 10px; align-items: center; min-width: 0; }
 .lbname b { font: 600 14.5px var(--display); display: block; }
 .lbe { font-size: 20px; flex: none; }
+.lbe:empty { display: none; } /* cards built from the sheet have no emoji */
 .lbmeta { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 3px; }
 .chip { font-size: 11px; font-weight: 600; color: var(--muted); background: var(--sunk); border-radius: 99px; padding: 1px 8px; box-shadow: inset 0 0 0 1px var(--line); white-space: nowrap; }
 .chip.tg { color: var(--c4); background: color-mix(in srgb, var(--c4) 10%, var(--surface)); box-shadow: none; }

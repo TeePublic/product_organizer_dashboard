@@ -1,7 +1,7 @@
 // Serves the latest roadmap snapshot (the sheet's Active Work rows) from Neon as a small script.
 // index.html loads it after the data files and before app.js. It ONLY sets window.__roadmapSnapshot.
-// It does not touch COMING or any other dataset, so the cards look exactly as they do today.
-// A later, separate step reads window.__roadmapSnapshot and applies it, once the dry-run diff has been reviewed.
+// It does not touch COMING or any other dataset: roadmap-apply.js reads window.__roadmapSnapshot and builds the cards.
+// v is the snapshot format: 2 = an array of sheet-row records. An older snapshot (no v, a map by name) is served as is and ignored by roadmap-apply.js.
 import { neon } from '@neondatabase/serverless';
 
 const url = process.env.DATABASE_URL || process.env.POSTGRES_URL;
@@ -12,7 +12,7 @@ const empty = (why) => `/* roadmap-data: ${why} */\nwindow.__roadmapSnapshot = n
 const withTimeout = (p, ms) => Promise.race([p, new Promise((_, no) => setTimeout(() => no(new Error('timeout')), ms))]);
 
 function expose(s) {
-  const json = JSON.stringify({ id: Number(s.id), createdAt: s.createdAt, rows: s.payload?.rows ?? {} })
+  const json = JSON.stringify({ id: Number(s.id), createdAt: s.createdAt, v: s.payload?.v ?? 1, rows: s.payload?.rows ?? [] })
     .replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
   return `window.__roadmapSnapshot = ${json};\n`;
 }
