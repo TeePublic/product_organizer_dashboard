@@ -4014,9 +4014,9 @@ details.pbox.prov > summary { cursor: pointer; list-style: none; } details.pbox.
 .absub { font-size: 11.5px; line-height: 1.25; color: var(--muted); font-weight: 500; }
 
 /* Refresh data: a solid rectangular button under the Bot filter, top right (Mike, Nov 9) */
-.cvr-refresh-btn { cursor: pointer; font: inherit; font-size: 13px; font-weight: 600; color: var(--surface); background: var(--ink); border: 1px solid var(--ink); border-radius: 8px; padding: 8px 16px; line-height: 1.2; box-shadow: 0 1px 2px rgba(0,0,0,.18); transition: transform .06s, box-shadow .12s, opacity .12s; }
-.cvr-refresh-btn:hover:not(:disabled) { opacity: .88; box-shadow: 0 2px 6px rgba(0,0,0,.22); }
-.cvr-refresh-btn:active:not(:disabled) { transform: translateY(1px); box-shadow: none; }
+.cvr-refresh-btn { cursor: pointer; font: inherit; font-size: 12px; font-weight: 500; color: var(--ink); background: var(--surface); border: 1px solid var(--line-2, #cfcfd6); border-radius: 999px; padding: 4px 11px; line-height: 1.2; box-shadow: none; transition: background .12s, border-color .12s, transform .06s; }
+.cvr-refresh-btn:hover:not(:disabled) { background: var(--sunk, #f2f2f6); border-color: var(--ink-3, #9a9aa8); }
+.cvr-refresh-btn:active:not(:disabled) { transform: translateY(1px); }
 .cvr-refresh-btn:disabled { cursor: progress; opacity: .6; }
 
 /* Beam overlay (Mike, Nov 10): laid out like the rest of the site. Headline sentence with highlighted phrases, big-number tiles, the standard table, a payback meter, a 100-shopper dot grid and three steps. Uses page tokens, so dark mode follows. Spacing runs on 4/8/12/16/24/32. */
