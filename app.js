@@ -1908,7 +1908,7 @@ function payMix(b, d) {
   // Compared with the last 30 days average: every other day in the 30-day window (Mike, Oct 26).
   const idx = []; for (let i = 0; i < n; i++) if (i !== t && !isContam(b, addDays(start, i))) idx.push(i);
   /* TeePublic: split Apple Pay orders by the share of Apple Pay taps that came from the product page buy-now button that day */
-  const apSplit = i => { if (b !== 'tp' || typeof AP === 'undefined') return null; const ai = Math.round((parse(addDays(start, i)) - parse(AP.start)) / DAY); if (ai < 0 || ai >= AP['Product page'].length) return null; const keys = Object.keys(AP).filter(k => k !== 'start'); return AP['Product page'][ai] / sum(keys.map(k => AP[k][ai])); };
+  const apSplit = i => { if (b !== 'tp' || typeof AP === 'undefined') return null; const keys = Object.keys(AP).filter(k => k !== 'start'), len = AP['Product page'].length, ai = Math.round((parse(addDays(start, i)) - parse(AP.start)) / DAY); if (ai < 0) return null; /* Days past the last AP day (the Amplitude refresh runs ahead of AP) use the share of the last 7 AP days, so the Apple Pay from PDP row never drops out and the rows stay aligned (Mike, Nov 11). */ if (ai >= len) { const a = Math.max(0, len - 7); return sum(AP['Product page'].slice(a, len)) / sum(keys.map(k => sum(AP[k].slice(a, len)))); } return AP['Product page'][ai] / sum(keys.map(k => AP[k][ai])); };
   const rows = i => {
     const out = [], tot = sum(names.map(k => P[k][i]));
     names.forEach((k, j) => {
