@@ -4102,3 +4102,17 @@ details.pbox.prov > summary { cursor: pointer; list-style: none; } details.pbox.
 .bm-bt i.cost { background: var(--ink); }
 .bm-bar b { text-align: right; font-size: 15px; }
 @media (max-width: 640px) { .bm-eq { grid-template-columns: 1fr; } .bm-op { justify-self: center; } .bm-bar { grid-template-columns: 92px 1fr 52px; gap: 8px; } }
+
+/* Undated projects on the Timeline: plain rows, no bar (Jay, Nov 10) */
+.urows { display: flex; flex-direction: column; min-width: 0; }
+.urow { display: grid; grid-template-columns: 24px minmax(0, 1fr) 96px 120px 120px; gap: 0 12px; align-items: center; padding: 6px 8px; border-radius: 6px; cursor: pointer; }
+.urow:nth-child(odd) { background: color-mix(in srgb, var(--ink) 3.5%, transparent); }
+.urow:hover { background: color-mix(in srgb, var(--accent) 10%, transparent); }
+.urow .ge { width: 24px; }
+.urow .utl { font: 600 13.5px var(--body); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.urow .ueta { font-size: 12.5px; color: var(--muted); }
+.urow .sstat { justify-self: start; }
+@media (max-width: 760px) { .urow { grid-template-columns: 24px minmax(0, 1fr) auto; } .urow .usite { display: none; } .urow .ueta { grid-column: 2 / -1; } }
+
+/* Timeline date labels sit on a solid chip above the Today, freeze and Black Friday lines, so the lines never run through the text (Jay, Nov 10) */
+.glbl { padding: 1px 6px; border-radius: 4px; background: color-mix(in srgb, var(--surface) 94%, transparent); z-index: 3; }
