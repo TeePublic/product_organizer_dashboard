@@ -1,5 +1,14 @@
 # Refreshing the dashboard data
 
+## Roadmap freeze (Jay, Nov 10): a refresh does not touch the Roadmap tab or Recent impact
+The Roadmap tab is built from the sheet (next section), and Jay and Tom own everything else on it until they lift this freeze. A refresh, by hand or scheduled, must **not**:
+- Edit `data/roadmap-coming-soon.js` or `data/sources.js` in any way. That means no projects, statuses, dates, links or text (`d`, `why`, `tags`), and nothing in `COMING.post`, `COMING.board`, `COMING.wins`, `COMING_PREV`, `COMING.asOf`, `ROADMAP_REVIEW`, `TEAM_MEETINGS`, `PEOPLE`, `DATES`, `VEL`, `HOURLY`, `RELN`, or their header comments.
+- Edit the Roadmap or Recent impact code in `app.js`, `styles.css` or `index.html` (the Timeline and List views, sections, filters, pop-up, wins cards).
+- Read Slack, Jira, Confluence, the calendar or meeting notes in order to change the roadmap or wins. Skip "Recent wins" and the "after each Executive Roadmap Review" steps below while the freeze is on.
+- "Fix" a `npm run check` failure that is about those files (a missing source link, a dash on a win, a stale date). Do not edit around it. Stop before committing and tell Jay what failed.
+
+Everything outside the roadmap (CVR pages, A/B tests, other tabs, the `PROD` dates and the rest of `data/`) is refreshed as before. If a roadmap change is needed, the Product Manager fixes the sheet, or Jay or Tom make the change on purpose. Do not work around the freeze.
+
 The page is static: it shows whatever is in `data/` at deploy time. Updating it means changing those files and pushing to `master`.
 There are two exceptions. On the Roadmap tab, each project's status, launch date and Jira link are patched at load from the latest snapshot of the sheet (see "The Roadmap tab comes from the sheet"). And the CVR numbers (CVR, sessions, the channel, device, funnel and region breakdowns, revenue, orders and payments) are refreshed from Amplitude by a Vercel job and applied at load from the latest snapshot (see "The CVR numbers come from Amplitude automatically").
 Vercel redeploys automatically (about a minute). Shared features (ticks, topics, flags) live in the database and are not affected.
@@ -9,8 +18,8 @@ Mike pushes straight to `master`: there is no pull request or approval step. Jay
 
 | File | Datasets | Comes from | Notes |
 |---|---|---|---|
-| `data/roadmap-coming-soon.js` | `COMING` (teams and their items), `COMING_PREV`, `ROADMAP_REVIEW`, `TEAM_MEETINGS`, `PEOPLE`, `SHOUTS`, `TESTTALK`, `SELLCALL`, `VIBE`, `CS`, `VEL`, `DATES`, `HOURLY`, `RELN` | Roadmap sheet (Active Work tab), calendar, meeting notes. Not Jira or Slack | Main file Mike touches. Header comments say how each dataset is refreshed. For projects on the sheet, `s`, `eta` and `link` are only fallbacks: the sheet's values replace them at load |
-| `data/sources.js` | `SRCS`: for each roadmap item, where each field came from (sheet row, plus older Jira and Slack entries that the Roadmap tab no longer refreshes) | Same as above | One entry per roadmap item title. For cards on the sheet, the page replaces the Status, Launch date and Why it's on the roadmap lines at load. Keys must match `COMING` item titles exactly |
+| `data/roadmap-coming-soon.js` | `COMING` (teams and their items), `COMING_PREV`, `ROADMAP_REVIEW`, `TEAM_MEETINGS`, `PEOPLE`, `SHOUTS`, `TESTTALK`, `SELLCALL`, `VIBE`, `CS`, `VEL`, `DATES`, `HOURLY`, `RELN` | Roadmap sheet (Active Work tab), calendar, meeting notes. Not Jira or Slack | **Frozen: do not edit in a refresh (see "Roadmap freeze").** Header comments describe how it was refreshed before Nov 10. For projects on the sheet, `s`, `eta` and `link` are only fallbacks: the sheet's values replace them at load |
+| `data/sources.js` | `SRCS`: for each roadmap item, where each field came from (sheet row, plus older Jira and Slack entries that the Roadmap tab no longer refreshes) | Same as above | **Frozen: do not edit in a refresh.** One entry per roadmap item title. For cards on the sheet, the page replaces the Status, Launch date and Why it's on the roadmap lines at load. Keys must match `COMING` item titles exactly |
 | `data/cvr-pacer-snapshot.js`, `data/cvr-ledger.js`, `data/standard-bot-filter.js`, `data/max-bot-filter-and-products.js` | `D`, `L` (Strong), `STD` (Moderate), `MAX` (Maximum), `UXL`, `PROD`... | Amplitude dashboards | **`D`, `L`, `STD` and `MAX` are refreshed automatically** (see "The CVR numbers come from Amplitude automatically"); the files are only the fallback and the starting point. `PROD`, `UXL` and the rest of these files are still refreshed by Claude. Header comment names the dashboard and date pulled |
 | `data/orders-slack-standups.js` | `ORD`, `R` (revenue), standup notes | Amplitude order_completed, Slack | **`ORD` and `R` are refreshed automatically.** Standup notes, Trending, incidents and the rest are still refreshed by Claude |
 | `data/experiments.js` | `EXPS` | Amplitude Experiment | |
@@ -51,8 +60,8 @@ The CVR pages' main numbers are no longer refreshed by Claude. A Vercel job (`ap
 - **If it looks wrong:** do not hand-edit the numbers. Tell Jay or Tom: deleting the newest snapshot in the database puts the page back on the previous snapshot, or on the files.
 
 ## Dates to update on every refresh
-- `REFRESH.last` (shown in the header as "Last refreshed"), `COMING.asOf`, `PROD.asOf` and the pull date in each file's header comment. **Not `D.asOf`:** the CVR datasets are refreshed automatically, and changing `D.asOf` in the file can make the page ignore the automatic refresh (see "The CVR numbers come from Amplitude automatically").
-- After each Executive Roadmap Review (every other Tuesday): set `ROADMAP_REVIEW.last`, copy the current board into `COMING_PREV`, and update `TEAM_MEETINGS.<team>.last`.
+- `REFRESH.last` (shown in the header as "Last refreshed"), `PROD.asOf` and the pull date in the header comment of each file you edit (not the two frozen roadmap files). **Not `D.asOf`:** the CVR datasets are refreshed automatically, and changing `D.asOf` in the file can make the page ignore the automatic refresh (see "The CVR numbers come from Amplitude automatically").
+- **Skipped while the Roadmap freeze is on.** After each Executive Roadmap Review (every other Tuesday), Jay or Tom: set `ROADMAP_REVIEW.last`, copy the current board into `COMING_PREV`, and update `TEAM_MEETINGS.<team>.last`.
 
 ## Rules for the content
 - Shareable only: no people-performance, compensation, HR or budget items.
@@ -105,10 +114,11 @@ The CVR numbers (`D`, `L`, `MAX`, `STD`, `R`, `ORD`) are not part of that task e
 
 ## Prompt for Claude (paste with the repo folder open)
 > Read REFRESH.md. I may ask for data updates, UI changes, or both.
-> - Data: edit the files in `data/`, keeping every field name and structure exactly as it is now. Update the as-of dates and header comments. Keep to the shareable-only rule.
+> - Roadmap freeze (Jay, Nov 10): do not edit `data/roadmap-coming-soon.js`, `data/sources.js`, or the Roadmap or Recent impact code. Do not read Slack or Jira to change the roadmap or wins. If a check fails because of those files, stop and tell me; do not fix it.
+> - Data: edit the other files in `data/`, keeping every field name and structure exactly as it is now. Update the as-of dates and header comments. Keep to the shareable-only rule.
 > - Roadmap tab: status, launch date and Jira link for projects on the Active Work tab come from the sheet automatically. Do not read Slack or Jira for roadmap items, and do not research or edit those fields; fix the sheet instead.
 > - CVR numbers: `D`, `L`, `MAX`, `STD`, `R` and `ORD` are refreshed automatically from Amplitude, always (switched on permanently Nov 9). Do not read Amplitude for them, do not edit them, and never change `D.asOf`, whatever the page shows. Still extend `PROD` to the last complete day.
-> - UI: you may edit `app.js`, `styles.css` and `index.html`. Make small targeted edits, keep the existing code style, and tell me which files you touched.
+> - UI: you may edit `app.js`, `styles.css` and `index.html`, but not the Roadmap or Recent impact parts. Make small targeted edits, keep the existing code style, and tell me which files you touched.
 > - Never touch the files listed under "Do not edit" in REFRESH.md.
 > - Git: follow "Branch rules" in REFRESH.md. Before changing anything, fetch and `git pull --rebase origin master`. Fetch again right before committing and rebase if master moved. Never create merge commits, never force-push, and stop and tell me if there is a conflict or I have uncommitted changes.
 > - Save tokens: do not read or print whole files. Use grep, or a short node snippet, to look at only the part you need, and change things with targeted edits rather than rewriting a file.
@@ -130,12 +140,13 @@ If Node is not installed on your computer, `npm run check` will not run. Tell Cl
 ## Do not edit
 - `middleware.js`, `lib/auth.js`, anything under `api/auth/` (Okta sign-in, managed separately).
 - `runtime-shim.js`, `api/docs.js`, `schema.sql`, `migrations/` and `vercel.json` (shared features and database).
+- `data/roadmap-coming-soon.js` and `data/sources.js` (frozen for refreshes, Nov 10), and the Roadmap and Recent impact code in `app.js`, `styles.css` and `index.html`. See "Roadmap freeze".
 - `roadmap-apply.js`, `api/roadmap-refresh.js`, `api/roadmap-data.js`, `api/roadmap-check.js` and everything under `api/_roadmap/` (the sheet pull for the Roadmap tab, managed by Jay).
 - `api/refresh-cvr.js`, `api/cvr-data.js` and everything under `api/_refresh/` (the automatic CVR refresh, managed by Jay).
 - `refresh-button.js` (the Refresh data button) is managed by Jay. Mike may ask for changes to where the button sits and how it looks (the `ANCHORS`/`HOSTS` lists and the button's styling in `styles.css`). Do not remove or weaken its hover (last pull time, "up to date" line), the one-an-hour message, the "Already up to date" explanation or the refresh loop; anything else goes through Jay.
 - **Button label and message card (Mike, Nov 10):** the button now reads "Refresh Amplitude data" (it only refreshes the Amplitude CVR numbers, not the hand-curated panels). Its message card has an x, closes on Escape or a click outside, and the "Already up to date" card also explains that the header's "Last refreshed" date is the hand-curated panels' clock. Earlier lines in this file that say "Refresh data button" mean this button.
 - **Must stay on the page, never removed or hidden:** the `<script>` tags in `index.html` for `/api/cvr-data` (before `app.js`) and `refresh-button.js` (after `app.js`); the Refresh data button on both CVR pages; the Roadmap and A/B tests refresh notes. Removing the `/api/cvr-data` tag silently stops the automatic CVR numbers from showing.
-- Everything else, including `app.js`, `styles.css` and `data/`, is fine to change. The one exception in `app.js`: leave the sheet-driven lines in `provHtml` (the `SR` and `sheetAt` lines and the Status, Launch date and Why it's on the roadmap rows) as they are.
+- Everything else, including `app.js`, `styles.css` and `data/`, is fine to change, **except** the two frozen roadmap data files and the Roadmap and Recent impact code (see "Roadmap freeze"). The one exception in `app.js`: leave the sheet-driven lines in `provHtml` (the `SR` and `sheetAt` lines and the Status, Launch date and Why it's on the roadmap rows) as they are.
 
 ## If something looks wrong
 - **GitHub emailed you "Check dashboard data failed":** the last update has a problem. Ask Claude to read the failed check and fix it, then commit and push again. The site may be showing the broken version until you do.
@@ -176,6 +187,8 @@ The TeePublic and Redbubble CVR pages are far more the same than different. **Ev
 - **Same rule for the A/B tab:** RBO and TPO must show the same things where the data allows (versions tag, Recently shipped, Coming soon); a column that cannot exist on one site is named in the header, not left blank.
 
 ## Recent wins: every win carries its own number (Mike, Nov 6)
+**Frozen (Jay, Nov 10): do not do any of this in a refresh.** See "Roadmap freeze". The rules below are kept for when the freeze is lifted.
+
 The cards on the Recent impact page read `result` and `rev` from each entry in `COMING.wins` (`data/roadmap-coming-soon.js`). This is part of every refresh, owned by the roadmap subagent. A dash on a card means this step was skipped, and `npm run check` fails for it.
 - **Add new wins:** every launch or test result posted in `#released`, the roadmap sheet or the Executive Roadmap Review since the last refresh becomes a `wins` entry.
 - **`result: [big, small]` on every win from the last 7 days.** Pick the first source that has a number:
