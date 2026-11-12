@@ -4128,3 +4128,6 @@ details.pbox.prov > summary { cursor: pointer; list-style: none; } details.pbox.
 .rmrefreshrow { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; }
 .rmrefreshrow .rmsheetnote { margin: 0; flex: 1 1 420px; }
 .cvr-refresh-btn.rmrefresh { padding: 5px 12px; font-size: 12.5px; flex: none; }
+
+/* Roadmap refresh button looks disabled for an hour after any pull (Jay, Nov 11); it stays clickable so a click can explain why */
+.rm-locked .cvr-refresh-btn.rmrefresh, .rm-locked .cvr-refresh-btn.rmrefresh:hover:not(:disabled) { opacity: .55; cursor: default; box-shadow: none; }

@@ -69,7 +69,7 @@ export default async function handler(req, res, deps = {}) {
     await sql`CREATE TABLE IF NOT EXISTS roadmap_snapshots (id bigserial PRIMARY KEY, created_at timestamptz NOT NULL DEFAULT now(), payload jsonb NOT NULL)`;
     const ins = await sql`INSERT INTO roadmap_snapshots (payload) VALUES (${payload}::jsonb) RETURNING id`;
     await sql`DELETE FROM roadmap_snapshots WHERE id NOT IN (SELECT id FROM roadmap_snapshots ORDER BY created_at DESC LIMIT ${KEEP})`;
-    console.log('[roadmap-refresh] saved snapshot ' + ins[0].id + ' by ' + report.who + '; sheet rows ' + report.sheetRows + '; cards on page ' + sheet.cardsOnPage + '; hidden until a team is set ' + sheet.hiddenUntilAssigned.length + '; no status ' + sheet.noStatus); // readable in the Vercel logs after a cron run
+    console.log('[roadmap-refresh] saved snapshot ' + ins[0].id + ' by ' + report.who + '; sheet rows ' + report.sheetRows + '; cards on page ' + sheet.cardsOnPage + '; hidden until a team is set ' + sheet.hiddenUntilAssigned.length + '; off the board (paused or deprioritized) ' + sheet.offBoard.length + '; no status ' + sheet.noStatus); // readable in the Vercel logs after a cron run
     return send(200, { ...report, stored: true, snapshotId: Number(ins[0].id) });
   } catch (e) {
     console.error('[roadmap-refresh] save failed:', e.message);

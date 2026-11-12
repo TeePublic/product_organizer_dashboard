@@ -64,6 +64,15 @@ export function boardLabel(phase, status) {
   return null;
 }
 
+// Rows kept off the board (Jay, Nov 12): Current Phase "Deprioritized" or Status "Paused" (or "Deprioritized"). They stay in the snapshot, so the sheet is still the full record,
+// but the page draws no card for them. roadmap-apply.js applies the same rule to the saved rows; keep the two in step.
+export function offBoardReason(row) {
+  if (norm(row.phase) === 'deprioritized') return 'Deprioritized';
+  const st = norm(row.status);
+  if (st === 'paused' || st === 'deprioritized') return st === 'paused' ? 'Paused' : 'Deprioritized';
+  return null;
+}
+
 // "🛒 CVR" -> "CVR": the Pillar is the card's goal, shown without its emoji.
 export const stripLead = (s) => String(s ?? '').replace(/^[^\p{L}\p{N}]+/u, '').replace(/\s+/g, ' ').trim();
 
@@ -104,8 +113,9 @@ export function summarize(rows) {
   const list = (f) => rows.filter(f).map((r) => `row ${r.row}: ${r.name}`);
   return {
     filledRows: rows.length,
-    cardsOnPage: rows.filter((r) => r.teamKey).length,
-    hiddenUntilAssigned: list((r) => !r.teamKey),
+    cardsOnPage: rows.filter((r) => r.teamKey && !offBoardReason(r)).length,
+    hiddenUntilAssigned: list((r) => !r.teamKey && !offBoardReason(r)),
+    offBoard: rows.filter((r) => offBoardReason(r)).map((r) => `row ${r.row}: ${r.name} (${offBoardReason(r)})`),
     noStatus: list((r) => !r.s).length,
     noStatusRows: list((r) => !r.s).slice(0, 60),
     noJira: rows.filter((r) => !r.jira).length,
@@ -114,6 +124,6 @@ export function summarize(rows) {
     duplicateNames: Object.entries(names).filter(([, v]) => v.length > 1).map(([n, v]) => `${n} (rows ${v.join(', ')})`),
     byTeam, byStatus,
     // The Pre-peak list on the page leaves out Live cards and cards dated 2027 or Q1 (see preList and LATE in app.js); these are the counts behind that.
-    notInPrePeakList: rows.filter((r) => r.teamKey && (r.s === 'Live' || /2027|Q1|Jan /.test(r.eta || ''))).length,
+    notInPrePeakList: rows.filter((r) => r.teamKey && !offBoardReason(r) && (r.s === 'Live' || /2027|Q1|Jan /.test(r.eta || ''))).length,
   };
 }

@@ -35,10 +35,14 @@
     COMING.teams.push(teams.infra);
   }
   const fresh = {}; Object.keys(teams).forEach((k) => { fresh[k] = []; });
-  const added = [], changed = [], hidden = [], noJira = [], seen = new Set();
+  const added = [], changed = [], hidden = [], offBoard = [], noJira = [], seen = new Set();
+  // Jay, Nov 12: a row whose Current Phase is Deprioritized, or whose Status is Paused, gets no card. (Same rule as offBoardReason in api/_roadmap/transform.js.)
+  const lc = (x) => String(x || '').replace(/\s+/g, ' ').trim().toLowerCase();
+  const offReason = (r) => (lc(r.phase) === 'deprioritized' ? 'Deprioritized' : (lc(r.status) === 'paused' ? 'Paused' : (lc(r.status) === 'deprioritized' ? 'Deprioritized' : null)));
   let withText = 0, noStatus = 0;
 
   snap.rows.forEach((r) => {
+    const off = offReason(r); if (off) { offBoard.push('row ' + r.row + ' | ' + (r.team || '(no team)') + ' | ' + r.name + ' | ' + off); return; }
     if (!r.teamKey || !teams[r.teamKey]) { hidden.push('row ' + r.row + ' | ' + (r.team || '(no team)') + ' | ' + r.name); return; } // hidden until a team is set on the sheet
     const prev = old[String(r.name).trim()];
     seen.add(String(r.name).trim());
@@ -70,9 +74,10 @@
   const removed = Object.keys(old).filter((k) => !seen.has(k)).map((k) => old[k].team + ' | ' + old[k].it.t);
 
   window.__roadmapDiff = { added, removed, changed };   // what the sheet changed against the data file's board
+  window.__roadmapOffBoard = offBoard;                  // paused or deprioritized rows kept off the page: "row | team | name | reason"
   window.__roadmapHidden = hidden;                      // sheet rows kept off the page until a team is set: "row | team | name"
   window.__roadmapNoJira = noJira;                      // cards whose sheet row has no Jira link yet: "team | title"
-  window.__roadmapBuilt = { sheetRows: snap.rows.length, cards: snap.rows.length - hidden.length, hiddenUntilTeamSet: hidden.length, noStatus, noJira: noJira.length, withHandWrittenText: withText };
+  window.__roadmapBuilt = { sheetRows: snap.rows.length, cards: snap.rows.length - hidden.length - offBoard.length, hiddenUntilTeamSet: hidden.length, offBoard: offBoard.length, noStatus, noJira: noJira.length, withHandWrittenText: withText };
   if (APPLY) Object.keys(teams).forEach((k) => { teams[k].items = fresh[k]; });
 
   // "Pulled Sun Nov 8, 1:13 PM ET", in the same style as the A/B page note.

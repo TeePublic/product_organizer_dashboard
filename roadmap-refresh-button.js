@@ -12,12 +12,19 @@
   }
   function ago(d) { var m = Math.max(0, Math.round((Date.now() - d) / 60000)); if (m < 60) return m + (m === 1 ? ' minute ago' : ' minutes ago'); var h = Math.floor(m / 60); if (h < 48) return h + (h === 1 ? ' hour ago' : ' hours ago'); return Math.floor(h / 24) + ' days ago'; }
   function pageSnapshotTime() { var s = window.__roadmapSnapshot; return s && s.createdAt ? parseTime(s.createdAt) : null; }
+  var seen = null; // the newest pull the server has told us about (the cron or another person's click can be newer than this page's snapshot)
+  function lastPull() { var a = pageSnapshotTime(); return a && seen ? (a > seen ? a : seen) : (a || seen); }
+  function lockedUntil() { var t = lastPull(); return t ? new Date(t.getTime() + MIN_GAP_MIN * 60000) : null; }
+  function locked() { var u = lockedUntil(); return !!u && Date.now() < u.getTime(); }
+  function timeOnly(d) { return new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', hour: 'numeric', minute: '2-digit' }).format(d) + ' ET'; }
+  // For an hour after any pull the button looks disabled. It stays clickable so a click can say why (like the Amplitude button). The class sits on <html>, so it survives the page redrawing the button.
+  function paint() { document.documentElement.classList.toggle('rm-locked', locked()); }
   function hover() {
-    var t = pageSnapshotTime();
-    return [t && Array.isArray(window.__roadmapSnapshot.rows) ? 'Roadmap last pulled from the sheet: ' + fmtTime(t) + ' (' + ago(t) + ').' : 'No saved pull from the sheet is being shown yet.',
-      'It also refreshes by itself twice a day, so you rarely need this button.',
-      'A refresh takes a few seconds and is limited to one an hour for everyone.',
-      'Roadmap only: the CVR pages have their own button.'].join('\n');
+    var t = lastPull(), live = window.__roadmapSnapshot && Array.isArray(window.__roadmapSnapshot.rows);
+    var lines = [t && (live || seen) ? 'Roadmap last pulled from the sheet: ' + fmtTime(t) + ' (' + ago(t) + ').' : 'No saved pull from the sheet is being shown yet.'];
+    if (locked()) lines.push('Up to date. You can refresh again at ' + timeOnly(lockedUntil()) + '.');
+    lines.push('It also refreshes by itself twice a day, so you rarely need this button.', 'A refresh takes a few seconds and is limited to one an hour for everyone.', 'Roadmap only: the CVR pages have their own button.');
+    return lines.join('\n');
   }
 
   // ---- a message card, fixed to the corner so it survives the page redrawing ----
@@ -41,7 +48,9 @@
   function reloadSoon() { setTimeout(function () { (window.__rmReload || function () { location.reload(); })(); }, 1200); }
 
   function run() {
-    if (busy) return; setBusy(true); closeCard();
+    if (busy) return;
+    if (locked()) { var lt = lastPull(); return show('Already up to date', ['The sheet was pulled ' + fmtTime(lt) + ' (' + ago(lt) + '), and this page is showing that pull.', 'You can refresh again at ' + timeOnly(lockedUntil()) + '. It also refreshes by itself twice a day.'], true); }
+    setBusy(true); closeCard();
     fetch(ENDPOINT, { method: 'POST', headers: { Accept: 'application/json' } })
       .then(function (r) { return r.json().catch(function () { return { ok: false, error: 'The server did not send a readable answer (status ' + r.status + ').' }; }); })
       .then(function (j) {
@@ -53,8 +62,9 @@
         }
         if (j.ok && j.refused === 'recent') {
           var saved = j.lastPulled ? parseTime(j.lastPulled) : null, mine = pageSnapshotTime();
+          if (saved) { seen = saved; paint(); }
           if (saved && (!mine || saved.getTime() - mine.getTime() > 5000)) { show('A newer pull is available', ['The sheet was pulled ' + fmtTime(saved) + ' (' + ago(saved) + '). Reloading the page...'], true); return reloadSoon(); }
-          return show('Already up to date', ['The sheet was pulled ' + (saved ? fmtTime(saved) + ' (' + ago(saved) + ')' : 'within the last hour') + ', and this page is showing that pull.', 'Refreshes are limited to one an hour.'], true);
+          return show('Already up to date', ['The sheet was pulled ' + (saved ? fmtTime(saved) + ' (' + ago(saved) + ')' : 'within the last hour') + ', and this page is showing that pull.', 'You can refresh again at ' + timeOnly(lockedUntil()) + '.'], true);
         }
         if (j.ok) return show('Checked the sheet: nothing was saved', [j.note || 'Saving is switched off, so this was a dry run.'], false);
         show('Not refreshed', [j.error || j.note || 'Something went wrong.', 'The page was not changed.'], false);
@@ -62,5 +72,6 @@
       .catch(function (e) { setBusy(false); show('Not refreshed', ['Could not reach the server: ' + e.message, 'The page was not changed.'], false); });
   }
   document.addEventListener('click', function (e) { var b = e.target.closest && e.target.closest('[data-rm-refresh]'); if (b && !b.disabled) run(); });
+  paint(); setInterval(paint, 30000); window.__rmPaint = paint; // (the hook is only for tests)
   document.addEventListener('mouseover', function (e) { var b = e.target.closest && e.target.closest('[data-rm-refresh]'); if (b && !b.disabled) b.title = hover(); }); // keeps "x minutes ago" current while the page stays open
 })();
