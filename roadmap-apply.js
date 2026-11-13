@@ -80,6 +80,16 @@
   window.__roadmapBuilt = { sheetRows: snap.rows.length, cards: snap.rows.length - hidden.length - offBoard.length, hiddenUntilTeamSet: hidden.length, offBoard: offBoard.length, noStatus, noJira: noJira.length, withHandWrittenText: withText };
   if (APPLY) Object.keys(teams).forEach((k) => { teams[k].items = fresh[k]; });
 
+  // Jay, Nov 12: the Post-peak list in the data file (COMING.post, which feeds Next Half) is hand-kept and is not on the sheet, so it showed projects the sheet no longer has.
+  // The sheet decides what exists: those cards are dropped. A post-peak entry that matches a sheet row by name only lends its hand-written description to that row's card.
+  const postDropped = [];
+  if (APPLY && Array.isArray(COMING.post)) {
+    const byName = {}; Object.keys(fresh).forEach((k) => fresh[k].forEach((it) => { byName[lc(it.sheet || it.t)] = it; }));
+    COMING.post.forEach((p) => { const m = byName[lc(p.sheet || p.t)]; if (m) { if (!m.d && p.d) m.d = p.d; } else postDropped.push((p.team || '') + ' | ' + p.t); });
+    COMING.post = [];
+  }
+  window.__roadmapPostDropped = postDropped;            // hand-kept Post-peak entries with no row on the sheet: "team | title"
+
   // "Pulled Sun Nov 8, 1:13 PM ET", in the same style as the A/B page note.
   function pulledAt(createdAt) {
     const d = new Date(String(createdAt).replace(' ', 'T').replace(/([+-]\d\d)$/, '$1:00'));
